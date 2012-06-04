@@ -40,7 +40,6 @@ public class EnderChest extends JavaPlugin
 		else
 		{
 			logThis("[EnderChest] Could not found a supported protection plugin! Please install Lockette or LWC.","SERVERE");
-			this.setEnabled(false);
 		}
 	}
 	
@@ -86,15 +85,6 @@ public class EnderChest extends JavaPlugin
 		return chestMaterial;
 	}
 	
-	/**
-	 * Sets the current protection bridge
-	 * @param bridge A class that implements nl.rutgerkok.EnderChest.Brigde
-	 */
-	public void setProtectionBridge(Bridge bridge)
-	{
-		this.protectionBridge = bridge;
-	}
-	
 	private void initConfig()
 	{
 		String chestBlock = getConfig().getString("enderBlock", "");
@@ -103,12 +93,12 @@ public class EnderChest extends JavaPlugin
 		{	//gebruik standaardoptie
 			chestMaterial = Material.BOOKSHELF;
 			getConfig().set("enderBlock", "BOOKSHELF");
-			logThis("Cannot load chest material, defaulting to BOOKSHELF. Make sure to add "+chestMaterial.getId()+" to the Lockette custum blocks list.","WARNING");
+			logThis("Cannot load chest material, defaulting to BOOKSHELF. Make sure to add "+chestMaterial.getId()+" to the "+protectionBridge.getBridgeName()+" custum blocks list.","WARNING");
 			saveConfig();
 		}
 		else
 		{
-			logThis("Using material "+chestMaterial+", make sure to add "+chestMaterial.getId()+" to the Lockette custom blocks list.");
+			logThis("Using material "+chestMaterial+", make sure to add "+chestMaterial.getId()+" to the "+protectionBridge.getBridgeName()+" custom blocks list.");
 			if(!chestBlock.equals(chestMaterial.toString()))
 			{	//blijkbaar is een id gebruikt, converteer naar string
 				getConfig().set("enderBlock", chestMaterial.toString());
@@ -125,10 +115,11 @@ public class EnderChest extends JavaPlugin
 			return true;
 		}
 		
-		//if(getServer().getPluginManager().isPluginEnabled("LWC"))
-		//{
-		//		
-		//}
+		if(getServer().getPluginManager().isPluginEnabled("LWC"))
+		{
+			protectionBridge = new LWCBridge();
+			return true;	
+		}
 		
 		return false;
 	}

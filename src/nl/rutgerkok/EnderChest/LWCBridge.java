@@ -2,31 +2,32 @@ package nl.rutgerkok.EnderChest;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.yi.acru.bukkit.Lockette.Lockette;
 
-public class LocketteBridge implements Bridge
+import com.griefcraft.lwc.LWC;
+
+public class LWCBridge implements Bridge
 {
 
 	@Override
 	public boolean canAccess(Player player, Block block) 
 	{
-		return Lockette.isUser(block, player.getName(), true);
+		return LWC.getInstance().canAccessProtection(player, block);
 	}
 
 	@Override
 	public String getBridgeName() {
-		return "Lockette";
+		return "LWC";
 	}
 	
 	@Override
-	public String getOwnerName(Block block)
+	public String getOwnerName(Block block) 
 	{
-		return Lockette.getProtectedOwner(block);
+		return LWC.getInstance().findProtection(block).getOwner();
 	}
 	
 	@Override
 	public boolean isProtected(Block block) 
 	{
-		return Lockette.isProtected(block);
+		return (LWC.getInstance().findProtection(block)!=null);
 	}
 }
