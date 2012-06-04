@@ -10,17 +10,18 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
-import org.yi.acru.bukkit.Lockette.Lockette;
 
 public class EnderHandler implements Listener
 {
 	private EnderChest plugin;
+	private Bridge protectionBridge;
 	
 	private HashMap<String,Inventory> inventories;
 	
-	public EnderHandler(EnderChest plugin)
+	public EnderHandler(EnderChest plugin, Bridge protectionBridge)
 	{
 		this.plugin = plugin;
+		this.protectionBridge = protectionBridge;
 		inventories = new HashMap<String,Inventory>();
 	}
 	
@@ -34,15 +35,15 @@ public class EnderHandler implements Listener
 		Player player = event.getPlayer();
 			
 		//Handel de Ender Chests af
-		if(event.getClickedBlock().getType().equals(plugin.chestMaterial))
+		if(event.getClickedBlock().getType().equals(plugin.getChestMaterial()))
 		{
-			if(Lockette.isProtected(event.getClickedBlock()))
+			if(protectionBridge.isProtected(event.getClickedBlock()))
 			{
 				event.setCancelled(true);
 				
-				if(Lockette.isUser(event.getClickedBlock(), player.getName(), true))
+				if(protectionBridge.canAccess(player, event.getClickedBlock()))
 				{
-					String inventoryName = Lockette.getProtectedOwner(event.getClickedBlock());
+					String inventoryName = protectionBridge.getOwnerName(event.getClickedBlock());
 					if(inventories.containsKey(inventoryName))
 					{
 						player.openInventory(inventories.get(inventoryName));

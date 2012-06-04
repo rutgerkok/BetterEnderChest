@@ -8,13 +8,17 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class EnderChest extends JavaPlugin
 {
-	EnderHandler enderHandler;
-	Material chestMaterial;
+	private EnderHandler enderHandler;
+	private Material chestMaterial;
+	private Bridge protectionBridge;
 	
 	public void onEnable()
 	{
+		//ProtectionBridge
+		protectionBridge = new LocketteBridge();
+		
 		//EventHandler
-		enderHandler = new EnderHandler(this);
+		enderHandler = new EnderHandler(this,protectionBridge);
 		getServer().getPluginManager().registerEvents(enderHandler, this);
 		
 		//AutoSave
@@ -26,8 +30,8 @@ public class EnderChest extends JavaPlugin
 		    }
 		}, 20*300, 20*300);
 		
-		//Configuratie
-		getConfiguration();
+		//Configuration
+		initConfig();
 		
 		logThis("Enabled.");
 		
@@ -39,6 +43,10 @@ public class EnderChest extends JavaPlugin
 		logThis("Disabling...");
 	}
 	
+	/**
+	 * Logs a message.
+	 * @param message
+	 */
 	public void logThis(String message)
 	{
 		Logger log = Logger.getLogger("Minecraft");
@@ -46,6 +54,11 @@ public class EnderChest extends JavaPlugin
 		log.info("["+this.getDescription().getName()+"] "+message);
 	}
 	
+	/**
+	 * Logs a message.
+	 * @param message
+	 * @param type - WARNING, LOG or SEVERE
+	 */
 	public void logThis(String message, String type)
 	{
 		Logger log = Logger.getLogger("Minecraft");
@@ -54,7 +67,25 @@ public class EnderChest extends JavaPlugin
 		if(type.equalsIgnoreCase("severe")) log.severe("["+this.getDescription().getName()+"]"+message);
 	}
 	
-	private void getConfiguration()
+	/**
+	 * Gets the current chest material
+	 * @return The current chest material
+	 */
+	public Material getChestMaterial()
+	{
+		return chestMaterial;
+	}
+	
+	/**
+	 * Sets the current protection bridge
+	 * @param bridge A class that implements nl.rutgerkok.EnderChest.Brigde
+	 */
+	public void setProtectionBridge(Bridge bridge)
+	{
+		this.protectionBridge = bridge;
+	}
+	
+	private void initConfig()
 	{
 		String chestBlock = getConfig().getString("enderBlock", "");
 		chestMaterial = Material.matchMaterial(chestBlock);
