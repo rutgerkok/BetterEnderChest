@@ -15,32 +15,42 @@ public class EnderChest extends JavaPlugin
 	public void onEnable()
 	{
 		//ProtectionBridge
-		protectionBridge = new LocketteBridge();
-		
-		//EventHandler
-		enderHandler = new EnderHandler(this,protectionBridge);
-		getServer().getPluginManager().registerEvents(enderHandler, this);
-		
-		//AutoSave
-		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() 
+		if(initBridge())
 		{
-		    public void run() 
-		    {
-		    	enderHandler.onSave();
-		    }
-		}, 20*300, 20*300);
-		
-		//Configuration
-		initConfig();
-		
-		logThis("Enabled.");
-		
+			logThis("Linked to "+protectionBridge.getBridgeName());
+			
+			//EventHandler
+			enderHandler = new EnderHandler(this,protectionBridge);
+			getServer().getPluginManager().registerEvents(enderHandler, this);
+			
+			//AutoSave
+			getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() 
+			{
+			    public void run() 
+			    {
+			    	enderHandler.onSave();
+			    }
+			}, 20*300, 20*300);
+			
+			//Configuration
+			initConfig();
+			
+			logThis("Enabled.");
+		}
+		else
+		{
+			logThis("[EnderChest] Could not found a supported protection plugin! Please install Lockette or LWC.","SERVERE");
+			this.setEnabled(false);
+		}
 	}
 	
 	public void onDisable()
 	{
-		enderHandler.onSave();
-		logThis("Disabling...");
+		if(enderHandler!=null)
+		{
+			enderHandler.onSave();
+			logThis("Disabling...");
+		}
 	}
 	
 	/**
@@ -105,5 +115,21 @@ public class EnderChest extends JavaPlugin
 				saveConfig();
 			}
 		}
+	}
+	
+	private boolean initBridge()
+	{
+		if(getServer().getPluginManager().isPluginEnabled("Lockette"))
+		{
+			protectionBridge = new LocketteBridge();
+			return true;
+		}
+		
+		//if(getServer().getPluginManager().isPluginEnabled("LWC"))
+		//{
+		//		
+		//}
+		
+		return false;
 	}
 }

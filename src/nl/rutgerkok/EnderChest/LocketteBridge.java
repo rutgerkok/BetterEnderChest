@@ -14,15 +14,19 @@ public class LocketteBridge implements Bridge
 	}
 
 	@Override
-	public boolean isProtected(Block block) 
-	{
-		return Lockette.isProtected(block);
+	public String getBridgeName() {
+		return "Lockette";
 	}
-
+	
 	@Override
 	public String getOwnerName(Block block) 
 	{
 		return Lockette.getProtectedOwner(block);
 	}
-
+	
+	@Override
+	public boolean isProtected(Block block) 
+	{
+		return Lockette.isProtected(block);
+	}
 }

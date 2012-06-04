@@ -4,4 +4,4 @@ version: 0.1
 permissions:
     enderchest.user:
         description: Create an EnderChest, destroy an EnderChest 
-depend: [Lockette] 
+softdepend: [Lockette, LWC] 
