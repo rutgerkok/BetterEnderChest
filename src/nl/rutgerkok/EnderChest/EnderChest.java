@@ -115,11 +115,20 @@ public class EnderChest extends JavaPlugin
 			return true;
 		}
 		
+		//Disabled Deadbolt. Is has no custom block support..
+		//if(getServer().getPluginManager().isPluginEnabled("Deadbolt"))
+		//{
+		//	protectionBridge = new DeadboltBridge();
+		//	return true;	
+		//}
+		
 		if(getServer().getPluginManager().isPluginEnabled("LWC"))
 		{
 			protectionBridge = new LWCBridge();
 			return true;	
 		}
+		
+		
 		
 		return false;
 	}
