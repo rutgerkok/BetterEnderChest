@@ -11,6 +11,7 @@ public class EnderChest extends JavaPlugin
 	private EnderHandler enderHandler;
 	private Material chestMaterial;
 	private Bridge protectionBridge;
+	private int chestRows;
 	
 	public void onEnable()
 	{
@@ -85,8 +86,25 @@ public class EnderChest extends JavaPlugin
 		return chestMaterial;
 	}
 	
+	/**
+	 * Gets the rows in the chest
+	 * @return The rows in the chest
+	 */
+	public int getChestRows()
+	{
+		return chestRows;
+	}
+	
 	private void initConfig()
 	{
+		//Chestrows
+		chestRows = getConfig().getInt("rowsInChest", 0);
+		if(chestRows==0)
+		{
+			chestRows=3;
+			getConfig().set("rowsInChest", 3);
+		}
+		//Chestmaterial
 		String chestBlock = getConfig().getString("enderBlock", "");
 		chestMaterial = Material.matchMaterial(chestBlock);
 		if(chestMaterial==null)
@@ -94,7 +112,6 @@ public class EnderChest extends JavaPlugin
 			chestMaterial = Material.BOOKSHELF;
 			getConfig().set("enderBlock", "BOOKSHELF");
 			logThis("Cannot load chest material, defaulting to BOOKSHELF. Make sure to add "+chestMaterial.getId()+" to the "+protectionBridge.getBridgeName()+" custum blocks list.","WARNING");
-			saveConfig();
 		}
 		else
 		{
@@ -102,9 +119,10 @@ public class EnderChest extends JavaPlugin
 			if(!chestBlock.equals(chestMaterial.toString()))
 			{	//blijkbaar is een id gebruikt, converteer naar string
 				getConfig().set("enderBlock", chestMaterial.toString());
-				saveConfig();
 			}
 		}
+		
+		saveConfig();
 	}
 	
 	private boolean initBridge()

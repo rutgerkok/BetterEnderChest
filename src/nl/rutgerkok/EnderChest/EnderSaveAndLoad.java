@@ -123,7 +123,7 @@ public class EnderSaveAndLoad
 	 */
 	public static Inventory loadInventory(String inventoryName, EnderChest plugin)
 	{
-		Inventory inventory = plugin.getServer().createInventory(null, 3*9, "Ender Chest ("+inventoryName+")");
+		Inventory inventory = plugin.getServer().createInventory(null, plugin.getChestRows()*9, "Ender Chest ("+inventoryName+")");
 		File from = new File(new String("chests/"+inventoryName+".dat").toLowerCase());
 		try
 		{
@@ -170,8 +170,9 @@ public class EnderSaveAndLoad
 		catch(FileNotFoundException e) { }
 		catch(Exception e)
 		{
-			plugin.logThis("Could not load inventory "+inventoryName, "SEVERE");
-			plugin.logThis(e.getMessage(),"SEVERE");
+			plugin.logThis("Could not fully load inventory "+inventoryName, "SEVERE");
+			plugin.logThis("Error message: "+e.getMessage(),"SEVERE");
+			plugin.logThis("Error occured on line "+e.getStackTrace()[0].getLineNumber()+" in file "+e.getStackTrace()[0].getFileName(),"SEVERE");
 		}
 		
 		return inventory;
