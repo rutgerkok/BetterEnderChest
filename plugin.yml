@@ -1,5 +1,5 @@
 name: EnderChest
-main: nl.rutgerkok.EnderChest.EnderChest
+main: nl.rutgerkok.BetterEnderChest.BetterEnderChest
 version: 0.3
 permissions:
     enderchest.use:
