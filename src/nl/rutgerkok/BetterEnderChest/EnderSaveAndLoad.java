@@ -1,4 +1,4 @@
-package nl.rutgerkok.EnderChest;
+package nl.rutgerkok.BetterEnderChest;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,7 +22,7 @@ public class EnderSaveAndLoad
 	 * @param inventoryName The name of the inventory, like 2zqa (saves as 2zqa.dat) or [moderator] (saves as [moderator].dat). 
 	 * @param plugin The plugin, needed for logging
 	 */
-	public static void saveInventory(Inventory inventory, String inventoryName, EnderChest plugin)
+	public static void saveInventory(Inventory inventory, String inventoryName, BetterEnderChest plugin)
 	{
 		Tag[] inventoryNBT = new Tag[2];//represents the whole inventory...
 		inventoryNBT[0] = new Tag("Inventory", Tag.Type.TAG_Compound);//..consisting of an inventory tag
@@ -121,7 +121,7 @@ public class EnderSaveAndLoad
 	 * @param plugin The plugin, needed for logging
 	 * @return
 	 */
-	public static Inventory loadInventory(String inventoryName, EnderChest plugin)
+	public static Inventory loadInventory(String inventoryName, BetterEnderChest plugin)
 	{
 		Inventory inventory = plugin.getServer().createInventory(null, plugin.getChestRows()*9, "Ender Chest ("+inventoryName+")");
 		File from = new File(new String("chests/"+inventoryName+".dat").toLowerCase());

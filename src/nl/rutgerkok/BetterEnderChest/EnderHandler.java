@@ -1,4 +1,4 @@
-package nl.rutgerkok.EnderChest;
+package nl.rutgerkok.BetterEnderChest;
 
 import java.util.HashMap;
 
@@ -13,12 +13,12 @@ import org.bukkit.inventory.Inventory;
 
 public class EnderHandler implements Listener
 {
-	private EnderChest plugin;
+	private BetterEnderChest plugin;
 	private Bridge protectionBridge;
 	
 	private HashMap<String,Inventory> inventories;
 	
-	public EnderHandler(EnderChest plugin, Bridge protectionBridge)
+	public EnderHandler(BetterEnderChest plugin, Bridge protectionBridge)
 	{
 		this.plugin = plugin;
 		this.protectionBridge = protectionBridge;
@@ -41,7 +41,7 @@ public class EnderHandler implements Listener
 			{
 				event.setCancelled(true);
 				
-				if(protectionBridge.canAccess(player, event.getClickedBlock())&&player.hasPermission("enderchest.use")s)
+				if(protectionBridge.canAccess(player, event.getClickedBlock())&&plugin.hasPermission(player,"enderchest.use",true))
 				{
 					String inventoryName = protectionBridge.getOwnerName(event.getClickedBlock());
 					if(inventories.containsKey(inventoryName))

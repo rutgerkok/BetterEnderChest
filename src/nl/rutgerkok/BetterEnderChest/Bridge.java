@@ -1,4 +1,4 @@
-package nl.rutgerkok.EnderChest;
+package nl.rutgerkok.BetterEnderChest;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;

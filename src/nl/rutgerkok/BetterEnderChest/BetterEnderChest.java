@@ -1,17 +1,19 @@
-package nl.rutgerkok.EnderChest;
+package nl.rutgerkok.BetterEnderChest;
 
 import java.util.logging.Logger;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 
-public class EnderChest extends JavaPlugin
+public class BetterEnderChest extends JavaPlugin
 {
 	private EnderHandler enderHandler;
 	private Material chestMaterial;
 	private Bridge protectionBridge;
 	private int chestRows;
+	private boolean usePermissions;
 	
 	public void onEnable()
 	{
@@ -53,29 +55,9 @@ public class EnderChest extends JavaPlugin
 		}
 	}
 	
-	/**
-	 * Logs a message.
-	 * @param message
-	 */
-	public void logThis(String message)
-	{
-		Logger log = Logger.getLogger("Minecraft");
-		
-		log.info("["+this.getDescription().getName()+"] "+message);
-	}
 	
-	/**
-	 * Logs a message.
-	 * @param message
-	 * @param type - WARNING, LOG or SEVERE
-	 */
-	public void logThis(String message, String type)
-	{
-		Logger log = Logger.getLogger("Minecraft");
-		if(type.equalsIgnoreCase("log")) log.info("["+this.getDescription().getName()+"]"+message);
-		if(type.equalsIgnoreCase("warning")) log.warning("["+this.getDescription().getName()+"]"+message);
-		if(type.equalsIgnoreCase("severe")) log.severe("["+this.getDescription().getName()+"]"+message);
-	}
+	
+	
 	
 	/**
 	 * Gets the current chest material
@@ -121,8 +103,24 @@ public class EnderChest extends JavaPlugin
 				getConfig().set("enderBlock", chestMaterial.toString());
 			}
 		}
-		
+		//Permissions
+		usePermissions = getConfig().getBoolean("usePermissions", false);
+		getConfig().set("usePermissions", usePermissions);
+		//Save everything
 		saveConfig();
+	}
+	
+	/**
+	 * If usePermissions is true, it returns whether the player has the permission. Otherwise it will return fallBack.
+	 * @param player
+	 * @param permission The permissions to check
+	 * @param fallBack Return this if permissions are disabled and the player is not a op
+	 * @return If usePermissions is true, it returns whether the player has the permission. Otherwise it will return fallBack
+	 */
+	public boolean hasPermission(Player player, String permission, boolean fallBack)
+	{
+		if(!usePermissions) return fallBack;
+		return player.hasPermission(permission);
 	}
 	
 	private boolean initBridge()
@@ -146,8 +144,35 @@ public class EnderChest extends JavaPlugin
 			return true;	
 		}
 		
-		
-		
+		//No bridge found
 		return false;
 	}
+	
+	/**
+	 * Logs a message.
+	 * @param message
+	 */
+	public void logThis(String message)
+	{
+		Logger log = Logger.getLogger("Minecraft");
+		
+		log.info("["+this.getDescription().getName()+"] "+message);
+	}
+	
+	/**
+	 * Logs a message.
+	 * @param message
+	 * @param type - WARNING, LOG or SEVERE
+	 */
+	public void logThis(String message, String type)
+	{
+		Logger log = Logger.getLogger("Minecraft");
+		if(type.equalsIgnoreCase("log")) log.info("["+this.getDescription().getName()+"]"+message);
+		if(type.equalsIgnoreCase("warning")) log.warning("["+this.getDescription().getName()+"]"+message);
+		if(type.equalsIgnoreCase("severe")) log.severe("["+this.getDescription().getName()+"]"+message);
+	}
+	
+	
+	
+	
 }
