@@ -2,6 +2,7 @@ package nl.rutgerkok.BetterEnderChest;
 
 import java.util.HashMap;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -41,18 +42,25 @@ public class EnderHandler implements Listener
 			{
 				event.setCancelled(true);
 				
-				if(protectionBridge.canAccess(player, event.getClickedBlock())&&plugin.hasPermission(player,"enderchest.use",true))
+				if(protectionBridge.canAccess(player, event.getClickedBlock()))
 				{
-					String inventoryName = protectionBridge.getOwnerName(event.getClickedBlock());
-					if(inventories.containsKey(inventoryName))
+					if(plugin.hasPermission(player,"enderchest.use",true))
 					{
-						player.openInventory(inventories.get(inventoryName));
+						String inventoryName = protectionBridge.getOwnerName(event.getClickedBlock());
+						if(inventories.containsKey(inventoryName))
+						{
+							player.openInventory(inventories.get(inventoryName));
+						}
+						else
+						{
+							Inventory enderInventory = EnderSaveAndLoad.loadInventory(inventoryName, plugin);
+							inventories.put(inventoryName, enderInventory);
+							player.openInventory(enderInventory);
+						}
 					}
 					else
 					{
-						Inventory enderInventory = EnderSaveAndLoad.loadInventory(inventoryName, plugin);
-						inventories.put(inventoryName, enderInventory);
-						player.openInventory(enderInventory);
+						player.sendMessage(ChatColor.RED+"You do not have permissions to use Ender Chests.");
 					}
 				}
 			}
