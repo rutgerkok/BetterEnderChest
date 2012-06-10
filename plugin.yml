@@ -1,7 +1,7 @@
-name: EnderChest
+name: BetterEnderChest
 main: nl.rutgerkok.BetterEnderChest.BetterEnderChest
 version: 0.3
 permissions:
-    enderchest.use:
+    betterenderchest.use:
         description: Use an EnderChest 
 softdepend: [Lockette, LWC] 

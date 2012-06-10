@@ -44,7 +44,7 @@ public class EnderHandler implements Listener
 				
 				if(protectionBridge.canAccess(player, event.getClickedBlock()))
 				{
-					if(plugin.hasPermission(player,"enderchest.use",true))
+					if(plugin.hasPermission(player,"betterenderchest.use",true))
 					{
 						String inventoryName = protectionBridge.getOwnerName(event.getClickedBlock());
 						if(inventories.containsKey(inventoryName))
