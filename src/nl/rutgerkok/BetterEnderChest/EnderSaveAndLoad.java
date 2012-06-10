@@ -163,7 +163,7 @@ public class EnderSaveAndLoad
 					}
 					
 					//Add item to inventory
-					if(slot<3*9) inventory.setItem(slot, stack);
+					if(slot<plugin.getChestRows()*9) inventory.setItem(slot, stack);
 				}
 			}
 		}
