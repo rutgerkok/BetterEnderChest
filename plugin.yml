@@ -1,6 +1,6 @@
 name: BetterEnderChest
 main: nl.rutgerkok.BetterEnderChest.BetterEnderChest
-version: 0.3
+version: 0.4
 permissions:
     betterenderchest.use:
         description: Use an EnderChest 

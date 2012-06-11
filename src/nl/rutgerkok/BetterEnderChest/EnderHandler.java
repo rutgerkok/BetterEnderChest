@@ -1,7 +1,5 @@
 package nl.rutgerkok.BetterEnderChest;
 
-import java.util.HashMap;
-
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,20 +8,18 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.Inventory;
 
 public class EnderHandler implements Listener
 {
 	private BetterEnderChest plugin;
 	private Bridge protectionBridge;
-	
-	private HashMap<String,Inventory> inventories;
+	private EnderStorage chests;
 	
 	public EnderHandler(BetterEnderChest plugin, Bridge protectionBridge)
 	{
 		this.plugin = plugin;
 		this.protectionBridge = protectionBridge;
-		inventories = new HashMap<String,Inventory>();
+		chests = new EnderStorage(plugin);
 	}
 	
 	//Zorgt voor het verschijnen van de kisten
@@ -47,16 +43,7 @@ public class EnderHandler implements Listener
 					if(plugin.hasPermission(player,"betterenderchest.use",true))
 					{
 						String inventoryName = protectionBridge.getOwnerName(event.getClickedBlock());
-						if(inventories.containsKey(inventoryName))
-						{
-							player.openInventory(inventories.get(inventoryName));
-						}
-						else
-						{
-							Inventory enderInventory = EnderSaveAndLoad.loadInventory(inventoryName, plugin);
-							inventories.put(inventoryName, enderInventory);
-							player.openInventory(enderInventory);
-						}
+						player.openInventory(chests.getInventory(inventoryName));
 					}
 					else
 					{
@@ -71,11 +58,7 @@ public class EnderHandler implements Listener
 	public void onPlayerQuit(PlayerQuitEvent event)
 	{
 		String inventoryName = event.getPlayer().getName();
-		if(inventories.containsKey(inventoryName))
-		{
-			EnderSaveAndLoad.saveInventory(inventories.get(inventoryName),inventoryName,plugin);
-			inventories.remove(inventoryName);
-		}
+		chests.saveInventory(inventoryName);
 	}
 	
 	/**
@@ -84,9 +67,6 @@ public class EnderHandler implements Listener
 	public void onSave()
 	{
 		//plugin.logThis("Saving inventories..."); //debug
-		for(String inventoryName:inventories.keySet())
-		{
-			EnderSaveAndLoad.saveInventory(inventories.get(inventoryName),inventoryName,plugin);
-		}
+		chests.saveAllInventories();
 	}
 }
