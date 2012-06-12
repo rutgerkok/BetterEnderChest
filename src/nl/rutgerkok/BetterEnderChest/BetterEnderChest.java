@@ -79,35 +79,51 @@ public class BetterEnderChest extends JavaPlugin
 	
 	private void initConfig()
 	{
+		if(!getConfig().getString("enderBlock","NOT_FOUND").equals("NOT_FOUND"))
+		{	//we have a 0.1-0.3 config here!
+			convertConfig();
+		}
+		
 		//Chestrows
-		chestRows = getConfig().getInt("rowsInChest", 0);
+		chestRows = getConfig().getInt("EnderChest.rows", 0);
 		if(chestRows==0)
 		{
 			chestRows=3;
-			getConfig().set("rowsInChest", 3);
+			getConfig().set("EnderChest.rows", 3);
 		}
 		//Chestmaterial
-		String chestBlock = getConfig().getString("enderBlock", "");
+		String chestBlock = getConfig().getString("EnderChest.block", "BOOKSHELF");
 		chestMaterial = Material.matchMaterial(chestBlock);
 		if(chestMaterial==null)
 		{	//gebruik standaardoptie
 			chestMaterial = Material.BOOKSHELF;
-			getConfig().set("enderBlock", "BOOKSHELF");
+			getConfig().set("EnderChest.block", "BOOKSHELF");
 			logThis("Cannot load chest material, defaulting to BOOKSHELF. Make sure to add "+chestMaterial.getId()+" to the "+protectionBridge.getBridgeName()+" custum blocks list.","WARNING");
 		}
 		else
 		{
 			logThis("Using material "+chestMaterial+", make sure to add "+chestMaterial.getId()+" to the "+protectionBridge.getBridgeName()+" custom blocks list.");
-			if(!chestBlock.equals(chestMaterial.toString()))
-			{	//blijkbaar is een id gebruikt, converteer naar string
-				getConfig().set("enderBlock", chestMaterial.toString());
-			}
 		}
+		getConfig().set("EnderChest.block", chestMaterial.toString());
 		//Permissions
-		usePermissions = getConfig().getBoolean("usePermissions", false);
-		getConfig().set("usePermissions", usePermissions);
+		usePermissions = getConfig().getBoolean("Permissions.enabled", false);
+		getConfig().set("Permissions.enabled", usePermissions);
 		//Save everything
 		saveConfig();
+	}
+	
+	private void convertConfig()
+	{	//doesn't save automatically!
+		
+		//convert old options
+		getConfig().set("EnderChest.block",getConfig().getString("enderBlock", "BOOKSHELF"));
+		getConfig().set("EnderChest.rows",getConfig().getInt("rowsInChest", 0));
+		getConfig().set("Permissions.enabled",getConfig().getBoolean("usePermissions", false));
+		
+		//remove old options
+		getConfig().set("enderBlock", null);
+		getConfig().set("rowsInChest", null);
+		getConfig().set("usePermissions", null);
 	}
 	
 	/**
