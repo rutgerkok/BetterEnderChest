@@ -13,8 +13,10 @@ public class BetterEnderChest extends JavaPlugin
 	private EnderStorage enderStorage;
 	private Material chestMaterial;
 	private Bridge protectionBridge;
-	private int chestRows;
-	private boolean usePermissions;
+	private int chestRows, publicChestRows;
+	private boolean usePermissions, enablePublicChests;
+	public static final String publicChestName = "--PublicChest";
+	public static String publicChestDisplayName;
 	
 	public void onEnable()
 	{
@@ -90,6 +92,24 @@ public class BetterEnderChest extends JavaPlugin
 		return enderStorage;
 	}
 	
+	/**
+	 * Gets whether a public chest must be shown when a unprotected chest is opened
+	 * @return
+	 */
+	public boolean getPublicChestsEnabled()
+	{
+		return enablePublicChests;
+	}
+	
+	/**
+	 * Gets the rows in the public chest
+	 * @return The rows in the chest
+	 */
+	public int getPublicChestRows()
+	{
+		return publicChestRows;
+	}
+	
 	private void initConfig()
 	{
 		if(!getConfig().getString("enderBlock","NOT_FOUND").equals("NOT_FOUND"))
@@ -104,6 +124,7 @@ public class BetterEnderChest extends JavaPlugin
 			chestRows=3;
 			getConfig().set("EnderChest.rows", 3);
 		}
+		
 		//Chestmaterial
 		String chestBlock = getConfig().getString("EnderChest.block", "BOOKSHELF");
 		chestMaterial = Material.matchMaterial(chestBlock);
@@ -118,9 +139,23 @@ public class BetterEnderChest extends JavaPlugin
 			logThis("Using material "+chestMaterial+", make sure to add "+chestMaterial.getId()+" to the "+protectionBridge.getBridgeName()+" custom blocks list.");
 		}
 		getConfig().set("EnderChest.block", chestMaterial.toString());
+		
 		//Permissions
 		usePermissions = getConfig().getBoolean("Permissions.enabled", false);
 		getConfig().set("Permissions.enabled", usePermissions);
+		
+		//Public chests
+		//enabled?
+		enablePublicChests = getConfig().getBoolean("PublicChest.enabled", true);
+		getConfig().set("PublicChest.enabled", enablePublicChests);
+		//display name?
+		BetterEnderChest.publicChestDisplayName = getConfig().getString("PublicChest.name", "Public Chest");
+		getConfig().set("PublicChest.name", BetterEnderChest.publicChestDisplayName);
+		//rows?
+		publicChestRows = getConfig().getInt("PublicChest.rows", chestRows);
+		if(publicChestRows<1||publicChestRows>20) publicChestRows = 3;
+		getConfig().set("PublicChest.rows", publicChestRows);
+		
 		//Save everything
 		saveConfig();
 	}

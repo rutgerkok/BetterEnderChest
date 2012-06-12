@@ -123,7 +123,20 @@ public class EnderSaveAndLoad
 	 */
 	public static Inventory loadInventory(String inventoryName, BetterEnderChest plugin)
 	{
-		Inventory inventory = plugin.getServer().createInventory(null, plugin.getChestRows()*9, "Ender Chest ("+inventoryName+")");
+		Inventory inventory;
+		int chestRows;
+		
+		if(inventoryName.equals(BetterEnderChest.publicChestName))
+		{	//public chest
+			chestRows = plugin.getPublicChestRows();
+			inventory = plugin.getServer().createInventory(null, chestRows*9, "Ender Chest ("+BetterEnderChest.publicChestDisplayName+")");
+		}
+		else
+		{	//private chest
+			chestRows = plugin.getChestRows();
+			inventory = plugin.getServer().createInventory(null, chestRows*9, "Ender Chest ("+inventoryName+")");
+		}
+		
 		File from = new File(new String("chests/"+inventoryName+".dat").toLowerCase());
 		try
 		{
@@ -163,7 +176,7 @@ public class EnderSaveAndLoad
 					}
 					
 					//Add item to inventory
-					if(slot<plugin.getChestRows()*9) inventory.setItem(slot, stack);
+					if(slot<chestRows*9) inventory.setItem(slot, stack);
 				}
 			}
 		}

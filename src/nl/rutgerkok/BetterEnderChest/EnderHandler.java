@@ -34,10 +34,10 @@ public class EnderHandler implements Listener
 		//Handel de Ender Chests af
 		if(event.getClickedBlock().getType().equals(plugin.getChestMaterial()))
 		{
+			event.setCancelled(true);
+			
 			if(protectionBridge.isProtected(event.getClickedBlock()))
-			{
-				event.setCancelled(true);
-				
+			{	//protected Ender chest
 				if(protectionBridge.canAccess(player, event.getClickedBlock()))
 				{
 					if(plugin.hasPermission(player,"betterenderchest.use",true))
@@ -49,6 +49,26 @@ public class EnderHandler implements Listener
 					{
 						player.sendMessage(ChatColor.RED+"You do not have permissions to use Ender Chests.");
 					}
+				}
+			}
+			else
+			{	//unprotected Ender chest
+				if(plugin.hasPermission(player,"betterenderchest.use",true))
+				{
+					if(plugin.getPublicChestsEnabled())
+					{	//show public chest
+						player.openInventory(chests.getInventory(BetterEnderChest.publicChestName));
+						player.sendMessage("This was a public chest. Protect it using "+protectionBridge.getBridgeName()+" to get your private Ender Chest.");
+					}
+					else
+					{	//show player's chest
+						String inventoryName = player.getName();
+						player.openInventory(chests.getInventory(inventoryName));
+					}
+				}
+				else
+				{
+					player.sendMessage(ChatColor.RED+"You do not have permissions to use Ender Chests.");
 				}
 			}
 		}
