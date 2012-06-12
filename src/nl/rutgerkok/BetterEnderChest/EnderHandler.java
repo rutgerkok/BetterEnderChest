@@ -40,25 +40,32 @@ public class EnderHandler implements Listener
 			{	//protected Ender chest
 				if(protectionBridge.canAccess(player, event.getClickedBlock()))
 				{
-					if(plugin.hasPermission(player,"betterenderchest.use",true))
+					if(plugin.hasPermission(player,"betterenderchest.use.privatechest",true))
 					{
 						String inventoryName = protectionBridge.getOwnerName(event.getClickedBlock());
 						player.openInventory(chests.getInventory(inventoryName));
 					}
 					else
 					{
-						player.sendMessage(ChatColor.RED+"You do not have permissions to use Ender Chests.");
+						player.sendMessage(ChatColor.RED+"You do not have permissions to use private Ender Chests.");
 					}
 				}
 			}
 			else
 			{	//unprotected Ender chest
-				if(plugin.hasPermission(player,"betterenderchest.use",true))
+				if(plugin.hasPermission(player,"betterenderchest.use.publicchest",true))
 				{
 					if(plugin.getPublicChestsEnabled())
 					{	//show public chest
 						player.openInventory(chests.getInventory(BetterEnderChest.publicChestName));
-						player.sendMessage("This was a public chest. Protect it using "+protectionBridge.getBridgeName()+" to get your private Ender Chest.");
+						if(plugin.hasPermission(player,"betterenderchest.use.privatechest",true))
+						{
+							player.sendMessage("This was a public Ender chest. Protect it using "+protectionBridge.getBridgeName()+" to get your private Ender Chest.");
+						}
+						else
+						{
+							player.sendMessage("This was a public Ender chest. Remember that your items aren't save.");
+						}
 					}
 					else
 					{	//show player's chest
@@ -68,7 +75,7 @@ public class EnderHandler implements Listener
 				}
 				else
 				{
-					player.sendMessage(ChatColor.RED+"You do not have permissions to use Ender Chests.");
+					player.sendMessage(ChatColor.RED+"You do not have permissions to use public Ender Chests.");
 				}
 			}
 		}

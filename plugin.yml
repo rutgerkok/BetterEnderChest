@@ -1,7 +1,21 @@
 name: BetterEnderChest
 main: nl.rutgerkok.BetterEnderChest.BetterEnderChest
 version: 0.4
+softdepend: [Lockette, LWC]
+
 permissions:
-    betterenderchest.use:
-        description: Use an EnderChest 
-softdepend: [Lockette, LWC] 
+  betterenderchest.use:
+    description: You can use both private and public Ender Chests. Same as betterenderchest.use.* .
+    children:
+      betterenderchest.use.*: true
+  betterenderchest.use.*:
+    description: You can use both private and public Ender Chests. Same as betterenderchest.use .
+    children:
+      betterenderchest.use.privatechest: true
+      betterenderchest.use.publicchest: true
+  betterenderchest.use.privatechests:
+    description: Use private chests
+    default: op
+  betterenderchest.use.publicchests:
+    description: Use public chests
+    default: op
