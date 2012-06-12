@@ -13,9 +13,9 @@ permissions:
     children:
       betterenderchest.use.privatechest: true
       betterenderchest.use.publicchest: true
-  betterenderchest.use.privatechests:
+  betterenderchest.use.privatechest:
     description: Use private chests
     default: op
-  betterenderchest.use.publicchests:
+  betterenderchest.use.publicchest:
     description: Use public chests
     default: op
