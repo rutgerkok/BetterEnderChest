@@ -19,7 +19,7 @@ public class EnderHandler implements Listener
 	{
 		this.plugin = plugin;
 		this.protectionBridge = protectionBridge;
-		chests = new EnderStorage(plugin);
+		chests = plugin.getEnderChests();
 	}
 	
 	//Zorgt voor het verschijnen van de kisten
