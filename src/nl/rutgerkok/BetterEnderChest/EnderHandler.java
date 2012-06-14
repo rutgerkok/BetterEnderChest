@@ -1,13 +1,18 @@
 package nl.rutgerkok.BetterEnderChest;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 
 public class EnderHandler implements Listener
 {
@@ -23,7 +28,7 @@ public class EnderHandler implements Listener
 	}
 	
 	//Zorgt voor het verschijnen van de kisten
-	@EventHandler(priority = EventPriority.LOW)
+	@EventHandler(priority = EventPriority.HIGH)
 	public void onPlayerInteract(PlayerInteractEvent event)
 	{
 		if(event.isCancelled()) return;
@@ -81,7 +86,46 @@ public class EnderHandler implements Listener
 		}
 	}
 	
-	@EventHandler(priority = EventPriority.LOW)
+	//change the drop
+	@EventHandler(priority = EventPriority.HIGH)
+	public void onBlockBreak(BlockBreakEvent event)
+	{
+		if(event.isCancelled()) return;
+		
+		Block block = event.getBlock();
+		Material material = block.getType();
+		if(material.equals(plugin.getChestMaterial()))
+		{	//if a chest is being broken, and not by Silk touch
+			event.setCancelled(true);
+			block.setData((byte) 0);
+			block.setType(Material.AIR);
+			
+			String chestDropString = plugin.getChestDropString(event.getPlayer().getItemInHand().getEnchantments().containsKey(Enchantment.SILK_TOUCH));
+			
+			if(chestDropString.equals("OBSIDIAN")||chestDropString.equals("OBSIDIAN_WITH_EYE_OF_ENDER")||chestDropString.equals("OBSIDIAN_WITH_ENDER_PEARL"))
+			{	//drop obsidian
+				event.getPlayer().getWorld().dropItemNaturally(block.getLocation(),new ItemStack(Material.OBSIDIAN,8));
+			}
+			
+			if(chestDropString.equals("OBSIDIAN_WITH_EYE_OF_ENDER"))
+			{	//drop eye of ender
+				event.getPlayer().getWorld().dropItemNaturally(block.getLocation(),new ItemStack(Material.EYE_OF_ENDER));
+			}
+			
+			if(chestDropString.equals("OBSIDIAN_WITH_ENDER_PEARL"))
+			{	//drop ender pearl
+				event.getPlayer().getWorld().dropItemNaturally(block.getLocation(),new ItemStack(Material.ENDER_PEARL));
+			}
+			
+			if(chestDropString.equals("ITSELF"))
+			{	//drop the chest itself
+				event.getPlayer().getWorld().dropItemNaturally(block.getLocation(),new ItemStack(material));
+			}
+		}
+		
+	}
+	
+	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent event)
 	{
 		String inventoryName = event.getPlayer().getName();

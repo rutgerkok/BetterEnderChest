@@ -1,5 +1,6 @@
 package nl.rutgerkok.BetterEnderChest;
 
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import org.bukkit.Material;
@@ -15,6 +16,7 @@ public class BetterEnderChest extends JavaPlugin
 	private Bridge protectionBridge;
 	private int chestRows, publicChestRows;
 	private boolean usePermissions, enablePublicChests;
+	private String chestDrop, chestDropSilkTouch;
 	public static final String publicChestName = "--PublicChest";
 	public static String publicChestDisplayName;
 	
@@ -63,7 +65,7 @@ public class BetterEnderChest extends JavaPlugin
 	
 	
 	
-	
+	//PUBLIC FUNCTIONS
 	
 	/**
 	 * Gets the current chest material
@@ -81,6 +83,18 @@ public class BetterEnderChest extends JavaPlugin
 	public int getChestRows()
 	{
 		return chestRows;
+	}
+	
+	/**
+	 * Gets the string of the chest drop. See documentation online.
+	 * @param silkTouch - whether to use Silk Touch
+	 * @return String of the chest drop
+	 */
+	public String getChestDropString(boolean silkTouch)
+	{
+		if(silkTouch)
+			return chestDropSilkTouch;
+		return chestDrop;
 	}
 	
 	/**
@@ -110,19 +124,27 @@ public class BetterEnderChest extends JavaPlugin
 		return publicChestRows;
 	}
 	
+	/**
+	 * Gets whether the string is a valid chest drop
+	 * @param drop
+	 * @return
+	 */
+	public boolean isValidChestDrop(String drop)
+	{
+		if(chestDrop.equals("OBSIDIAN")) return true;
+		if(chestDrop.equals("OBSIDIAN_WITH_EYE_OF_ENDER")) return true;
+		if(chestDrop.equals("OBSIDIAN_WITH_ENDER_PEARL")) return true;
+		if(chestDrop.equals("ITSELF")) return true;
+		if(chestDrop.equals("NOTHING")) return true;
+		return false;
+	}
+	
+	
 	private void initConfig()
 	{
 		if(!getConfig().getString("enderBlock","NOT_FOUND").equals("NOT_FOUND"))
 		{	//we have a 0.1-0.3 config here!
 			convertConfig();
-		}
-		
-		//Chestrows
-		chestRows = getConfig().getInt("EnderChest.rows", 0);
-		if(chestRows==0)
-		{
-			chestRows=3;
-			getConfig().set("EnderChest.rows", 3);
 		}
 		
 		//Chestmaterial
@@ -140,6 +162,36 @@ public class BetterEnderChest extends JavaPlugin
 		}
 		getConfig().set("EnderChest.block", chestMaterial.toString());
 		
+		//Chestrows
+		chestRows = getConfig().getInt("EnderChest.rows", 0);
+		if(chestRows<1||chestRows>20)
+		{
+			logThis("The number of rows in the private chest was "+chestRows+"...","WARNING");
+			logThis("Changed it to 3.","WARNING");
+			chestRows=3;
+		}
+		getConfig().set("EnderChest.rows", 3);
+		
+		//Chestdrop
+		chestDrop = getConfig().getString("EnderChest.drop","OBSIDIAN");
+		chestDrop = chestDrop.toUpperCase(Locale.ENGLISH);
+		if(!isValidChestDrop(chestDrop))
+		{	//cannot understand value
+			logThis("Could not understand the drop "+chestDrop+", defaulting to OBSIDIAN","WARNING");
+			chestDrop = "OBSIDIAN";
+		}
+		getConfig().set("EnderChest.drop",chestDrop);
+		
+		//ChestSilkTouchDrop
+		chestDropSilkTouch = getConfig().getString("EnderChest.dropSilkTouch","ITSELF");
+		chestDropSilkTouch = chestDropSilkTouch.toUpperCase(Locale.ENGLISH);
+		if(!isValidChestDrop(chestDropSilkTouch))
+		{	//cannot understand value
+			logThis("Could not understand the Silk Touch drop "+chestDropSilkTouch+", defaulting to ITSELF","WARNING");
+			chestDrop = "ITSELF";
+		}
+		getConfig().set("EnderChest.dropSilkTouch",chestDropSilkTouch);
+		
 		//Permissions
 		usePermissions = getConfig().getBoolean("Permissions.enabled", false);
 		getConfig().set("Permissions.enabled", usePermissions);
@@ -153,7 +205,12 @@ public class BetterEnderChest extends JavaPlugin
 		getConfig().set("PublicChest.name", BetterEnderChest.publicChestDisplayName);
 		//rows?
 		publicChestRows = getConfig().getInt("PublicChest.rows", chestRows);
-		if(publicChestRows<1||publicChestRows>20) publicChestRows = 3;
+		if(publicChestRows<1||publicChestRows>20)
+		{
+			logThis("The number of rows in the private chest was "+chestRows+"...","WARNING");
+			logThis("Changed it to 3.","WARNING");
+			publicChestRows=3;
+		}
 		getConfig().set("PublicChest.rows", publicChestRows);
 		
 		//Save everything
