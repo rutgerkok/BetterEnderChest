@@ -1,6 +1,6 @@
 name: BetterEnderChest
 main: nl.rutgerkok.BetterEnderChest.BetterEnderChest
-version: 0.5
+version: 0.6
 softdepend: [Lockette, LWC]
 
 permissions:

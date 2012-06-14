@@ -167,7 +167,7 @@ public class BetterEnderChest extends JavaPlugin
 		getConfig().set("EnderChest.block", chestMaterial.toString());
 		
 		//Chestrows
-		chestRows = getConfig().getInt("EnderChest.rows", 0);
+		chestRows = getConfig().getInt("EnderChest.rows", 3);
 		if(chestRows<1||chestRows>20)
 		{
 			logThis("The number of rows in the private chest was "+chestRows+"...","WARNING");
