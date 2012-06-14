@@ -26,32 +26,32 @@ public class BetterEnderChest extends JavaPlugin
 		if(initBridge())
 		{
 			logThis("Linked to "+protectionBridge.getBridgeName());
-			
-			//Chests storage
-			enderStorage = new EnderStorage(this);
-			
-			//EventHandler
-			enderHandler = new EnderHandler(this,protectionBridge);
-			getServer().getPluginManager().registerEvents(enderHandler, this);
-			
-			//AutoSave
-			getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() 
-			{
-			    public void run() 
-			    {
-			    	enderHandler.onSave();
-			    }
-			}, 20*300, 20*300);
-			
-			//Configuration
-			initConfig();
-			
-			logThis("Enabled.");
 		}
 		else
 		{
-			logThis("[EnderChest] Could not found a supported protection plugin! Please install Lockette or LWC.","SERVERE");
+			logThis("Not linked to a block protection plugin like Lockette or LWC.");
 		}
+		
+		//Chests storage
+		enderStorage = new EnderStorage(this);
+		
+		//EventHandler
+		enderHandler = new EnderHandler(this,protectionBridge);
+		getServer().getPluginManager().registerEvents(enderHandler, this);
+		
+		//AutoSave
+		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() 
+		{
+		    public void run() 
+		    {
+		    	enderHandler.onSave();
+		    }
+		}, 20*300, 20*300);
+		
+		//Configuration
+		initConfig();
+		
+		logThis("Enabled.");
 	}
 	
 	public void onDisable()
@@ -154,11 +154,15 @@ public class BetterEnderChest extends JavaPlugin
 		{	//gebruik standaardoptie
 			chestMaterial = Material.BOOKSHELF;
 			getConfig().set("EnderChest.block", "BOOKSHELF");
-			logThis("Cannot load chest material, defaulting to BOOKSHELF. Make sure to add "+chestMaterial.getId()+" to the "+protectionBridge.getBridgeName()+" custum blocks list.","WARNING");
+			logThis("Cannot load chest material, defaulting to BOOKSHELF.","WARNING");
 		}
 		else
 		{
-			logThis("Using material "+chestMaterial+", make sure to add "+chestMaterial.getId()+" to the "+protectionBridge.getBridgeName()+" custom blocks list.");
+			logThis("Using material "+chestMaterial);
+		}
+		if(!(protectionBridge instanceof NoBridge))
+		{	//reminder to add to custom blocks list
+			logThis("Make sure to add "+chestMaterial.getId()+" to the "+protectionBridge.getBridgeName()+" custom blocks list");
 		}
 		getConfig().set("EnderChest.block", chestMaterial.toString());
 		
@@ -266,6 +270,7 @@ public class BetterEnderChest extends JavaPlugin
 		}
 		
 		//No bridge found
+		protectionBridge = new NoBridge();
 		return false;
 	}
 	

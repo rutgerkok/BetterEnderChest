@@ -63,7 +63,7 @@ public class EnderHandler implements Listener
 					if(plugin.getPublicChestsEnabled())
 					{	//show public chest
 						player.openInventory(chests.getInventory(BetterEnderChest.publicChestName));
-						if(plugin.hasPermission(player,"betterenderchest.use.privatechest",true))
+						if(plugin.hasPermission(player,"betterenderchest.use.privatechest",true)&&!(protectionBridge instanceof NoBridge))
 						{
 							player.sendMessage("This was a public Ender chest. Protect it using "+protectionBridge.getBridgeName()+" to get your private Ender Chest.");
 						}
