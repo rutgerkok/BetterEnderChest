@@ -5,12 +5,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.ListIterator;
 
 import net.minecraftwiki.wiki.NBTClass.Tag;
 
-import org.bukkit.enchantments.Enchantment;
+//import org.bukkit.entity.Player; //not needed yet
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -24,93 +23,43 @@ public class EnderSaveAndLoad
 	 */
 	public static void saveInventory(Inventory inventory, String inventoryName, BetterEnderChest plugin)
 	{
+		int slot;//id of slot
+		
+		//First of all, we creat an array that holds two tags: the inventory tag and the end tag.
 		Tag[] inventoryNBT = new Tag[2];//represents the whole inventory...
 		inventoryNBT[0] = new Tag("Inventory", Tag.Type.TAG_Compound);//..consisting of an inventory tag
 		inventoryNBT[1] = new Tag(Tag.Type.TAG_End, null, null);//..and an end tag
 		
-		Tag[] stackNBT = new Tag[5];//represents one stack, used in inventory
-		Tag[] stackWithEnchantmentsNBT = new Tag[6];//represents one stack, used in inventory
-		
-		Tag[] enchantmentsNBT = new Tag[2];//represents an array of TAG_Compounds with enchantments
-		enchantmentsNBT[1] = new Tag(Tag.Type.TAG_End, null, null);
-		
-		Tag[] enchantmentNBT = new Tag[3];//represents an array of TAG_Compounds with enchantments
-		enchantmentNBT[2] = new Tag(Tag.Type.TAG_End, null, null);
-		
-		HashMap<Enchantment,Integer> enchantments = new HashMap<Enchantment,Integer> ();
-		
-		int slot;//id of slot
-		
-		//Read trough the inventory
+		//Now we are going to read the inventory, ...
 		ListIterator<ItemStack> iterator = inventory.iterator();
 		while(iterator.hasNext())
-		{
+		{	//.. find all the ItemStacks, ...
 			slot = iterator.nextIndex();
 			ItemStack stack = iterator.next();
 			if(stack!=null)
-			{ 	//parse each stack (if there is one)
-				stackNBT[0] = new Tag(Tag.Type.TAG_Byte, "Count", (byte) stack.getAmount());
-				stackNBT[1] = new Tag(Tag.Type.TAG_Byte, "Slot", (byte) slot);
-				stackNBT[2] = new Tag(Tag.Type.TAG_Short, "Damage", (short) stack.getDurability());
-				stackNBT[3] = new Tag(Tag.Type.TAG_Short, "id", (short) stack.getTypeId());
-				
-				//enchantments
-				enchantments = (HashMap<Enchantment,Integer>) stack.getEnchantments();
-				if(enchantments.size()>0)
-				{
-					stackWithEnchantmentsNBT[0] = stackNBT[0];
-					stackWithEnchantmentsNBT[1] = stackNBT[1];
-					stackWithEnchantmentsNBT[2] = stackNBT[2];
-					stackWithEnchantmentsNBT[3] = stackNBT[3];
-					
-					enchantmentsNBT[0] = new Tag("ench", Tag.Type.TAG_Compound);
-					
-					for(Enchantment enchantment: enchantments.keySet())
-					{
-						enchantmentNBT[0] = new Tag(Tag.Type.TAG_Short,"id",(short) enchantment.getId());
-						enchantmentNBT[1] = new Tag(Tag.Type.TAG_Short,"lvl",(short) enchantments.get(enchantment).shortValue());
-						enchantmentsNBT[0].addTag(new Tag(Tag.Type.TAG_Compound,null,enchantmentNBT.clone()));
-					}
-					stackWithEnchantmentsNBT[4] = new Tag(Tag.Type.TAG_Compound, "tag", enchantmentsNBT.clone());
-					
-					//add end tag at position 5
-					stackWithEnchantmentsNBT[5] = new Tag(Tag.Type.TAG_End, null, null);
-					
-					inventoryNBT[0].addTag(
-							new Tag(Tag.Type.TAG_Compound, "", 
-										stackWithEnchantmentsNBT.clone()
-									 )
-							);
-				}
-				else
-				{	//no enchantments, add end tag at position 4
-					stackNBT[4] = new Tag(Tag.Type.TAG_End, null, null);
-					
-					inventoryNBT[0].addTag(
-							new Tag(Tag.Type.TAG_Compound, "", 
-										stackNBT.clone()
-									 )
-							);
-				}
-
-				
+			{ 	//... and as long as the stack isn't null, we add it to the inventory tag
+				inventoryNBT[0].addTag(NBTHelper.getNBTFromStack(stack, slot));
 			}
-			
 		}
 		
-		//Create the main tag, which holds the inventory tag and the end tag
+		//Create the main tag, which holds the array we created at the begin of this method
 		Tag mainNBT = new Tag(Tag.Type.TAG_Compound,"Player",inventoryNBT);
+		
+		//Now we are going to write that tag to a file
 		try
-		{	//write the main tag to a file
-			File to = new File(new String("chests/"+inventoryName+".dat").toLowerCase());
+		{
+			//Create /chests directory (if it already exists, this does nothing)
 			new File("chests/").mkdirs();
+			
+			//Output file
+			File to = new File(new String("chests/"+inventoryName+".dat").toLowerCase());
 			to.createNewFile();
 			mainNBT.writeTo(new FileOutputStream(to));
 		}
 		catch(IOException e)
-		{
+		{	//And handle all IOExceptions
 			plugin.logThis("Could not save inventory "+inventoryName, "SEVERE");
-			plugin.logThis(e.getMessage(),"SEVERE");
+			plugin.logThis(e.getMessage()+" at line "+e.getStackTrace()[0].getLineNumber(),"SEVERE");//small stack 'trace'
 		}
 		
 	}
@@ -126,6 +75,7 @@ public class EnderSaveAndLoad
 		Inventory inventory;
 		int chestRows;
 		
+		//Get the name of the chest and the availible rows
 		if(inventoryName.equals(BetterEnderChest.publicChestName))
 		{	//public chest
 			chestRows = plugin.getPublicChestRows();
@@ -137,6 +87,7 @@ public class EnderSaveAndLoad
 			inventory = plugin.getServer().createInventory(null, chestRows*9, "Ender Chest ("+inventoryName+")");
 		}
 		
+		//Now read it from a file
 		File from = new File(new String("chests/"+inventoryName+".dat").toLowerCase());
 		try
 		{
@@ -150,46 +101,39 @@ public class EnderSaveAndLoad
 			{
 				Tag[] stacksNBT = (Tag[]) inventoryNBT.getValue();
 				ItemStack stack;
+				int slot;
 				
 				for(Tag stackNBT: stacksNBT)
 				{	//parse the NBT-stack
-					int count = Integer.parseInt( stackNBT.findTagByName("Count").getValue().toString() );
-					int slot = Integer.parseInt( stackNBT.findTagByName("Slot").getValue().toString() );
-					short damage = Short.parseShort( stackNBT.findTagByName("Damage").getValue().toString() );
-					int id = Integer.parseInt( stackNBT.findTagByName("id").getValue().toString() );
-					stack = new ItemStack(id);
-					stack.setAmount(count);
-					stack.setDurability(damage);
-					
-					
-					//Enchantments
-					if(stackNBT.findTagByName("tag")!=null)
-					{
-						Tag[] enchantmentsNBT = (Tag[]) stackNBT.findTagByName("tag").findTagByName("ench").getValue();
-						for(Tag enchantmentNBT: enchantmentsNBT)
-						{
-							stack.addEnchantment(
-									Enchantment.getById(Integer.parseInt(enchantmentNBT.findTagByName("id").getValue().toString())), 
-									Integer.parseInt(enchantmentNBT.findTagByName("lvl").getValue().toString())
-								);
-							}
-					}
+					stack = NBTHelper.getStackFromNBT(stackNBT);
+					slot = NBTHelper.getSlotFromNBT(stackNBT);
 					
 					//Add item to inventory
 					if(slot<chestRows*9) inventory.setItem(slot, stack);
 				}
 			}
 		}
-		catch(FileNotFoundException e) { }
+		catch(FileNotFoundException e) 
+		{	//load it from the default player chest
+			
+			//But not for now! The Ender chest doesn't exist yet!
+			//After 1.3 is released, this dummy code will be converted to real code
+			//The player.getEnderChestInventory() method will most likely be called different
+			//if(!inventoryName.equals(BetterEnderChest.publicChestName))
+			//{
+			//	Player player = plugin.getServer().getPlayer(inventoryName);
+			//	if(player!=null)
+			//	{	//load it using a bukkit method
+			//		inventory = player.getEnderChestInventory();
+			//	}
+			//}
+		}
 		catch(Exception e)
 		{
 			plugin.logThis("Could not fully load inventory "+inventoryName, "SEVERE");
 			plugin.logThis("Error message: "+e.getMessage(),"SEVERE");
 			plugin.logThis("Error occured on line "+e.getStackTrace()[0].getLineNumber()+" in file "+e.getStackTrace()[0].getFileName(),"SEVERE");
 		}
-		
 		return inventory;
 	}
-	
-	
 }
