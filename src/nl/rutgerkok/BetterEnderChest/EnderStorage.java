@@ -36,6 +36,17 @@ public class EnderStorage
 	}
 	
 	/**
+	 * Set a inventory. Make sure the name of the inventory (((EnderHolder)inventory.getHolder()).getOwnerName()) matches the inventoryName.
+	 * @param inventoryName Name to save the inventory in the list AND the filename
+	 * @param inventory The new inventory
+	 */
+	public void setInventory(String inventoryName, Inventory inventory)
+	{
+		inventories.put(inventoryName, inventory);
+	}
+	
+	
+	/**
 	 * Save an inventory, but keep it in memory
 	 * @param inventoryName
 	 */
