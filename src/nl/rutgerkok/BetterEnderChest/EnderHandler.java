@@ -58,29 +58,32 @@ public class EnderHandler implements Listener
 			}
 			else
 			{	//unprotected Ender chest
-				if(plugin.hasPermission(player,"betterenderchest.use.publicchest",true))
-				{
-					if(plugin.getPublicChestsEnabled())
-					{	//show public chest
-						player.openInventory(chests.getInventory(BetterEnderChest.publicChestName));
-						if(plugin.hasPermission(player,"betterenderchest.use.privatechest",true)&&!(protectionBridge instanceof NoBridge))
-						{
-							player.sendMessage("This was a public Ender chest. Protect it using "+protectionBridge.getBridgeName()+" to get your private Ender Chest.");
+				if(!player.getItemInHand().getType().equals(Material.SIGN)&&protectionBridge.getBridgeName().equals("Lockette"))
+				{	//open only when the player doesn't want to protect the chest using a sign and Lockette is the current bridge
+					if(plugin.hasPermission(player,"betterenderchest.use.publicchest",true))
+					{
+						if(plugin.getPublicChestsEnabled())
+						{	//show public chest
+							player.openInventory(chests.getInventory(BetterEnderChest.publicChestName));
+							if(plugin.hasPermission(player,"betterenderchest.use.privatechest",true)&&!(protectionBridge instanceof NoBridge))
+							{
+								player.sendMessage("This was a public Ender chest. Protect it using "+protectionBridge.getBridgeName()+" to get your private Ender Chest.");
+							}
+							else
+							{
+								player.sendMessage("This was a public Ender chest. Remember that your items aren't save.");
+							}
 						}
 						else
-						{
-							player.sendMessage("This was a public Ender chest. Remember that your items aren't save.");
+						{	//show player's chest
+							String inventoryName = player.getName();
+							player.openInventory(chests.getInventory(inventoryName));
 						}
 					}
 					else
-					{	//show player's chest
-						String inventoryName = player.getName();
-						player.openInventory(chests.getInventory(inventoryName));
+					{
+						player.sendMessage(ChatColor.RED+"You do not have permissions to use public Ender Chests.");
 					}
-				}
-				else
-				{
-					player.sendMessage(ChatColor.RED+"You do not have permissions to use public Ender Chests.");
 				}
 			}
 		}
