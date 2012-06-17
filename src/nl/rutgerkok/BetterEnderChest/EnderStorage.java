@@ -56,6 +56,14 @@ public class EnderStorage
 		for(String inventoryName:inventories.keySet())
 		{
 			EnderSaveAndLoad.saveInventory(inventories.get(inventoryName),inventoryName,plugin);
+			if(
+					!inventoryName.equals(BetterEnderChest.publicChestName)&&
+					!plugin.getServer().getOfflinePlayer(inventoryName).isOnline()
+				)
+			{	//if it isn't a public chest and the player isn't online, unload the chest
+				//this can happen when a player opens someone else's chest (using group chests or commands)
+				inventories.remove(inventoryName);
+			}
 		}
 	}
 	
