@@ -52,7 +52,7 @@ public class EnderSaveAndLoad
 			new File("chests/").mkdirs();
 			
 			//Output file
-			File to = new File(new String("chests/"+inventoryName+".dat").toLowerCase());
+			File to = new File(new String("chests/"+inventoryName+".dat"));
 			to.createNewFile();
 			mainNBT.writeTo(new FileOutputStream(to));
 		}
@@ -88,7 +88,7 @@ public class EnderSaveAndLoad
 		}
 		
 		//Now read it from a file
-		File from = new File(new String("chests/"+inventoryName+".dat").toLowerCase());
+		File from = new File(new String("chests/"+inventoryName+".dat"));
 		try
 		{
 			Tag mainNBT = Tag.readFrom(new FileInputStream(from));
@@ -124,7 +124,8 @@ public class EnderSaveAndLoad
 			//	Player player = plugin.getServer().getPlayer(inventoryName);
 			//	if(player!=null)
 			//	{	//load it using a bukkit method
-			//		inventory = player.getEnderChestInventory();
+			//		COPY CONTENTS OF BUKKIT ENDER CHEST INVENTORY
+			//      EMPTY BUKKIT ENDER CHEST INVENTORY
 			//	}
 			//}
 		}

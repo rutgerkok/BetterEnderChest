@@ -22,6 +22,7 @@ public class EnderStorage
 	 */
 	public Inventory getInventory(String inventoryName)
 	{
+		inventoryName = inventoryName.toLowerCase();
 		if(inventories.containsKey(inventoryName))
 		{	//inventory is availible in cache
 			return inventories.get(inventoryName);
@@ -40,6 +41,7 @@ public class EnderStorage
 	 */
 	public void saveInventory(String inventoryName)
 	{
+		inventoryName = inventoryName.toLowerCase();
 		if(!inventories.containsKey(inventoryName))
 		{	//oops! Inventory has not been loaded. Nothing to save
 			return;
@@ -73,6 +75,7 @@ public class EnderStorage
 	 */
 	public void saveAndUnloadInventory(String inventoryName)
 	{
+		inventoryName = inventoryName.toLowerCase();
 		if(!inventories.containsKey(inventoryName))
 		{	//oops! Inventory has not been loaded
 			plugin.logThis("Could not save inventory "+inventoryName+"! Inventory not loaded!", "SERVERE");
