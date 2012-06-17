@@ -134,6 +134,8 @@ public class BetterEnderChest extends JavaPlugin
 		if(chestDrop.equals("OBSIDIAN")) return true;
 		if(chestDrop.equals("OBSIDIAN_WITH_EYE_OF_ENDER")) return true;
 		if(chestDrop.equals("OBSIDIAN_WITH_ENDER_PEARL")) return true;
+		if(chestDrop.equals("EYE_OF_ENDER")) return true;
+		if(chestDrop.equals("ENDER_PEARL")) return true;
 		if(chestDrop.equals("ITSELF")) return true;
 		if(chestDrop.equals("NOTHING")) return true;
 		return false;

@@ -110,12 +110,12 @@ public class EnderHandler implements Listener
 				event.getPlayer().getWorld().dropItemNaturally(block.getLocation(),new ItemStack(Material.OBSIDIAN,8));
 			}
 			
-			if(chestDropString.equals("OBSIDIAN_WITH_EYE_OF_ENDER"))
+			if(chestDropString.equals("OBSIDIAN_WITH_EYE_OF_ENDER")||chestDropString.equals("EYE_OF_ENDER"))
 			{	//drop eye of ender
 				event.getPlayer().getWorld().dropItemNaturally(block.getLocation(),new ItemStack(Material.EYE_OF_ENDER));
 			}
 			
-			if(chestDropString.equals("OBSIDIAN_WITH_ENDER_PEARL"))
+			if(chestDropString.equals("OBSIDIAN_WITH_ENDER_PEARL")||chestDropString.equals("ENDER_PEARL"))
 			{	//drop ender pearl
 				event.getPlayer().getWorld().dropItemNaturally(block.getLocation(),new ItemStack(Material.ENDER_PEARL));
 			}
