@@ -79,12 +79,12 @@ public class EnderSaveAndLoad
 		if(inventoryName.equals(BetterEnderChest.publicChestName))
 		{	//public chest
 			chestRows = plugin.getPublicChestRows();
-			inventory = plugin.getServer().createInventory(null, chestRows*9, "Ender Chest ("+BetterEnderChest.publicChestDisplayName+")");
+			inventory = plugin.getServer().createInventory(new EnderHolder(inventoryName), chestRows*9, "Ender Chest ("+BetterEnderChest.publicChestDisplayName+")");
 		}
 		else
 		{	//private chest
 			chestRows = plugin.getChestRows();
-			inventory = plugin.getServer().createInventory(null, chestRows*9, "Ender Chest ("+inventoryName+")");
+			inventory = plugin.getServer().createInventory(new EnderHolder(inventoryName), chestRows*9, "Ender Chest ("+inventoryName+")");
 		}
 		
 		//Now read it from a file

@@ -59,21 +59,13 @@ public class EnderHandler implements Listener
 			}
 			else
 			{	//unprotected Ender chest
-				if(!player.getItemInHand().getType().equals(Material.SIGN)&&protectionBridge.getBridgeName().equals("Lockette"))
+				if(!player.getItemInHand().getType().equals(Material.SIGN)||!protectionBridge.getBridgeName().equals("Lockette"))
 				{	//open only when the player doesn't want to protect the chest using a sign and Lockette is the current bridge
 					if(plugin.hasPermission(player,"betterenderchest.use.publicchest",true))
 					{
 						if(plugin.getPublicChestsEnabled())
 						{	//show public chest
 							player.openInventory(chests.getInventory(BetterEnderChest.publicChestName));
-							if(plugin.hasPermission(player,"betterenderchest.use.privatechest",true)&&!(protectionBridge instanceof NoBridge))
-							{
-								player.sendMessage("This was a public Ender chest. Protect it using "+protectionBridge.getBridgeName()+" to get your private Ender Chest.");
-							}
-							else
-							{
-								player.sendMessage("This was a public Ender chest. Remember that your items aren't save.");
-							}
 						}
 						else
 						{	//show player's chest
@@ -93,7 +85,22 @@ public class EnderHandler implements Listener
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent event)
 	{
-
+		Player player = (Player) event.getPlayer();
+		if(event.getInventory().getHolder() instanceof EnderHolder)
+		{	//just closed an Ender Inventory
+			EnderHolder holder = (EnderHolder) event.getInventory().getHolder();
+			if(holder.getOwnerName().equals(BetterEnderChest.publicChestName))
+			{	//which was a public inventory, show warning message
+				if(plugin.hasPermission(player,"betterenderchest.use.privatechest",true)&&!(protectionBridge instanceof NoBridge))
+				{	//suggest to protect chest
+					player.sendMessage("This was a public Ender chest. Protect it using "+protectionBridge.getBridgeName()+" to get your private Ender Chest.");
+				}
+				else
+				{	//don't suggest to protect chest, because the player hasn't got the permissions
+					player.sendMessage("This was a public Ender chest. Remember that your items aren't save.");
+				}
+			}
+		}
 	}
 	
 	//change the drop
