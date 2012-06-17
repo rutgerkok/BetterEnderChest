@@ -5,7 +5,7 @@ import org.bukkit.inventory.InventoryHolder;
 
 public class EnderHolder implements InventoryHolder
 {
-	String ownerName;
+	String ownerName;//never displayed, currently only used for checking whether the inventory is pubic
 	
 	public EnderHolder(String ownerName)
 	{
