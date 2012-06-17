@@ -6,7 +6,7 @@ commands:
   betterenderchest:
     description: Administrative command for BetterEnderChest.
     aliases: [bec]
-    usage: /betterenderchest <command> [commandarg1] [commandarg2] ...
+    usage: Type /<command> for more information.
 permissions:
   betterenderchest.*:
     description: Use all BetterEnderChest features. Only for administrators!
