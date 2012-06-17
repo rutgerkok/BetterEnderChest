@@ -2,8 +2,17 @@ name: BetterEnderChest
 main: nl.rutgerkok.BetterEnderChest.BetterEnderChest
 version: 0.6
 softdepend: [Lockette, LWC]
-
+commands:
+  betterenderchest:
+    description: Administrative command for BetterEnderChest.
+    aliases: [bec]
+    usage: /betterenderchest <command> [commandarg1] [commandarg2] ...
 permissions:
+  betterenderchest.*:
+    description: Use all BetterEnderChest features. Only for administrators!
+    children:
+      betterenderchest.command.*: true
+      betterenderchest.use.*: true
   betterenderchest.use:
     description: You can use both private and public Ender Chests. Same as betterenderchest.use.* .
     children:
@@ -18,4 +27,15 @@ permissions:
     default: op
   betterenderchest.use.publicchest:
     description: Use public chests
+    default: op
+  betterenderchest.command:
+    description: Use all commands. Same as betterenderchest.command.* .
+    children:
+      betterenderchest.command.*: true
+  betterenderchest.command.*:
+    description: Use all commands. Same as betterenderchest.command .
+    children:
+      betterenderchest.command.openinv: true
+  betterenderchest.command.openinv:
+    description: Open someone's Ender inventory.
     default: op
