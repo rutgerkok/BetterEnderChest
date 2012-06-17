@@ -82,6 +82,7 @@ public class EnderHandler implements Listener
 		}
 	}
 	
+	//show warning message on close
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent event)
 	{
