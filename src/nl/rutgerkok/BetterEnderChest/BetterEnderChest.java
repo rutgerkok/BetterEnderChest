@@ -1,6 +1,5 @@
 package nl.rutgerkok.BetterEnderChest;
 
-import java.util.Locale;
 import java.util.logging.Logger;
 
 import org.bukkit.Material;
@@ -11,13 +10,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class BetterEnderChest extends JavaPlugin
 {
 	private EnderHandler enderHandler;
+	private EnderCommands commandHandler;
 	private EnderStorage enderStorage;
 	private Material chestMaterial;
 	private Bridge protectionBridge;
 	private int chestRows, publicChestRows;
 	private boolean usePermissions, enablePublicChests;
 	private String chestDrop, chestDropSilkTouch;
-	public static final String publicChestName = "--PublicChest";
+	public static final String publicChestName = "--publicchest";
 	public static String publicChestDisplayName;
 	
 	public void onEnable()
@@ -38,6 +38,10 @@ public class BetterEnderChest extends JavaPlugin
 		//EventHandler
 		enderHandler = new EnderHandler(this,protectionBridge);
 		getServer().getPluginManager().registerEvents(enderHandler, this);
+		
+		//CommandHandler
+		commandHandler = new EnderCommands(this);
+		getCommand("betterenderchest").setExecutor(commandHandler);
 		
 		//AutoSave
 		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() 
@@ -180,7 +184,7 @@ public class BetterEnderChest extends JavaPlugin
 		
 		//Chestdrop
 		chestDrop = getConfig().getString("EnderChest.drop","OBSIDIAN");
-		chestDrop = chestDrop.toUpperCase(Locale.ENGLISH);
+		chestDrop = chestDrop.toUpperCase();
 		if(!isValidChestDrop(chestDrop))
 		{	//cannot understand value
 			logThis("Could not understand the drop "+chestDrop+", defaulting to OBSIDIAN","WARNING");
@@ -190,11 +194,11 @@ public class BetterEnderChest extends JavaPlugin
 		
 		//ChestSilkTouchDrop
 		chestDropSilkTouch = getConfig().getString("EnderChest.dropSilkTouch","ITSELF");
-		chestDropSilkTouch = chestDropSilkTouch.toUpperCase(Locale.ENGLISH);
+		chestDropSilkTouch = chestDropSilkTouch.toUpperCase();
 		if(!isValidChestDrop(chestDropSilkTouch))
 		{	//cannot understand value
 			logThis("Could not understand the Silk Touch drop "+chestDropSilkTouch+", defaulting to ITSELF","WARNING");
-			chestDrop = "ITSELF";
+			chestDropSilkTouch = "ITSELF";
 		}
 		getConfig().set("EnderChest.dropSilkTouch",chestDropSilkTouch);
 		
@@ -246,7 +250,11 @@ public class BetterEnderChest extends JavaPlugin
 	 */
 	public boolean hasPermission(Player player, String permission, boolean fallBack)
 	{
-		if(!usePermissions) return fallBack;
+		if(!usePermissions)
+		{
+			if(player.isOp()) return true;
+			return fallBack;
+		}
 		return player.hasPermission(permission);
 	}
 	
@@ -282,9 +290,7 @@ public class BetterEnderChest extends JavaPlugin
 	 */
 	public void logThis(String message)
 	{
-		Logger log = Logger.getLogger("Minecraft");
-		
-		log.info("["+this.getDescription().getName()+"] "+message);
+		logThis(message,"info");
 	}
 	
 	/**
@@ -295,9 +301,9 @@ public class BetterEnderChest extends JavaPlugin
 	public void logThis(String message, String type)
 	{
 		Logger log = Logger.getLogger("Minecraft");
-		if(type.equalsIgnoreCase("log")) log.info("["+this.getDescription().getName()+"]"+message);
-		if(type.equalsIgnoreCase("warning")) log.warning("["+this.getDescription().getName()+"]"+message);
-		if(type.equalsIgnoreCase("severe")) log.severe("["+this.getDescription().getName()+"]"+message);
+		if(type.equalsIgnoreCase("info")) log.info("["+this.getDescription().getName()+"] "+message);
+		if(type.equalsIgnoreCase("warning")) log.warning("["+this.getDescription().getName()+"] "+message);
+		if(type.equalsIgnoreCase("severe")) log.severe("["+this.getDescription().getName()+"] "+message);
 	}
 	
 	
