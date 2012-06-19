@@ -33,13 +33,20 @@ public class EnderCommands implements CommandExecutor
 							((Player) sender).openInventory(plugin.getEnderChests().getInventory(BetterEnderChest.publicChestName));
 						}
 						else
-						{	//open private Ender chest
-							((Player) sender).openInventory(plugin.getEnderChests().getInventory(args[1]));
+						{	//check if player exists
+							if(plugin.getServer().getOfflinePlayer(args[1]).hasPlayedBefore()||plugin.getServer().getOfflinePlayer(args[1]).isOnline())
+							{	//open private Ender chest
+								((Player) sender).openInventory(plugin.getEnderChests().getInventory(args[1]));
+							}
+							else
+							{
+								sender.sendMessage(ChatColor.RED+"The player "+args[1]+" was never seen on this server.");
+							}
 						}
 					}
 					else
 					{	//show error
-						((Player) sender).sendMessage(ChatColor.RED+"No permissions to do this...");
+						sender.sendMessage(ChatColor.RED+"No permissions to do this...");
 					}
 				}
 				else
@@ -52,24 +59,40 @@ public class EnderCommands implements CommandExecutor
 			//swapinv command
 			if(args[0].equalsIgnoreCase("swapinv"))
 			{
+				//check for permissions
 				if(!(sender instanceof Player)||plugin.hasPermission((Player) sender, "betterenderchest.command.swapinv", false))
-				{	//swap the Ender chests
+				{	//check for arguments
 					if(args.length==3)
-					{	//get the inventories
-						Inventory firstInventory = plugin.getEnderChests().getInventory(args[1]);
-						Inventory secondInventory = plugin.getEnderChests().getInventory(args[2]);
-						if(!firstInventory.getViewers().isEmpty()||!secondInventory.getViewers().isEmpty())
-						{	//oh no! They are being viewed!
-							sender.sendMessage(ChatColor.RED+"Error: someone else is currently viewing the inventories. Please try again later.");
+					{	//check if both players exist
+						if(plugin.getServer().getOfflinePlayer(args[1]).hasPlayedBefore()||plugin.getServer().getOfflinePlayer(args[1]).isOnline())
+						{
+							if(plugin.getServer().getOfflinePlayer(args[2]).hasPlayedBefore()||plugin.getServer().getOfflinePlayer(args[2]).isOnline())
+							{
+								//get the inventories
+								Inventory firstInventory = plugin.getEnderChests().getInventory(args[1]);
+								Inventory secondInventory = plugin.getEnderChests().getInventory(args[2]);
+								if(!firstInventory.getViewers().isEmpty()||!secondInventory.getViewers().isEmpty())
+								{	//oh no! They are being viewed!
+									sender.sendMessage(ChatColor.RED+"Error: someone else is currently viewing the inventories. Please try again later.");
+								}
+								else
+								{	//swap them
+									plugin.getEnderChests().setInventory(args[1], secondInventory);
+									plugin.getEnderChests().setInventory(args[2], firstInventory);
+									//unload them (so that they get reloaded with correct titles)
+									plugin.getEnderChests().saveAndUnloadInventory(args[1]);
+									plugin.getEnderChests().saveAndUnloadInventory(args[2]);
+									sender.sendMessage(ChatColor.GREEN+"Succesfully swapped inventories!");
+								}
+							}
+							else
+							{
+								sender.sendMessage(ChatColor.RED+"The player "+args[2]+" was never seen on this server.");
+							}
 						}
 						else
-						{	//swap them
-							plugin.getEnderChests().setInventory(args[1], secondInventory);
-							plugin.getEnderChests().setInventory(args[2], firstInventory);
-							//unload them (so that they get reloaded with correct titles)
-							plugin.getEnderChests().saveAndUnloadInventory(args[1]);
-							plugin.getEnderChests().saveAndUnloadInventory(args[2]);
-							sender.sendMessage(ChatColor.GREEN+"Succesfully swapped inventories!");
+						{
+							sender.sendMessage(ChatColor.RED+"The player "+args[1]+" was never seen on this server.");
 						}
 					}
 					else
