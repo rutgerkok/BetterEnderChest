@@ -1,5 +1,6 @@
 package nl.rutgerkok.BetterEnderChest;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.bukkit.inventory.Inventory;
@@ -45,7 +46,6 @@ public class EnderStorage
 		inventories.put(inventoryName, inventory);
 	}
 	
-	
 	/**
 	 * Save an inventory, but keep it in memory
 	 * @param inventoryName
@@ -66,6 +66,9 @@ public class EnderStorage
 	 */
 	public void saveAllInventories()
 	{
+		//list with inventories to remove
+		ArrayList<String> inventoriesToRemove = new ArrayList<String>();
+		
 		for(String inventoryName:inventories.keySet())
 		{
 			EnderSaveAndLoad.saveInventory(inventories.get(inventoryName),inventoryName,plugin);
@@ -75,8 +78,16 @@ public class EnderStorage
 				)
 			{	//if it isn't a public chest and the player isn't online, unload the chest
 				//this can happen when a player opens someone else's chest (using group chests or commands)
-				inventories.remove(inventoryName);
+				//Also, don't remove it while iterating, add it to a list that will remove it after the iteration
+				plugin.logThis("Removing something from the list");
+				inventoriesToRemove.add(inventoryName);
 			}
+		}
+		
+		//remove the inventories that aren't used
+		for(String inventoryName:inventoriesToRemove)
+		{
+			inventories.remove(inventoryName);
 		}
 	}
 	
@@ -97,5 +108,24 @@ public class EnderStorage
 		
 		//remove it from the list
 		inventories.remove(inventoryName);
+	}
+	
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder();
+		for(String inventoryName:inventories.keySet())
+		{
+			builder.append(',');
+			builder.append(((EnderHolder)inventories.get(inventoryName).getHolder()).getOwnerName());
+		}
+		if(builder.length()>0)
+		{
+			builder.deleteCharAt(0);//remove the first ,
+		}
+		else
+		{
+			builder.append("No inventories loaded.");
+		}
+		return builder.toString();
 	}
 }
