@@ -2,7 +2,6 @@ package nl.rutgerkok.BetterEnderChest;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ListIterator;
@@ -10,6 +9,7 @@ import java.util.ListIterator;
 import net.minecraftwiki.wiki.NBTClass.Tag;
 
 //import org.bukkit.entity.Player; //not needed yet
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -24,11 +24,19 @@ public class EnderSaveAndLoad
 	public static void saveInventory(Inventory inventory, String inventoryName, BetterEnderChest plugin)
 	{
 		int slot;//id of slot
+		byte nameCaseCorrect = 0;
+		if(((EnderHolder) inventory.getHolder()).isOwnerNameCaseCorrect())
+		{
+			nameCaseCorrect = 1;
+		}
+		
 		
 		//First of all, we creat an array that holds two tags: the inventory tag and the end tag.
-		Tag[] inventoryNBT = new Tag[2];//represents the whole inventory...
+		Tag[] inventoryNBT = new Tag[4];//represents the whole inventory...
 		inventoryNBT[0] = new Tag("Inventory", Tag.Type.TAG_Compound);//..consisting of an inventory tag
-		inventoryNBT[1] = new Tag(Tag.Type.TAG_End, null, null);//..and an end tag
+		inventoryNBT[1] = new Tag(Tag.Type.TAG_String, "OwnerName", ((EnderHolder) inventory.getHolder()).getOwnerName());//the player name
+		inventoryNBT[2] = new Tag(Tag.Type.TAG_Byte, "NameCaseCorrect", nameCaseCorrect);//the player name
+		inventoryNBT[3] = new Tag(Tag.Type.TAG_End, null, null);//..and an end tag
 		
 		//Now we are going to read the inventory, ...
 		ListIterator<ItemStack> iterator = inventory.iterator();
@@ -72,62 +80,26 @@ public class EnderSaveAndLoad
 	 */
 	public static Inventory loadInventory(String inventoryName, BetterEnderChest plugin)
 	{
-		Inventory inventory;
-		int chestRows;
+		int inventoryRows;
 		
-		//Get the name of the chest and the availible rows
+		//Get the number of rows
 		if(inventoryName.equals(BetterEnderChest.publicChestName))
 		{	//public chest
-			chestRows = plugin.getPublicChestRows();
-			inventory = plugin.getServer().createInventory(new EnderHolder(inventoryName), chestRows*9, "Ender Chest ("+BetterEnderChest.publicChestDisplayName+")");
+			inventoryRows = plugin.getPublicChestRows();
 		}
 		else
 		{	//private chest
-			chestRows = plugin.getChestRows();
-			inventory = plugin.getServer().createInventory(new EnderHolder(inventoryName), chestRows*9, "Ender Chest ("+inventoryName+")");
+			inventoryRows = plugin.getChestRows();
 		}
 		
-		//Now read it from a file
-		File from = new File(new String("chests/"+inventoryName+".dat"));
+		//Try to load it from a file
 		try
 		{
-			Tag mainNBT = Tag.readFrom(new FileInputStream(from));
-			Tag inventoryNBT = mainNBT.findTagByName("Inventory");
-			if(inventoryNBT==null||!inventoryNBT.getType().equals(Tag.Type.TAG_List)||!inventoryNBT.getListType().equals(Tag.Type.TAG_Compound))
-			{
-				throw new Exception("No valid Inventory tag found!");
+			File file = new File(new String("chests/"+inventoryName+".dat"));
+			if(file.exists())
+			{	//load it from a file
+				return EnderSaveAndLoad.loadInventoryFromFile(inventoryName, inventoryRows, file, plugin);
 			}
-			else
-			{
-				Tag[] stacksNBT = (Tag[]) inventoryNBT.getValue();
-				ItemStack stack;
-				int slot;
-				
-				for(Tag stackNBT: stacksNBT)
-				{	//parse the NBT-stack
-					stack = NBTHelper.getStackFromNBT(stackNBT);
-					slot = NBTHelper.getSlotFromNBT(stackNBT);
-					
-					//Add item to inventory
-					if(slot<chestRows*9) inventory.setItem(slot, stack);
-				}
-			}
-		}
-		catch(FileNotFoundException e) 
-		{	//load it from the default player chest
-			
-			//But not for now! The Ender chest doesn't exist yet!
-			//After 1.3 is released, this dummy code will be converted to real code
-			//The player.getEnderChestInventory() method will most likely be called different
-			//if(!inventoryName.equals(BetterEnderChest.publicChestName))
-			//{
-			//	Player player = plugin.getServer().getPlayer(inventoryName);
-			//	if(player!=null)
-			//	{	//load it using a bukkit method
-			//		COPY CONTENTS OF BUKKIT ENDER CHEST INVENTORY
-			//      EMPTY BUKKIT ENDER CHEST INVENTORY
-			//	}
-			//}
 		}
 		catch(Exception e)
 		{
@@ -135,6 +107,104 @@ public class EnderSaveAndLoad
 			plugin.logThis("Error message: "+e.getMessage(),"SEVERE");
 			plugin.logThis("Error occured on line "+e.getStackTrace()[0].getLineNumber()+" in file "+e.getStackTrace()[0].getFileName(),"SEVERE");
 		}
+		
+		//Try to load it from bukkit
+		//NOT IMPLEMENTED
+		
+		//Loading failed (error, or no one created yet), return empty inventory
+		return EnderSaveAndLoad.loadEmptyInventory(inventoryName, inventoryRows, plugin);
+	}
+	
+	private static Inventory loadInventoryFromFile(String inventoryName, int inventoryRows, File file, BetterEnderChest plugin) throws IOException
+	{
+		Tag mainNBT = Tag.readFrom(new FileInputStream(file));
+		Tag inventoryNBT = mainNBT.findTagByName("Inventory");
+		boolean caseCorrect = false;//whether the name is case-correct (loaded from file)
+			
+		//try to get correct-case player names
+		if(mainNBT.findTagByName("OwnerName")!=null&&mainNBT.findTagByName("NameCaseCorrect")!=null)
+		{
+			caseCorrect = (((Byte) mainNBT.findTagByName("NameCaseCorrect").getValue()).byteValue()==1);
+			if(caseCorrect)
+			{	//found a case-correct inventory name! It was saved in the file.
+				inventoryName = (String) mainNBT.findTagByName("OwnerName").getValue();
+			}
+		}
+		
+		//not case correct, let's try to find a case-correct name
+		if(!caseCorrect)
+		{
+			if(inventoryName.equals(BetterEnderChest.publicChestName))
+			{	//it's the public chest, so it IS case correct
+				caseCorrect = true;
+			}
+			else
+			{	//check if the player is online
+				Player player = plugin.getServer().getPlayer(inventoryName);
+				if(player!=null)
+				{	//found the correct case name!
+					inventoryName = player.getName();
+					caseCorrect = true;
+				}
+			}
+		}
+		
+		
+		//create the inventory
+		String title;
+		if(inventoryName.equals(BetterEnderChest.publicChestName))//set correct title
+		{	//public chest
+			title =  "Ender Chest ("+BetterEnderChest.publicChestDisplayName+")";
+		}
+		else
+		{	//private chest
+			title = "Ender Chest ("+inventoryName+")";
+		}
+		Inventory inventory = plugin.getServer().createInventory(new EnderHolder(inventoryName,caseCorrect), inventoryRows*9, title);
+		
+		//parse the stacks
+		Tag[] stacksNBT = (Tag[]) inventoryNBT.getValue();
+		ItemStack stack;
+		int slot;
+		
+		for(Tag stackNBT: stacksNBT)
+		{	//parse the NBT-stack
+			stack = NBTHelper.getStackFromNBT(stackNBT);
+			slot = NBTHelper.getSlotFromNBT(stackNBT);
+			
+			//Add item to inventory
+			if(slot<inventoryRows*9) inventory.setItem(slot, stack);
+		}
+		
+		//done
 		return inventory;
+	}
+	
+	//private static Inventory loadInventoryFromCraftBukkit(String inventoryName, int inventoryRows, Player player, BetterEnderChest plugin)
+	//{
+	//	Will be a method that imports a native Ender chest.
+	//}
+	
+	private static Inventory loadEmptyInventory(String inventoryName, int inventoryRows, BetterEnderChest plugin)
+	{
+		if(inventoryName.equals(BetterEnderChest.publicChestName))
+		{	//return a new public inventory
+			return plugin.getServer().createInventory(new EnderHolder(inventoryName,true), inventoryRows*9, "Ender Chest ("+BetterEnderChest.publicChestDisplayName+")");
+		}
+		else
+		{	//try to find case-correct name
+			boolean caseCorrect = false;
+			
+			Player player = plugin.getServer().getPlayer(inventoryName);
+			if(player!=null)
+			{
+				inventoryName = player.getName();
+				caseCorrect = true;//found a case-correct name
+			}
+			
+			//and return the inventory
+			return plugin.getServer().createInventory(new EnderHolder(inventoryName,caseCorrect), inventoryRows*9, "Ender Chest ("+inventoryName+")");
+		}
+		
 	}
 }
