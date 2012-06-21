@@ -29,4 +29,10 @@ public class EnderHolder implements InventoryHolder
 	{
 		return correctCase;
 	}
+	
+	public void setOwnerName(String newName, boolean correctCase)
+	{
+		ownerName = newName;
+		this.correctCase = correctCase;
+	}
 }

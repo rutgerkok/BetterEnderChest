@@ -93,6 +93,16 @@ public class EnderCommands implements CommandExecutor
 								}
 								else
 								{	//swap them
+									String firstOwnerName = ((EnderHolder)firstInventory.getHolder()).getOwnerName();
+									boolean firstOwnerNameCaseCorrect = ((EnderHolder)firstInventory.getHolder()).isOwnerNameCaseCorrect();
+									((EnderHolder)firstInventory.getHolder()).setOwnerName(
+											((EnderHolder)secondInventory.getHolder()).getOwnerName(),
+											((EnderHolder)secondInventory.getHolder()).isOwnerNameCaseCorrect()
+										);
+									((EnderHolder)secondInventory.getHolder()).setOwnerName(
+											firstOwnerName,
+											firstOwnerNameCaseCorrect
+										);
 									plugin.getEnderChests().setInventory(args[1], secondInventory);
 									plugin.getEnderChests().setInventory(args[2], firstInventory);
 									//unload them (so that they get reloaded with correct titles)
