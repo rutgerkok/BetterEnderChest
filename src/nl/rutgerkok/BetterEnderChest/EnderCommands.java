@@ -21,6 +21,22 @@ public class EnderCommands implements CommandExecutor
 	{
 		if(args.length>=1)
 		{
+			//list command
+			if(args[0].equalsIgnoreCase("list"))
+			{
+				if(!(sender instanceof Player)||plugin.hasPermission((Player) sender, "betterenderchest.command.list", false))
+				{
+					sender.sendMessage("All currently loaded inventories:");
+					sender.sendMessage(plugin.getEnderChests().toString());
+				}
+				else
+				{	//show error
+					sender.sendMessage(ChatColor.RED+"No permissions to do this...");
+				}
+				return true;
+			}
+			
+			
 			//openinv command
 			if(args[0].equalsIgnoreCase("openinv"))
 			{
@@ -109,6 +125,7 @@ public class EnderCommands implements CommandExecutor
 		}
 		
 		sender.sendMessage(ChatColor.GRAY+"Please note that some commands might not be availible for your rank.");
+		sender.sendMessage(ChatColor.GOLD+"/"+label+" list:"+ChatColor.WHITE+" lists all loaded Ender inventories");
 		sender.sendMessage(ChatColor.GOLD+"/"+label+" openinv:"+ChatColor.WHITE+" opens the public Ender inventory");
 		sender.sendMessage(ChatColor.GOLD+"/"+label+" openinv <player>:"+ChatColor.WHITE+" opens the Ender inventory of that player");
 		sender.sendMessage(ChatColor.GOLD+"/"+label+" swapinv <player1> <player2>:"+ChatColor.WHITE+" swaps the Ender inventories");

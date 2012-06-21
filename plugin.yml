@@ -35,8 +35,12 @@ permissions:
   betterenderchest.command.*:
     description: Use all commands. Same as betterenderchest.command .
     children:
+      betterenderchest.command.list: true
       betterenderchest.command.openinv: true
       betterenderchest.command.swapinv: true
+  betterenderchest.command.list:
+    description: List all currently loaded inventories.
+    default: op
   betterenderchest.command.openinv:
     description: Open someone's Ender inventory.
     default: op
