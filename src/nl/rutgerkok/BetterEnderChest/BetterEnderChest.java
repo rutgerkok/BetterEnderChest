@@ -180,7 +180,7 @@ public class BetterEnderChest extends JavaPlugin
 			logThis("Changed it to 3.","WARNING");
 			chestRows=3;
 		}
-		getConfig().set("EnderChest.rows", 3);
+		getConfig().set("EnderChest.rows", chestRows);
 		
 		//Chestdrop
 		chestDrop = getConfig().getString("EnderChest.drop","OBSIDIAN");
