@@ -1,6 +1,6 @@
 name: BetterEnderChest
 main: nl.rutgerkok.BetterEnderChest.BetterEnderChest
-version: 0.6
+version: 0.7
 softdepend: [Lockette, LWC]
 commands:
   betterenderchest:
