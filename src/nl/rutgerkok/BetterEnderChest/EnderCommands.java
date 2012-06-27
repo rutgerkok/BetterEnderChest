@@ -21,6 +21,45 @@ public class EnderCommands implements CommandExecutor
 	{
 		if(args.length>=1)
 		{
+			//deleteinv command
+			if(args[0].equalsIgnoreCase("deleteinv"))
+			{
+				//check for permissions
+				if(!(sender instanceof Player)||plugin.hasPermission((Player) sender, "betterenderchest.command.deleteinv", false))
+				{	//check for arguments
+					if(args.length==2)
+					{	//check if both players exist
+						if(plugin.getServer().getOfflinePlayer(args[1]).hasPlayedBefore()||plugin.getServer().getOfflinePlayer(args[1]).isOnline())
+						{
+							//get the inventories
+							Inventory inventory = plugin.getEnderChests().getInventory(args[1]);
+							if(!inventory.getViewers().isEmpty())
+							{	//oh no! They are being viewed!
+								sender.sendMessage(ChatColor.RED+"Error: someone else is currently viewing the inventory. Please try again later.");
+							}
+							else
+							{	//clear it
+								inventory.clear();
+								sender.sendMessage(ChatColor.GREEN+"Succesfully removed inventory!");
+							}
+						}
+						else
+						{
+							sender.sendMessage(ChatColor.RED+"The player "+args[1]+" was never seen on this server.");
+						}
+					}
+					else
+					{	//open private Ender chest
+						sender.sendMessage(ChatColor.RED+"Correct syntaxis: /"+label+" swapinv <player1> <player2>");
+					}
+				}
+				else
+				{	//show error
+					sender.sendMessage(ChatColor.RED+"No permissions to do this...");
+				}
+				return true;
+			}
+			
 			//list command
 			if(args[0].equalsIgnoreCase("list"))
 			{
@@ -35,7 +74,6 @@ public class EnderCommands implements CommandExecutor
 				}
 				return true;
 			}
-			
 			
 			//openinv command
 			if(args[0].equalsIgnoreCase("openinv"))

@@ -35,9 +35,13 @@ permissions:
   betterenderchest.command.*:
     description: Use all commands. Same as betterenderchest.command .
     children:
+      betterenderchest.command.deleteinv: true
       betterenderchest.command.list: true
       betterenderchest.command.openinv: true
       betterenderchest.command.swapinv: true
+  betterenderchest.command.deleteinv:
+    description: Delete a inventory.
+    default: op
   betterenderchest.command.list:
     description: List all currently loaded inventories.
     default: op
