@@ -232,7 +232,7 @@ public class BetterEnderChest extends JavaPlugin
 		
 		//convert old options
 		getConfig().set("EnderChest.block",getConfig().getString("enderBlock", "BOOKSHELF"));
-		getConfig().set("EnderChest.rows",getConfig().getInt("rowsInChest", 0));
+		getConfig().set("EnderChest.rows",getConfig().getInt("rowsInChest", 3));
 		getConfig().set("Permissions.enabled",getConfig().getBoolean("usePermissions", false));
 		
 		//remove old options
