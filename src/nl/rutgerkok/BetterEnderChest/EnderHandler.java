@@ -96,11 +96,11 @@ public class EnderHandler implements Listener
 			{	//which was a public inventory, show warning message
 				if(plugin.hasPermission(player,"betterenderchest.use.privatechest",true)&&!(protectionBridge instanceof NoBridge))
 				{	//suggest to protect chest
-					player.sendMessage("This was a public Ender chest. Protect it using "+protectionBridge.getBridgeName()+" to get your private Ender Chest.");
+					player.sendMessage("This was a public Ender Chest. Protect it using "+protectionBridge.getBridgeName()+" to get your private Ender Chest.");
 				}
 				else
 				{	//don't suggest to protect chest, because the player hasn't got the permissions
-					player.sendMessage("This was a public Ender chest. Remember that your items aren't save.");
+					player.sendMessage("This was a public Ender Chest. Remember that your items aren't save.");
 				}
 			}
 		}
