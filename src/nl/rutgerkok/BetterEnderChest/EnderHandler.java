@@ -5,11 +5,13 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -100,6 +102,25 @@ public class EnderHandler implements Listener
 				{	//don't suggest to protect chest, because the player hasn't got the permissions
 					player.sendMessage("This was a public Ender chest. Remember that your items aren't save.");
 				}
+			}
+		}
+	}
+	
+	//prevent placing books with text in the chest (because they WON'T get saved)
+	@EventHandler
+	public void onInventoryClick(InventoryClickEvent event)
+	{
+		if(event.isCancelled()) return;
+		
+		if(event.getInventory().getHolder() instanceof EnderHolder)
+		{	//we're using a Ender chest
+			if(event.getCursor().getTypeId()==386||event.getCursor().getTypeId()==387)
+			{	//we're using a book with text
+				if(event.getRawSlot()==event.getSlot())
+				{	//inside the above part of the inventory
+					event.setResult(Result.DENY);
+				}
+				
 			}
 		}
 	}
