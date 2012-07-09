@@ -33,7 +33,8 @@ public class Tag {
         TAG_Byte_Array,
         TAG_String,
         TAG_List,
-        TAG_Compound
+        TAG_Compound,
+        TAG_Int_Array
     }
 
     /**
@@ -116,6 +117,10 @@ public class Tag {
             if (!(value instanceof Tag[]))
                 throw new IllegalArgumentException();
             break;
+        case TAG_Int_Array:
+            if (!(value instanceof int[]))
+                throw new IllegalArgumentException();
+            break;
         default:
             throw new IllegalArgumentException();
         }
@@ -186,6 +191,10 @@ public class Tag {
             break;
         case TAG_Compound:
             if (!(value instanceof Tag[]))
+                throw new IllegalArgumentException();
+            break;
+        case TAG_Int_Array:
+            if (!(value instanceof int[]))
                 throw new IllegalArgumentException();
             break;
         default:
@@ -383,6 +392,12 @@ public class Tag {
                 newTags[tags.length] = new Tag(Type.values()[stt], name, readPayload(dis, stt));
                 tags = newTags;             } while (stt != 0);
             return tags;
+        case 11:
+            int len = dis.readInt();
+            int[] ia = new int[len];
+            for (int i=0;i<len;i++)
+                ia[i] = dis.readInt();
+            return ia;
          }
         return null;
     }
@@ -455,7 +470,13 @@ public class Tag {
                 }
             }
             break;
-        }
+        case TAG_Int_Array:
+            int[] ia = (int[]) value;
+            dos.writeInt(ia.length);
+            for (int i=0;i<ia.length;i++)
+                dos.writeInt(ia[i]);
+            break;
+         }
     }
 
     /**
@@ -489,6 +510,8 @@ public class Tag {
             return "TAG_List";
         case TAG_Compound:
             return "TAG_Compound";
+        case TAG_Int_Array:
+            return "TAG_Int_Array";
          }
         return null;
     }
@@ -529,6 +552,9 @@ public class Tag {
             }
             indent(indent);
             System.out.println("}");
+        } else if (type == Type.TAG_Int_Array) {
+            int[] i = (int[]) t.getValue();
+            System.out.println(": [" + i.length * 4 + " bytes]");
          } else {
             System.out.println(": " + t.getValue());
         }
