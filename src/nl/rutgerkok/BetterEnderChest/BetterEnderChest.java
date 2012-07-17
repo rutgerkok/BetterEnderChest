@@ -32,6 +32,20 @@ public class BetterEnderChest extends JavaPlugin
 			logThis("Not linked to a block protection plugin like Lockette or LWC.");
 		}
 		
+		//Configuration
+		initConfig();
+		
+		
+		chestMaterial = Material.getMaterial(130);
+		if(chestMaterial==null)
+		{
+			logThis("Ender Chest not found! You're using Minecraft 1.2.5 (or even older)!","SEVERE");
+			logThis("BetterEnderChest "+this.getDescription().getVersion()+" needs MC 1.3 (or the preview)!","SEVERE");
+			logThis("If you want to test this plugin with MC 1.2.5, download 0.7 instead.","SEVERE");
+			logThis("In that version, you can use another block id to test.","SEVERE");
+			return;
+		}
+		
 		//Chests storage
 		enderStorage = new EnderStorage(this);
 		
@@ -52,8 +66,6 @@ public class BetterEnderChest extends JavaPlugin
 		    }
 		}, 20*300, 20*300);
 		
-		//Configuration
-		initConfig();
 		
 		logThis("Enabled.");
 	}
@@ -147,30 +159,9 @@ public class BetterEnderChest extends JavaPlugin
 	
 	
 	private void initConfig()
-	{
-		if(!getConfig().getString("enderBlock","NOT_FOUND").equals("NOT_FOUND"))
-		{	//we have a 0.1-0.3 config here!
-			convertConfig();
-		}
-		
-		//Chestmaterial
-		String chestBlock = getConfig().getString("EnderChest.block", "BOOKSHELF");
-		chestMaterial = Material.matchMaterial(chestBlock);
-		if(chestMaterial==null)
-		{	//gebruik standaardoptie
-			chestMaterial = Material.BOOKSHELF;
-			getConfig().set("EnderChest.block", "BOOKSHELF");
-			logThis("Cannot load chest material, defaulting to BOOKSHELF.","WARNING");
-		}
-		else
-		{
-			logThis("Using material "+chestMaterial);
-		}
-		if(!(protectionBridge instanceof NoBridge))
-		{	//reminder to add to custom blocks list
-			logThis("Make sure to add "+chestMaterial.getId()+" to the "+protectionBridge.getBridgeName()+" custom blocks list");
-		}
-		getConfig().set("EnderChest.block", chestMaterial.toString());
+	{	
+		//remove old setting for the chestmaterial
+		getConfig().set("EnderChest.block", null);
 		
 		//Chestrows
 		chestRows = getConfig().getInt("EnderChest.rows", 3);
@@ -225,20 +216,6 @@ public class BetterEnderChest extends JavaPlugin
 		
 		//Save everything
 		saveConfig();
-	}
-	
-	private void convertConfig()
-	{	//doesn't save automatically!
-		
-		//convert old options
-		getConfig().set("EnderChest.block",getConfig().getString("enderBlock", "BOOKSHELF"));
-		getConfig().set("EnderChest.rows",getConfig().getInt("rowsInChest", 3));
-		getConfig().set("Permissions.enabled",getConfig().getBoolean("usePermissions", false));
-		
-		//remove old options
-		getConfig().set("enderBlock", null);
-		getConfig().set("rowsInChest", null);
-		getConfig().set("usePermissions", null);
 	}
 	
 	/**
