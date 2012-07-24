@@ -62,7 +62,7 @@ public class EnderStorage
 	}
 	
 	/**
-	 * Saves all inventories
+	 * Saves all inventories, and unloads the one's that are not needed anymore
 	 */
 	public void saveAllInventories()
 	{
@@ -74,12 +74,12 @@ public class EnderStorage
 			EnderSaveAndLoad.saveInventory(inventories.get(inventoryName),inventoryName,plugin);
 			if(
 					!inventoryName.equals(BetterEnderChest.publicChestName)&&
-					!plugin.getServer().getOfflinePlayer(inventoryName).isOnline()
+					!plugin.getServer().getOfflinePlayer(inventoryName).isOnline()&&
+					inventories.get(inventoryName).getViewers().size()==0
 				)
-			{	//if it isn't a public chest and the player isn't online, unload the chest
-				//this can happen when a player opens someone else's chest (using group chests or commands)
-				//Also, don't remove it while iterating, add it to a list that will remove it after the iteration
-				plugin.logThis("Removing something from the list");
+			{	//if it isn't a public chest and the player isn't online and no one is viewing the chest,
+				//unload the chest. Also, don't remove it while iterating, add it to a list
+				//that will remove it after the iteration (beware the ConcurrentModificationException)
 				inventoriesToRemove.add(inventoryName);
 			}
 		}

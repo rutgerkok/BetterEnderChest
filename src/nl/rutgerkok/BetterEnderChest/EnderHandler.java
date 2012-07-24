@@ -14,7 +14,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class EnderHandler implements Listener
@@ -162,13 +161,6 @@ public class EnderHandler implements Listener
 			}
 		}
 		
-	}
-	
-	@EventHandler
-	public void onPlayerQuit(PlayerQuitEvent event)
-	{
-		String inventoryName = event.getPlayer().getName();
-		chests.saveInventory(inventoryName);
 	}
 	
 	/**

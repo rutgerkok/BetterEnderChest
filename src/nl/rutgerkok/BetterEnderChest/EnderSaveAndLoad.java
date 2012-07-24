@@ -67,7 +67,7 @@ public class EnderSaveAndLoad
 		catch(IOException e)
 		{	//And handle all IOExceptions
 			plugin.logThis("Could not save inventory "+inventoryName, "SEVERE");
-			plugin.logThis(e.getMessage()+" at line "+e.getStackTrace()[0].getLineNumber(),"SEVERE");//small stack 'trace'
+			e.printStackTrace();
 		}
 		
 	}
@@ -104,8 +104,7 @@ public class EnderSaveAndLoad
 		catch(Exception e)
 		{
 			plugin.logThis("Could not fully load inventory "+inventoryName, "SEVERE");
-			plugin.logThis("Error message: "+e.getMessage(),"SEVERE");
-			plugin.logThis("Error occured on line "+e.getStackTrace()[0].getLineNumber()+" in file "+e.getStackTrace()[0].getFileName(),"SEVERE");
+			e.printStackTrace();
 		}
 		
 		//Try to load it from bukkit
