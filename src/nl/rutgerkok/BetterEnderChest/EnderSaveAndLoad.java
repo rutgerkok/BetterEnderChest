@@ -8,7 +8,6 @@ import java.util.ListIterator;
 
 import net.minecraftwiki.wiki.NBTClass.Tag;
 
-//import org.bukkit.entity.Player; //not needed yet
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -33,21 +32,15 @@ public class EnderSaveAndLoad {
 	    nameCaseCorrect = 1;
 	}
 
-	// First of all, we creat an array that holds two tags: the inventory
+	// First of all, we create an array that holds two tags: the inventory
 	// tag and the end tag.
 	Tag[] inventoryNBT = new Tag[4];// represents the whole inventory...
-	inventoryNBT[0] = new Tag("Inventory", Tag.Type.TAG_Compound);// ..consisting
-								      // of an
-								      // inventory
-								      // tag
+	inventoryNBT[0] = new Tag("Inventory", Tag.Type.TAG_Compound);// ..consisting of an inventory tag..
 	inventoryNBT[1] = new Tag(Tag.Type.TAG_String, "OwnerName",
-		((EnderHolder) inventory.getHolder()).getOwnerName());// the
-								      // player
-								      // name
+		((EnderHolder) inventory.getHolder()).getOwnerName());// ..the player name..
 	inventoryNBT[2] = new Tag(Tag.Type.TAG_Byte, "NameCaseCorrect",
-		nameCaseCorrect);// the player name
-	inventoryNBT[3] = new Tag(Tag.Type.TAG_End, null, null);// ..and an end
-								// tag
+		nameCaseCorrect);// ..whether the name is case-correct..
+	inventoryNBT[3] = new Tag(Tag.Type.TAG_End, null, null);// ..and an end tag
 
 	// Now we are going to read the inventory, ...
 	ListIterator<ItemStack> iterator = inventory.iterator();
@@ -60,8 +53,7 @@ public class EnderSaveAndLoad {
 	    }
 	}
 
-	// Create the main tag, which holds the array we created at the begin of
-	// this method
+	// Create the main tag, which holds the array we created at the begin of this method
 	Tag mainNBT = new Tag(Tag.Type.TAG_Compound, "Player", inventoryNBT);
 
 	// Now we are going to write that tag to a file
@@ -97,8 +89,7 @@ public class EnderSaveAndLoad {
 	int inventoryRows;
 
 	// Get the number of rows
-	if (inventoryName.equals(BetterEnderChest.publicChestName)) { // public
-								      // chest
+	if (inventoryName.equals(BetterEnderChest.publicChestName)) { // public chest
 	    inventoryRows = plugin.getPublicChestRows();
 	} else { // private chest
 	    inventoryRows = plugin.getChestRows();
@@ -118,7 +109,8 @@ public class EnderSaveAndLoad {
 	}
 
 	// Try to load it from bukkit
-	// NOT IMPLEMENTED
+	// NOT IMPLEMENTED YET
+	// return EnderSaveAndLoad.loadInventoryFromCraftBukkit(inventoryName, inventoryRows, Bukkit.getPlayerExact(inventoryName), plugin);
 
 	// Loading failed (error, or no one created yet), return empty inventory
 	return EnderSaveAndLoad.loadEmptyInventory(inventoryName,
@@ -147,15 +139,8 @@ public class EnderSaveAndLoad {
 
 	// not case correct, let's try to find a case-correct name
 	if (!caseCorrect) {
-	    if (inventoryName.equals(BetterEnderChest.publicChestName)) { // it's
-									  // the
-									  // public
-									  // chest,
-									  // so
-									  // it
-									  // IS
-									  // case
-									  // correct
+	    if (inventoryName.equals(BetterEnderChest.publicChestName)) { 
+	        // it's the public chest, so it IS case-correct
 		caseCorrect = true;
 	    } else { // check if the player is online
 		Player player = plugin.getServer().getPlayer(inventoryName);
@@ -168,9 +153,7 @@ public class EnderSaveAndLoad {
 
 	// create the inventory
 	String title;
-	if (inventoryName.equals(BetterEnderChest.publicChestName))// set
-								   // correct
-								   // title
+	if (inventoryName.equals(BetterEnderChest.publicChestName)) // set correct title
 	{ // public chest
 	    title = "Ender Chest (" + BetterEnderChest.publicChestDisplayName
 		    + ")";
@@ -199,11 +182,11 @@ public class EnderSaveAndLoad {
 	return inventory;
     }
 
-    // private static Inventory loadInventoryFromCraftBukkit(String
-    // inventoryName, int inventoryRows, Player player, BetterEnderChest plugin)
-    // {
-    // Will be a method that imports a native Ender chest.
-    // }
+    @SuppressWarnings("unused")
+    private static Inventory loadInventoryFromCraftBukkit(String inventoryName, int inventoryRows, Player player, BetterEnderChest plugin)
+    {
+        throw new UnsupportedOperationException("Bukkit has no method yet to get a player's Ender Chest!");
+    }
 
     private static Inventory loadEmptyInventory(String inventoryName,
 	    int inventoryRows, BetterEnderChest plugin) {

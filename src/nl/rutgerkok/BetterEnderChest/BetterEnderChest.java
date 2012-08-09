@@ -29,18 +29,7 @@ public class BetterEnderChest extends JavaPlugin {
 	// Configuration
 	initConfig();
 
-	chestMaterial = Material.getMaterial(130);
-	if (chestMaterial == null) {
-	    logThis("Ender Chest not found! You're using Minecraft 1.2.5 (or even older)!",
-		    "SEVERE");
-	    logThis("BetterEnderChest " + this.getDescription().getVersion()
-		    + " needs MC 1.3 (or the preview)!", "SEVERE");
-	    logThis("If you want to test this plugin with MC 1.2.5, download 0.7 instead.",
-		    "SEVERE");
-	    logThis("In that version, you can use another block id to test.",
-		    "SEVERE");
-	    return;
-	}
+	chestMaterial = Material.ENDER_CHEST;
 
 	// Chests storage
 	enderStorage = new EnderStorage(this);

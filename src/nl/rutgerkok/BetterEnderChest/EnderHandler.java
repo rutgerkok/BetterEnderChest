@@ -27,7 +27,7 @@ public class EnderHandler implements Listener {
 	chests = plugin.getEnderChests();
     }
 
-    // Zorgt voor het verschijnen van de kisten
+    // Makes sure the chests show up
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerInteract(PlayerInteractEvent event) {
 	if (event.isCancelled())
@@ -37,121 +37,92 @@ public class EnderHandler implements Listener {
 
 	Player player = event.getPlayer();
 
-	// Handel de Ender Chests af
 	if (event.getClickedBlock().getType().equals(plugin.getChestMaterial())) {
+	    // clicked on an Ender Chest
 	    event.setCancelled(true);
 
-	    if (protectionBridge.isProtected(event.getClickedBlock())) { // protected
-									 // Ender
-									 // chest
+	    if (protectionBridge.isProtected(event.getClickedBlock())) { 
+	        // protected Ender Chest
 		if (protectionBridge.canAccess(player, event.getClickedBlock())) {
-		    if (plugin.hasPermission(player,
-			    "betterenderchest.use.privatechest", true)) {
-			String inventoryName = protectionBridge
-				.getOwnerName(event.getClickedBlock());
+		    // player can access the chest
+		    if (plugin.hasPermission(player, "betterenderchest.use.privatechest", true)) {
+		        // and has the correct permission node
+		        
+		        // Get the owner's name
+			String inventoryName = protectionBridge.getOwnerName(event.getClickedBlock());
+			
+			// Show the chest
 			player.openInventory(chests.getInventory(inventoryName));
 		    } else {
-			player.sendMessage(ChatColor.RED
-				+ "You do not have permissions to use private Ender Chests.");
+		        
+		        // Show an error
+			player.sendMessage(ChatColor.RED + "You do not have permissions to use private Ender Chests.");
 		    }
 		}
 	    } else { // unprotected Ender chest
 		if (!player.getItemInHand().getType().equals(Material.SIGN)
-			|| !protectionBridge.getBridgeName().equals("Lockette")) { // open
-										   // only
-										   // when
-										   // the
-										   // player
-										   // doesn't
-										   // want
-										   // to
-										   // protect
-										   // the
-										   // chest
-										   // using
-										   // a
-										   // sign
-										   // and
-										   // Lockette
-										   // is
-										   // the
-										   // current
-										   // bridge
+			|| !protectionBridge.getBridgeName().equals("Lockette")) {
 		    if (plugin.hasPermission(player,
 			    "betterenderchest.use.publicchest", true)) {
 			if (plugin.getPublicChestsEnabled()) { // show public
 							       // chest
-			    player.openInventory(chests
-				    .getInventory(BetterEnderChest.publicChestName));
+			    player.openInventory(chests.getInventory(BetterEnderChest.publicChestName));
 			} else { // show player's chest
 			    String inventoryName = player.getName();
-			    player.openInventory(chests
-				    .getInventory(inventoryName));
+			    player.openInventory(chests.getInventory(inventoryName));
 			}
 		    } else {
-			player.sendMessage(ChatColor.RED
-				+ "You do not have permissions to use public Ender Chests.");
+			player.sendMessage(ChatColor.RED + "You do not have permissions to use public Ender Chests.");
 		    }
 		}
 	    }
 	}
     }
 
-    // show warning message on close
+    // show warning message for public chests on close
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
 	Player player = (Player) event.getPlayer();
-	if (event.getInventory().getHolder() instanceof EnderHolder) { // just
-								       // closed
-								       // an
-								       // Ender
-								       // Inventory
+	if (event.getInventory().getHolder() instanceof EnderHolder) { 
 	    EnderHolder holder = (EnderHolder) event.getInventory().getHolder();
-	    if (holder.getOwnerName().equals(BetterEnderChest.publicChestName)) { // which
-										  // was
-										  // a
-										  // public
-										  // inventory,
-										  // show
-										  // warning
-										  // message
+	    if (holder.getOwnerName().equals(BetterEnderChest.publicChestName)) {
 		if (plugin.hasPermission(player,
 			"betterenderchest.use.privatechest", true)
-			&& !(protectionBridge instanceof NoBridge)) { // suggest
-								      // to
-								      // protect
-								      // chest
+			&& !(protectionBridge instanceof NoBridge)) { 
+		    // suggest to protect the Ender Chest
 		    player.sendMessage("This was a public Ender Chest. Protect it using "
 			    + protectionBridge.getBridgeName()
 			    + " to get your private Ender Chest.");
-		} else { // don't suggest to protect chest, because the player
-			 // hasn't got the permissions
+		} else { 
+		    // don't suggest to protect chest, because 
+		    // the player hasn't got the permissions
+		    // and/or there is no chest protection plugin
 		    player.sendMessage("This was a public Ender Chest. Remember that your items aren't save.");
 		}
 	    }
 	}
     }
 
-    // prevent placing books with text in the chest (because they WON'T get
-    // saved)
+    // prevent placing books with text in the chest (because they WON'T get saved)
+    @SuppressWarnings("deprecation")
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
 	if (event.isCancelled())
 	    return;
 
-	if (event.getInventory().getHolder() instanceof EnderHolder) { // we're
-								       // using
-								       // a
-								       // Ender
-								       // chest
-	    if (event.getCursor().getTypeId() == 386
-		    || event.getCursor().getTypeId() == 387) { // we're using a
-							       // book with
-							       // text
-		if (event.getRawSlot() == event.getSlot()) { // inside the above
-							     // part of the
-							     // inventory
+	if (event.getInventory().getHolder() instanceof EnderHolder) { 
+	    // we're having an Ender Chest
+	    if (event.getCursor().getType().equals(Material.BOOK_AND_QUILL)
+		    || event.getCursor().getType().equals(Material.WRITTEN_BOOK)) {
+	        // where the player tries to place a book with text in the slots
+		if (event.getRawSlot() == event.getSlot()) {
+		    // that slot is inside the chest
 		    event.setResult(Result.DENY);
+		    
+		    if(event.getWhoClicked() instanceof Player)
+		    {
+		        ((Player)event.getWhoClicked()).updateInventory();
+		    }
 		}
 
 	    }
