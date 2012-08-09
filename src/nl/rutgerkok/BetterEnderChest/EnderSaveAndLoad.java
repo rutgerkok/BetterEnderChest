@@ -79,7 +79,7 @@ public class EnderSaveAndLoad {
      * exist.
      * 
      * @param inventoryName
-     *            Name of the inventory, like 2zqa or [admin]
+     *            Name of the inventory, like 2zqa or BetterEnderChest.publicChestName
      * @param plugin
      *            The plugin, needed for logging
      * @return
