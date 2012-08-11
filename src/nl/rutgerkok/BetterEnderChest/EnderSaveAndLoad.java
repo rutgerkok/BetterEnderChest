@@ -24,8 +24,7 @@ public class EnderSaveAndLoad {
      * @param plugin
      *            The plugin, needed for logging
      */
-    public static void saveInventory(Inventory inventory, String inventoryName,
-	    BetterEnderChest plugin) {
+    public static void saveInventory(Inventory inventory, String inventoryName, BetterEnderChest plugin) {
 	int slot;// id of slot
 	byte nameCaseCorrect = 0;
 	if (((EnderHolder) inventory.getHolder()).isOwnerNameCaseCorrect()) {

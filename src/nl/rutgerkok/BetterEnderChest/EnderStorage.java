@@ -1,8 +1,11 @@
 package nl.rutgerkok.BetterEnderChest;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 
 public class EnderStorage {
@@ -69,83 +72,31 @@ public class EnderStorage {
      * Saves all inventories, and unloads the one's that are not needed anymore
      */
     public void saveAllInventories() {
-	// list with inventories to remove
-	ArrayList<String> inventoriesToRemove = new ArrayList<String>();
-
-	for (String inventoryName : inventories.keySet()) {
-	    EnderSaveAndLoad.saveInventory(inventories.get(inventoryName),
-		    inventoryName, plugin);
-	    if (!inventoryName.equals(BetterEnderChest.publicChestName)
-		    && !plugin.getServer().getOfflinePlayer(inventoryName)
-			    .isOnline()
-		    && inventories.get(inventoryName).getViewers().size() == 0) { // if
-										  // it
-										  // isn't
-										  // a
-										  // public
-										  // chest
-										  // and
-										  // the
-										  // player
-										  // isn't
-										  // online
-										  // and
-										  // no
-										  // one
-										  // is
-										  // viewing
-										  // the
-										  // chest,
-										  // unload
-										  // the
-										  // chest.
-										  // Also,
-										  // don't
-										  // remove
-										  // it
-										  // while
-										  // iterating,
-										  // add
-										  // it
-										  // to
-										  // a
-										  // list
-										  // that
-										  // will
-										  // remove
-										  // it
-										  // after
-										  // the
-										  // iteration
-										  // (beware
-										  // the
-										  // ConcurrentModificationException)
-		inventoriesToRemove.add(inventoryName);
-	    }
-	}
-
-	// remove the inventories that aren't used
-	for (String inventoryName : inventoriesToRemove) {
-	    inventories.remove(inventoryName);
-	}
+        
+           for(Iterator<Map.Entry<String, Inventory>> it = inventories.entrySet().iterator(); it.hasNext();) {
+               Entry<String,Inventory> entry = it.next();
+               String inventoryName = entry.getKey();
+               Inventory inventory = entry.getValue();
+               
+               EnderSaveAndLoad.saveInventory(inventory, inventoryName, plugin);
+               
+               if(!inventoryName.equals(BetterEnderChest.publicChestName)
+                       && !Bukkit.getOfflinePlayer(inventoryName).isOnline()
+                       && inventory.getViewers().size() == 0) {
+                   // This inventory is NOT the public chest, the owner is NOT online and NO ONE is viewing it
+                   // So unload it
+                   inventories.remove(inventoryName);
+               }
+           }
     }
 
     /**
-     * Saves the inventory and unloads it from memory
+     * Unloads the inventory from memory. Doesn't save!
      * 
      * @param inventoryName
      */
-    public void saveAndUnloadInventory(String inventoryName) {
+    public void unloadInventory(String inventoryName) {
 	inventoryName = inventoryName.toLowerCase();
-	if (!inventories.containsKey(inventoryName)) { // oops! Inventory has
-						       // not been loaded
-	    plugin.logThis("Could not save inventory " + inventoryName
-		    + "! Inventory not loaded!", "SERVERE");
-	    return;
-	}
-	// save the inventory to disk
-	EnderSaveAndLoad.saveInventory(inventories.get(inventoryName),
-		inventoryName, plugin);
 
 	// remove it from the list
 	inventories.remove(inventoryName);

@@ -244,12 +244,11 @@ public class EnderCommands implements CommandExecutor {
 					    args[1], secondInventory);
 				    plugin.getEnderChests().setInventory(
 					    args[2], firstInventory);
-				    // unload them (so that they get reloaded
-				    // with correct titles)
-				    plugin.getEnderChests()
-					    .saveAndUnloadInventory(args[1]);
-				    plugin.getEnderChests()
-					    .saveAndUnloadInventory(args[2]);
+				    // unload them (so that they get reloaded with correct titles)
+				    plugin.getEnderChests().saveInventory(args[1]);
+				    plugin.getEnderChests().unloadInventory(args[1]);
+				    plugin.getEnderChests().saveInventory(args[2]);
+				    plugin.getEnderChests().unloadInventory(args[2]);
 				    sender.sendMessage(ChatColor.GREEN
 					    + "Succesfully swapped inventories!");
 				}
