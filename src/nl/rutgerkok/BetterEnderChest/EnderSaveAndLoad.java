@@ -27,7 +27,7 @@ public class EnderSaveAndLoad {
     public static void saveInventory(Inventory inventory, String inventoryName, BetterEnderChest plugin) {
 	int slot;// id of slot
 	byte nameCaseCorrect = 0;
-	if (((EnderHolder) inventory.getHolder()).isOwnerNameCaseCorrect()) {
+	if (((BetterEnderHolder) inventory.getHolder()).isOwnerNameCaseCorrect()) {
 	    nameCaseCorrect = 1;
 	}
 
@@ -36,7 +36,7 @@ public class EnderSaveAndLoad {
 	Tag[] inventoryNBT = new Tag[4];// represents the whole inventory...
 	inventoryNBT[0] = new Tag("Inventory", Tag.Type.TAG_Compound);// ..consisting of an inventory tag..
 	inventoryNBT[1] = new Tag(Tag.Type.TAG_String, "OwnerName",
-		((EnderHolder) inventory.getHolder()).getOwnerName());// ..the player name..
+		((BetterEnderHolder) inventory.getHolder()).getOwnerName());// ..the player name..
 	inventoryNBT[2] = new Tag(Tag.Type.TAG_Byte, "NameCaseCorrect",
 		nameCaseCorrect);// ..whether the name is case-correct..
 	inventoryNBT[3] = new Tag(Tag.Type.TAG_End, null, null);// ..and an end tag
@@ -160,7 +160,7 @@ public class EnderSaveAndLoad {
 	    title = "Ender Chest (" + inventoryName + ")";
 	}
 	Inventory inventory = plugin.getServer().createInventory(
-		new EnderHolder(inventoryName, caseCorrect), inventoryRows * 9,
+		new BetterEnderHolder(inventoryName, caseCorrect), inventoryRows * 9,
 		title);
 
 	// parse the stacks
@@ -194,7 +194,7 @@ public class EnderSaveAndLoad {
 								      // public
 								      // inventory
 	    return plugin.getServer().createInventory(
-		    new EnderHolder(inventoryName, true),
+		    new BetterEnderHolder(inventoryName, true),
 		    inventoryRows * 9,
 		    "Ender Chest (" + BetterEnderChest.publicChestDisplayName
 			    + ")");
@@ -209,7 +209,7 @@ public class EnderSaveAndLoad {
 
 	    // and return the inventory
 	    return plugin.getServer().createInventory(
-		    new EnderHolder(inventoryName, caseCorrect),
+		    new BetterEnderHolder(inventoryName, caseCorrect),
 		    inventoryRows * 9, "Ender Chest (" + inventoryName + ")");
 	}
 

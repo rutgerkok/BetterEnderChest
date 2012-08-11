@@ -9,7 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class BetterEnderChest extends JavaPlugin {
     private EnderHandler enderHandler;
     private EnderCommands commandHandler;
-    private EnderStorage enderStorage;
+    private BetterEnderStorage enderStorage;
     private Material chestMaterial;
     private Bridge protectionBridge;
     private int chestRows, publicChestRows;
@@ -32,7 +32,7 @@ public class BetterEnderChest extends JavaPlugin {
 	chestMaterial = Material.ENDER_CHEST;
 
 	// Chests storage
-	enderStorage = new EnderStorage(this);
+	enderStorage = new BetterEnderStorage(this);
 
 	// EventHandler
 	enderHandler = new EnderHandler(this, protectionBridge);
@@ -98,7 +98,7 @@ public class BetterEnderChest extends JavaPlugin {
      * 
      * @return
      */
-    public EnderStorage getEnderChests() {
+    public BetterEnderStorage getEnderChests() {
 	return enderStorage;
     }
 

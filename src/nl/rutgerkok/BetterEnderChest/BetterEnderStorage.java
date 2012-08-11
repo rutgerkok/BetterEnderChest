@@ -8,11 +8,11 @@ import java.util.Map.Entry;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 
-public class EnderStorage {
+public class BetterEnderStorage {
     private HashMap<String, Inventory> inventories;
     private BetterEnderChest plugin;
 
-    public EnderStorage(BetterEnderChest plugin) {
+    public BetterEnderStorage(BetterEnderChest plugin) {
 	inventories = new HashMap<String, Inventory>();
 	this.plugin = plugin;
     }
@@ -106,7 +106,7 @@ public class EnderStorage {
 	StringBuilder builder = new StringBuilder();
 	for (String inventoryName : inventories.keySet()) {
 	    builder.append(',');
-	    builder.append(((EnderHolder) inventories.get(inventoryName)
+	    builder.append(((BetterEnderHolder) inventories.get(inventoryName)
 		    .getHolder()).getOwnerName());
 	}
 	if (builder.length() > 0) {

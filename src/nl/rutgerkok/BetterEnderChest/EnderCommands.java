@@ -224,20 +224,20 @@ public class EnderCommands implements CommandExecutor {
 				    sender.sendMessage(ChatColor.RED
 					    + "Error: someone else is currently viewing the inventories. Please try again later.");
 				} else { // swap them
-				    String firstOwnerName = ((EnderHolder) firstInventory
+				    String firstOwnerName = ((BetterEnderHolder) firstInventory
 					    .getHolder()).getOwnerName();
-				    boolean firstOwnerNameCaseCorrect = ((EnderHolder) firstInventory
+				    boolean firstOwnerNameCaseCorrect = ((BetterEnderHolder) firstInventory
 					    .getHolder())
 					    .isOwnerNameCaseCorrect();
-				    ((EnderHolder) firstInventory.getHolder())
+				    ((BetterEnderHolder) firstInventory.getHolder())
 					    .setOwnerName(
-						    ((EnderHolder) secondInventory
+						    ((BetterEnderHolder) secondInventory
 							    .getHolder())
 							    .getOwnerName(),
-						    ((EnderHolder) secondInventory
+						    ((BetterEnderHolder) secondInventory
 							    .getHolder())
 							    .isOwnerNameCaseCorrect());
-				    ((EnderHolder) secondInventory.getHolder())
+				    ((BetterEnderHolder) secondInventory.getHolder())
 					    .setOwnerName(firstOwnerName,
 						    firstOwnerNameCaseCorrect);
 				    plugin.getEnderChests().setInventory(

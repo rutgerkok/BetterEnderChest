@@ -19,7 +19,7 @@ import org.bukkit.inventory.ItemStack;
 public class EnderHandler implements Listener {
     private BetterEnderChest plugin;
     private Bridge protectionBridge;
-    private EnderStorage chests;
+    private BetterEnderStorage chests;
 
     public EnderHandler(BetterEnderChest plugin, Bridge protectionBridge) {
 	this.plugin = plugin;
@@ -83,8 +83,8 @@ public class EnderHandler implements Listener {
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
 	Player player = (Player) event.getPlayer();
-	if (event.getInventory().getHolder() instanceof EnderHolder) { 
-	    EnderHolder holder = (EnderHolder) event.getInventory().getHolder();
+	if (event.getInventory().getHolder() instanceof BetterEnderHolder) { 
+	    BetterEnderHolder holder = (BetterEnderHolder) event.getInventory().getHolder();
 	    if (holder.getOwnerName().equals(BetterEnderChest.publicChestName)) {
 		if (plugin.hasPermission(player,
 			"betterenderchest.use.privatechest", true)
@@ -110,7 +110,7 @@ public class EnderHandler implements Listener {
 	if (event.isCancelled())
 	    return;
 
-	if (event.getInventory().getHolder() instanceof EnderHolder) { 
+	if (event.getInventory().getHolder() instanceof BetterEnderHolder) { 
 	    // we're having an Ender Chest
 	    if (event.getCursor().getType().equals(Material.BOOK_AND_QUILL)
 		    || event.getCursor().getType().equals(Material.WRITTEN_BOOK)) {
