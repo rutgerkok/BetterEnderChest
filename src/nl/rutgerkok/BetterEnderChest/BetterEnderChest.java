@@ -46,6 +46,7 @@ public class BetterEnderChest extends JavaPlugin {
 	getServer().getScheduler().scheduleSyncRepeatingTask(this,
 		new Runnable() {
 		    public void run() {
+		        logThis("Autosaving...");
 			enderHandler.onSave();
 		    }
 		}, 20 * 300, 20 * 300);
