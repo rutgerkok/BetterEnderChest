@@ -57,17 +57,15 @@ public class EnderSaveAndLoad {
 
 	// Now we are going to write that tag to a file
 	try {
-	    // Create /chests directory (if it already exists, this does
-	    // nothing)
-	    new File("chests/").mkdirs();
+	    // Create /chests directory (if it already exists, this does nothing)
+	    plugin.getChestSaveLocation().mkdirs();
 
 	    // Output file
-	    File to = new File(new String("chests/" + inventoryName + ".dat"));
+	    File to = new File(plugin.getChestSaveLocation().getPath() + "/" + inventoryName + ".dat");
 	    to.createNewFile();
 	    mainNBT.writeTo(new FileOutputStream(to));
 	} catch (IOException e) { // And handle all IOExceptions
-	    plugin.logThis("Could not save inventory " + inventoryName,
-		    "SEVERE");
+	    plugin.logThis("Could not save inventory " + inventoryName, "SEVERE");
 	    e.printStackTrace();
 	}
 
@@ -83,8 +81,7 @@ public class EnderSaveAndLoad {
      *            The plugin, needed for logging
      * @return
      */
-    public static Inventory loadInventory(String inventoryName,
-	    BetterEnderChest plugin) {
+    public static Inventory loadInventory(String inventoryName, BetterEnderChest plugin) {
 	int inventoryRows;
 
 	// Get the number of rows
@@ -96,14 +93,12 @@ public class EnderSaveAndLoad {
 
 	// Try to load it from a file
 	try {
-	    File file = new File(new String("chests/" + inventoryName + ".dat"));
+	    File file = new File(new String(plugin.getChestSaveLocation().getPath() + "/" + inventoryName + ".dat"));
 	    if (file.exists()) { // load it from a file
-		return EnderSaveAndLoad.loadInventoryFromFile(inventoryName,
-			inventoryRows, file, plugin);
+		return EnderSaveAndLoad.loadInventoryFromFile(inventoryName, inventoryRows, file, plugin);
 	    }
 	} catch (Exception e) {
-	    plugin.logThis("Could not fully load inventory " + inventoryName,
-		    "SEVERE");
+	    plugin.logThis("Could not fully load inventory " + inventoryName, "SEVERE");
 	    e.printStackTrace();
 	}
 

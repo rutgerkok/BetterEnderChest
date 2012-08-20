@@ -1,5 +1,6 @@
 package nl.rutgerkok.BetterEnderChest;
 
+import java.io.File;
 import java.util.logging.Logger;
 
 import org.bukkit.Material;
@@ -10,48 +11,57 @@ public class BetterEnderChest extends JavaPlugin {
     private EnderHandler enderHandler;
     private EnderCommands commandHandler;
     private BetterEnderStorage enderStorage;
-    private Material chestMaterial;
+    private Material chestMaterial = Material.ENDER_CHEST;
     private Bridge protectionBridge;
     private int chestRows, publicChestRows;
     private boolean usePermissions, enablePublicChests;
     private String chestDrop, chestDropSilkTouch;
+    private File chestSaveLocation = new File("chests/");
     public static final String publicChestName = "--publicchest";
     public static String publicChestDisplayName;
 
+    // onEnable and onDisable
+    
     public void onEnable() {
-	// ProtectionBridge
-	if (initBridge()) {
-	    logThis("Linked to " + protectionBridge.getBridgeName());
-	} else {
-	    logThis("Not linked to a block protection plugin like Lockette or LWC.");
-	}
+        
+        // ProtectionBridge
+        if (initBridge()) {
+            logThis("Linked to " + protectionBridge.getBridgeName());
+        } else {
+            logThis("Not linked to a block protection plugin like Lockette or LWC.");
+        }
 
-	// Configuration
-	initConfig();
+        // Configuration
+        initConfig();
+        logThis(chestSaveLocation.getPath());
+        
+        // Warning if no chests are found
+        if(!getChestSaveLocation().exists())
+        {
+            logThis("No saved Ender Chests found! If","WARNING");
+            logThis("you already had some player Ender Chests,","WARNING");
+            logThis("stop the server and use the converter!","WARNING");
+        }
 
-	chestMaterial = Material.ENDER_CHEST;
+        // Chests storage
+        enderStorage = new BetterEnderStorage(this);
 
-	// Chests storage
-	enderStorage = new BetterEnderStorage(this);
+        // EventHandler
+        enderHandler = new EnderHandler(this, protectionBridge);
+        getServer().getPluginManager().registerEvents(enderHandler, this);
 
-	// EventHandler
-	enderHandler = new EnderHandler(this, protectionBridge);
-	getServer().getPluginManager().registerEvents(enderHandler, this);
+        // CommandHandler
+        commandHandler = new EnderCommands(this);
+        getCommand("betterenderchest").setExecutor(commandHandler);
 
-	// CommandHandler
-	commandHandler = new EnderCommands(this);
-	getCommand("betterenderchest").setExecutor(commandHandler);
-
-	// AutoSave
-	getServer().getScheduler().scheduleSyncRepeatingTask(this,
-		new Runnable() {
-		    public void run() {
-		        logThis("Autosaving...");
-			enderHandler.onSave();
-		    }
-		}, 20 * 300, 20 * 300);
-
-	logThis("Enabled.");
+        // AutoSave
+        getServer().getScheduler().scheduleSyncRepeatingTask(this,
+                new Runnable() {
+                    public void run() {
+                        logThis("Autosaving...");
+                        enderHandler.onSave();
+                    }
+                }, 20 * 300, 20 * 300);
     }
 
     public void onDisable() {
@@ -61,8 +71,21 @@ public class BetterEnderChest extends JavaPlugin {
 	}
     }
 
-    // PUBLIC FUNCTIONS
+    // Public methods
 
+    /**
+     * Gets the string of the chest drop. See documentation online.
+     * 
+     * @param silkTouch
+     *            - whether to use Silk Touch
+     * @return String of the chest drop
+     */
+    public String getChestDropString(boolean silkTouch) {
+        if (silkTouch)
+            return chestDropSilkTouch;
+        return chestDrop;
+    }
+    
     /**
      * Gets the current chest material
      * 
@@ -80,18 +103,12 @@ public class BetterEnderChest extends JavaPlugin {
     public int getChestRows() {
 	return chestRows;
     }
-
+    
     /**
-     * Gets the string of the chest drop. See documentation online.
-     * 
-     * @param silkTouch
-     *            - whether to use Silk Touch
-     * @return String of the chest drop
+     * @return the chestSaveLocation
      */
-    public String getChestDropString(boolean silkTouch) {
-	if (silkTouch)
-	    return chestDropSilkTouch;
-	return chestDrop;
+    public File getChestSaveLocation() {
+        return chestSaveLocation;
     }
 
     /**
@@ -121,6 +138,29 @@ public class BetterEnderChest extends JavaPlugin {
     public int getPublicChestRows() {
 	return publicChestRows;
     }
+    
+    /**
+     * If usePermissions is true, it returns whether the player has the
+     * permission. Otherwise it will return fallBack.
+     * 
+     * @param player
+     * @param permission
+     *            The permissions to check
+     * @param fallBack
+     *            Return this if permissions are disabled and the player is not
+     *            a op
+     * @return If usePermissions is true, it returns whether the player has the
+     *         permission. Otherwise it will return fallBack
+     */
+    public boolean hasPermission(Player player, String permission,
+            boolean fallBack) {
+        if (!usePermissions) {
+            if (player.isOp())
+                return true;
+            return fallBack;
+        }
+        return player.hasPermission(permission);
+    }
 
     /**
      * Gets whether the string is a valid chest drop
@@ -145,6 +185,33 @@ public class BetterEnderChest extends JavaPlugin {
 	    return true;
 	return false;
     }
+    
+    /**
+     * Logs a message.
+     * 
+     * @param message
+     */
+    public void logThis(String message) {
+        logThis(message, "info");
+    }
+
+    /**
+     * Logs a message.
+     * 
+     * @param message
+     * @param type - WARNING, LOG or SEVERE, case insensetive
+     */
+    public void logThis(String message, String type) {
+        Logger log = Logger.getLogger("Minecraft");
+        if (type.equalsIgnoreCase("info"))
+            log.info("[" + this.getDescription().getName() + "] " + message);
+        if (type.equalsIgnoreCase("warning"))
+            log.warning("[" + this.getDescription().getName() + "] " + message);
+        if (type.equalsIgnoreCase("severe"))
+            log.severe("[" + this.getDescription().getName() + "] " + message);
+    }
+    
+    // Private methods
 
     private void initConfig() {
 	// remove old setting for the chestmaterial
@@ -209,29 +276,6 @@ public class BetterEnderChest extends JavaPlugin {
 	saveConfig();
     }
 
-    /**
-     * If usePermissions is true, it returns whether the player has the
-     * permission. Otherwise it will return fallBack.
-     * 
-     * @param player
-     * @param permission
-     *            The permissions to check
-     * @param fallBack
-     *            Return this if permissions are disabled and the player is not
-     *            a op
-     * @return If usePermissions is true, it returns whether the player has the
-     *         permission. Otherwise it will return fallBack
-     */
-    public boolean hasPermission(Player player, String permission,
-	    boolean fallBack) {
-	if (!usePermissions) {
-	    if (player.isOp())
-		return true;
-	    return fallBack;
-	}
-	return player.hasPermission(permission);
-    }
-
     private boolean initBridge() {
 	if (getServer().getPluginManager().isPluginEnabled("Lockette")) {
 	    protectionBridge = new LocketteBridge();
@@ -254,31 +298,4 @@ public class BetterEnderChest extends JavaPlugin {
 	protectionBridge = new NoBridge();
 	return false;
     }
-
-    /**
-     * Logs a message.
-     * 
-     * @param message
-     */
-    public void logThis(String message) {
-	logThis(message, "info");
-    }
-
-    /**
-     * Logs a message.
-     * 
-     * @param message
-     * @param type
-     *            - WARNING, LOG or SEVERE
-     */
-    public void logThis(String message, String type) {
-	Logger log = Logger.getLogger("Minecraft");
-	if (type.equalsIgnoreCase("info"))
-	    log.info("[" + this.getDescription().getName() + "] " + message);
-	if (type.equalsIgnoreCase("warning"))
-	    log.warning("[" + this.getDescription().getName() + "] " + message);
-	if (type.equalsIgnoreCase("severe"))
-	    log.severe("[" + this.getDescription().getName() + "] " + message);
-    }
-
 }

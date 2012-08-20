@@ -275,8 +275,7 @@ public class EnderCommands implements CommandExecutor {
 	    }
 	}
 
-	sender.sendMessage(ChatColor.GRAY
-		+ "Please note that some commands might not be availible for your rank.");
+	sender.sendMessage(ChatColor.GRAY + "Please note that some commands might not be availible for your rank.");
 	sender.sendMessage(ChatColor.GOLD + "/" + label
 		+ " deleteinv <player>:" + ChatColor.WHITE
 		+ " delete an Ender inventory");
