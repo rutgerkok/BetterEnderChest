@@ -1,296 +1,88 @@
 package nl.rutgerkok.BetterEnderChest;
 
+import java.util.HashMap;
+import java.util.Set;
+
+import nl.rutgerkok.BetterEnderChest.commands.*;
+
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 public class EnderCommands implements CommandExecutor {
     BetterEnderChest plugin;
 
+    private HashMap<String, BaseCommand> commands;
+
     public EnderCommands(BetterEnderChest plugin) {
-	this.plugin = plugin;
+        this.plugin = plugin;
+
+        commands = new HashMap<String, BaseCommand>();
+
+        commands.put("deleteinv", new DeleteInvCommand(plugin));
+        commands.put("give", new GiveCommand(plugin));
+        commands.put("list", new ListCommand(plugin));
+        commands.put("openinv", new OpenInvCommand(plugin));
+        commands.put("swapinv", new SwapInvCommand(plugin));
     }
 
-    private boolean isValidPlayer(String name) {
-	if (name.equals(BetterEnderChest.publicChestName))
-	    return true;
-
-	OfflinePlayer player = plugin.getServer().getOfflinePlayer(name);
-	if (player.hasPlayedBefore())
-	    return true;
-	if (player.isOnline())
-	    return true;
-
-	return false;
+    private void showHelp(CommandSender sender, String label) {
+        Set<String> keySet = commands.keySet();
+        int commandCount = 0; // Counts availible commands
+        
+        for (String key : keySet) {
+            BaseCommand command = commands.get(key);
+            if(plugin.hasPermission(sender, command.getPermission(), false))
+            {
+                sender.sendMessage(ChatColor.GOLD + "/" + label + " " + key + " " + command.getUsage() + ": " + ChatColor.WHITE + command.getHelpText());
+                commandCount++;
+            }
+        }
+        
+        if(commandCount == 0)
+        {
+            sender.sendMessage(ChatColor.GOLD + "Sorry, no availible commands for your rank.");
+        }
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command,
-	    String label, String[] args) {
-	if (args.length >= 1) {
-	    // deleteinv command
-	    if (args[0].equalsIgnoreCase("deleteinv")) {
-		// check for permissions
-		if (!(sender instanceof Player)
-			|| plugin.hasPermission((Player) sender,
-				"betterenderchest.command.deleteinv", false)) { // check
-										// for
-										// arguments
-		    if (args.length == 2) { // check if the player exists
-			if (isValidPlayer(args[1])) {
-			    // get the inventory
-			    Inventory inventory = plugin.getEnderChests()
-				    .getInventory(args[1]);
-			    if (!inventory.getViewers().isEmpty()) { // oh no!
-								     // They
-								     // are
-								     // being
-								     // viewed!
-				sender.sendMessage(ChatColor.RED
-					+ "Error: someone else is currently viewing the inventory. Please try again later.");
-			    } else { // clear it
-				inventory.clear();
-				sender.sendMessage(ChatColor.GREEN
-					+ "Succesfully removed inventory!");
-			    }
-			} else {
-			    sender.sendMessage(ChatColor.RED + "The player "
-				    + args[1]
-				    + " was never seen on this server.");
-			}
-		    } else { // open private Ender chest
-			sender.sendMessage(ChatColor.RED
-				+ "Correct syntaxis: /" + label
-				+ " deleteinv <player>");
-		    }
-		} else { // show error
-		    sender.sendMessage(ChatColor.RED
-			    + "No permissions to do this...");
-		}
-		return true;
-	    }
+    public boolean onCommand(CommandSender sender, Command bukkitCommand, String label, String[] originalArgs) {
 
-	    if (args[0].equalsIgnoreCase("give")) {
-		// check for permissions
-		if (!(sender instanceof Player)
-			|| plugin.hasPermission((Player) sender,
-				"betterenderchest.command.give", false)) { // check
-									   // for
-									   // arguments
-		    if (args.length >= 3) { // get the inventory
-			if (isValidPlayer(args[1])) {
-			    Inventory inventory = plugin.getEnderChests()
-				    .getInventory(args[1]);
-			    boolean valid = true;
+        if (originalArgs.length == 0) {
+            showHelp(sender, label);
+            return true;
+        }
 
-			    Material material = Material.matchMaterial(args[2]);
-			    if (material != null) {
-				int count = 1;
-				if (args.length >= 4) { // set the count
-				    try {
-					count = Integer.parseInt(args[3]);
-					if (count > material.getMaxStackSize()) {
-					    sender.sendMessage(ChatColor.RED
-						    + "Amount was capped at "
-						    + material
-							    .getMaxStackSize()
-						    + ".");
-					    count = material.getMaxStackSize();
-					}
-				    } catch (NumberFormatException e) {
-					sender.sendMessage("" + ChatColor.RED
-						+ args[3]
-						+ " is not a valid amount!");
-					valid = false;
-				    }
-				}
+        String name = originalArgs[0];
 
-				byte damage = 0;
-				if (args.length >= 5) { // set the damage
-				    try {
-					damage = Byte.parseByte(args[4]);
-				    } catch (NumberFormatException e) {
-					sender.sendMessage(""
-						+ ChatColor.RED
-						+ args[4]
-						+ " is not a valid damage value!");
-					valid = false;
-				    }
-				}
+        // Copy to new array, move all arguments one postion
+        // So ["give","Notch","GOLDEN_APPLE","64"] gets
+        // ["Notch","GOLDEN_APPLE","64"]
+        String[] args = new String[originalArgs.length - 1];
+        for (int i = 1; i < originalArgs.length; i++) {
+            args[i - 1] = originalArgs[i];
+        }
 
-				// add the item to the inventory
-				if (valid) {
-				    inventory.addItem(new ItemStack(material,
-					    count, damage));
-				    sender.sendMessage("Item added to the Ender inventory of "
-					    + args[1]);
-				}
-			    } else {
-				sender.sendMessage("" + ChatColor.RED
-					+ material
-					+ " is not a valid material!");
-			    }
-			} else {
-			    sender.sendMessage(ChatColor.RED + args[1]
-				    + " was never seen on this server!");
-			}
-		    } else { // invalid syntaxis
-			sender.sendMessage(ChatColor.RED
-				+ "Correct syntaxis: /" + label
-				+ " give <player> <item> [amount] [damage]");
-		    }
-		} else { // show error
-		    sender.sendMessage(ChatColor.RED
-			    + "No permissions to do this...");
-		}
-		return true;
-	    }
+        BaseCommand command = commands.get(name);
 
-	    // list command
-	    if (args[0].equalsIgnoreCase("list")) {
-		if (!(sender instanceof Player)
-			|| plugin.hasPermission((Player) sender,
-				"betterenderchest.command.list", false)) {
-		    sender.sendMessage("All currently loaded inventories:");
-		    sender.sendMessage(plugin.getEnderChests().toString());
-		} else { // show error
-		    sender.sendMessage(ChatColor.RED
-			    + "No permissions to do this...");
-		}
-		return true;
-	    }
+        if (command == null) {
+            sender.sendMessage(ChatColor.RED + "Command " + name + " not found... Availible commands:");
+            showHelp(sender, label);
+            return true;
+        }
 
-	    // openinv command
-	    if (args[0].equalsIgnoreCase("openinv")) {
-		if (sender instanceof Player) {
-		    if (plugin.hasPermission((Player) sender,
-			    "betterenderchest.command.openinv", false)) { // open
-									  // the
-									  // Ender
-									  // chest
-			if (args.length == 1) { // open public Ender chest
-			    ((Player) sender).openInventory(plugin
-				    .getEnderChests().getInventory(
-					    BetterEnderChest.publicChestName));
-			} else { // check if player exists
-			    if (isValidPlayer(args[1])) { // open private Ender
-							  // chest
-				((Player) sender)
-					.openInventory(plugin.getEnderChests()
-						.getInventory(args[1]));
-			    } else {
-				sender.sendMessage(ChatColor.RED
-					+ "The player " + args[1]
-					+ " was never seen on this server.");
-			    }
-			}
-		    } else { // show error
-			sender.sendMessage(ChatColor.RED
-				+ "No permissions to do this...");
-		    }
-		} else { // show error
-		    sender.sendMessage(ChatColor.RED
-			    + "Doesn't work from console!");
-		}
-		return true;
-	    }
+        if (!plugin.hasPermission(sender, command.getPermission(), false)) {
+            sender.sendMessage(ChatColor.RED + "No permission to do this...");
+            return true;
+        }
 
-	    // swapinv command
-	    if (args[0].equalsIgnoreCase("swapinv")) {
-		// check for permissions
-		if (!(sender instanceof Player)
-			|| plugin.hasPermission((Player) sender,
-				"betterenderchest.command.swapinv", false)) { // check
-									      // for
-									      // arguments
-		    if (args.length == 3) { // check if both players exist
-			if (isValidPlayer(args[1])) {
-			    if (isValidPlayer(args[2])) {
-				// get the inventories
-				Inventory firstInventory = plugin
-					.getEnderChests().getInventory(args[1]);
-				Inventory secondInventory = plugin
-					.getEnderChests().getInventory(args[2]);
-				if (!firstInventory.getViewers().isEmpty()
-					|| !secondInventory.getViewers()
-						.isEmpty()) { // oh no! They are
-							      // being viewed!
-				    sender.sendMessage(ChatColor.RED
-					    + "Error: someone else is currently viewing the inventories. Please try again later.");
-				} else { // swap them
-				    String firstOwnerName = ((BetterEnderHolder) firstInventory
-					    .getHolder()).getOwnerName();
-				    boolean firstOwnerNameCaseCorrect = ((BetterEnderHolder) firstInventory
-					    .getHolder())
-					    .isOwnerNameCaseCorrect();
-				    ((BetterEnderHolder) firstInventory.getHolder())
-					    .setOwnerName(
-						    ((BetterEnderHolder) secondInventory
-							    .getHolder())
-							    .getOwnerName(),
-						    ((BetterEnderHolder) secondInventory
-							    .getHolder())
-							    .isOwnerNameCaseCorrect());
-				    ((BetterEnderHolder) secondInventory.getHolder())
-					    .setOwnerName(firstOwnerName,
-						    firstOwnerNameCaseCorrect);
-				    plugin.getEnderChests().setInventory(
-					    args[1], secondInventory);
-				    plugin.getEnderChests().setInventory(
-					    args[2], firstInventory);
-				    // unload them (so that they get reloaded with correct titles)
-				    plugin.getEnderChests().saveInventory(args[1]);
-				    plugin.getEnderChests().unloadInventory(args[1]);
-				    plugin.getEnderChests().saveInventory(args[2]);
-				    plugin.getEnderChests().unloadInventory(args[2]);
-				    sender.sendMessage(ChatColor.GREEN
-					    + "Succesfully swapped inventories!");
-				}
-			    } else {
-				sender.sendMessage(ChatColor.RED
-					+ "The player " + args[2]
-					+ " was never seen on this server.");
-			    }
-			} else {
-			    sender.sendMessage(ChatColor.RED + "The player "
-				    + args[1]
-				    + " was never seen on this server.");
-			}
-		    } else { // open private Ender chest
-			sender.sendMessage(ChatColor.RED
-				+ "Correct syntaxis: /" + label
-				+ " swapinv <player1> <player2>");
-		    }
-		} else { // show error
-		    sender.sendMessage(ChatColor.RED
-			    + "No permissions to do this...");
-		}
-		return true;
-	    }
-	}
+        if (!command.execute(sender, args)) {
+            sender.sendMessage(ChatColor.RED + "Wrong command usage! Correct usage:");
+            sender.sendMessage(ChatColor.RED + "/" + label + " " + name + " " + command.getUsage());
+            return true;
+        }
 
-	sender.sendMessage(ChatColor.GRAY + "Please note that some commands might not be availible for your rank.");
-	sender.sendMessage(ChatColor.GOLD + "/" + label
-		+ " deleteinv <player>:" + ChatColor.WHITE
-		+ " delete an Ender inventory");
-	sender.sendMessage(ChatColor.GOLD + "/" + label
-		+ " give <player> <item> [amount] [damage]:" + ChatColor.WHITE
-		+ " give an item");
-	sender.sendMessage(ChatColor.GOLD + "/" + label + " list:"
-		+ ChatColor.WHITE + " lists all loaded Ender inventories");
-	sender.sendMessage(ChatColor.GOLD + "/" + label + " openinv:"
-		+ ChatColor.WHITE + " opens the public Ender inventory");
-	sender.sendMessage(ChatColor.GOLD + "/" + label + " openinv <player>:"
-		+ ChatColor.WHITE + " opens an Ender inventory");
-	sender.sendMessage(ChatColor.GOLD + "/" + label
-		+ " swapinv <player1> <player2>:" + ChatColor.WHITE
-		+ " swaps the Ender inventories");
-	return true;
+        return true;
     }
 }

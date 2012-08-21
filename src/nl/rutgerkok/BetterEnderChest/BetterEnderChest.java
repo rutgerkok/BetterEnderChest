@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.logging.Logger;
 
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -33,11 +34,11 @@ public class BetterEnderChest extends JavaPlugin {
 
         // Configuration
         initConfig();
-        logThis(chestSaveLocation.getPath());
         
         // Warning if no chests are found
         if(!getChestSaveLocation().exists())
         {
+            logThis("--------- WARNING ---------","WARNING");
             logThis("No saved Ender Chests found! If","WARNING");
             logThis("you already had some player Ender Chests,","WARNING");
             logThis("stop the server and use the converter!","WARNING");
@@ -141,25 +142,34 @@ public class BetterEnderChest extends JavaPlugin {
     
     /**
      * If usePermissions is true, it returns whether the player has the
-     * permission. Otherwise it will return fallBack.
+     * permission. If the player is OP, it returns true. Otherwise it will return fallBack.
      * 
      * @param player
-     * @param permission
-     *            The permissions to check
-     * @param fallBack
-     *            Return this if permissions are disabled and the player is not
-     *            a op
+     * @param permission The permission to check
+     * @param fallBack Returns this if player is not op and permissions are disabled
      * @return If usePermissions is true, it returns whether the player has the
      *         permission. Otherwise it will return fallBack
      */
-    public boolean hasPermission(Player player, String permission,
-            boolean fallBack) {
+    public boolean hasPermission(Player player, String permission, boolean fallBack) {
         if (!usePermissions) {
             if (player.isOp())
                 return true;
             return fallBack;
         }
         return player.hasPermission(permission);
+    }
+    
+    /**
+     * If usePermissions is true, it returns whether the sender has the
+     * permission. If the sender is a console or is OP, it returns true. Otherwise it will return fallBack
+     * @param sender
+     * @param permission The permission to check
+     * @param fallBack Returns this if sender is not a console and not op and permissions are disabled
+     * @return
+     */
+    public boolean hasPermission(CommandSender sender, String permission,  boolean fallBack) {
+        if(!(sender instanceof Player)) return true; //console always has permission
+        return hasPermission((Player) sender, permission, fallBack);
     }
 
     /**
