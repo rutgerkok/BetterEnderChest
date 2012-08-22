@@ -5,13 +5,11 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -103,32 +101,6 @@ public class EnderHandler implements Listener {
 	}
     }
 
-    // prevent placing books with text in the chest (because they WON'T get saved)
-    @SuppressWarnings("deprecation")
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-	if (event.isCancelled())
-	    return;
-
-	if (event.getInventory().getHolder() instanceof BetterEnderHolder) { 
-	    // we're having an Ender Chest
-	    if (event.getCursor().getType().equals(Material.BOOK_AND_QUILL)
-		    || event.getCursor().getType().equals(Material.WRITTEN_BOOK)) {
-	        // where the player tries to place a book with text in the slots
-		if (event.getRawSlot() == event.getSlot()) {
-		    // that slot is inside the chest
-		    event.setResult(Result.DENY);
-		    
-		    if(event.getWhoClicked() instanceof Player)
-		    {
-		        ((Player)event.getWhoClicked()).updateInventory();
-		    }
-		}
-
-	    }
-	}
-    }
-
     // change the drop
     @EventHandler(priority = EventPriority.HIGH)
     public void onBlockBreak(BlockBreakEvent event) {
@@ -190,7 +162,6 @@ public class EnderHandler implements Listener {
      * Saves everything
      */
     public void onSave() {
-	// plugin.logThis("Saving inventories..."); //debug
 	chests.saveAllInventories();
     }
 }
