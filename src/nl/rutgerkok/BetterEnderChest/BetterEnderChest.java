@@ -17,7 +17,7 @@ public class BetterEnderChest extends JavaPlugin {
     private int chestRows, publicChestRows;
     private boolean usePermissions, enablePublicChests;
     private String chestDrop, chestDropSilkTouch;
-    private File chestSaveLocation = new File("chests/");
+    private File chestSaveLocation;
     public static final String publicChestName = "--publicchest";
     public static String publicChestDisplayName;
 
@@ -39,9 +39,10 @@ public class BetterEnderChest extends JavaPlugin {
         if(!getChestSaveLocation().exists())
         {
             logThis("--------- WARNING ---------","WARNING");
-            logThis("No saved Ender Chests found! If","WARNING");
-            logThis("you already had some player Ender Chests,","WARNING");
-            logThis("stop the server and use the converter!","WARNING");
+            logThis("No saved Ender Chests found!","WARNING");
+            logThis("Did you forgot the converter?","WARNING");
+            logThis("Did you modify the default save location?","WARNING");
+            logThis("    (You have to move the files manually)");
         }
 
         // Chests storage
@@ -197,6 +198,21 @@ public class BetterEnderChest extends JavaPlugin {
     }
     
     /**
+     * Returns whether the save location is valid. Case-sensetive
+     * 
+     * @param saveFolderLocation
+     *            Must be SERVER_ROOT or PLUGIN_FOLDER
+     * @return
+     */
+    private boolean isValidSaveLocation(String saveFolderLocation) {
+        if (saveFolderLocation.equals("SERVER_ROOT"))
+            return true;
+        if (saveFolderLocation.equals("PLUGIN_FOLDER"))
+            return true;
+        return false;
+    }
+    
+    /**
      * Logs a message.
      * 
      * @param message
@@ -220,6 +236,25 @@ public class BetterEnderChest extends JavaPlugin {
         if (type.equalsIgnoreCase("severe"))
             log.severe("[" + this.getDescription().getName() + "] " + message);
     }
+
+    /**
+     * Returns a directory with the save location
+     * 
+     * @param saveFolderLocation
+     *            Either PLUGIN_FOLDER or SERVER_ROOT.
+     * @throws IllegalArgumentException
+     *            If the saveFolderLocation is invalid.
+     * @return
+     */
+    public File toSaveLocation(String saveFolderLocation) {
+        if (!isValidSaveLocation(saveFolderLocation)) {
+            throw new IllegalArgumentException("Invalid save location: " + saveFolderLocation);
+        }
+        if (saveFolderLocation.equalsIgnoreCase("PLUGIN_FOLDER")) {
+            return new File(this.getDataFolder().getPath() + "/chests/");
+        }
+        return new File("chests/");
+    }
     
     // Private methods
 
@@ -236,6 +271,15 @@ public class BetterEnderChest extends JavaPlugin {
 	    chestRows = 3;
 	}
 	getConfig().set("EnderChest.rows", chestRows);
+	
+        // Save location
+        String saveFolderLocation = getConfig().getString("EnderChest.saveFolderLocation", "SERVER_ROOT");
+        if (!isValidSaveLocation(saveFolderLocation)) {
+            logThis(saveFolderLocation + "is not a valid save location. Defaulting to SERVER_ROOT.", "WARNING");
+            saveFolderLocation = "SERVER_ROOT";
+        }
+        chestSaveLocation = toSaveLocation(saveFolderLocation);
+        getConfig().set("EnderChest.saveFolderLocation", saveFolderLocation);
 
 	// Chestdrop
 	chestDrop = getConfig().getString("EnderChest.drop", "OBSIDIAN");
