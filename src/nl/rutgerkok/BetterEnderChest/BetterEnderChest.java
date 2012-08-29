@@ -275,7 +275,7 @@ public class BetterEnderChest extends JavaPlugin {
         // Save location
         String saveFolderLocation = getConfig().getString("EnderChest.saveFolderLocation", "SERVER_ROOT");
         if (!isValidSaveLocation(saveFolderLocation)) {
-            logThis(saveFolderLocation + "is not a valid save location. Defaulting to SERVER_ROOT.", "WARNING");
+            logThis(saveFolderLocation + " is not a valid save location. Defaulting to SERVER_ROOT.", "WARNING");
             saveFolderLocation = "SERVER_ROOT";
         }
         chestSaveLocation = toSaveLocation(saveFolderLocation);
