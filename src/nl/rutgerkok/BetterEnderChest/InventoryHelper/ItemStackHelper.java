@@ -1,4 +1,4 @@
-package nl.rutgerkok.BetterEnderChest;
+package nl.rutgerkok.BetterEnderChest.InventoryHelper;
 
 import java.util.HashMap;
 
@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 
 import tux2.bookapi.Book;
 
-public class NBTHelper {
+public class ItemStackHelper {
     /**
      * Converts an NBT ItemStack to a Bukkit ItemStack
      * 
@@ -34,10 +34,10 @@ public class NBTHelper {
             if (moreDataNBT.findTagByName("ench") != null) {
                 Tag[] enchantmentsNBT = (Tag[]) moreDataNBT.findTagByName("ench").getValue();
                 for (Tag enchantmentNBT : enchantmentsNBT) {
-                    stack.addEnchantment(
-                            Enchantment.getById(Integer.parseInt(enchantmentNBT.findTagByName("id").getValue().toString())),
-                            Integer.parseInt(enchantmentNBT.findTagByName("lvl").getValue().toString())
-                    ); // Should be (:
+                    stack.addEnchantment(Enchantment.getById(Integer.parseInt(enchantmentNBT.findTagByName("id").getValue().toString())),
+                            Integer.parseInt(enchantmentNBT.findTagByName("lvl").getValue().toString())); // Should
+                                                                                                          // be
+                                                                                                          // (:
                 }
             }
 

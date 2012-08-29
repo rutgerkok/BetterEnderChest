@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import nl.rutgerkok.BetterEnderChest.InventoryHelper.EnderSaveAndLoad;
+
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 

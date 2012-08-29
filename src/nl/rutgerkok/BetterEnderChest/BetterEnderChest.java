@@ -3,6 +3,7 @@ package nl.rutgerkok.BetterEnderChest;
 import java.io.File;
 import java.util.logging.Logger;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -25,6 +26,17 @@ public class BetterEnderChest extends JavaPlugin {
     
     public void onEnable() {
         
+        // STOP if build is too low
+        try {
+            Player.class.getMethod("getEnderChest");
+        } catch (NoSuchMethodException e) {
+            logThis("--------- SERVERE ---------","SEVERE");
+            logThis("Bukkit version is too old!","SEVERE");
+            logThis("Use at least version 2344!","SEVERE");
+            return;
+        }
+        
+        
         // ProtectionBridge
         if (initBridge()) {
             logThis("Linked to " + protectionBridge.getBridgeName());
@@ -35,15 +47,7 @@ public class BetterEnderChest extends JavaPlugin {
         // Configuration
         initConfig();
         
-        // Warning if no chests are found
-        if(!getChestSaveLocation().exists())
-        {
-            logThis("--------- WARNING ---------","WARNING");
-            logThis("No saved Ender Chests found!","WARNING");
-            logThis("Did you forgot the converter?","WARNING");
-            logThis("Did you modify the default save location?","WARNING");
-            logThis("    (You have to move the files manually)");
-        }
+        
 
         // Chests storage
         enderStorage = new BetterEnderStorage(this);
