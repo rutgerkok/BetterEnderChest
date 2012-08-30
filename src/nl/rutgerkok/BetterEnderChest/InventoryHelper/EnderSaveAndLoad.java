@@ -105,14 +105,16 @@ public class EnderSaveAndLoad {
             plugin.logThis("Could not load inventory " + inventoryName, "SEVERE");
             plugin.logThis("Path:" + file.getAbsolutePath(), "SEVERE");
             e.printStackTrace();
+            
+            // Return an empty inventory. Importing it again from Bukkit could cause item duplication glitches.
             return LoadHelper.loadEmptyInventory(inventoryName, inventoryRows);
         }
 
-        // Try to load it from bukkit
+        // Try to load it from Bukkit
         try {
             return LoadHelper.loadInventoryFromCraftBukkit(inventoryName, inventoryRows);
         } catch (Exception e) {
-            plugin.logThis("Could not import load inventory " + inventoryName, "SEVERE");
+            plugin.logThis("Could not import inventory " + inventoryName, "SEVERE");
             e.printStackTrace();
             return LoadHelper.loadEmptyInventory(inventoryName, inventoryRows);
         }
