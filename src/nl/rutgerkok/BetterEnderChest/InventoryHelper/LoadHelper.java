@@ -2,6 +2,7 @@ package nl.rutgerkok.BetterEnderChest.InventoryHelper;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ListIterator;
 
@@ -132,21 +133,28 @@ public class LoadHelper {
         return inventory;
     }
 
-    public static Inventory loadInventoryFromCraftBukkit(String inventoryName, int inventoryRows) throws IOException {
+    public static Inventory loadInventoryFromCraftBukkit(final String inventoryName, int inventoryRows) throws IOException {
         Player player = Bukkit.getPlayerExact(inventoryName);
         if (player == null) {
 
             // Offline, load from file
-            File playerStorage = new File(Bukkit.getWorlds().get(0).getWorldFolder().getAbsolutePath() + "/" + inventoryName + ".dat");
+            File playerStorage = new File(Bukkit.getWorlds().get(0).getWorldFolder().getAbsolutePath() + "/players");
+            String[] files = playerStorage.list(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String fileName) {
+                    return fileName.equalsIgnoreCase(inventoryName + ".dat");
+                }
+            });
+            ;
 
             // Check if the file exists
-            if (!playerStorage.exists()) {
+            if (files.length == 0) {
                 // File not found
                 return loadEmptyInventory(inventoryName, inventoryRows);
             }
 
             // Load it from the file
-            return loadInventoryFromFile(inventoryName, inventoryRows, playerStorage, "EnderItems");
+            return loadInventoryFromFile(inventoryName, inventoryRows, new File(playerStorage.getAbsolutePath() + "/" + files[0]), "EnderItems");
         } else {
             // Online, load now
             Inventory vanillaInventory = player.getEnderChest();
