@@ -34,6 +34,7 @@ public class EnderHandler implements Listener {
 	    return;
 
 	Player player = event.getPlayer();
+	String worldName = player.getWorld().getName();
 
 	if (event.getClickedBlock().getType().equals(plugin.getChestMaterial())) {
 	    // clicked on an Ender Chest
@@ -50,7 +51,7 @@ public class EnderHandler implements Listener {
 			String inventoryName = protectionBridge.getOwnerName(event.getClickedBlock());
 			
 			// Show the chest
-			player.openInventory(chests.getInventory(inventoryName));
+                        player.openInventory(chests.getInventory(inventoryName, worldName));
 		    } else {
 		        
 		        // Show an error
@@ -64,10 +65,10 @@ public class EnderHandler implements Listener {
 			    "betterenderchest.use.publicchest", true)) {
 			if (plugin.getPublicChestsEnabled()) { // show public
 							       // chest
-			    player.openInventory(chests.getInventory(BetterEnderChest.publicChestName));
+			    player.openInventory(chests.getInventory(BetterEnderChest.publicChestName, worldName));
 			} else { // show player's chest
 			    String inventoryName = player.getName();
-			    player.openInventory(chests.getInventory(inventoryName));
+			    player.openInventory(chests.getInventory(inventoryName, worldName));
 			}
 		    } else {
 			player.sendMessage(ChatColor.RED + "You do not have permissions to use public Ender Chests.");

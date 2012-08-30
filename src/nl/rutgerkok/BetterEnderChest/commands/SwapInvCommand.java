@@ -22,13 +22,18 @@ public class SwapInvCommand extends BaseCommand {
         if (args.length != 2)
             return false;
 
+        String inventoryName1 = getInventoryName(args[0]);
+        String worldName1 = getWorldName(args[0],sender);
+        String inventoryName2 = getInventoryName(args[1]);
+        String worldName2 = getWorldName(args[1],sender);
+        
         // Check if both players exist (separate conditions for separate error
         // messages)
-        if (isValidPlayer(args[0])) {
-            if (isValidPlayer(args[1])) {
+        if (isValidPlayer(inventoryName1)) {
+            if (isValidPlayer(inventoryName2)) {
                 // Get the inventories
-                Inventory firstInventory = plugin.getEnderChests().getInventory(args[0]);
-                Inventory secondInventory = plugin.getEnderChests().getInventory(args[1]);
+                Inventory firstInventory = plugin.getEnderChests().getInventory(inventoryName1,worldName1);
+                Inventory secondInventory = plugin.getEnderChests().getInventory(inventoryName2,worldName2);
 
                 // Get rid of the viewers
                 for(HumanEntity player: firstInventory.getViewers())
@@ -60,22 +65,22 @@ public class SwapInvCommand extends BaseCommand {
                 ((BetterEnderHolder) secondInventory.getHolder()).setOwnerName(firstOwnerName, firstOwnerNameCaseCorrect);
 
                 // Now swap them in the list
-                plugin.getEnderChests().setInventory(args[0], secondInventory);
-                plugin.getEnderChests().setInventory(args[1], firstInventory);
+                plugin.getEnderChests().setInventory(inventoryName1, worldName1, secondInventory);
+                plugin.getEnderChests().setInventory(inventoryName2, worldName2, firstInventory);
 
                 // Unload them (so that they will get reloaded with correct titles)
-                plugin.getEnderChests().saveInventory(args[0]);
-                plugin.getEnderChests().unloadInventory(args[0]);
-                plugin.getEnderChests().saveInventory(args[1]);
-                plugin.getEnderChests().unloadInventory(args[1]);
+                plugin.getEnderChests().saveInventory(inventoryName1, worldName1);
+                plugin.getEnderChests().unloadInventory(inventoryName1, worldName1);
+                plugin.getEnderChests().saveInventory(inventoryName2, worldName2);
+                plugin.getEnderChests().unloadInventory(inventoryName2, worldName2);
 
                 // Show a message
                 sender.sendMessage(ChatColor.GREEN + "Succesfully swapped inventories!");
             } else {
-                sender.sendMessage(ChatColor.RED + "The player " + args[1] + " was never seen on this server.");
+                sender.sendMessage(ChatColor.RED + "The player " + inventoryName2 + " was never seen on this server.");
             }
         } else {
-            sender.sendMessage(ChatColor.RED + "The player " + args[0] + " was never seen on this server.");
+            sender.sendMessage(ChatColor.RED + "The player " + inventoryName1 + " was never seen on this server.");
         }
         return true;
     }

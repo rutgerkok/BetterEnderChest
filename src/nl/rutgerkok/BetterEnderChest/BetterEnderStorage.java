@@ -26,7 +26,7 @@ public class BetterEnderStorage {
      * @param inventoryName
      * @return
      */
-    public Inventory getInventory(String inventoryName) {
+    public Inventory getInventory(String inventoryName, String worldName) {
 	inventoryName = inventoryName.toLowerCase();
 	if (inventories.containsKey(inventoryName)) { // inventory is availible
 						      // in cache
@@ -49,7 +49,7 @@ public class BetterEnderStorage {
      * @param inventory
      *            The new inventory
      */
-    public void setInventory(String inventoryName, Inventory inventory) {
+    public void setInventory(String inventoryName, String worldName, Inventory inventory) {
 	inventories.put(inventoryName, inventory);
     }
 
@@ -58,7 +58,7 @@ public class BetterEnderStorage {
      * 
      * @param inventoryName
      */
-    public void saveInventory(String inventoryName) {
+    public void saveInventory(String inventoryName, String worldName) {
 	inventoryName = inventoryName.toLowerCase();
 	if (!inventories.containsKey(inventoryName)) { // oops! Inventory has
 						       // not been loaded.
@@ -97,7 +97,7 @@ public class BetterEnderStorage {
      * 
      * @param inventoryName
      */
-    public void unloadInventory(String inventoryName) {
+    public void unloadInventory(String inventoryName, String worldName) {
 	inventoryName = inventoryName.toLowerCase();
 
 	// remove it from the list

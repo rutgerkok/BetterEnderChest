@@ -21,20 +21,18 @@ public class DeleteInvCommand extends BaseCommand {
         if (args.length != 1)
             return false; // Wrong argument count!
 
-        if (BaseCommand.isValidPlayer(args[0])) {
+        if (BaseCommand.isValidPlayer(getInventoryName(args[0]))) {
             // get the inventory
-            Inventory inventory = plugin.getEnderChests().getInventory(args[0]);
-            
+            Inventory inventory = plugin.getEnderChests().getInventory(getInventoryName(args[0]), getWorldName(args[0], sender));
+
             // Remove all the viewers
-            for(HumanEntity player: inventory.getViewers())
-            {
+            for (HumanEntity player : inventory.getViewers()) {
                 player.closeInventory();
-                if(player instanceof Player)
-                {
-                    ((Player)player).sendMessage(ChatColor.YELLOW+"An admin just deleted this inventory.");
+                if (player instanceof Player) {
+                    ((Player) player).sendMessage(ChatColor.YELLOW + "An admin just deleted this inventory.");
                 }
             }
-            
+
             // Clear it.
             inventory.clear();
             sender.sendMessage(ChatColor.GREEN + "Succesfully removed inventory!");

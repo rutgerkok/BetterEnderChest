@@ -21,8 +21,11 @@ public class GiveCommand extends BaseCommand {
         if (args.length < 2)
             return false;
         
-        if (isValidPlayer(args[0])) {
-            Inventory inventory = plugin.getEnderChests().getInventory(args[1]);
+        String inventoryName = getInventoryName(args[0]);
+        String worldName = getWorldName(args[0],sender);
+        
+        if (isValidPlayer(inventoryName)) {
+            Inventory inventory = plugin.getEnderChests().getInventory(inventoryName,worldName);
             boolean valid = true;
 
             Material material = Material.matchMaterial(args[1]);
@@ -57,13 +60,13 @@ public class GiveCommand extends BaseCommand {
                 // Add the item to the inventory
                 if (valid) {
                     inventory.addItem(new ItemStack(material, count, damage));
-                    sender.sendMessage("Item added to the Ender inventory of " + args[1]);
+                    sender.sendMessage("Item added to the Ender inventory of " + args[0]);
                 }
             } else {
                 sender.sendMessage("" + ChatColor.RED + material + " is not a valid material!");
             }
         } else {
-            sender.sendMessage(ChatColor.RED + args[0] + " was never seen on this server!");
+            sender.sendMessage(ChatColor.RED + inventoryName + " was never seen on this server!");
         }
         
         return true;

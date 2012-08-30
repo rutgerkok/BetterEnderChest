@@ -23,14 +23,16 @@ public class OpenInvCommand extends BaseCommand {
         }
         
         if (args.length == 0) { // open public Ender chest
-            ((Player) sender).openInventory(plugin.getEnderChests().getInventory(BetterEnderChest.publicChestName));
+            ((Player) sender).openInventory(plugin.getEnderChests().getInventory(BetterEnderChest.publicChestName,getWorldName(sender)));
         } else { // check if player exists
-            if (isValidPlayer(args[0])) { 
+            String inventoryName = getInventoryName(args[0]);
+            String worldName = getWorldName(args[0], sender);
+            if (isValidPlayer(inventoryName)) { 
                 // Open private Ender Chest
-                ((Player) sender).openInventory(plugin.getEnderChests().getInventory(args[0]));
+                ((Player) sender).openInventory(plugin.getEnderChests().getInventory(inventoryName,worldName));
             } else {
                 // Show error
-                sender.sendMessage(ChatColor.RED + "The player " + args[0]  + " was never seen on this server.");
+                sender.sendMessage(ChatColor.RED + "The player " + inventoryName  + " was never seen on this server.");
             }
         }
         return true;
