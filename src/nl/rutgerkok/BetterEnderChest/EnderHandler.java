@@ -63,10 +63,11 @@ public class EnderHandler implements Listener {
 			|| !protectionBridge.getBridgeName().equals("Lockette")) {
 		    if (plugin.hasPermission(player,
 			    "betterenderchest.use.publicchest", true)) {
-			if (plugin.getPublicChestsEnabled()) { // show public
-							       // chest
+			if (BetterEnderChest.PublicChest.openOnOpeningUnprotectedChest) {
+			    // Show public chest
 			    player.openInventory(chests.getInventory(BetterEnderChest.publicChestName, worldName));
-			} else { // show player's chest
+			} else { 
+			    // Show player's chest
 			    String inventoryName = player.getName();
 			    player.openInventory(chests.getInventory(inventoryName, worldName));
 			}
@@ -123,8 +124,7 @@ public class EnderHandler implements Listener {
 
 	    if (chestDropString.equals("OBSIDIAN")
 		    || chestDropString.equals("OBSIDIAN_WITH_EYE_OF_ENDER")
-		    || chestDropString.equals("OBSIDIAN_WITH_ENDER_PEARL")) { // drop
-									      // obsidian
+		    || chestDropString.equals("OBSIDIAN_WITH_ENDER_PEARL")) { 
 		event.getPlayer()
 			.getWorld()
 			.dropItemNaturally(block.getLocation(),

@@ -15,11 +15,20 @@ public class BetterEnderChest extends JavaPlugin {
     private Material chestMaterial = Material.ENDER_CHEST;
     private Bridge protectionBridge;
     private int chestRows, publicChestRows;
-    private boolean usePermissions, enablePublicChests;
-    private String chestDrop, chestDropSilkTouch;
+    private boolean usePermissions;
+    private String chestDrop, chestDropSilkTouch, chestDropCreative;
     private File chestSaveLocation;
     public static final String publicChestName = "--publicchest";
     public static String publicChestDisplayName;
+    
+    /**
+     * Inner class to store some variables.
+     * @author Rutger
+     *
+     */
+    public static class PublicChest {
+        public static boolean openOnOpeningUnprotectedChest, openOnOpeningPluginChest;
+    }
 
     // onEnable and onDisable
     
@@ -123,16 +132,6 @@ public class BetterEnderChest extends JavaPlugin {
      */
     public BetterEnderStorage getEnderChests() {
 	return enderStorage;
-    }
-
-    /**
-     * Gets whether a public chest must be shown when a unprotected chest is
-     * opened
-     * 
-     * @return
-     */
-    public boolean getPublicChestsEnabled() {
-	return enablePublicChests;
     }
 
     /**
@@ -262,75 +261,100 @@ public class BetterEnderChest extends JavaPlugin {
     // Private methods
 
     private void initConfig() {
-	// remove old setting for the chestmaterial
-	getConfig().set("EnderChest.block", null);
-
-	// Chestrows
-	chestRows = getConfig().getInt("EnderChest.rows", 3);
-	if (chestRows < 1 || chestRows > 20) {
-	    logThis("The number of rows in the private chest was " + chestRows
-		    + "...", "WARNING");
-	    logThis("Changed it to 3.", "WARNING");
-	    chestRows = 3;
+	if(getConfig().getInt("EnderChest.rows", -1) != -1) {
+	    // Found an old config!
+	    logThis("Converting config.yml to new format...");
+	    convertConfig();
 	}
-	getConfig().set("EnderChest.rows", chestRows);
 	
         // Save location
-        String saveFolderLocation = getConfig().getString("EnderChest.saveFolderLocation", "SERVER_ROOT");
-        if (!isValidSaveLocation(saveFolderLocation)) {
-            logThis(saveFolderLocation + " is not a valid save location. Defaulting to SERVER_ROOT.", "WARNING");
-            saveFolderLocation = "SERVER_ROOT";
+        String chestSaveLocationString = getConfig().getString("BetterEnderChest.saveFolderLocation", "PLUGIN_FOLDER");
+        chestSaveLocationString.toUpperCase();
+        if (!isValidSaveLocation(chestSaveLocationString)) {
+            logThis(chestSaveLocationString + " is not a valid save location. Defaulting to PLUGIN_FOLDER.", "WARNING");
+            chestSaveLocationString = "PLUGIN_FOLDER";
         }
-        chestSaveLocation = toSaveLocation(saveFolderLocation);
-        getConfig().set("EnderChest.saveFolderLocation", saveFolderLocation);
+        chestSaveLocation = toSaveLocation(chestSaveLocationString);
+        getConfig().set("BetterEnderChest.saveFolderLocation", chestSaveLocationString);
 
-	// Chestdrop
-	chestDrop = getConfig().getString("EnderChest.drop", "OBSIDIAN");
+	// ChestDrop
+	chestDrop = getConfig().getString("BetterEnderChest.drop", "OBSIDIAN");
 	chestDrop = chestDrop.toUpperCase();
 	if (!isValidChestDrop(chestDrop)) { // cannot understand value
 	    logThis("Could not understand the drop " + chestDrop
 		    + ", defaulting to OBSIDIAN", "WARNING");
 	    chestDrop = "OBSIDIAN";
 	}
-	getConfig().set("EnderChest.drop", chestDrop);
+	getConfig().set("BetterEnderChest.drop", chestDrop);
 
-	// ChestSilkTouchDrop
-	chestDropSilkTouch = getConfig().getString("EnderChest.dropSilkTouch",
-		"ITSELF");
+	// ChestDropSilkTouch
+	chestDropSilkTouch = getConfig().getString("BetterEnderChest.dropSilkTouch", "ITSELF");
 	chestDropSilkTouch = chestDropSilkTouch.toUpperCase();
 	if (!isValidChestDrop(chestDropSilkTouch)) { // cannot understand value
 	    logThis("Could not understand the Silk Touch drop "
 		    + chestDropSilkTouch + ", defaulting to ITSELF", "WARNING");
 	    chestDropSilkTouch = "ITSELF";
 	}
-	getConfig().set("EnderChest.dropSilkTouch", chestDropSilkTouch);
+	getConfig().set("BetterEnderChest.dropSilkTouch", chestDropSilkTouch);
+	
+	// ChestDropCreative
+        chestDropCreative = getConfig().getString("BetterEnderChest.dropCreative", "NOTHING");
+        chestDropCreative = chestDropCreative.toUpperCase();
+        if (!isValidChestDrop(chestDropCreative)) { // cannot understand value
+            logThis("Could not understand the drop for Creative Mode "
+                    + chestDropCreative + ", defaulting to NOTHING", "WARNING");
+            chestDropCreative = "NOTHING";
+        }
+        getConfig().set("BetterEnderChest.dropCreative", chestDropCreative);
 
 	// Permissions
-	usePermissions = getConfig().getBoolean("Permissions.enabled", false);
-	getConfig().set("Permissions.enabled", usePermissions);
+	usePermissions = getConfig().getBoolean("BetterEnderChest.usePermissions", false);
+	getConfig().set("BetterEnderChest.usePermissions", usePermissions);
+	
+	// Private chests
+	// rows?
+        chestRows = getConfig().getInt("PrivateEnderChest.defaultRows", 3);
+        if (chestRows < 1 || chestRows > 20) {
+            logThis("The number of rows in the private chest was " + chestRows + "...", "WARNING");
+            logThis("Changed it to 3.", "WARNING");
+            chestRows = 3;
+        }
+        getConfig().set("PrivateEnderChest.defaultRows", chestRows);
 
 	// Public chests
 	// enabled?
-	enablePublicChests = getConfig()
-		.getBoolean("PublicChest.enabled", true);
-	getConfig().set("PublicChest.enabled", enablePublicChests);
+	PublicChest.openOnOpeningUnprotectedChest = getConfig().getBoolean("PublicEnderChest.showOnOpeningUnprotectedChest", false);
+	getConfig().set("PublicEnderChest.showOnOpeningUnprotectedChest", PublicChest.openOnOpeningUnprotectedChest);
 	// display name?
-	BetterEnderChest.publicChestDisplayName = getConfig().getString(
-		"PublicChest.name", "Public Chest");
-	getConfig().set("PublicChest.name",
-		BetterEnderChest.publicChestDisplayName);
+	BetterEnderChest.publicChestDisplayName = getConfig().getString("PublicEnderChest.name", "Public Chest");
+	getConfig().set("PublicEnderChest.name",BetterEnderChest.publicChestDisplayName);
 	// rows?
-	publicChestRows = getConfig().getInt("PublicChest.rows", chestRows);
+	publicChestRows = getConfig().getInt("PublicEnderChest.defaultRows", chestRows);
 	if (publicChestRows < 1 || publicChestRows > 20) {
-	    logThis("The number of rows in the private chest was " + chestRows
-		    + "...", "WARNING");
+	    logThis("The number of rows in the private chest was " + chestRows + "...", "WARNING");
 	    logThis("Changed it to 3.", "WARNING");
 	    publicChestRows = 3;
 	}
-	getConfig().set("PublicChest.rows", publicChestRows);
+	getConfig().set("PublicEnderChest.defaultRows", publicChestRows);
 
 	// Save everything
 	saveConfig();
+    }
+    
+    private void convertConfig() {
+        getConfig().set("BetterEnderChest.usePermissions", getConfig().getBoolean("Permissions.enabled", false));
+        getConfig().set("BetterEnderChest.saveFolderLocation", getConfig().getString("EnderChest.saveFolderLocation", "SERVER_ROOT"));
+        getConfig().set("BetterEnderChest.drop", getConfig().getString("EnderChest.drop", "OBSIDIAN"));
+        getConfig().set("BetterEnderChest.dropSilkTouch", getConfig().getString("EnderChest.dropSilkTouch", "ITSELF"));
+        getConfig().set("PrivateEnderChest.defaultRows", getConfig().getInt("EnderChest.rows", 3));
+        getConfig().set("PublicEnderChest.showOnOpeningUnprotectedChest", getConfig().getBoolean("PublicChest.enabled", true));
+        getConfig().set("PublicEnderChest.name", getConfig().getString("PublicChest.name", "Public Chest"));
+        getConfig().set("PublicEnderChest.defaultRows", getConfig().getInt("PublicChest.rows", 3));
+        
+        // Null out old values
+        getConfig().set("EnderChest", null);
+        getConfig().set("Permissions", null);
+        getConfig().set("PublicChest", null);
     }
 
     private boolean initBridge() {
