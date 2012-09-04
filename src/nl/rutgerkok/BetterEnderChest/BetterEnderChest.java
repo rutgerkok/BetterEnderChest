@@ -12,6 +12,7 @@ public class BetterEnderChest extends JavaPlugin {
     private EnderHandler enderHandler;
     private EnderCommands commandHandler;
     private BetterEnderStorage enderStorage;
+    private BetterEnderGroups groups;
     private Material chestMaterial = Material.ENDER_CHEST;
     private Bridge protectionBridge;
     private int chestRows, publicChestRows;
@@ -53,7 +54,10 @@ public class BetterEnderChest extends JavaPlugin {
         }
 
         // Configuration
+        groups = new BetterEnderGroups(this);
         initConfig();
+        groups.initConfig();
+        saveConfig();
         
         
 
@@ -336,9 +340,6 @@ public class BetterEnderChest extends JavaPlugin {
 	    publicChestRows = 3;
 	}
 	getConfig().set("PublicEnderChest.defaultRows", publicChestRows);
-
-	// Save everything
-	saveConfig();
     }
     
     private void convertConfig() {
