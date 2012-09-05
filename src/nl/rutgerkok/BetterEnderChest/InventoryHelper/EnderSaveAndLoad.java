@@ -13,6 +13,19 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class EnderSaveAndLoad {
+    
+    
+    public static File getChestFile(String inventoryName, String groupName) {
+        if(groupName.equals(BetterEnderChest.defaultGroupName)) {
+            // Default group? File isn't in a subdirectory.
+            return new File(BetterEnderChest.getChestSaveLocation().getPath() + "/" + inventoryName + ".dat");
+        }
+        else {
+            // Another group? Save in subdirectory.
+            return new File(BetterEnderChest.getChestSaveLocation().getPath() + "/" + groupName + "/" + inventoryName + ".dat");
+        }
+            
+    }
     /**
      * Saves the inventory.
      * 
@@ -24,7 +37,7 @@ public class EnderSaveAndLoad {
      * @param plugin
      *            The plugin, needed for logging
      */
-    public static void saveInventory(Inventory inventory, String inventoryName, BetterEnderChest plugin) {
+    public static void saveInventory(Inventory inventory, String inventoryName, String groupName, BetterEnderChest plugin) {
         int slot;// id of slot
         byte nameCaseCorrect = 0;
         if (((BetterEnderHolder) inventory.getHolder()).isOwnerNameCaseCorrect()) {
@@ -57,13 +70,12 @@ public class EnderSaveAndLoad {
 
         // Now we are going to write that tag to a file
         try {
-            // Create /chests directory (if it already exists, this does
-            // nothing)
-            plugin.getChestSaveLocation().mkdirs();
-
             // Output file
-            File to = new File(plugin.getChestSaveLocation().getPath() + "/" + inventoryName + ".dat");
+            File to = getChestFile(inventoryName, groupName);
+            // Create the file and directories
+            to.getParentFile().mkdirs();
             to.createNewFile();
+            // Write to it
             mainNBT.writeTo(new FileOutputStream(to));
         } catch (IOException e) { // And handle all IOExceptions
             plugin.logThis("Could not save inventory " + inventoryName, "SEVERE");
@@ -83,7 +95,7 @@ public class EnderSaveAndLoad {
      *            The plugin, needed for logging
      * @return
      */
-    public static Inventory loadInventory(String inventoryName, BetterEnderChest plugin) {
+    public static Inventory loadInventory(String inventoryName, String groupName, BetterEnderChest plugin) {
         int inventoryRows;
 
         // Get the number of rows
@@ -95,7 +107,7 @@ public class EnderSaveAndLoad {
         }
 
         // Try to load it from a file
-        File file = new File(new String(plugin.getChestSaveLocation().getPath() + "/" + inventoryName + ".dat"));
+        File file = getChestFile(inventoryName, groupName);
         try {
             if (file.exists()) {
                 // Load it from a file (if it exists)

@@ -68,7 +68,7 @@ public class LoadHelper {
      * @param inventoryRows
      *            The rows that should be in the inventory
      * @param plugin
-     *            The plugin, for loggin
+     *            The plugin, for logging
      * @return
      * @throws IOException
      */

@@ -18,34 +18,31 @@ public class BetterEnderChest extends JavaPlugin {
     private int chestRows, publicChestRows;
     private boolean usePermissions;
     private String chestDrop, chestDropSilkTouch, chestDropCreative;
-    private File chestSaveLocation;
-    public static final String publicChestName = "--publicchest";
+    private static File chestSaveLocation;
+    public static final String publicChestName = "--publicchest", defaultChestName = "--defaultchest", defaultGroupName = "default";
     public static String publicChestDisplayName;
-    
+
     /**
      * Inner class to store some variables.
-     * @author Rutger
-     *
      */
     public static class PublicChest {
         public static boolean openOnOpeningUnprotectedChest, openOnOpeningPluginChest;
     }
 
     // onEnable and onDisable
-    
+
     public void onEnable() {
-        
+
         // STOP if build is too low
         try {
             Player.class.getMethod("getEnderChest");
         } catch (NoSuchMethodException e) {
-            logThis("--------- SERVERE ---------","SEVERE");
-            logThis("Bukkit version is too old!","SEVERE");
-            logThis("Use at least version 2344!","SEVERE");
+            logThis("--------- SERVERE ---------", "SEVERE");
+            logThis("Bukkit version is too old!", "SEVERE");
+            logThis("Use at least version 2344!", "SEVERE");
             return;
         }
-        
-        
+
         // ProtectionBridge
         if (initBridge()) {
             logThis("Linked to " + protectionBridge.getBridgeName());
@@ -58,8 +55,6 @@ public class BetterEnderChest extends JavaPlugin {
         initConfig();
         groups.initConfig();
         saveConfig();
-        
-        
 
         // Chests storage
         enderStorage = new BetterEnderStorage(this);
@@ -73,20 +68,19 @@ public class BetterEnderChest extends JavaPlugin {
         getCommand("betterenderchest").setExecutor(commandHandler);
 
         // AutoSave
-        getServer().getScheduler().scheduleSyncRepeatingTask(this,
-                new Runnable() {
-                    public void run() {
-                        logThis("Autosaving...");
-                        enderHandler.onSave();
-                    }
-                }, 20 * 300, 20 * 300);
+        getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+            public void run() {
+                logThis("Autosaving...");
+                enderHandler.onSave();
+            }
+        }, 20 * 300, 20 * 300);
     }
 
     public void onDisable() {
-	if (enderHandler != null) {
-	    enderHandler.onSave();
-	    logThis("Disabling...");
-	}
+        if (enderHandler != null) {
+            enderHandler.onSave();
+            logThis("Disabling...");
+        }
     }
 
     // Public methods
@@ -103,14 +97,14 @@ public class BetterEnderChest extends JavaPlugin {
             return chestDropSilkTouch;
         return chestDrop;
     }
-    
+
     /**
      * Gets the current chest material
      * 
      * @return The current chest material
      */
     public Material getChestMaterial() {
-	return chestMaterial;
+        return chestMaterial;
     }
 
     /**
@@ -119,13 +113,13 @@ public class BetterEnderChest extends JavaPlugin {
      * @return The rows in the chest
      */
     public int getChestRows() {
-	return chestRows;
+        return chestRows;
     }
-    
+
     /**
      * @return the chestSaveLocation
      */
-    public File getChestSaveLocation() {
+    public static File getChestSaveLocation() {
         return chestSaveLocation;
     }
 
@@ -135,7 +129,16 @@ public class BetterEnderChest extends JavaPlugin {
      * @return
      */
     public BetterEnderStorage getEnderChests() {
-	return enderStorage;
+        return enderStorage;
+    }
+
+    /**
+     * Returns the group settings
+     * 
+     * @return
+     */
+    public BetterEnderGroups getGroups() {
+        return groups;
     }
 
     /**
@@ -144,16 +147,19 @@ public class BetterEnderChest extends JavaPlugin {
      * @return The rows in the chest
      */
     public int getPublicChestRows() {
-	return publicChestRows;
+        return publicChestRows;
     }
-    
+
     /**
      * If usePermissions is true, it returns whether the player has the
-     * permission. If the player is OP, it returns true. Otherwise it will return fallBack.
+     * permission. If the player is OP, it returns true. Otherwise it will
+     * return fallBack.
      * 
      * @param player
-     * @param permission The permission to check
-     * @param fallBack Returns this if player is not op and permissions are disabled
+     * @param permission
+     *            The permission to check
+     * @param fallBack
+     *            Returns this if player is not op and permissions are disabled
      * @return If usePermissions is true, it returns whether the player has the
      *         permission. Otherwise it will return fallBack
      */
@@ -165,17 +171,23 @@ public class BetterEnderChest extends JavaPlugin {
         }
         return player.hasPermission(permission);
     }
-    
+
     /**
      * If usePermissions is true, it returns whether the sender has the
-     * permission. If the sender is a console or is OP, it returns true. Otherwise it will return fallBack
+     * permission. If the sender is a console or is OP, it returns true.
+     * Otherwise it will return fallBack
+     * 
      * @param sender
-     * @param permission The permission to check
-     * @param fallBack Returns this if sender is not a console and not op and permissions are disabled
+     * @param permission
+     *            The permission to check
+     * @param fallBack
+     *            Returns this if sender is not a console and not op and
+     *            permissions are disabled
      * @return
      */
-    public boolean hasPermission(CommandSender sender, String permission,  boolean fallBack) {
-        if(!(sender instanceof Player)) return true; //console always has permission
+    public boolean hasPermission(CommandSender sender, String permission, boolean fallBack) {
+        if (!(sender instanceof Player))
+            return true; // console always has permission
         return hasPermission((Player) sender, permission, fallBack);
     }
 
@@ -186,23 +198,23 @@ public class BetterEnderChest extends JavaPlugin {
      * @return
      */
     public boolean isValidChestDrop(String drop) {
-	if (drop.equals("OBSIDIAN"))
-	    return true;
-	if (drop.equals("OBSIDIAN_WITH_EYE_OF_ENDER"))
-	    return true;
-	if (drop.equals("OBSIDIAN_WITH_ENDER_PEARL"))
-	    return true;
-	if (drop.equals("EYE_OF_ENDER"))
-	    return true;
-	if (drop.equals("ENDER_PEARL"))
-	    return true;
-	if (drop.equals("ITSELF"))
-	    return true;
-	if (drop.equals("NOTHING"))
-	    return true;
-	return false;
+        if (drop.equals("OBSIDIAN"))
+            return true;
+        if (drop.equals("OBSIDIAN_WITH_EYE_OF_ENDER"))
+            return true;
+        if (drop.equals("OBSIDIAN_WITH_ENDER_PEARL"))
+            return true;
+        if (drop.equals("EYE_OF_ENDER"))
+            return true;
+        if (drop.equals("ENDER_PEARL"))
+            return true;
+        if (drop.equals("ITSELF"))
+            return true;
+        if (drop.equals("NOTHING"))
+            return true;
+        return false;
     }
-    
+
     /**
      * Returns whether the save location is valid. Case-sensetive
      * 
@@ -217,7 +229,7 @@ public class BetterEnderChest extends JavaPlugin {
             return true;
         return false;
     }
-    
+
     /**
      * Logs a message.
      * 
@@ -231,7 +243,8 @@ public class BetterEnderChest extends JavaPlugin {
      * Logs a message.
      * 
      * @param message
-     * @param type - WARNING, LOG or SEVERE, case insensetive
+     * @param type
+     *            - WARNING, LOG or SEVERE, case insensetive
      */
     public void logThis(String message, String type) {
         Logger log = Logger.getLogger("Minecraft");
@@ -249,7 +262,7 @@ public class BetterEnderChest extends JavaPlugin {
      * @param saveFolderLocation
      *            Either PLUGIN_FOLDER or SERVER_ROOT.
      * @throws IllegalArgumentException
-     *            If the saveFolderLocation is invalid.
+     *             If the saveFolderLocation is invalid.
      * @return
      */
     public File toSaveLocation(String saveFolderLocation) {
@@ -261,16 +274,16 @@ public class BetterEnderChest extends JavaPlugin {
         }
         return new File("chests/");
     }
-    
+
     // Private methods
 
     private void initConfig() {
-	if(getConfig().getInt("EnderChest.rows", -1) != -1) {
-	    // Found an old config!
-	    logThis("Converting config.yml to new format...");
-	    convertConfig();
-	}
-	
+        if (getConfig().getInt("EnderChest.rows", -1) != -1) {
+            // Found an old config!
+            logThis("Converting config.yml to new format...");
+            convertConfig();
+        }
+
         // Save location
         String chestSaveLocationString = getConfig().getString("BetterEnderChest.saveFolderLocation", "PLUGIN_FOLDER");
         chestSaveLocationString.toUpperCase();
@@ -281,42 +294,39 @@ public class BetterEnderChest extends JavaPlugin {
         chestSaveLocation = toSaveLocation(chestSaveLocationString);
         getConfig().set("BetterEnderChest.saveFolderLocation", chestSaveLocationString);
 
-	// ChestDrop
-	chestDrop = getConfig().getString("BetterEnderChest.drop", "OBSIDIAN");
-	chestDrop = chestDrop.toUpperCase();
-	if (!isValidChestDrop(chestDrop)) { // cannot understand value
-	    logThis("Could not understand the drop " + chestDrop
-		    + ", defaulting to OBSIDIAN", "WARNING");
-	    chestDrop = "OBSIDIAN";
-	}
-	getConfig().set("BetterEnderChest.drop", chestDrop);
+        // ChestDrop
+        chestDrop = getConfig().getString("BetterEnderChest.drop", "OBSIDIAN");
+        chestDrop = chestDrop.toUpperCase();
+        if (!isValidChestDrop(chestDrop)) { // cannot understand value
+            logThis("Could not understand the drop " + chestDrop + ", defaulting to OBSIDIAN", "WARNING");
+            chestDrop = "OBSIDIAN";
+        }
+        getConfig().set("BetterEnderChest.drop", chestDrop);
 
-	// ChestDropSilkTouch
-	chestDropSilkTouch = getConfig().getString("BetterEnderChest.dropSilkTouch", "ITSELF");
-	chestDropSilkTouch = chestDropSilkTouch.toUpperCase();
-	if (!isValidChestDrop(chestDropSilkTouch)) { // cannot understand value
-	    logThis("Could not understand the Silk Touch drop "
-		    + chestDropSilkTouch + ", defaulting to ITSELF", "WARNING");
-	    chestDropSilkTouch = "ITSELF";
-	}
-	getConfig().set("BetterEnderChest.dropSilkTouch", chestDropSilkTouch);
-	
-	// ChestDropCreative
+        // ChestDropSilkTouch
+        chestDropSilkTouch = getConfig().getString("BetterEnderChest.dropSilkTouch", "ITSELF");
+        chestDropSilkTouch = chestDropSilkTouch.toUpperCase();
+        if (!isValidChestDrop(chestDropSilkTouch)) { // cannot understand value
+            logThis("Could not understand the Silk Touch drop " + chestDropSilkTouch + ", defaulting to ITSELF", "WARNING");
+            chestDropSilkTouch = "ITSELF";
+        }
+        getConfig().set("BetterEnderChest.dropSilkTouch", chestDropSilkTouch);
+
+        // ChestDropCreative
         chestDropCreative = getConfig().getString("BetterEnderChest.dropCreative", "NOTHING");
         chestDropCreative = chestDropCreative.toUpperCase();
         if (!isValidChestDrop(chestDropCreative)) { // cannot understand value
-            logThis("Could not understand the drop for Creative Mode "
-                    + chestDropCreative + ", defaulting to NOTHING", "WARNING");
+            logThis("Could not understand the drop for Creative Mode " + chestDropCreative + ", defaulting to NOTHING", "WARNING");
             chestDropCreative = "NOTHING";
         }
         getConfig().set("BetterEnderChest.dropCreative", chestDropCreative);
 
-	// Permissions
-	usePermissions = getConfig().getBoolean("BetterEnderChest.usePermissions", false);
-	getConfig().set("BetterEnderChest.usePermissions", usePermissions);
-	
-	// Private chests
-	// rows?
+        // Permissions
+        usePermissions = getConfig().getBoolean("BetterEnderChest.usePermissions", false);
+        getConfig().set("BetterEnderChest.usePermissions", usePermissions);
+
+        // Private chests
+        // rows?
         chestRows = getConfig().getInt("PrivateEnderChest.defaultRows", 3);
         if (chestRows < 1 || chestRows > 20) {
             logThis("The number of rows in the private chest was " + chestRows + "...", "WARNING");
@@ -325,23 +335,23 @@ public class BetterEnderChest extends JavaPlugin {
         }
         getConfig().set("PrivateEnderChest.defaultRows", chestRows);
 
-	// Public chests
-	// enabled?
-	PublicChest.openOnOpeningUnprotectedChest = getConfig().getBoolean("PublicEnderChest.showOnOpeningUnprotectedChest", false);
-	getConfig().set("PublicEnderChest.showOnOpeningUnprotectedChest", PublicChest.openOnOpeningUnprotectedChest);
-	// display name?
-	BetterEnderChest.publicChestDisplayName = getConfig().getString("PublicEnderChest.name", "Public Chest");
-	getConfig().set("PublicEnderChest.name",BetterEnderChest.publicChestDisplayName);
-	// rows?
-	publicChestRows = getConfig().getInt("PublicEnderChest.defaultRows", chestRows);
-	if (publicChestRows < 1 || publicChestRows > 20) {
-	    logThis("The number of rows in the private chest was " + chestRows + "...", "WARNING");
-	    logThis("Changed it to 3.", "WARNING");
-	    publicChestRows = 3;
-	}
-	getConfig().set("PublicEnderChest.defaultRows", publicChestRows);
+        // Public chests
+        // enabled?
+        PublicChest.openOnOpeningUnprotectedChest = getConfig().getBoolean("PublicEnderChest.showOnOpeningUnprotectedChest", false);
+        getConfig().set("PublicEnderChest.showOnOpeningUnprotectedChest", PublicChest.openOnOpeningUnprotectedChest);
+        // display name?
+        BetterEnderChest.publicChestDisplayName = getConfig().getString("PublicEnderChest.name", "Public Chest");
+        getConfig().set("PublicEnderChest.name", BetterEnderChest.publicChestDisplayName);
+        // rows?
+        publicChestRows = getConfig().getInt("PublicEnderChest.defaultRows", chestRows);
+        if (publicChestRows < 1 || publicChestRows > 20) {
+            logThis("The number of rows in the private chest was " + chestRows + "...", "WARNING");
+            logThis("Changed it to 3.", "WARNING");
+            publicChestRows = 3;
+        }
+        getConfig().set("PublicEnderChest.defaultRows", publicChestRows);
     }
-    
+
     private void convertConfig() {
         getConfig().set("BetterEnderChest.usePermissions", getConfig().getBoolean("Permissions.enabled", false));
         getConfig().set("BetterEnderChest.saveFolderLocation", getConfig().getString("EnderChest.saveFolderLocation", "SERVER_ROOT"));
@@ -351,7 +361,7 @@ public class BetterEnderChest extends JavaPlugin {
         getConfig().set("PublicEnderChest.showOnOpeningUnprotectedChest", getConfig().getBoolean("PublicChest.enabled", true));
         getConfig().set("PublicEnderChest.name", getConfig().getString("PublicChest.name", "Public Chest"));
         getConfig().set("PublicEnderChest.defaultRows", getConfig().getInt("PublicChest.rows", 3));
-        
+
         // Null out old values
         getConfig().set("EnderChest", null);
         getConfig().set("Permissions", null);
@@ -359,18 +369,18 @@ public class BetterEnderChest extends JavaPlugin {
     }
 
     private boolean initBridge() {
-	if (getServer().getPluginManager().isPluginEnabled("Lockette")) {
-	    protectionBridge = new LocketteBridge();
-	    return true;
-	}
+        if (getServer().getPluginManager().isPluginEnabled("Lockette")) {
+            protectionBridge = new LocketteBridge();
+            return true;
+        }
 
-	if (getServer().getPluginManager().isPluginEnabled("LWC")) {
-	    protectionBridge = new LWCBridge();
-	    return true;
-	}
+        if (getServer().getPluginManager().isPluginEnabled("LWC")) {
+            protectionBridge = new LWCBridge();
+            return true;
+        }
 
-	// No bridge found
-	protectionBridge = new NoBridge();
-	return false;
+        // No bridge found
+        protectionBridge = new NoBridge();
+        return false;
     }
 }

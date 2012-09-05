@@ -2,8 +2,6 @@ package nl.rutgerkok.BetterEnderChest;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import nl.rutgerkok.BetterEnderChest.InventoryHelper.EnderSaveAndLoad;
 
@@ -11,11 +9,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 
 public class BetterEnderStorage {
-    private HashMap<String, Inventory> inventories;
+    private HashMap<String, HashMap<String, Inventory>> inventories;
     private BetterEnderChest plugin;
 
     public BetterEnderStorage(BetterEnderChest plugin) {
-	inventories = new HashMap<String, Inventory>();
+	inventories = new HashMap<String, HashMap<String, Inventory>>();
 	this.plugin = plugin;
     }
 
@@ -27,14 +25,24 @@ public class BetterEnderStorage {
      * @return
      */
     public Inventory getInventory(String inventoryName, String worldName) {
+        // Always lowercase
 	inventoryName = inventoryName.toLowerCase();
-	if (inventories.containsKey(inventoryName)) { // inventory is availible
-						      // in cache
-	    return inventories.get(inventoryName);
-	} else { // inventoy has to be loaded
-	    Inventory enderInventory = EnderSaveAndLoad.loadInventory(
-		    inventoryName, plugin);
-	    inventories.put(inventoryName, enderInventory);// put in cache
+	// Get the group
+	String groupName = plugin.getGroups().getGroup(worldName);
+	// Check if loaded
+	if (inventories.containsKey(groupName) && inventories.get(groupName).containsKey(inventoryName)) { 
+	    // Already loaded, return it
+	    return inventories.get(groupName).get(inventoryName);
+	} else { 
+	    // Inventory has to be loaded
+	    Inventory enderInventory = EnderSaveAndLoad.loadInventory(inventoryName, groupName, plugin);
+	    // Check if something from that group has been loaded
+	    if(!inventories.containsKey(groupName)) {
+	        // If not, create the group first
+	        inventories.put(groupName, new HashMap<String,Inventory>());
+	    }
+	    // Put in cache
+	    inventories.get(groupName).put(inventoryName, enderInventory);
 	    return enderInventory;
 	}
     }
@@ -49,8 +57,18 @@ public class BetterEnderStorage {
      * @param inventory
      *            The new inventory
      */
-    public void setInventory(String inventoryName, String worldName, Inventory inventory) {
-	inventories.put(inventoryName, inventory);
+    public void setInventory(String inventoryName, String worldName, Inventory enderInventory) {
+        // Always lowercase
+        inventoryName = inventoryName.toLowerCase();
+        // Get the group
+        String groupName = plugin.getGroups().getGroup(worldName);
+        // Check if something from that group has been loaded
+        if(!inventories.containsKey(groupName)) {
+            // If not, create the group first
+            inventories.put(groupName, new HashMap<String,Inventory>());
+        }
+        // Put in cache
+        inventories.get(groupName).put(inventoryName, enderInventory);
     }
 
     /**
@@ -59,37 +77,41 @@ public class BetterEnderStorage {
      * @param inventoryName
      */
     public void saveInventory(String inventoryName, String worldName) {
-	inventoryName = inventoryName.toLowerCase();
-	if (!inventories.containsKey(inventoryName)) { // oops! Inventory has
-						       // not been loaded.
-						       // Nothing to save
+        // Always lowercase
+        inventoryName = inventoryName.toLowerCase();
+        // Get the group
+        String groupName = plugin.getGroups().getGroup(worldName);
+
+        if (!inventories.containsKey(groupName) || !inventories.get(groupName).containsKey(inventoryName)) {
+            // Oops! Inventory hasn't been loaded. Nothing to save.
 	    return;
 	}
-	// save the inventory to disk
-	EnderSaveAndLoad.saveInventory(inventories.get(inventoryName),
-		inventoryName, plugin);
+	// Save the inventory to disk
+	EnderSaveAndLoad.saveInventory(inventories.get(groupName).get(inventoryName), inventoryName, groupName, plugin);
     }
 
     /**
      * Saves all inventories, and unloads the one's that are not needed anymore
      */
     public void saveAllInventories() {
-        
-           for(Iterator<Map.Entry<String, Inventory>> it = inventories.entrySet().iterator(); it.hasNext();) {
-               Entry<String,Inventory> entry = it.next();
-               String inventoryName = entry.getKey();
-               Inventory inventory = entry.getValue();
-               
-               EnderSaveAndLoad.saveInventory(inventory, inventoryName, plugin);
-               
-               if(!inventoryName.equals(BetterEnderChest.publicChestName)
-                       && !Bukkit.getOfflinePlayer(inventoryName).isOnline()
-                       && inventory.getViewers().size() == 0) {
-                   // This inventory is NOT the public chest, the owner is NOT online and NO ONE is viewing it
-                   // So unload it
-                   inventories.remove(inventoryName);
-               }
-           }
+        for(Iterator<String> outerIterator = inventories.keySet().iterator(); outerIterator.hasNext();) {
+            String groupName = outerIterator.next();
+            HashMap<String, Inventory> group = inventories.get(groupName);
+            for(Iterator<String> it = group.keySet().iterator(); it.hasNext();) {
+                String inventoryName = it.next();
+                Inventory inventory = group.get(inventoryName);
+
+                EnderSaveAndLoad.saveInventory(inventory, inventoryName, groupName, plugin);
+
+                if(!inventoryName.equals(BetterEnderChest.publicChestName)
+                        && !Bukkit.getOfflinePlayer(inventoryName).isOnline()
+                        && inventory.getViewers().size() == 0) {
+                    // This inventory is NOT the public chest, the owner is NOT online and NO ONE is viewing it
+                    // So unload it
+                    inventories.remove(inventoryName);
+                }
+            }
+        }
     }
 
     /**
@@ -99,21 +121,28 @@ public class BetterEnderStorage {
      */
     public void unloadInventory(String inventoryName, String worldName) {
 	inventoryName = inventoryName.toLowerCase();
-
-	// remove it from the list
-	inventories.remove(inventoryName);
+	String groupName = plugin.getGroups().getGroup(worldName);
+	
+	// Remove it from the list
+	if(inventories.containsKey(groupName)) {
+	    inventories.get(groupName).remove(inventoryName);
+	}
     }
 
     public String toString() {
-	StringBuilder builder = new StringBuilder();
-	for (String inventoryName : inventories.keySet()) {
-	    builder.append(',');
-	    builder.append(((BetterEnderHolder) inventories.get(inventoryName)
-		    .getHolder()).getOwnerName());
-	}
-	if (builder.length() > 0) {
-	    builder.deleteCharAt(0);// remove the first ,
-	} else {
+        StringBuilder builder = new StringBuilder();
+        for (String groupName : inventories.keySet()) {
+            HashMap<String, Inventory> group = inventories.get(groupName);
+            if(group.size()>0) {
+                builder.append("GROUP " + groupName + ":");
+                for (String inventoryName: group.keySet()) {
+                    builder.append(((BetterEnderHolder) group.get(inventoryName).getHolder()).getOwnerName());
+                    builder.append(',');
+                }
+            }
+        }
+	
+	if (builder.length() == 0) {
 	    builder.append("No inventories loaded.");
 	}
 	return builder.toString();
