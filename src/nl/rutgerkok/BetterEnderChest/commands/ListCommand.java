@@ -6,10 +6,8 @@ import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
 
 public class ListCommand extends BaseCommand {
 
-    private BetterEnderChest plugin;
-
     public ListCommand(BetterEnderChest plugin) {
-        this.plugin = plugin;
+        super(plugin);
     }
 
     @Override

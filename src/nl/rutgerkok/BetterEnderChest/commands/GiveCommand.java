@@ -10,65 +10,67 @@ import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
 
 public class GiveCommand extends BaseCommand {
 
-    private BetterEnderChest plugin;
-
     public GiveCommand(BetterEnderChest plugin) {
-        this.plugin = plugin;
+        super(plugin);
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 2)
             return false;
-        
+
         String inventoryName = getInventoryName(args[0]);
-        String worldName = getWorldName(args[0],sender);
-        
+        String groupName = getGroupName(args[0], sender);
+
         if (isValidPlayer(inventoryName)) {
-            Inventory inventory = plugin.getEnderChests().getInventory(inventoryName,worldName);
-            boolean valid = true;
+            if (isValidGroup(groupName)) {
+                Inventory inventory = plugin.getEnderChests().getInventory(inventoryName, groupName);
+                boolean valid = true;
 
-            Material material = Material.matchMaterial(args[1]);
-            if (material != null) {
-                
-                // Count
-                int count = 1;
-                if (args.length >= 3) { // set the count
-                    try {
-                        count = Integer.parseInt(args[2]);
-                        if (count > material.getMaxStackSize()) {
-                            sender.sendMessage(ChatColor.RED + "Amount was capped at " + material.getMaxStackSize() + ".");
-                            count = material.getMaxStackSize();
+                Material material = Material.matchMaterial(args[1]);
+                if (material != null) {
+
+                    // Count
+                    int count = 1;
+                    if (args.length >= 3) { // set the count
+                        try {
+                            count = Integer.parseInt(args[2]);
+                            if (count > material.getMaxStackSize()) {
+                                sender.sendMessage(ChatColor.RED + "Amount was capped at " + material.getMaxStackSize() + ".");
+                                count = material.getMaxStackSize();
+                            }
+                        } catch (NumberFormatException e) {
+                            sender.sendMessage("" + ChatColor.RED + args[2] + " is not a valid amount!");
+                            valid = false;
                         }
-                    } catch (NumberFormatException e) {
-                        sender.sendMessage("" + ChatColor.RED + args[2] + " is not a valid amount!");
-                        valid = false;
                     }
-                }
 
-                // Damage value
-                byte damage = 0;
-                if (args.length >= 4) { // Set the damage
-                    try {
-                        damage = Byte.parseByte(args[3]);
-                    } catch (NumberFormatException e) {
-                        sender.sendMessage("" + ChatColor.RED + args[3] + " is not a valid damage value!");
-                        valid = false;
+                    // Damage value
+                    byte damage = 0;
+                    if (args.length >= 4) { // Set the damage
+                        try {
+                            damage = Byte.parseByte(args[3]);
+                        } catch (NumberFormatException e) {
+                            sender.sendMessage("" + ChatColor.RED + args[3] + " is not a valid damage value!");
+                            valid = false;
+                        }
                     }
-                }
 
-                // Add the item to the inventory
-                if (valid) {
-                    inventory.addItem(new ItemStack(material, count, damage));
-                    sender.sendMessage("Item added to the Ender inventory of " + args[0]);
+                    // Add the item to the inventory
+                    if (valid) {
+                        inventory.addItem(new ItemStack(material, count, damage));
+                        sender.sendMessage("Item added to the Ender inventory of " + args[0]);
+                    }
+                } else {
+                    sender.sendMessage("" + ChatColor.RED + material + " is not a valid material!");
                 }
             } else {
-                sender.sendMessage("" + ChatColor.RED + material + " is not a valid material!");
+                sender.sendMessage(ChatColor.RED + "The group " + groupName + " doesn't exist!");
             }
         } else {
             sender.sendMessage(ChatColor.RED + inventoryName + " was never seen on this server!");
         }
-        
+
         return true;
     }
 

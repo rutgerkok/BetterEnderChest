@@ -93,4 +93,8 @@ public class BetterEnderGroups {
             plugin.getConfig().set("Groups." + groupName, list);
         }
     }
+
+    public boolean groupExists(String name) {
+        return worlds.containsValue(name.toLowerCase());
+    }
 }

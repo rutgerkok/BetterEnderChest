@@ -10,10 +10,8 @@ import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
 
 public class DeleteInvCommand extends BaseCommand {
 
-    private BetterEnderChest plugin;
-
     public DeleteInvCommand(BetterEnderChest plugin) {
-        this.plugin = plugin;
+        super(plugin);
     }
 
     @Override
@@ -21,23 +19,30 @@ public class DeleteInvCommand extends BaseCommand {
         if (args.length != 1)
             return false; // Wrong argument count!
 
-        if (BaseCommand.isValidPlayer(getInventoryName(args[0]))) {
-            // get the inventory
-            Inventory inventory = plugin.getEnderChests().getInventory(getInventoryName(args[0]), getWorldName(args[0], sender));
+        String inventoryName = getInventoryName(args[0]);
+        String groupName = getGroupName(args[0], sender);
 
-            // Remove all the viewers
-            for (HumanEntity player : inventory.getViewers()) {
-                player.closeInventory();
-                if (player instanceof Player) {
-                    ((Player) player).sendMessage(ChatColor.YELLOW + "An admin just deleted this inventory.");
+        if (isValidPlayer(inventoryName)) {
+            if (isValidGroup(groupName)) {
+                // Get the inventory
+                Inventory inventory = plugin.getEnderChests().getInventory(inventoryName, groupName);
+
+                // Remove all the viewers
+                for (HumanEntity player : inventory.getViewers()) {
+                    player.closeInventory();
+                    if (player instanceof Player) {
+                        ((Player) player).sendMessage(ChatColor.YELLOW + "An admin just deleted this inventory.");
+                    }
                 }
-            }
 
-            // Clear it.
-            inventory.clear();
-            sender.sendMessage(ChatColor.GREEN + "Succesfully removed inventory!");
+                // Clear it.
+                inventory.clear();
+                sender.sendMessage(ChatColor.GREEN + "Succesfully removed inventory!");
+            } else {
+                sender.sendMessage(ChatColor.RED + "The group " + groupName + " doesn't exist.");
+            }
         } else {
-            sender.sendMessage(ChatColor.RED + "The player " + args[0] + " was never seen on this server.");
+            sender.sendMessage(ChatColor.RED + "The player " + inventoryName + " was never seen on this server.");
         }
         return true;
     }

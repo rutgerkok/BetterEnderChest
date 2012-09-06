@@ -24,11 +24,9 @@ public class BetterEnderStorage {
      * @param inventoryName
      * @return
      */
-    public Inventory getInventory(String inventoryName, String worldName) {
+    public Inventory getInventory(String inventoryName, String groupName) {
         // Always lowercase
 	inventoryName = inventoryName.toLowerCase();
-	// Get the group
-	String groupName = plugin.getGroups().getGroup(worldName);
 	// Check if loaded
 	if (inventories.containsKey(groupName) && inventories.get(groupName).containsKey(inventoryName)) { 
 	    // Already loaded, return it
@@ -57,11 +55,9 @@ public class BetterEnderStorage {
      * @param inventory
      *            The new inventory
      */
-    public void setInventory(String inventoryName, String worldName, Inventory enderInventory) {
+    public void setInventory(String inventoryName, String groupName, Inventory enderInventory) {
         // Always lowercase
         inventoryName = inventoryName.toLowerCase();
-        // Get the group
-        String groupName = plugin.getGroups().getGroup(worldName);
         // Check if something from that group has been loaded
         if(!inventories.containsKey(groupName)) {
             // If not, create the group first
@@ -76,11 +72,9 @@ public class BetterEnderStorage {
      * 
      * @param inventoryName
      */
-    public void saveInventory(String inventoryName, String worldName) {
+    public void saveInventory(String inventoryName, String groupName) {
         // Always lowercase
         inventoryName = inventoryName.toLowerCase();
-        // Get the group
-        String groupName = plugin.getGroups().getGroup(worldName);
 
         if (!inventories.containsKey(groupName) || !inventories.get(groupName).containsKey(inventoryName)) {
             // Oops! Inventory hasn't been loaded. Nothing to save.
@@ -119,9 +113,8 @@ public class BetterEnderStorage {
      * 
      * @param inventoryName
      */
-    public void unloadInventory(String inventoryName, String worldName) {
+    public void unloadInventory(String inventoryName, String groupName) {
 	inventoryName = inventoryName.toLowerCase();
-	String groupName = plugin.getGroups().getGroup(worldName);
 	
 	// Remove it from the list
 	if(inventories.containsKey(groupName)) {
