@@ -3,6 +3,7 @@ package nl.rutgerkok.BetterEnderChest;
 import java.io.File;
 import java.util.logging.Logger;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -20,13 +21,13 @@ public class BetterEnderChest extends JavaPlugin {
     private String chestDrop, chestDropSilkTouch, chestDropCreative;
     private static File chestSaveLocation;
     public static final String publicChestName = "--publicchest", defaultChestName = "--defaultchest", defaultGroupName = "default";
-    public static String publicChestDisplayName;
 
     /**
      * Inner class to store some variables.
      */
     public static class PublicChest {
         public static boolean openOnOpeningUnprotectedChest, openOnOpeningPluginChest;
+        public static String displayName, closeMessage;
     }
 
     // onEnable and onDisable
@@ -278,6 +279,7 @@ public class BetterEnderChest extends JavaPlugin {
     // Private methods
 
     private void initConfig() {
+        // Converting
         if (getConfig().getInt("EnderChest.rows", -1) != -1) {
             // Found an old config!
             logThis("Converting config.yml to new format...");
@@ -340,8 +342,12 @@ public class BetterEnderChest extends JavaPlugin {
         PublicChest.openOnOpeningUnprotectedChest = getConfig().getBoolean("PublicEnderChest.showOnOpeningUnprotectedChest", false);
         getConfig().set("PublicEnderChest.showOnOpeningUnprotectedChest", PublicChest.openOnOpeningUnprotectedChest);
         // display name?
-        BetterEnderChest.publicChestDisplayName = getConfig().getString("PublicEnderChest.name", "Public Chest");
-        getConfig().set("PublicEnderChest.name", BetterEnderChest.publicChestDisplayName);
+        BetterEnderChest.PublicChest.displayName = getConfig().getString("PublicEnderChest.name", "Public Chest");
+        getConfig().set("PublicEnderChest.name", BetterEnderChest.PublicChest.displayName);
+        // close message?
+        BetterEnderChest.PublicChest.closeMessage = getConfig().getString("PublicEnderChest.closeMessage", "This was a public Ender Chest. Remember that your items aren't save.");
+        getConfig().set("PublicEnderChest.closeMessage", BetterEnderChest.PublicChest.closeMessage);
+        BetterEnderChest.PublicChest.closeMessage = ChatColor.translateAlternateColorCodes('&', BetterEnderChest.PublicChest.closeMessage);
         // rows?
         publicChestRows = getConfig().getInt("PublicEnderChest.defaultRows", chestRows);
         if (publicChestRows < 1 || publicChestRows > 20) {

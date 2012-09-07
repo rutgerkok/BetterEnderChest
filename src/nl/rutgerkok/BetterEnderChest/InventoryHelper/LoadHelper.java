@@ -22,7 +22,7 @@ public class LoadHelper {
 
         if (inventoryName.equals(BetterEnderChest.publicChestName)) {
             // Public chest
-            title = "Ender Chest (" + BetterEnderChest.publicChestDisplayName + ")";
+            title = "Ender Chest (" + BetterEnderChest.PublicChest.displayName + ")";
         } else {
             // Private chest
             title = "Ender Chest (" + inventoryName + ")";
@@ -31,6 +31,12 @@ public class LoadHelper {
         return title;
     }
 
+    /**
+     * Creates an empty inventory with the given name and rows.
+     * @param inventoryName
+     * @param inventoryRows
+     * @return
+     */
     public static Inventory loadEmptyInventory(String inventoryName, int inventoryRows) {
 
         // Find out if it's case-correct
@@ -51,8 +57,6 @@ public class LoadHelper {
 
         // Return the inventory
         return Bukkit.createInventory(new BetterEnderHolder(inventoryName, caseCorrect), inventoryRows * 9, getInventoryTitle(inventoryName)); // Smiley
-                                                                                                                                               // unintended
-
     }
 
     /**
@@ -69,11 +73,14 @@ public class LoadHelper {
      *            The rows that should be in the inventory
      * @param plugin
      *            The plugin, for logging
-     * @return
+     * @return The inventory, null if the file doesn't exist
      * @throws IOException
      */
     public static Inventory loadInventoryFromFile(String inventoryName, int inventoryRows, File file, String inventoryTagName) throws IOException {
-
+        if(!file.exists()) {
+            // Return nothing if the file doesn't exist
+            return null;
+        }
         // Main tag, represents the file
         Tag mainNBT = Tag.readFrom(new FileInputStream(file));
 
@@ -133,6 +140,13 @@ public class LoadHelper {
         return inventory;
     }
 
+    /**
+     * Imports inventory from Bukkit.
+     * @param inventoryName
+     * @param inventoryRows
+     * @return The inventory, null if there isn't an inventory
+     * @throws IOException
+     */
     public static Inventory loadInventoryFromCraftBukkit(final String inventoryName, int inventoryRows) throws IOException {
         Player player = Bukkit.getPlayerExact(inventoryName);
         if (player == null) {
@@ -149,15 +163,19 @@ public class LoadHelper {
 
             // Check if the file exists
             if (files.length == 0) {
-                // File not found
-                return loadEmptyInventory(inventoryName, inventoryRows);
+                // File not found, return null
+                return null;
             }
 
-            // Load it from the file
+            // Load it from the file (mainworld/players/playername.dat)
             return loadInventoryFromFile(inventoryName, inventoryRows, new File(playerStorage.getAbsolutePath() + "/" + files[0]), "EnderItems");
         } else {
             // Online, load now
             Inventory vanillaInventory = player.getEnderChest();
+            if(!vanillaInventory.iterator().hasNext()) {
+                // Empty inventory, return null
+                return null;
+            }
             Inventory betterInventory = loadEmptyInventory(inventoryName, inventoryRows);
 
             // Copy all items
