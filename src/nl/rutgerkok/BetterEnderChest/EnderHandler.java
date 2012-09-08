@@ -1,6 +1,7 @@
 package nl.rutgerkok.BetterEnderChest;
 
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -99,33 +100,43 @@ public class EnderHandler implements Listener {
 
         Block block = event.getBlock();
         Material material = block.getType();
-        if (material.equals(plugin.getChestMaterial())) { // if a chest is being
-            // broken, and not
-            // by Silk touch
+        if (material.equals(plugin.getChestMaterial())) {
+            // If an Ender Chest is being broken
             event.setCancelled(true);
             block.setData((byte) 0);
             block.setType(Material.AIR);
 
-            String chestDropString = plugin.getChestDropString(event.getPlayer().getItemInHand().getEnchantments().containsKey(Enchantment.SILK_TOUCH));
+            // Get the right chest drop
+            String chestDropString = plugin.chestDrop;
 
+            if (event.getPlayer().getItemInHand().getEnchantments().containsKey(Enchantment.SILK_TOUCH)) {
+                // Silk touch
+                chestDropString = plugin.chestDropSilkTouch;
+            }
+            
+            if (event.getPlayer().getGameMode() == GameMode.CREATIVE) {
+                // Creative mode
+                chestDropString = plugin.chestDropCreative;
+            }
+            
+            // Drop it
             if (chestDropString.equals("OBSIDIAN") || chestDropString.equals("OBSIDIAN_WITH_EYE_OF_ENDER") || chestDropString.equals("OBSIDIAN_WITH_ENDER_PEARL")) {
+                // Drop 8 obsidian
                 event.getPlayer().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(Material.OBSIDIAN, 8));
             }
 
-            if (chestDropString.equals("OBSIDIAN_WITH_EYE_OF_ENDER") || chestDropString.equals("EYE_OF_ENDER")) { // drop
-                                                                                                                  // eye
-                                                                                                                  // of
-                // ender
+            if (chestDropString.equals("OBSIDIAN_WITH_EYE_OF_ENDER") || chestDropString.equals("EYE_OF_ENDER")) {
+                // Drop Eye of Ender
                 event.getPlayer().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(Material.EYE_OF_ENDER));
             }
 
-            if (chestDropString.equals("OBSIDIAN_WITH_ENDER_PEARL") || chestDropString.equals("ENDER_PEARL")) { // drop
-                                                                                                                // ender
-                // pearl
+            if (chestDropString.equals("OBSIDIAN_WITH_ENDER_PEARL") || chestDropString.equals("ENDER_PEARL")) {
+                // Drop Ender Pearl
                 event.getPlayer().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(Material.ENDER_PEARL));
             }
 
-            if (chestDropString.equals("ITSELF")) { // drop the chest itself
+            if (chestDropString.equals("ITSELF")) {
+                // Drop itself
                 event.getPlayer().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(material));
             }
         }

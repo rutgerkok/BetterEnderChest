@@ -18,8 +18,9 @@ public class BetterEnderChest extends JavaPlugin {
     private Bridge protectionBridge;
     private int chestRows, publicChestRows;
     private boolean usePermissions;
-    private String chestDrop, chestDropSilkTouch, chestDropCreative;
     private static File chestSaveLocation;
+    public String chestDrop, chestDropSilkTouch, chestDropCreative;
+    public static String importingGroupName;
     public static final String publicChestName = "--publicchest", defaultChestName = "--defaultchest", defaultGroupName = "default";
 
     /**
@@ -85,19 +86,6 @@ public class BetterEnderChest extends JavaPlugin {
     }
 
     // Public methods
-
-    /**
-     * Gets the string of the chest drop. See documentation online.
-     * 
-     * @param silkTouch
-     *            - whether to use Silk Touch
-     * @return String of the chest drop
-     */
-    public String getChestDropString(boolean silkTouch) {
-        if (silkTouch)
-            return chestDropSilkTouch;
-        return chestDrop;
-    }
 
     /**
      * Gets the current chest material
@@ -359,6 +347,7 @@ public class BetterEnderChest extends JavaPlugin {
     }
 
     private void convertConfig() {
+        // This imports the old config. For any missing options it uses the old default values.
         getConfig().set("BetterEnderChest.usePermissions", getConfig().getBoolean("Permissions.enabled", false));
         getConfig().set("BetterEnderChest.saveFolderLocation", getConfig().getString("EnderChest.saveFolderLocation", "SERVER_ROOT"));
         getConfig().set("BetterEnderChest.drop", getConfig().getString("EnderChest.drop", "OBSIDIAN"));
