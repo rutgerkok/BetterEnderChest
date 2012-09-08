@@ -180,24 +180,28 @@ public class LoadHelper {
             // Copy all items
             ListIterator<ItemStack> copyIterator = vanillaInventory.iterator();
             while (copyIterator.hasNext()) {
-                betterEnderInventory.setItem(copyIterator.nextIndex(), copyIterator.next());
+                int slot = copyIterator.nextIndex();
+                ItemStack stack = copyIterator.next();
+                if (slot < betterEnderInventory.getSize()) {
+                    betterEnderInventory.setItem(slot, stack);
+                }
             }
         }
-        
+
         // Check if the inventory is empty
         boolean empty = true;
         ListIterator<ItemStack> iterator = betterEnderInventory.iterator();
         while (iterator.hasNext()) {
-            if(iterator.next() != null) {
+            if (iterator.next() != null) {
                 empty = false;
             }
         }
-        if(empty) {
+        if (empty) {
             // Empty inventory, return null
             return null;
         } else {
             // Return the inventory
             return betterEnderInventory;
-        }        
+        }
     }
 }

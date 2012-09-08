@@ -72,6 +72,13 @@ public class BetterEnderGroups {
                 worlds.put(worldName, BetterEnderChest.defaultGroupName);
             }
         }
+        
+        // Read the importing group
+        BetterEnderChest.importingGroupName = plugin.getConfig().getString("Groups.importingGroup", BetterEnderChest.defaultGroupName).toLowerCase();
+        if(!groupExists(BetterEnderChest.importingGroupName)) {
+            plugin.logThis("The group " + BetterEnderChest.importingGroupName + " doesn't exist! Reverting to " + BetterEnderChest.defaultGroupName, "WARNING");
+            BetterEnderChest.importingGroupName = BetterEnderChest.defaultGroupName;
+        }
     }
 
     /**
@@ -79,6 +86,9 @@ public class BetterEnderGroups {
      */
     private void writeConfig() {
         for (String worldName : worlds.keySet()) {
+            // First of all, store the importing group
+            plugin.getConfig().set("Groups.importingGroup", BetterEnderChest.importingGroupName);
+            
             // For each world, get the group
             String groupName = worlds.get(worldName);
             // Get the list where the world should be in

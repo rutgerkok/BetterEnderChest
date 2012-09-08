@@ -13,19 +13,17 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class EnderSaveAndLoad {
-    
-    
+
     public static File getChestFile(String inventoryName, String groupName) {
-        if(groupName.equals(BetterEnderChest.defaultGroupName)) {
+        if (groupName.equals(BetterEnderChest.defaultGroupName)) {
             // Default group? File isn't in a subdirectory.
             return new File(BetterEnderChest.getChestSaveLocation().getPath() + "/" + inventoryName + ".dat");
-        }
-        else {
+        } else {
             // Another group? Save in subdirectory.
             return new File(BetterEnderChest.getChestSaveLocation().getPath() + "/" + groupName + "/" + inventoryName + ".dat");
-        }   
+        }
     }
-    
+
     /**
      * Saves the inventory.
      * 
@@ -57,7 +55,7 @@ public class EnderSaveAndLoad {
         while (iterator.hasNext()) { // .. find all the ItemStacks, ...
             slot = iterator.nextIndex();
             ItemStack stack = iterator.next();
-            if (stack != null) { 
+            if (stack != null) {
                 // ... and as long as the stack isn't null, we
                 // add it to the inventory tag
                 inventoryNBT[0].addTag(ItemStackHelper.getNBTFromStack(stack, slot));
@@ -107,11 +105,10 @@ public class EnderSaveAndLoad {
         }
 
         // Try to load it from a file
-        System.out.println("Loading from a file...");
         File file = getChestFile(inventoryName, groupName);
         try {
-            Inventory chestInventory =  LoadHelper.loadInventoryFromFile(inventoryName, inventoryRows, file, "Inventory");
-            if(chestInventory != null) {
+            Inventory chestInventory = LoadHelper.loadInventoryFromFile(inventoryName, inventoryRows, file, "Inventory");
+            if (chestInventory != null) {
                 return chestInventory;
             }
         } catch (IOException e) {
@@ -119,33 +116,35 @@ public class EnderSaveAndLoad {
             plugin.logThis("Could not load inventory " + inventoryName, "SEVERE");
             plugin.logThis("Path:" + file.getAbsolutePath(), "SEVERE");
             e.printStackTrace();
-            
-            // Return an empty inventory. Importing it again from Bukkit/loading the default chest could cause item duplication glitches.
+
+            // Return an empty inventory. Importing it again from Bukkit/loading
+            // the default chest could cause item duplication glitches.
             return LoadHelper.loadEmptyInventory(inventoryName, inventoryRows);
         }
 
-        // Try to load it from Bukkit
-        System.out.println("Loading from Bukkit...");
-        try {
-            Inventory bukkitInventory = LoadHelper.loadInventoryFromCraftBukkit(inventoryName, inventoryRows);
-            if(bukkitInventory != null) {
-                return bukkitInventory;
-            }    
-        } catch (IOException e) {
-            plugin.logThis("Could not import inventory " + inventoryName, "SEVERE");
-            e.printStackTrace();
-            
-            // Return an empty inventory. Loading the default chest again could cause issues when someone
-            // finds a way to constantly break this plugin.
-            return LoadHelper.loadEmptyInventory(inventoryName, inventoryRows);
+        // Try to load it from Bukkit (but only if in the correct group)
+        if (groupName.equals(BetterEnderChest.importingGroupName)) {
+            try {
+                Inventory bukkitInventory = LoadHelper.loadInventoryFromCraftBukkit(inventoryName, inventoryRows);
+                if (bukkitInventory != null) {
+                    return bukkitInventory;
+                }
+            } catch (IOException e) {
+                plugin.logThis("Could not import inventory " + inventoryName, "SEVERE");
+                e.printStackTrace();
+
+                // Return an empty inventory. Loading the default chest again
+                // could cause issues when someone
+                // finds a way to constantly break this plugin.
+                return LoadHelper.loadEmptyInventory(inventoryName, inventoryRows);
+            }
         }
-        
+
         // Try to load the default inventory
-        System.out.println("Loading from default...");
         File defaultFile = getChestFile(BetterEnderChest.defaultChestName, groupName);
         try {
-            Inventory defaultInventory =  LoadHelper.loadInventoryFromFile(inventoryName, inventoryRows, defaultFile, "Inventory");
-            if(defaultInventory != null) {
+            Inventory defaultInventory = LoadHelper.loadInventoryFromFile(inventoryName, inventoryRows, defaultFile, "Inventory");
+            if (defaultInventory != null) {
                 return defaultInventory;
             }
         } catch (IOException e) {
@@ -154,10 +153,10 @@ public class EnderSaveAndLoad {
             plugin.logThis("Path:" + defaultFile.getAbsolutePath(), "SEVERE");
             e.printStackTrace();
         }
-        
+
         // Return an empty chest
-        // (only happens when there is saved chest, nothing can be imported and there is no default chest)
-        System.out.println("Empty...");
+        // (only happens when there is saved chest, nothing can be imported and
+        // there is no default chest)
         return LoadHelper.loadEmptyInventory(inventoryName, inventoryRows);
     }
 }
