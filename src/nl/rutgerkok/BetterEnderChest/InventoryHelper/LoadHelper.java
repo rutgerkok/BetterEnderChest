@@ -33,6 +33,7 @@ public class LoadHelper {
 
     /**
      * Creates an empty inventory with the given name and rows.
+     * 
      * @param inventoryName
      * @param inventoryRows
      * @return
@@ -77,7 +78,7 @@ public class LoadHelper {
      * @throws IOException
      */
     public static Inventory loadInventoryFromFile(String inventoryName, int inventoryRows, File file, String inventoryTagName) throws IOException {
-        if(!file.exists()) {
+        if (!file.exists()) {
             // Return nothing if the file doesn't exist
             return null;
         }
@@ -142,6 +143,7 @@ public class LoadHelper {
 
     /**
      * Imports inventory from Bukkit.
+     * 
      * @param inventoryName
      * @param inventoryRows
      * @return The inventory, null if there isn't an inventory
@@ -149,6 +151,7 @@ public class LoadHelper {
      */
     public static Inventory loadInventoryFromCraftBukkit(final String inventoryName, int inventoryRows) throws IOException {
         Player player = Bukkit.getPlayerExact(inventoryName);
+        Inventory betterEnderInventory;
         if (player == null) {
 
             // Offline, load from file
@@ -168,23 +171,33 @@ public class LoadHelper {
             }
 
             // Load it from the file (mainworld/players/playername.dat)
-            return loadInventoryFromFile(inventoryName, inventoryRows, new File(playerStorage.getAbsolutePath() + "/" + files[0]), "EnderItems");
+            betterEnderInventory = loadInventoryFromFile(inventoryName, inventoryRows, new File(playerStorage.getAbsolutePath() + "/" + files[0]), "EnderItems");
         } else {
             // Online, load now
             Inventory vanillaInventory = player.getEnderChest();
-            if(!vanillaInventory.iterator().hasNext()) {
-                // Empty inventory, return null
-                return null;
-            }
-            Inventory betterInventory = loadEmptyInventory(inventoryName, inventoryRows);
+            betterEnderInventory = loadEmptyInventory(inventoryName, inventoryRows);
 
             // Copy all items
-            ListIterator<ItemStack> iterator = vanillaInventory.iterator();
-            while (iterator.hasNext()) {
-                betterInventory.setItem(iterator.nextIndex(), iterator.next());
+            ListIterator<ItemStack> copyIterator = vanillaInventory.iterator();
+            while (copyIterator.hasNext()) {
+                betterEnderInventory.setItem(copyIterator.nextIndex(), copyIterator.next());
             }
-
-            return betterInventory;
         }
+        
+        // Check if the inventory is empty
+        boolean empty = true;
+        ListIterator<ItemStack> iterator = betterEnderInventory.iterator();
+        while (iterator.hasNext()) {
+            if(iterator.next() != null) {
+                empty = false;
+            }
+        }
+        if(empty) {
+            // Empty inventory, return null
+            return null;
+        } else {
+            // Return the inventory
+            return betterEnderInventory;
+        }        
     }
 }

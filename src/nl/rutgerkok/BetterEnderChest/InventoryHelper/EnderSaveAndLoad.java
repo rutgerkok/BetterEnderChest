@@ -23,9 +23,9 @@ public class EnderSaveAndLoad {
         else {
             // Another group? Save in subdirectory.
             return new File(BetterEnderChest.getChestSaveLocation().getPath() + "/" + groupName + "/" + inventoryName + ".dat");
-        }
-            
+        }   
     }
+    
     /**
      * Saves the inventory.
      * 
@@ -99,36 +99,65 @@ public class EnderSaveAndLoad {
         int inventoryRows;
 
         // Get the number of rows
-        if (inventoryName.equals(BetterEnderChest.publicChestName)) { // public
-                                                                      // chest
+        if (inventoryName.equals(BetterEnderChest.publicChestName)) {
+            // Public chest
             inventoryRows = plugin.getPublicChestRows();
         } else { // private chest
             inventoryRows = plugin.getChestRows();
         }
 
         // Try to load it from a file
+        System.out.println("Loading from a file...");
         File file = getChestFile(inventoryName, groupName);
         try {
-            if (file.exists()) {
-                // Load it from a file (if it exists)
-                return LoadHelper.loadInventoryFromFile(inventoryName, inventoryRows, file, "Inventory");
+            Inventory chestInventory =  LoadHelper.loadInventoryFromFile(inventoryName, inventoryRows, file, "Inventory");
+            if(chestInventory != null) {
+                return chestInventory;
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
+            // Something went wrong...
             plugin.logThis("Could not load inventory " + inventoryName, "SEVERE");
             plugin.logThis("Path:" + file.getAbsolutePath(), "SEVERE");
             e.printStackTrace();
             
-            // Return an empty inventory. Importing it again from Bukkit could cause item duplication glitches.
+            // Return an empty inventory. Importing it again from Bukkit/loading the default chest could cause item duplication glitches.
             return LoadHelper.loadEmptyInventory(inventoryName, inventoryRows);
         }
 
         // Try to load it from Bukkit
+        System.out.println("Loading from Bukkit...");
         try {
-            return LoadHelper.loadInventoryFromCraftBukkit(inventoryName, inventoryRows);
-        } catch (Exception e) {
+            Inventory bukkitInventory = LoadHelper.loadInventoryFromCraftBukkit(inventoryName, inventoryRows);
+            if(bukkitInventory != null) {
+                return bukkitInventory;
+            }    
+        } catch (IOException e) {
             plugin.logThis("Could not import inventory " + inventoryName, "SEVERE");
             e.printStackTrace();
+            
+            // Return an empty inventory. Loading the default chest again could cause issues when someone
+            // finds a way to constantly break this plugin.
             return LoadHelper.loadEmptyInventory(inventoryName, inventoryRows);
         }
+        
+        // Try to load the default inventory
+        System.out.println("Loading from default...");
+        File defaultFile = getChestFile(BetterEnderChest.defaultChestName, groupName);
+        try {
+            Inventory defaultInventory =  LoadHelper.loadInventoryFromFile(inventoryName, inventoryRows, defaultFile, "Inventory");
+            if(defaultInventory != null) {
+                return defaultInventory;
+            }
+        } catch (IOException e) {
+            // Something went wrong
+            plugin.logThis("Could not load the default chest for " + inventoryName, "SEVERE");
+            plugin.logThis("Path:" + defaultFile.getAbsolutePath(), "SEVERE");
+            e.printStackTrace();
+        }
+        
+        // Return an empty chest
+        // (only happens when there is saved chest, nothing can be imported and there is no default chest)
+        System.out.println("Empty...");
+        return LoadHelper.loadEmptyInventory(inventoryName, inventoryRows);
     }
 }
