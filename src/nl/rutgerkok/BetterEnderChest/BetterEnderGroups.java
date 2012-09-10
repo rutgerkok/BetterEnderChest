@@ -16,7 +16,7 @@ public class BetterEnderGroups {
 
     public BetterEnderGroups(BetterEnderChest plugin) {
         this.plugin = plugin;
-        worlds = new HashMap<String, String>();
+        worlds = new HashMap<String, String>();//<World,Group>
     }
 
     public String getGroup(String world) {
