@@ -31,6 +31,14 @@ public class BetterEnderChest extends JavaPlugin {
         public static String displayName, closeMessage;
     }
 
+    /**
+     * Another inner class to store some variables.
+     */
+    public static class AutoSave {
+        public static int autoSaveIntervalTicks, saveTickInterval, chestsPerSaveTick;
+        public static boolean showAutoSaveMessage;
+    }
+
     // onEnable and onDisable
 
     public void onEnable() {
@@ -315,6 +323,30 @@ public class BetterEnderChest extends JavaPlugin {
         usePermissions = getConfig().getBoolean("BetterEnderChest.usePermissions", false);
         getConfig().set("BetterEnderChest.usePermissions", usePermissions);
 
+        // Autosave
+        // ticks?
+        AutoSave.autoSaveIntervalTicks = getConfig().getInt("AutoSave.autoSaveIntervalSeconds", 300) * 20;
+        if (AutoSave.autoSaveIntervalTicks <= 20 * 120) {
+            logThis("You need at least two minutes between each autosave. Changed it to two minutes.", "WARNING");
+            AutoSave.autoSaveIntervalTicks = 20 * 120;
+            getConfig().set("AutoSave.autoSaveIntervalSeconds", AutoSave.autoSaveIntervalTicks / 20);
+        }
+        if (AutoSave.autoSaveIntervalTicks >= 15 * 60 * 120) {
+            logThis("You have set a long time between the autosaves. Remember that chest unloading is also done during the autosave.", "WARNING");
+        }
+        // chests per saveTick?
+        AutoSave.chestsPerSaveTick = getConfig().getInt("AutoSave.chestsPerSaveTick", 3);
+        if (AutoSave.chestsPerSaveTick < 1) {
+            logThis("You can't save " + AutoSave.chestsPerSaveTick + " chest per saveTick! Changed it to 3.", "WARNING");
+            AutoSave.chestsPerSaveTick = 3;
+            getConfig().set("AutoSave.chestsPerSaveTick", AutoSave.chestsPerSaveTick);
+        }
+        if (AutoSave.chestsPerSaveTick > 10) {
+            logThis("You have set AutoSave.chestsPerSaveTick to " + AutoSave.chestsPerSaveTick + ". This could cause lag when it has to save a lot of chests.", "WARNING");
+        }
+        // enable message?
+        AutoSave.showAutoSaveMessage = getConfig().getBoolean("AutoSave.showAutoSaveMessage", true);
+
         // Private chests
         // rows?
         chestRows = getConfig().getInt("PrivateEnderChest.defaultRows", 3);
@@ -347,7 +379,8 @@ public class BetterEnderChest extends JavaPlugin {
     }
 
     private void convertConfig() {
-        // This imports the old config. For any missing options it uses the old default values.
+        // This imports the old config. For any missing options it uses the old
+        // default values.
         getConfig().set("BetterEnderChest.usePermissions", getConfig().getBoolean("Permissions.enabled", false));
         getConfig().set("BetterEnderChest.saveFolderLocation", getConfig().getString("EnderChest.saveFolderLocation", "SERVER_ROOT"));
         getConfig().set("BetterEnderChest.drop", getConfig().getString("EnderChest.drop", "OBSIDIAN"));
