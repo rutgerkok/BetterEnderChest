@@ -1,5 +1,6 @@
 package nl.rutgerkok.BetterEnderChest;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -11,9 +12,11 @@ import org.bukkit.inventory.Inventory;
 public class BetterEnderStorage {
     private HashMap<String, HashMap<String, Inventory>> inventories;
     private BetterEnderChest plugin;
+    private ArrayList<String[]> saveQueue; //<GroupName,InventoryName>
 
     public BetterEnderStorage(BetterEnderChest plugin) {
 	inventories = new HashMap<String, HashMap<String, Inventory>>();
+	saveQueue = new ArrayList<String[]>();
 	this.plugin = plugin;
     }
 
@@ -85,9 +88,12 @@ public class BetterEnderStorage {
     }
 
     /**
-     * Saves all inventories, and unloads the one's that are not needed anymore
+     * Saves all inventories (causing some lag), and unloads the ones that are not needed anymore. Only call this when the server is shutting down!
      */
     public void saveAllInventories() {
+        // Clear the save queue. We are saving ALL chests!
+        
+        saveQueue.clear();
         for(Iterator<String> outerIterator = inventories.keySet().iterator(); outerIterator.hasNext();) {
             String groupName = outerIterator.next();
             HashMap<String, Inventory> group = inventories.get(groupName);
@@ -95,14 +101,14 @@ public class BetterEnderStorage {
                 String inventoryName = it.next();
                 Inventory inventory = group.get(inventoryName);
 
-                EnderSaveAndLoad.saveInventory(inventory, inventoryName, groupName, plugin);
-
+                saveInventory(inventoryName, groupName);
+                
                 if(!inventoryName.equals(BetterEnderChest.publicChestName)
                         && !Bukkit.getOfflinePlayer(inventoryName).isOnline()
                         && inventory.getViewers().size() == 0) {
                     // This inventory is NOT the public chest, the owner is NOT online and NO ONE is viewing it
                     // So unload it
-                    inventories.remove(inventoryName);
+                    unloadInventory(inventoryName, groupName);
                 }
             }
         }
@@ -120,6 +126,51 @@ public class BetterEnderStorage {
 	if(inventories.containsKey(groupName)) {
 	    inventories.get(groupName).remove(inventoryName);
 	}
+    }
+    
+    public void autoSave() {
+        for(Iterator<String> outerIterator = inventories.keySet().iterator(); outerIterator.hasNext();) {
+            String groupName = outerIterator.next();
+            HashMap<String, Inventory> group = inventories.get(groupName);
+            for(Iterator<String> it = group.keySet().iterator(); it.hasNext();) {
+                String inventoryName = it.next();
+
+                String[] forSaveQueue = {inventoryName,groupName};
+                plugin.logThis("Adding "+groupName+"/"+inventoryName+" to the save queue...");
+                saveQueue.add(forSaveQueue);
+            }
+        }
+    }
+    
+    /**
+     * Called whenever the plugin should save some chest
+     */
+    public void autoSaveTick() {
+        for(int i = 0; i<BetterEnderChest.AutoSave.chestsPerSaveTick; i++) {
+            if(saveQueue.isEmpty()) return; //Nothing to save
+            
+            String inventoryName = saveQueue.get(saveQueue.size()-1)[0];
+            String groupName = saveQueue.get(saveQueue.size()-1)[1];
+            Inventory inventory = getInventory(inventoryName,groupName);
+            
+            plugin.logThis("Saving "+groupName+"/"+inventoryName+" from the save queue...");
+            
+            // Saving
+            saveInventory(inventoryName, groupName);
+            
+            // Unloading
+            if(!inventoryName.equals(BetterEnderChest.publicChestName)
+                    && !Bukkit.getOfflinePlayer(inventoryName).isOnline()
+                    && inventory.getViewers().size() == 0) {
+                // This inventory is NOT the public chest, the owner is NOT online and NO ONE is viewing it
+                // So unload it
+                unloadInventory(inventoryName, groupName);
+            }
+            
+            // Remove it from the save queue
+            saveQueue.remove(saveQueue.size()-1);
+        }
+        
     }
 
     public String toString() {

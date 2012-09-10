@@ -35,8 +35,8 @@ public class BetterEnderChest extends JavaPlugin {
      * Another inner class to store some variables.
      */
     public static class AutoSave {
-        public static int autoSaveIntervalTicks, saveTickInterval, chestsPerSaveTick;
-        public static boolean showAutoSaveMessage;
+        public static int autoSaveIntervalTicks = 5*60*20, saveTickInterval = 10, chestsPerSaveTick = 3;
+        public static boolean showAutoSaveMessage = true;
     }
 
     // onEnable and onDisable
@@ -77,19 +77,26 @@ public class BetterEnderChest extends JavaPlugin {
         commandHandler = new EnderCommands(this);
         getCommand("betterenderchest").setExecutor(commandHandler);
 
-        // AutoSave
+        // AutoSave (adds things to the save queue
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             public void run() {
                 logThis("Autosaving...");
-                enderHandler.onSave();
+                enderStorage.autoSave();
             }
-        }, 20 * 300, 20 * 300);
+        }, AutoSave.autoSaveIntervalTicks, AutoSave.autoSaveIntervalTicks);
+        
+        // AutoSaveTick
+        getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+            public void run() {
+                enderStorage.autoSaveTick();
+            }
+        }, 60, AutoSave.saveTickInterval);
     }
 
     public void onDisable() {
-        if (enderHandler != null) {
-            enderHandler.onSave();
-            logThis("Disabling...");
+        if (enderStorage != null) {
+            logThis("Disabling... Saving all chests...");
+            enderStorage.saveAllInventories();
         }
     }
 
@@ -329,24 +336,24 @@ public class BetterEnderChest extends JavaPlugin {
         if (AutoSave.autoSaveIntervalTicks <= 20 * 120) {
             logThis("You need at least two minutes between each autosave. Changed it to two minutes.", "WARNING");
             AutoSave.autoSaveIntervalTicks = 20 * 120;
-            getConfig().set("AutoSave.autoSaveIntervalSeconds", AutoSave.autoSaveIntervalTicks / 20);
         }
         if (AutoSave.autoSaveIntervalTicks >= 15 * 60 * 120) {
             logThis("You have set a long time between the autosaves. Remember that chest unloading is also done during the autosave.", "WARNING");
         }
+        getConfig().set("AutoSave.autoSaveIntervalSeconds", AutoSave.autoSaveIntervalTicks / 20);
         // chests per saveTick?
         AutoSave.chestsPerSaveTick = getConfig().getInt("AutoSave.chestsPerSaveTick", 3);
         if (AutoSave.chestsPerSaveTick < 1) {
             logThis("You can't save " + AutoSave.chestsPerSaveTick + " chest per saveTick! Changed it to 3.", "WARNING");
             AutoSave.chestsPerSaveTick = 3;
-            getConfig().set("AutoSave.chestsPerSaveTick", AutoSave.chestsPerSaveTick);
         }
         if (AutoSave.chestsPerSaveTick > 10) {
             logThis("You have set AutoSave.chestsPerSaveTick to " + AutoSave.chestsPerSaveTick + ". This could cause lag when it has to save a lot of chests.", "WARNING");
         }
+        getConfig().set("AutoSave.chestsPerSaveTick", AutoSave.chestsPerSaveTick);
         // enable message?
         AutoSave.showAutoSaveMessage = getConfig().getBoolean("AutoSave.showAutoSaveMessage", true);
-
+        getConfig().set("AutoSave.showAutoSaveMessage", AutoSave.showAutoSaveMessage);
         // Private chests
         // rows?
         chestRows = getConfig().getInt("PrivateEnderChest.defaultRows", 3);
@@ -363,6 +370,10 @@ public class BetterEnderChest extends JavaPlugin {
         getConfig().set("PublicEnderChest.showOnOpeningUnprotectedChest", PublicChest.openOnOpeningUnprotectedChest);
         // display name?
         BetterEnderChest.PublicChest.displayName = getConfig().getString("PublicEnderChest.name", "Public Chest");
+        if(BetterEnderChest.PublicChest.displayName.length()>16) {
+            logThis("The public chest display name "+BetterEnderChest.PublicChest.displayName+" is too long. (Max lenght:15). Resetting it to Public Chest.","WARNING");
+            BetterEnderChest.PublicChest.displayName = "Public Chest";
+        }
         getConfig().set("PublicEnderChest.name", BetterEnderChest.PublicChest.displayName);
         // close message?
         BetterEnderChest.PublicChest.closeMessage = getConfig().getString("PublicEnderChest.closeMessage", "This was a public Ender Chest. Remember that your items aren't save.");
