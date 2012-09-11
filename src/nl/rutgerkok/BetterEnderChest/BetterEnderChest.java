@@ -35,7 +35,7 @@ public class BetterEnderChest extends JavaPlugin {
      * Another inner class to store some variables.
      */
     public static class AutoSave {
-        public static int autoSaveIntervalTicks = 5*60*20, saveTickInterval = 10, chestsPerSaveTick = 3;
+        public static int autoSaveIntervalTicks = 5 * 60 * 20, saveTickInterval = 10, chestsPerSaveTick = 3;
         public static boolean showAutoSaveMessage = true;
     }
 
@@ -84,7 +84,7 @@ public class BetterEnderChest extends JavaPlugin {
                 enderStorage.autoSave();
             }
         }, AutoSave.autoSaveIntervalTicks, AutoSave.autoSaveIntervalTicks);
-        
+
         // AutoSaveTick
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             public void run() {
@@ -332,15 +332,23 @@ public class BetterEnderChest extends JavaPlugin {
 
         // Autosave
         // ticks?
-        AutoSave.autoSaveIntervalTicks = getConfig().getInt("AutoSave.autoSaveIntervalSeconds", 300) * 20;
-        if (AutoSave.autoSaveIntervalTicks <= 20 * 120) {
+        int autoSaveIntervalSeconds = getConfig().getInt("AutoSave.autoSaveIntervalSeconds", 300);
+        if (autoSaveIntervalSeconds <= 120) {
             logThis("You need at least two minutes between each autosave. Changed it to two minutes.", "WARNING");
-            AutoSave.autoSaveIntervalTicks = 20 * 120;
+            autoSaveIntervalSeconds = 120;
         }
-        if (AutoSave.autoSaveIntervalTicks >= 15 * 60 * 120) {
+        if (autoSaveIntervalSeconds >= 60*15) {
             logThis("You have set a long time between the autosaves. Remember that chest unloading is also done during the autosave.", "WARNING");
         }
-        getConfig().set("AutoSave.autoSaveIntervalSeconds", AutoSave.autoSaveIntervalTicks / 20);
+        getConfig().set("AutoSave.autoSaveIntervalSeconds", autoSaveIntervalSeconds);
+        AutoSave.autoSaveIntervalTicks = autoSaveIntervalSeconds * 20;
+        // saveTick every x ticks?
+        AutoSave.saveTickInterval = getConfig().getInt("AutoSave.saveTickIntervalTicks", AutoSave.saveTickInterval);
+        if (AutoSave.saveTickInterval <= 1) {
+            logThis("AutoSave.saveTickIntervalTicks was " + AutoSave.saveTickInterval + ". Changed it to 3.", "WARNING");
+            AutoSave.saveTickInterval = 3;
+        }
+        getConfig().set("AutoSave.saveTickIntervalTicks", AutoSave.saveTickInterval);
         // chests per saveTick?
         AutoSave.chestsPerSaveTick = getConfig().getInt("AutoSave.chestsPerSaveTick", 3);
         if (AutoSave.chestsPerSaveTick < 1) {
@@ -370,8 +378,8 @@ public class BetterEnderChest extends JavaPlugin {
         getConfig().set("PublicEnderChest.showOnOpeningUnprotectedChest", PublicChest.openOnOpeningUnprotectedChest);
         // display name?
         BetterEnderChest.PublicChest.displayName = getConfig().getString("PublicEnderChest.name", "Public Chest");
-        if(BetterEnderChest.PublicChest.displayName.length()>16) {
-            logThis("The public chest display name "+BetterEnderChest.PublicChest.displayName+" is too long. (Max lenght:15). Resetting it to Public Chest.","WARNING");
+        if (BetterEnderChest.PublicChest.displayName.length() > 16) {
+            logThis("The public chest display name " + BetterEnderChest.PublicChest.displayName + " is too long. (Max lenght:15). Resetting it to Public Chest.", "WARNING");
             BetterEnderChest.PublicChest.displayName = "Public Chest";
         }
         getConfig().set("PublicEnderChest.name", BetterEnderChest.PublicChest.displayName);
