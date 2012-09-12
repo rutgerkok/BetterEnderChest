@@ -129,6 +129,12 @@ public class BetterEnderStorage {
     }
     
     public void autoSave() {
+        if(!saveQueue.isEmpty()) {
+            plugin.logThis("Saving is so slow, that the save queue of the previous autosave wasn't empty during the next one!","WARNING");
+            plugin.logThis("Please reconsider your autosave settings.","WARNING");
+            plugin.logThis("Skipping this autosave.","WARNING");
+            return;
+        }
         for(Iterator<String> outerIterator = inventories.keySet().iterator(); outerIterator.hasNext();) {
             String groupName = outerIterator.next();
             HashMap<String, Inventory> group = inventories.get(groupName);
