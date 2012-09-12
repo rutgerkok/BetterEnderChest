@@ -80,7 +80,9 @@ public class BetterEnderChest extends JavaPlugin {
         // AutoSave (adds things to the save queue
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             public void run() {
-                logThis("Autosaving...");
+                if(AutoSave.showAutoSaveMessage) {
+                    logThis("Autosaving...");
+                }
                 enderStorage.autoSave();
             }
         }, AutoSave.autoSaveIntervalTicks, AutoSave.autoSaveIntervalTicks);
@@ -333,7 +335,7 @@ public class BetterEnderChest extends JavaPlugin {
         // Autosave
         // ticks?
         int autoSaveIntervalSeconds = getConfig().getInt("AutoSave.autoSaveIntervalSeconds", 300);
-        if (autoSaveIntervalSeconds <= 120) {
+        if (autoSaveIntervalSeconds < 120) {
             logThis("You need at least two minutes between each autosave. Changed it to two minutes.", "WARNING");
             autoSaveIntervalSeconds = 120;
         }
@@ -344,7 +346,7 @@ public class BetterEnderChest extends JavaPlugin {
         AutoSave.autoSaveIntervalTicks = autoSaveIntervalSeconds * 20;
         // saveTick every x ticks?
         AutoSave.saveTickInterval = getConfig().getInt("AutoSave.saveTickIntervalTicks", AutoSave.saveTickInterval);
-        if (AutoSave.saveTickInterval <= 1) {
+        if (AutoSave.saveTickInterval < 1) {
             logThis("AutoSave.saveTickIntervalTicks was " + AutoSave.saveTickInterval + ". Changed it to 3.", "WARNING");
             AutoSave.saveTickInterval = 3;
         }

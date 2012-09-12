@@ -140,13 +140,5 @@ public class EnderHandler implements Listener {
                 event.getPlayer().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(material));
             }
         }
-
-    }
-
-    /**
-     * Saves everything
-     */
-    public void onSave() {
-        chests.saveAllInventories();
     }
 }

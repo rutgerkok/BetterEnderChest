@@ -92,8 +92,8 @@ public class BetterEnderStorage {
      */
     public void saveAllInventories() {
         // Clear the save queue. We are saving ALL chests!
-        
         saveQueue.clear();
+        
         for(Iterator<String> outerIterator = inventories.keySet().iterator(); outerIterator.hasNext();) {
             String groupName = outerIterator.next();
             HashMap<String, Inventory> group = inventories.get(groupName);
@@ -101,14 +101,14 @@ public class BetterEnderStorage {
                 String inventoryName = it.next();
                 Inventory inventory = group.get(inventoryName);
 
-                saveInventory(inventoryName, groupName);
+                EnderSaveAndLoad.saveInventory(inventory, inventoryName, groupName, plugin);
                 
                 if(!inventoryName.equals(BetterEnderChest.publicChestName)
                         && !Bukkit.getOfflinePlayer(inventoryName).isOnline()
                         && inventory.getViewers().size() == 0) {
                     // This inventory is NOT the public chest, the owner is NOT online and NO ONE is viewing it
                     // So unload it
-                    unloadInventory(inventoryName, groupName);
+                    inventories.remove(inventoryName);
                 }
             }
         }
@@ -136,7 +136,6 @@ public class BetterEnderStorage {
                 String inventoryName = it.next();
 
                 String[] forSaveQueue = {inventoryName,groupName};
-                plugin.logThis("Adding "+groupName+"/"+inventoryName+" to the save queue...");
                 saveQueue.add(forSaveQueue);
             }
         }
@@ -152,8 +151,6 @@ public class BetterEnderStorage {
             String inventoryName = saveQueue.get(saveQueue.size()-1)[0];
             String groupName = saveQueue.get(saveQueue.size()-1)[1];
             Inventory inventory = getInventory(inventoryName,groupName);
-            
-            plugin.logThis("Saving "+groupName+"/"+inventoryName+" from the save queue...");
             
             // Saving
             saveInventory(inventoryName, groupName);
