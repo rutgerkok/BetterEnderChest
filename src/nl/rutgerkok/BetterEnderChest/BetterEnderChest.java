@@ -16,7 +16,8 @@ public class BetterEnderChest extends JavaPlugin {
     private BetterEnderGroups groups;
     private Material chestMaterial = Material.ENDER_CHEST;
     private Bridge protectionBridge;
-    private int chestRows, publicChestRows;
+    private int[] chestRows = new int[3];
+    private int publicChestRows;
     private boolean usePermissions;
     private static File chestSaveLocation;
     public String chestDrop, chestDropSilkTouch, chestDropCreative;
@@ -80,7 +81,7 @@ public class BetterEnderChest extends JavaPlugin {
         // AutoSave (adds things to the save queue
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             public void run() {
-                if(AutoSave.showAutoSaveMessage) {
+                if (AutoSave.showAutoSaveMessage) {
                     logThis("Autosaving...");
                 }
                 enderStorage.autoSave();
@@ -119,7 +120,11 @@ public class BetterEnderChest extends JavaPlugin {
      * @return The rows in the chest
      */
     public int getChestRows() {
-        return chestRows;
+        return getChestRows(0);
+    }
+
+    public int getChestRows(int upgrade) {
+        return chestRows[upgrade];
     }
 
     /**
@@ -339,7 +344,7 @@ public class BetterEnderChest extends JavaPlugin {
             logThis("You need at least two minutes between each autosave. Changed it to two minutes.", "WARNING");
             autoSaveIntervalSeconds = 120;
         }
-        if (autoSaveIntervalSeconds >= 60*15) {
+        if (autoSaveIntervalSeconds >= 60 * 15) {
             logThis("You have set a long time between the autosaves. Remember that chest unloading is also done during the autosave.", "WARNING");
         }
         getConfig().set("AutoSave.autoSaveIntervalSeconds", autoSaveIntervalSeconds);
@@ -366,13 +371,18 @@ public class BetterEnderChest extends JavaPlugin {
         getConfig().set("AutoSave.showAutoSaveMessage", AutoSave.showAutoSaveMessage);
         // Private chests
         // rows?
-        chestRows = getConfig().getInt("PrivateEnderChest.defaultRows", 3);
-        if (chestRows < 1 || chestRows > 20) {
-            logThis("The number of rows in the private chest was " + chestRows + "...", "WARNING");
-            logThis("Changed it to 3.", "WARNING");
-            chestRows = 3;
+        for(int i = 0; i<chestRows.length; i++) {
+            // Correct setting
+            String settingName = i>0? "PrivateEnderChest.rowsUpgrade"+i:"PrivateEnderChest.defaultRows";
+            
+            chestRows[i] = getConfig().getInt(settingName, 3);
+            if (chestRows[i] < 1 || chestRows[i] > 20) {
+                logThis("The number of rows (upgrade nr. "+i+") in the private chest was " + chestRows[i] + "...", "WARNING");
+                logThis("Changed it to 3.", "WARNING");
+                chestRows[i] = 3;
+            }
+            getConfig().set(settingName, chestRows[i]);
         }
-        getConfig().set("PrivateEnderChest.defaultRows", chestRows);
 
         // Public chests
         // enabled?
@@ -390,9 +400,9 @@ public class BetterEnderChest extends JavaPlugin {
         getConfig().set("PublicEnderChest.closeMessage", BetterEnderChest.PublicChest.closeMessage);
         BetterEnderChest.PublicChest.closeMessage = ChatColor.translateAlternateColorCodes('&', BetterEnderChest.PublicChest.closeMessage);
         // rows?
-        publicChestRows = getConfig().getInt("PublicEnderChest.defaultRows", chestRows);
+        publicChestRows = getConfig().getInt("PublicEnderChest.defaultRows", chestRows[0]);
         if (publicChestRows < 1 || publicChestRows > 20) {
-            logThis("The number of rows in the private chest was " + chestRows + "...", "WARNING");
+            logThis("The number of rows in the public chest was " + publicChestRows + "...", "WARNING");
             logThis("Changed it to 3.", "WARNING");
             publicChestRows = 3;
         }
