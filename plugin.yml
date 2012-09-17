@@ -28,6 +28,12 @@ permissions:
   betterenderchest.use.publicchest:
     description: Use public chests
     default: op
+  betterenderchest.rows.upgrade1:
+    description: Get the rows as specified for this upgrade in the config.yml.
+    default: false
+  betterenderchest.rows.upgrade2:
+    description: Get the rows as specified for this upgrade in the config.yml.
+    default: false
   betterenderchest.command:
     description: Use all commands. Same as betterenderchest.command.* .
     children:

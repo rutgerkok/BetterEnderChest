@@ -128,6 +128,24 @@ public class BetterEnderChest extends JavaPlugin {
     }
 
     /**
+     * Returns how much rows the player should have, based on his current
+     * permissions.
+     * 
+     * @param player
+     * @return
+     */
+    public int getPlayerRows(Player player) {
+        // Check for upgrade permission
+        for(int i = chestRows.length - 1; i>0; i--) {
+            if(hasPermission(player, "betterenderchest.rows.upgrade"+i, false)) {
+                return getChestRows(i);
+            }
+        }
+        // No upgrade permissions found - return rows for no upgrades
+        return getChestRows();
+    }
+
+    /**
      * @return the chestSaveLocation
      */
     public static File getChestSaveLocation() {
@@ -163,8 +181,8 @@ public class BetterEnderChest extends JavaPlugin {
 
     /**
      * If usePermissions is true, it returns whether the player has the
-     * permission. If the player is OP, it returns true. Otherwise it will
-     * return fallBack.
+     * permission. If it's false, it will return true if the player is Op.
+     * Otherwise it will return fallBack.
      * 
      * @param player
      * @param permission
@@ -172,7 +190,8 @@ public class BetterEnderChest extends JavaPlugin {
      * @param fallBack
      *            Returns this if player is not op and permissions are disabled
      * @return If usePermissions is true, it returns whether the player has the
-     *         permission. Otherwise it will return fallBack
+     *         permission. Otherwise it will return true if the player is Op, or
+     *         it will return fallBack
      */
     public boolean hasPermission(Player player, String permission, boolean fallBack) {
         if (!usePermissions) {
@@ -371,13 +390,13 @@ public class BetterEnderChest extends JavaPlugin {
         getConfig().set("AutoSave.showAutoSaveMessage", AutoSave.showAutoSaveMessage);
         // Private chests
         // rows?
-        for(int i = 0; i<chestRows.length; i++) {
+        for (int i = 0; i < chestRows.length; i++) {
             // Correct setting
-            String settingName = i>0? "PrivateEnderChest.rowsUpgrade"+i:"PrivateEnderChest.defaultRows";
-            
+            String settingName = i > 0 ? "PrivateEnderChest.rowsUpgrade" + i : "PrivateEnderChest.defaultRows";
+
             chestRows[i] = getConfig().getInt(settingName, 3);
             if (chestRows[i] < 1 || chestRows[i] > 20) {
-                logThis("The number of rows (upgrade nr. "+i+") in the private chest was " + chestRows[i] + "...", "WARNING");
+                logThis("The number of rows (upgrade nr. " + i + ") in the private chest was " + chestRows[i] + "...", "WARNING");
                 logThis("Changed it to 3.", "WARNING");
                 chestRows[i] = 3;
             }

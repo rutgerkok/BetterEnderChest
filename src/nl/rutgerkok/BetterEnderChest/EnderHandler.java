@@ -53,6 +53,9 @@ public class EnderHandler implements Listener {
 
                         // Show the chest
                         player.openInventory(chests.getInventory(inventoryName, groupName));
+                        
+                        // DEBUG
+                        plugin.logThis("Rows: " + plugin.getPlayerRows(player));
                     } else {
 
                         // Show an error
@@ -69,6 +72,9 @@ public class EnderHandler implements Listener {
                             // Show player's chest
                             String inventoryName = player.getName();
                             player.openInventory(chests.getInventory(inventoryName, groupName));
+                            
+                            // DEBUG
+                            plugin.logThis("Rows: " + plugin.getPlayerRows(player));
                         }
                     } else {
                         player.sendMessage(ChatColor.RED + "You do not have permissions to use public Ender Chests.");
