@@ -54,8 +54,8 @@ public class EnderHandler implements Listener {
                         // Show the chest
                         player.openInventory(chests.getInventory(inventoryName, groupName));
                         
-                        // DEBUG
-                        plugin.logThis("Rows: " + plugin.getPlayerRows(player));
+                        // TODO: remove debug code
+                        plugin.logThis("RowsPermission: " + plugin.getPlayerRows(player) + ", RowsActual: "+chests.getInventory(inventoryName, groupName).getSize()/9);
                     } else {
 
                         // Show an error

@@ -44,11 +44,12 @@ public class EnderSaveAndLoad {
 
         // First of all, we create an array that holds two tags: the inventory
         // tag and the end tag.
-        Tag[] inventoryNBT = new Tag[4];
+        Tag[] inventoryNBT = new Tag[5];
         inventoryNBT[0] = new Tag("Inventory", Tag.Type.TAG_Compound);
         inventoryNBT[1] = new Tag(Tag.Type.TAG_String, "OwnerName", ((BetterEnderHolder) inventory.getHolder()).getOwnerName());
         inventoryNBT[2] = new Tag(Tag.Type.TAG_Byte, "NameCaseCorrect", nameCaseCorrect);
-        inventoryNBT[3] = new Tag(Tag.Type.TAG_End, null, null);
+        inventoryNBT[3] = new Tag(Tag.Type.TAG_Byte, "Rows", (byte) (inventory.getSize() / 9));
+        inventoryNBT[4] = new Tag(Tag.Type.TAG_End, null, null);
 
         // Now we are going to read the inventory, ...
         ListIterator<ItemStack> iterator = inventory.iterator();
@@ -94,20 +95,11 @@ public class EnderSaveAndLoad {
      * @return
      */
     public static Inventory loadInventory(String inventoryName, String groupName, BetterEnderChest plugin) {
-        int inventoryRows;
-
-        // Get the number of rows
-        if (inventoryName.equals(BetterEnderChest.publicChestName)) {
-            // Public chest
-            inventoryRows = plugin.getPublicChestRows();
-        } else { // private chest
-            inventoryRows = plugin.getChestRows();
-        }
 
         // Try to load it from a file
         File file = getChestFile(inventoryName, groupName);
         try {
-            Inventory chestInventory = LoadHelper.loadInventoryFromFile(inventoryName, inventoryRows, file, "Inventory");
+            Inventory chestInventory = Loader.loadInventoryFromFile(inventoryName, file, "Inventory", plugin);
             if (chestInventory != null) {
                 return chestInventory;
             }
@@ -119,13 +111,13 @@ public class EnderSaveAndLoad {
 
             // Return an empty inventory. Importing it again from Bukkit/loading
             // the default chest could cause item duplication glitches.
-            return LoadHelper.loadEmptyInventory(inventoryName, inventoryRows);
+            return Loader.loadEmptyInventory(inventoryName, plugin);
         }
 
         // Try to load it from Bukkit (but only if in the correct group)
         if (groupName.equals(BetterEnderChest.importingGroupName)) {
             try {
-                Inventory bukkitInventory = LoadHelper.loadInventoryFromCraftBukkit(inventoryName, inventoryRows);
+                Inventory bukkitInventory = Loader.loadInventoryFromCraftBukkit(inventoryName, plugin);
                 if (bukkitInventory != null) {
                     return bukkitInventory;
                 }
@@ -136,14 +128,14 @@ public class EnderSaveAndLoad {
                 // Return an empty inventory. Loading the default chest again
                 // could cause issues when someone
                 // finds a way to constantly break this plugin.
-                return LoadHelper.loadEmptyInventory(inventoryName, inventoryRows);
+                return Loader.loadEmptyInventory(inventoryName, plugin);
             }
         }
 
         // Try to load the default inventory
         File defaultFile = getChestFile(BetterEnderChest.defaultChestName, groupName);
         try {
-            Inventory defaultInventory = LoadHelper.loadInventoryFromFile(inventoryName, inventoryRows, defaultFile, "Inventory");
+            Inventory defaultInventory = Loader.loadInventoryFromFile(inventoryName, defaultFile, "Inventory", plugin);
             if (defaultInventory != null) {
                 return defaultInventory;
             }
@@ -157,6 +149,6 @@ public class EnderSaveAndLoad {
         // Return an empty chest
         // (only happens when there is saved chest, nothing can be imported and
         // there is no default chest)
-        return LoadHelper.loadEmptyInventory(inventoryName, inventoryRows);
+        return Loader.loadEmptyInventory(inventoryName, plugin);
     }
 }
