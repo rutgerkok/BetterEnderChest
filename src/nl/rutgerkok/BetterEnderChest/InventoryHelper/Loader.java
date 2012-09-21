@@ -91,13 +91,9 @@ public class Loader {
         if (mainNBT.findTagByName("Rows") != null) {
             // Load the number of rows
             inventoryRows = ((Byte) mainNBT.findTagByName("Rows").getValue()).intValue();
-            // TODO: remove debug code
-            plugin.logThis("Rows loaded: " + inventoryRows);
         } else {
             // Guess the number of rows
             inventoryRows = LoadHelper.getInventoryRows(inventoryName, inventoryNBT, plugin);
-            // TODO: remove debug code
-            plugin.logThis("Rows guessed: " + inventoryRows);
         }
 
         // Whether the player name is case-correct (to be loaded from file)

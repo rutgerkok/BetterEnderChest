@@ -1,11 +1,16 @@
 package nl.rutgerkok.BetterEnderChest;
 
+import nl.rutgerkok.BetterEnderChest.InventoryHelper.InventoryUtils;
+import nl.rutgerkok.BetterEnderChest.InventoryHelper.Loader;
+
+
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -13,6 +18,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class EnderHandler implements Listener {
@@ -27,6 +33,7 @@ public class EnderHandler implements Listener {
     }
 
     // Makes sure the chests show up
+    // Priority: High so that others can cancel the event
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.isCancelled())
@@ -34,13 +41,18 @@ public class EnderHandler implements Listener {
         if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK))
             return;
 
-        Player player = event.getPlayer();
-        String groupName = plugin.getGroups().getGroup(player.getWorld().getName());
-
         if (event.getClickedBlock().getType().equals(plugin.getChestMaterial())) {
-            // clicked on an Ender Chest
+            // Clicked an Ender Chest
+            
+            // Cancel the event
             event.setCancelled(true);
+            
+            // Some objects
+            Player player = event.getPlayer();
+            String groupName = plugin.getGroups().getGroup(player.getWorld().getName());
+            String inventoryName = "";
 
+            // Find the chest name
             if (protectionBridge.isProtected(event.getClickedBlock())) {
                 // protected Ender Chest
                 if (protectionBridge.canAccess(player, event.getClickedBlock())) {
@@ -49,15 +61,8 @@ public class EnderHandler implements Listener {
                         // and has the correct permission node
 
                         // Get the owner's name
-                        String inventoryName = protectionBridge.getOwnerName(event.getClickedBlock());
-
-                        // Show the chest
-                        player.openInventory(chests.getInventory(inventoryName, groupName));
-                        
-                        // TODO: remove debug code
-                        plugin.logThis("RowsPermission: " + plugin.getPlayerRows(player) + ", RowsActual: "+chests.getInventory(inventoryName, groupName).getSize()/9);
+                        inventoryName = protectionBridge.getOwnerName(event.getClickedBlock());
                     } else {
-
                         // Show an error
                         player.sendMessage(ChatColor.RED + "You do not have permissions to use private Ender Chests.");
                     }
@@ -67,20 +72,41 @@ public class EnderHandler implements Listener {
                     if (plugin.hasPermission(player, "betterenderchest.use.publicchest", true)) {
                         if (BetterEnderChest.PublicChest.openOnOpeningUnprotectedChest) {
                             // Show public chest
-                            player.openInventory(chests.getInventory(BetterEnderChest.publicChestName, groupName));
+                            inventoryName = BetterEnderChest.publicChestName;
                         } else {
-                            // Show player's chest
-                            String inventoryName = player.getName();
-                            player.openInventory(chests.getInventory(inventoryName, groupName));
-                            
-                            // DEBUG
-                            plugin.logThis("Rows: " + plugin.getPlayerRows(player));
+                            // Get player's name
+                            inventoryName = player.getName();
                         }
                     } else {
                         player.sendMessage(ChatColor.RED + "You do not have permissions to use public Ender Chests.");
                     }
                 }
             }
+
+            // Stop if no name has been found
+            if (inventoryName.isEmpty()) {
+                return;
+            }
+            
+            // Get the inventory object
+            Inventory inventory = chests.getInventory(inventoryName, groupName);
+
+            // Check if the inventory should resize (up/downgrades)
+            if (shouldResize(player, inventory, inventoryName, plugin)) {
+                // TODO: DEBUG
+                plugin.logThis("Resizing..");
+                // Get an inventory of the correct size
+                Inventory newInventory = Loader.loadEmptyInventory(inventoryName, plugin.getPlayerRows(player));
+                InventoryUtils.copyContents(inventory, newInventory, player.getLocation());
+
+                // Goodbye to old inventory!
+                chests.setInventory(inventoryName, groupName, newInventory);
+                inventory = newInventory;
+
+            }
+            
+            // Show the inventory
+            player.openInventory(inventory);
         }
     }
 
@@ -119,12 +145,12 @@ public class EnderHandler implements Listener {
                 // Silk touch
                 chestDropString = plugin.chestDropSilkTouch;
             }
-            
+
             if (event.getPlayer().getGameMode() == GameMode.CREATIVE) {
                 // Creative mode
                 chestDropString = plugin.chestDropCreative;
             }
-            
+
             // Drop it
             if (chestDropString.equals("OBSIDIAN") || chestDropString.equals("OBSIDIAN_WITH_EYE_OF_ENDER") || chestDropString.equals("OBSIDIAN_WITH_ENDER_PEARL")) {
                 // Drop 8 obsidian
@@ -146,5 +172,37 @@ public class EnderHandler implements Listener {
                 event.getPlayer().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(material));
             }
         }
+    }
+
+    /**
+     * Calculates if the inventory should be resized
+     * 
+     * @param player
+     * @param inventory
+     * @param inventoryName
+     * @param plugin
+     * @return
+     */
+    private boolean shouldResize(Player player, Inventory inventory, String inventoryName, BetterEnderChest plugin) {
+        if (plugin.getPlayerRows(player) == inventory.getSize() / 9) {
+            // Size is already correct
+            return false;
+        }
+        if (player.getName().equalsIgnoreCase(inventoryName)) {
+            // Player is owner of inventory, resize
+            return true;
+        }
+        if (inventoryName.equals(BetterEnderChest.publicChestName)) {
+            // It's the public chest, resize
+            return true;
+        }
+        if (inventoryName.equals(BetterEnderChest.defaultChestName)) {
+            // It's the default chest, resize
+            return true;
+        }
+
+        // Wrong size, but player is not the owner, and it's not a special chest
+        // Don't resize yet.
+        return false;
     }
 }
