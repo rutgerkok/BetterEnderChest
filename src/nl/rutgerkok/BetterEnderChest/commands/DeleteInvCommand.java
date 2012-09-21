@@ -2,11 +2,10 @@ package nl.rutgerkok.BetterEnderChest.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
+import nl.rutgerkok.BetterEnderChest.InventoryHelper.InventoryUtils;
 
 public class DeleteInvCommand extends BaseCommand {
 
@@ -28,12 +27,7 @@ public class DeleteInvCommand extends BaseCommand {
                 Inventory inventory = plugin.getEnderChests().getInventory(inventoryName, groupName);
 
                 // Remove all the viewers
-                for (HumanEntity player : inventory.getViewers()) {
-                    player.closeInventory();
-                    if (player instanceof Player) {
-                        ((Player) player).sendMessage(ChatColor.YELLOW + "An admin just deleted this inventory.");
-                    }
-                }
+                InventoryUtils.closeInventory(inventory, ChatColor.YELLOW + "An admin just deleted this inventory.");
 
                 // Clear it.
                 inventory.clear();

@@ -3,7 +3,6 @@ package nl.rutgerkok.BetterEnderChest;
 import nl.rutgerkok.BetterEnderChest.InventoryHelper.InventoryUtils;
 import nl.rutgerkok.BetterEnderChest.InventoryHelper.Loader;
 
-
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -43,10 +42,10 @@ public class EnderHandler implements Listener {
 
         if (event.getClickedBlock().getType().equals(plugin.getChestMaterial())) {
             // Clicked an Ender Chest
-            
+
             // Cancel the event
             event.setCancelled(true);
-            
+
             // Some objects
             Player player = event.getPlayer();
             String groupName = plugin.getGroups().getGroup(player.getWorld().getName());
@@ -87,7 +86,7 @@ public class EnderHandler implements Listener {
             if (inventoryName.isEmpty()) {
                 return;
             }
-            
+
             // Get the inventory object
             Inventory inventory = chests.getInventory(inventoryName, groupName);
 
@@ -100,11 +99,12 @@ public class EnderHandler implements Listener {
                 InventoryUtils.copyContents(inventory, newInventory, player.getLocation());
 
                 // Goodbye to old inventory!
+                InventoryUtils.closeInventory(newInventory, ChatColor.YELLOW + "The owner got a different rank, and the inventory had to be resized.");
                 chests.setInventory(inventoryName, groupName, newInventory);
                 inventory = newInventory;
 
             }
-            
+
             // Show the inventory
             player.openInventory(inventory);
         }

@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.ListIterator;
 
 import org.bukkit.Location;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -35,6 +37,23 @@ public class InventoryUtils {
                     }
                 }
 
+            }
+        }
+    }
+
+    /**
+     * Closes the inventory for all the viewers. Always call this before
+     * deleting it!
+     * 
+     * @param inventory
+     * @param message
+     *            Shown to the victims
+     */
+    public static void closeInventory(Inventory inventory, String message) {
+        for (HumanEntity player : inventory.getViewers()) {
+            player.closeInventory();
+            if (player instanceof Player) {
+                ((Player) player).sendMessage(message);
             }
         }
     }

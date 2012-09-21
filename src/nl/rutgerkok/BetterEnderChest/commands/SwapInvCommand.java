@@ -2,12 +2,11 @@ package nl.rutgerkok.BetterEnderChest.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
 import nl.rutgerkok.BetterEnderChest.BetterEnderHolder;
+import nl.rutgerkok.BetterEnderChest.InventoryHelper.InventoryUtils;
 
 public class SwapInvCommand extends BaseCommand {
 
@@ -34,18 +33,8 @@ public class SwapInvCommand extends BaseCommand {
                 Inventory secondInventory = plugin.getEnderChests().getInventory(inventoryName2, groupName2);
 
                 // Get rid of the viewers
-                for (HumanEntity player : firstInventory.getViewers()) {
-                    player.closeInventory();
-                    if (player instanceof Player) {
-                        ((Player) player).sendMessage(ChatColor.YELLOW + "An admin just swapped this inventory with another.");
-                    }
-                }
-                for (HumanEntity player : secondInventory.getViewers()) {
-                    player.closeInventory();
-                    if (player instanceof Player) {
-                        ((Player) player).sendMessage(ChatColor.YELLOW + "An admin just swapped this inventory with another.");
-                    }
-                }
+                InventoryUtils.closeInventory(firstInventory, ChatColor.YELLOW + "An admin just swapped this inventory with another.");
+                InventoryUtils.closeInventory(secondInventory, ChatColor.YELLOW + "The owner got a different rank, and the inventory had to be resized.");
 
                 // Swap the owner names (and whether they are case-correct)
                 String firstOwnerName = ((BetterEnderHolder) firstInventory.getHolder()).getOwnerName();
