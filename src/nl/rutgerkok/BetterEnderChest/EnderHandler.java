@@ -6,6 +6,7 @@ import nl.rutgerkok.BetterEnderChest.InventoryHelper.Loader;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -92,20 +93,21 @@ public class EnderHandler implements Listener {
 
             // Check if the inventory should resize (up/downgrades)
             if (shouldResize(player, inventory, inventoryName, plugin)) {
-                // TODO: DEBUG
-                plugin.logThis("Resizing..");
-                // Get an inventory of the correct size
+                // Kick all players from old inventory
+                InventoryUtils.closeInventory(inventory, ChatColor.YELLOW + "The owner got a different rank, and the inventory had to be resized.");
+                
+                // Get an inventory of the correct size and fill it
                 Inventory newInventory = Loader.loadEmptyInventory(inventoryName, plugin.getPlayerRows(player));
                 InventoryUtils.copyContents(inventory, newInventory, player.getLocation());
 
                 // Goodbye to old inventory!
-                InventoryUtils.closeInventory(newInventory, ChatColor.YELLOW + "The owner got a different rank, and the inventory had to be resized.");
                 chests.setInventory(inventoryName, groupName, newInventory);
                 inventory = newInventory;
 
             }
 
-            // Show the inventory
+            // Show the inventory and play a sound
+            player.getWorld().playSound(player.getLocation(), Sound.CHEST_OPEN, 1.0F, 1.0F);
             player.openInventory(inventory);
         }
     }
@@ -113,8 +115,16 @@ public class EnderHandler implements Listener {
     // show warning message for public chests on close
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
+        if (!(event.getPlayer() instanceof Player)) {
+            return;
+        }
         Player player = (Player) event.getPlayer();
         if (event.getInventory().getHolder() instanceof BetterEnderHolder) {
+
+            // Play closing sound
+            player.getWorld().playSound(player.getLocation(), Sound.CHEST_CLOSE, 1.0F, 1.0F);
+
+            // If it's a public chest, show a warning about that
             BetterEnderHolder holder = (BetterEnderHolder) event.getInventory().getHolder();
             if (holder.getOwnerName().equals(BetterEnderChest.publicChestName)) {
                 if (!BetterEnderChest.PublicChest.closeMessage.isEmpty()) {
