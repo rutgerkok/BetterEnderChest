@@ -34,7 +34,7 @@ public class SwapInvCommand extends BaseCommand {
 
                 // Get rid of the viewers
                 InventoryUtils.closeInventory(firstInventory, ChatColor.YELLOW + "An admin just swapped this inventory with another.");
-                InventoryUtils.closeInventory(secondInventory, ChatColor.YELLOW + "The owner got a different rank, and the inventory had to be resized.");
+                InventoryUtils.closeInventory(secondInventory, ChatColor.YELLOW + "An admin just swapped this inventory with another.");
 
                 // Swap the owner names (and whether they are case-correct)
                 String firstOwnerName = ((BetterEnderHolder) firstInventory.getHolder()).getOwnerName();
