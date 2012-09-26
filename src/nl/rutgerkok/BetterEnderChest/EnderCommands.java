@@ -13,7 +13,7 @@ import org.bukkit.command.CommandSender;
 public class EnderCommands implements CommandExecutor {
     BetterEnderChest plugin;
 
-    private HashMap<String, BaseCommand> commands;
+    public HashMap<String, BaseCommand> commands;
 
     public EnderCommands(BetterEnderChest plugin) {
         this.plugin = plugin;
