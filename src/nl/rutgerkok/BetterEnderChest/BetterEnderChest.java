@@ -14,6 +14,7 @@ public class BetterEnderChest extends JavaPlugin {
     private EnderCommands commandHandler;
     private BetterEnderStorage enderStorage;
     private BetterEnderGroups groups;
+    private BetterEnderConverter enderConverter;
     private Material chestMaterial = Material.ENDER_CHEST;
     private Bridge protectionBridge;
     private int[] chestRows = new int[3];
@@ -66,6 +67,9 @@ public class BetterEnderChest extends JavaPlugin {
         initConfig();
         groups.initConfig();
         saveConfig();
+
+        // Converter
+        enderConverter = new BetterEnderConverter(this);
 
         // Chests storage
         enderStorage = new BetterEnderStorage(this);
@@ -128,6 +132,24 @@ public class BetterEnderChest extends JavaPlugin {
     }
 
     /**
+     * Returns the command handler which can be used to modify the /betterenderchest command.
+     * @return
+     */
+    public EnderCommands getCommandHandler() {
+        return commandHandler;
+    }
+    
+    /**
+     * Returns the converter, which contains methods to import and export Ender
+     * inventories from and to various plugins.
+     * 
+     * @return
+     */
+    public BetterEnderConverter getConverter() {
+        return enderConverter;
+    }
+
+    /**
      * Returns how much rows the player should have, based on his current
      * permissions.
      * 
@@ -136,8 +158,8 @@ public class BetterEnderChest extends JavaPlugin {
      */
     public int getPlayerRows(Player player) {
         // Check for upgrade permission
-        for(int i = chestRows.length - 1; i>0; i--) {
-            if(hasPermission(player, "betterenderchest.rows.upgrade"+i, false)) {
+        for (int i = chestRows.length - 1; i > 0; i--) {
+            if (hasPermission(player, "betterenderchest.rows.upgrade" + i, false)) {
                 return getChestRows(i);
             }
         }
