@@ -114,12 +114,13 @@ public class EnderSaveAndLoad {
             return Loader.loadEmptyInventory(inventoryName, plugin);
         }
 
-        // Try to load it from Bukkit (but only if in the correct group)
+        // Try to import it from vanilla/some other plugin (but only if in the correct group)
+        // TODO: allow other plugins, not a hardcoded vanilla.
         if (groupName.equals(BetterEnderChest.importingGroupName)) {
             try {
-                Inventory bukkitInventory = Loader.loadInventoryFromCraftBukkit(inventoryName, plugin);
-                if (bukkitInventory != null) {
-                    return bukkitInventory;
+                Inventory importedInventory = plugin.getConverter().getImport(inventoryName, "vanilla");
+                if (importedInventory != null) {
+                    return importedInventory;
                 }
             } catch (IOException e) {
                 plugin.logThis("Could not import inventory " + inventoryName, "SEVERE");
