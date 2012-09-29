@@ -22,7 +22,6 @@ public class BetterEnderChest extends JavaPlugin {
     private boolean usePermissions;
     private static File chestSaveLocation;
     public String chestDrop, chestDropSilkTouch, chestDropCreative;
-    public static String importingGroupName;
     public static final String publicChestName = "--publicchest", defaultChestName = "--defaultchest", defaultGroupName = "default";
 
     /**
@@ -62,14 +61,14 @@ public class BetterEnderChest extends JavaPlugin {
             logThis("Not linked to a block protection plugin like Lockette or LWC.");
         }
 
+        // Converter
+        enderConverter = new BetterEnderConverter(this);
+
         // Configuration
         groups = new BetterEnderGroups(this);
         initConfig();
         groups.initConfig();
         saveConfig();
-
-        // Converter
-        enderConverter = new BetterEnderConverter(this);
 
         // Chests storage
         enderStorage = new BetterEnderStorage(this);

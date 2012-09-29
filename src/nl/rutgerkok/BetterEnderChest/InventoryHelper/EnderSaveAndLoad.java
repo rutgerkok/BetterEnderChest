@@ -114,23 +114,20 @@ public class EnderSaveAndLoad {
             return Loader.loadEmptyInventory(inventoryName, plugin);
         }
 
-        // Try to import it from vanilla/some other plugin (but only if in the correct group)
-        // TODO: allow other plugins, not a hardcoded vanilla.
-        if (groupName.equals(BetterEnderChest.importingGroupName)) {
-            try {
-                Inventory importedInventory = plugin.getConverter().importInventory(inventoryName, groupName, "multiinv");
-                if (importedInventory != null) {
-                    return importedInventory;
-                }
-            } catch (IOException e) {
-                plugin.logThis("Could not import inventory " + inventoryName, "SEVERE");
-                e.printStackTrace();
-
-                // Return an empty inventory. Loading the default chest again
-                // could cause issues when someone
-                // finds a way to constantly break this plugin.
-                return Loader.loadEmptyInventory(inventoryName, plugin);
+        // Try to import it from vanilla/some other plugin
+        try {
+            Inventory importedInventory = plugin.getConverter().importInventory(inventoryName, groupName, plugin.getGroups().getImport(groupName));
+            if (importedInventory != null) {
+                return importedInventory;
             }
+        } catch (IOException e) {
+            plugin.logThis("Could not import inventory " + inventoryName, "SEVERE");
+            e.printStackTrace();
+
+            // Return an empty inventory. Loading the default chest again
+            // could cause issues when someone
+            // finds a way to constantly break this plugin.
+            return Loader.loadEmptyInventory(inventoryName, plugin);
         }
 
         // Try to load the default inventory

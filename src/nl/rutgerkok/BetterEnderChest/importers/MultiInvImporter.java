@@ -37,6 +37,8 @@ public class MultiInvImporter extends Importer {
             gameModeName = Bukkit.getDefaultGameMode().toString();
         }
 
+        System.out.println(inventoryName+","+groupName+","+gameModeName);
+        
         // Load from MultiInv
         MIEnderchestInventory multiInvEnderInventory = null;
         if (MIYamlFiles.config.getBoolean("useSQL")) {
@@ -84,6 +86,11 @@ public class MultiInvImporter extends Importer {
         }
 
         return betterInventory;
+    }
+
+    @Override
+    public boolean isAvailible() {
+        return (Bukkit.getServer().getPluginManager().getPlugin("MultiInv") != null);
     }
 
 }
