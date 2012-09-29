@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ListIterator;
+import java.util.logging.Level;
 
 import net.minecraftwiki.wiki.NBTClass.Tag;
 import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
@@ -77,7 +78,7 @@ public class EnderSaveAndLoad {
             // Write to it
             mainNBT.writeTo(new FileOutputStream(to));
         } catch (IOException e) { // And handle all IOExceptions
-            plugin.logThis("Could not save inventory " + inventoryName, "SEVERE");
+            plugin.logThis("Could not save inventory " + inventoryName, Level.SEVERE);
             e.printStackTrace();
         }
 
@@ -105,8 +106,8 @@ public class EnderSaveAndLoad {
             }
         } catch (IOException e) {
             // Something went wrong...
-            plugin.logThis("Could not load inventory " + inventoryName, "SEVERE");
-            plugin.logThis("Path:" + file.getAbsolutePath(), "SEVERE");
+            plugin.logThis("Could not load inventory " + inventoryName, Level.SEVERE);
+            plugin.logThis("Path:" + file.getAbsolutePath(), Level.SEVERE);
             e.printStackTrace();
 
             // Return an empty inventory. Importing it again from Bukkit/loading
@@ -121,7 +122,7 @@ public class EnderSaveAndLoad {
                 return importedInventory;
             }
         } catch (IOException e) {
-            plugin.logThis("Could not import inventory " + inventoryName, "SEVERE");
+            plugin.logThis("Could not import inventory " + inventoryName, Level.SEVERE);
             e.printStackTrace();
 
             // Return an empty inventory. Loading the default chest again
@@ -139,8 +140,8 @@ public class EnderSaveAndLoad {
             }
         } catch (IOException e) {
             // Something went wrong
-            plugin.logThis("Could not load the default chest for " + inventoryName, "SEVERE");
-            plugin.logThis("Path:" + defaultFile.getAbsolutePath(), "SEVERE");
+            plugin.logThis("Could not load the default chest for " + inventoryName, Level.SEVERE);
+            plugin.logThis("Path:" + defaultFile.getAbsolutePath(), Level.SEVERE);
             e.printStackTrace();
         }
 

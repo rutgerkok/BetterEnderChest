@@ -1,10 +1,12 @@
 package nl.rutgerkok.BetterEnderChest;
 
 import java.io.File;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -45,12 +47,13 @@ public class BetterEnderChest extends JavaPlugin {
     public void onEnable() {
 
         // STOP if build is too low
+        
         try {
-            Player.class.getMethod("getEnderChest");
-        } catch (NoSuchMethodException e) {
-            logThis("--------- SERVERE ---------", "SEVERE");
-            logThis("Bukkit version is too old!", "SEVERE");
-            logThis("Use at least version 2344!", "SEVERE");
+            Sound.getSound("CHEST_OPEN");
+        } catch (NoClassDefFoundError e) {
+            logThis("--------- SERVERE ---------", Level.SEVERE);
+            logThis("Bukkit version is too old!", Level.SEVERE);
+            logThis("Use at least version 2346!", Level.SEVERE);
             return;
         }
 
@@ -304,7 +307,7 @@ public class BetterEnderChest extends JavaPlugin {
      * @param message
      */
     public void logThis(String message) {
-        logThis(message, "info");
+        logThis(message, Level.INFO);
     }
 
     /**
@@ -314,14 +317,9 @@ public class BetterEnderChest extends JavaPlugin {
      * @param type
      *            - WARNING, LOG or SEVERE, case insensetive
      */
-    public void logThis(String message, String type) {
+    public void logThis(String message, Level type) {
         Logger log = Logger.getLogger("Minecraft");
-        if (type.equalsIgnoreCase("info"))
-            log.info("[" + this.getDescription().getName() + "] " + message);
-        if (type.equalsIgnoreCase("warning"))
-            log.warning("[" + this.getDescription().getName() + "] " + message);
-        if (type.equalsIgnoreCase("severe"))
-            log.severe("[" + this.getDescription().getName() + "] " + message);
+        log.log(type, "[" + this.getDescription().getName() + "] " + message);
     }
 
     /**
@@ -357,7 +355,7 @@ public class BetterEnderChest extends JavaPlugin {
         String chestSaveLocationString = getConfig().getString("BetterEnderChest.saveFolderLocation", "PLUGIN_FOLDER");
         chestSaveLocationString.toUpperCase();
         if (!isValidSaveLocation(chestSaveLocationString)) {
-            logThis(chestSaveLocationString + " is not a valid save location. Defaulting to PLUGIN_FOLDER.", "WARNING");
+            logThis(chestSaveLocationString + " is not a valid save location. Defaulting to PLUGIN_FOLDER.", Level.WARNING);
             chestSaveLocationString = "PLUGIN_FOLDER";
         }
         chestSaveLocation = toSaveLocation(chestSaveLocationString);
@@ -367,7 +365,7 @@ public class BetterEnderChest extends JavaPlugin {
         chestDrop = getConfig().getString("BetterEnderChest.drop", "OBSIDIAN");
         chestDrop = chestDrop.toUpperCase();
         if (!isValidChestDrop(chestDrop)) { // cannot understand value
-            logThis("Could not understand the drop " + chestDrop + ", defaulting to OBSIDIAN", "WARNING");
+            logThis("Could not understand the drop " + chestDrop + ", defaulting to OBSIDIAN", Level.WARNING);
             chestDrop = "OBSIDIAN";
         }
         getConfig().set("BetterEnderChest.drop", chestDrop);
@@ -376,7 +374,7 @@ public class BetterEnderChest extends JavaPlugin {
         chestDropSilkTouch = getConfig().getString("BetterEnderChest.dropSilkTouch", "ITSELF");
         chestDropSilkTouch = chestDropSilkTouch.toUpperCase();
         if (!isValidChestDrop(chestDropSilkTouch)) { // cannot understand value
-            logThis("Could not understand the Silk Touch drop " + chestDropSilkTouch + ", defaulting to ITSELF", "WARNING");
+            logThis("Could not understand the Silk Touch drop " + chestDropSilkTouch + ", defaulting to ITSELF", Level.WARNING);
             chestDropSilkTouch = "ITSELF";
         }
         getConfig().set("BetterEnderChest.dropSilkTouch", chestDropSilkTouch);
@@ -385,7 +383,7 @@ public class BetterEnderChest extends JavaPlugin {
         chestDropCreative = getConfig().getString("BetterEnderChest.dropCreative", "NOTHING");
         chestDropCreative = chestDropCreative.toUpperCase();
         if (!isValidChestDrop(chestDropCreative)) { // cannot understand value
-            logThis("Could not understand the drop for Creative Mode " + chestDropCreative + ", defaulting to NOTHING", "WARNING");
+            logThis("Could not understand the drop for Creative Mode " + chestDropCreative + ", defaulting to NOTHING", Level.WARNING);
             chestDropCreative = "NOTHING";
         }
         getConfig().set("BetterEnderChest.dropCreative", chestDropCreative);
@@ -398,29 +396,29 @@ public class BetterEnderChest extends JavaPlugin {
         // ticks?
         int autoSaveIntervalSeconds = getConfig().getInt("AutoSave.autoSaveIntervalSeconds", 300);
         if (autoSaveIntervalSeconds < 120) {
-            logThis("You need at least two minutes between each autosave. Changed it to two minutes.", "WARNING");
+            logThis("You need at least two minutes between each autosave. Changed it to two minutes.", Level.WARNING);
             autoSaveIntervalSeconds = 120;
         }
         if (autoSaveIntervalSeconds >= 60 * 15) {
-            logThis("You have set a long time between the autosaves. Remember that chest unloading is also done during the autosave.", "WARNING");
+            logThis("You have set a long time between the autosaves. Remember that chest unloading is also done during the autosave.", Level.WARNING);
         }
         getConfig().set("AutoSave.autoSaveIntervalSeconds", autoSaveIntervalSeconds);
         AutoSave.autoSaveIntervalTicks = autoSaveIntervalSeconds * 20;
         // saveTick every x ticks?
         AutoSave.saveTickInterval = getConfig().getInt("AutoSave.saveTickIntervalTicks", AutoSave.saveTickInterval);
         if (AutoSave.saveTickInterval < 1) {
-            logThis("AutoSave.saveTickIntervalTicks was " + AutoSave.saveTickInterval + ". Changed it to 3.", "WARNING");
+            logThis("AutoSave.saveTickIntervalTicks was " + AutoSave.saveTickInterval + ". Changed it to 3.", Level.WARNING);
             AutoSave.saveTickInterval = 3;
         }
         getConfig().set("AutoSave.saveTickIntervalTicks", AutoSave.saveTickInterval);
         // chests per saveTick?
         AutoSave.chestsPerSaveTick = getConfig().getInt("AutoSave.chestsPerSaveTick", 3);
         if (AutoSave.chestsPerSaveTick < 1) {
-            logThis("You can't save " + AutoSave.chestsPerSaveTick + " chest per saveTick! Changed it to 3.", "WARNING");
+            logThis("You can't save " + AutoSave.chestsPerSaveTick + " chest per saveTick! Changed it to 3.", Level.WARNING);
             AutoSave.chestsPerSaveTick = 3;
         }
         if (AutoSave.chestsPerSaveTick > 10) {
-            logThis("You have set AutoSave.chestsPerSaveTick to " + AutoSave.chestsPerSaveTick + ". This could cause lag when it has to save a lot of chests.", "WARNING");
+            logThis("You have set AutoSave.chestsPerSaveTick to " + AutoSave.chestsPerSaveTick + ". This could cause lag when it has to save a lot of chests.", Level.WARNING);
         }
         getConfig().set("AutoSave.chestsPerSaveTick", AutoSave.chestsPerSaveTick);
         // enable message?
@@ -434,8 +432,8 @@ public class BetterEnderChest extends JavaPlugin {
 
             chestRows[i] = getConfig().getInt(settingName, 3);
             if (chestRows[i] < 1 || chestRows[i] > 20) {
-                logThis("The number of rows (upgrade nr. " + i + ") in the private chest was " + chestRows[i] + "...", "WARNING");
-                logThis("Changed it to 3.", "WARNING");
+                logThis("The number of rows (upgrade nr. " + i + ") in the private chest was " + chestRows[i] + "...", Level.WARNING);
+                logThis("Changed it to 3.", Level.WARNING);
                 chestRows[i] = 3;
             }
             getConfig().set(settingName, chestRows[i]);
@@ -448,7 +446,7 @@ public class BetterEnderChest extends JavaPlugin {
         // display name?
         BetterEnderChest.PublicChest.displayName = getConfig().getString("PublicEnderChest.name", "Public Chest");
         if (BetterEnderChest.PublicChest.displayName.length() > 16) {
-            logThis("The public chest display name " + BetterEnderChest.PublicChest.displayName + " is too long. (Max lenght:15). Resetting it to Public Chest.", "WARNING");
+            logThis("The public chest display name " + BetterEnderChest.PublicChest.displayName + " is too long. (Max lenght:15). Resetting it to Public Chest.", Level.WARNING);
             BetterEnderChest.PublicChest.displayName = "Public Chest";
         }
         getConfig().set("PublicEnderChest.name", BetterEnderChest.PublicChest.displayName);
@@ -459,8 +457,8 @@ public class BetterEnderChest extends JavaPlugin {
         // rows?
         publicChestRows = getConfig().getInt("PublicEnderChest.defaultRows", chestRows[0]);
         if (publicChestRows < 1 || publicChestRows > 20) {
-            logThis("The number of rows in the public chest was " + publicChestRows + "...", "WARNING");
-            logThis("Changed it to 3.", "WARNING");
+            logThis("The number of rows in the public chest was " + publicChestRows + "...", Level.WARNING);
+            logThis("Changed it to 3.", Level.WARNING);
             publicChestRows = 3;
         }
         getConfig().set("PublicEnderChest.defaultRows", publicChestRows);

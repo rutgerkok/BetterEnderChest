@@ -3,6 +3,7 @@ package nl.rutgerkok.BetterEnderChest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.logging.Level;
 
 import nl.rutgerkok.BetterEnderChest.InventoryHelper.EnderSaveAndLoad;
 
@@ -130,9 +131,9 @@ public class BetterEnderStorage {
     
     public void autoSave() {
         if(!saveQueue.isEmpty()) {
-            plugin.logThis("Saving is so slow, that the save queue of the previous autosave wasn't empty during the next one!","WARNING");
-            plugin.logThis("Please reconsider your autosave settings.","WARNING");
-            plugin.logThis("Skipping this autosave.","WARNING");
+            plugin.logThis("Saving is so slow, that the save queue of the previous autosave wasn't empty during the next one!",Level.WARNING);
+            plugin.logThis("Please reconsider your autosave settings.",Level.WARNING);
+            plugin.logThis("Skipping this autosave.",Level.WARNING);
             return;
         }
         for(Iterator<String> outerIterator = inventories.keySet().iterator(); outerIterator.hasNext();) {

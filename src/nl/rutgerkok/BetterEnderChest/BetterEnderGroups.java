@@ -3,6 +3,7 @@ package nl.rutgerkok.BetterEnderChest;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -59,7 +60,7 @@ public class BetterEnderGroups {
     public void readConfig() {
         // Get the Groups
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("Groups");
-        
+
         // Check if it exists
         if (section != null) {
             // If yes, add all the worlds
@@ -72,7 +73,7 @@ public class BetterEnderGroups {
                         // Always lowercase
                         if (worlds.containsKey(world.toLowerCase())) {
                             // ALARM! Duplicate world!
-                            plugin.logThis("The world " + world + " was added to two different groups! Removing it from the second.", "WARNING");
+                            plugin.logThis("The world " + world + " was added to two different groups! Removing it from the second.", Level.WARNING);
                         } else {
                             // Add it to the world list
                             worlds.put(world.toLowerCase(), groupName.toLowerCase());
@@ -82,7 +83,8 @@ public class BetterEnderGroups {
             }
         }
 
-        // Add all missing world to the default group (might fail, because other plugins load after BetterEnderChest)
+        // Add all missing world to the default group (might fail, because other
+        // plugins load after BetterEnderChest)
         for (Iterator<World> iterator = Bukkit.getWorlds().iterator(); iterator.hasNext();) {
             String worldName = iterator.next().getName().toLowerCase();
             if (!worlds.containsKey(worldName)) {
@@ -114,19 +116,19 @@ public class BetterEnderGroups {
             for (String groupName : importSection.getValues(false).keySet()) {
                 // Get the import
                 String importerName = importSection.getString(groupName).toLowerCase();
-                
+
                 // Always lowercase
                 groupName = groupName.toLowerCase();
 
                 // If it's valid, add it to the list
                 if (plugin.getConverter().isValidImporter(importerName)) {
-                    if(groupExists(groupName)) {
-                    imports.put(groupName.toLowerCase(), importerName);
+                    if (groupExists(groupName)) {
+                        imports.put(groupName.toLowerCase(), importerName);
                     } else {
-                        plugin.logThis("The import "+importerName+" was added for the non-existant group "+groupName+"!","WARNING");
+                        plugin.logThis("The import " + importerName + " was added for the non-existant group " + groupName + "!", Level.WARNING);
                     }
                 } else {
-                    plugin.logThis("The import "+importerName+" for the group "+groupName+" isn't a valid importer!","WARNING");
+                    plugin.logThis("The import " + importerName + " for the group " + groupName + " isn't a valid importer!", Level.WARNING);
                 }
             }
         }
