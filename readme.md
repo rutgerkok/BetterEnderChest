@@ -13,7 +13,7 @@ BetterEnderChest is a plugin for CraftBukkit (Minecraft server mod) that adds so
 
 ## Get someone's inventory
 
-   Inventory enderInventory = betterEnderChest.getEnderChests().getInventory(player.getName(), String groupName);
+    Inventory enderInventory = betterEnderChest.getEnderChests().getInventory(player.getName(), String groupName);
 
 There are some other methods availible in the same class to save and unload inventories. This method always returns an inventory, if it doesn't exist it is created. So check the groupName and inventoryName!
 
@@ -40,7 +40,7 @@ There is a static BetterEnderChest.defaultGroupName, but it is just the group na
 
 Changes to the default chest get used by new chests as soon as the chest is saved. If you can't wait for the autosave, just call the save function manually:
 
-   betterEnderChest.getEnderChests().saveInventory(BetterEnderChest.defaultChestName, String groupName);
+    betterEnderChest.getEnderChests().saveInventory(BetterEnderChest.defaultChestName, String groupName);
 
 ## Add a /betterenderchest subcommand
 Create a new class that inherits [BaseCommand](https://github.com/rutgerkok/BetterEnderChest/blob/master/src/nl/rutgerkok/BetterEnderChest/commands/BaseCommand.java). Then  you can add your command to the betterEnderChest.getCommandHandler().commands hashmap<String commandName, BaseCommand command>.
