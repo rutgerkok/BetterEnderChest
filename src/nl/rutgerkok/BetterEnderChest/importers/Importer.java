@@ -8,5 +8,15 @@ import org.bukkit.inventory.Inventory;
 
 public abstract class Importer {
 
-    public abstract Inventory importInventory(String inventoryName, BetterEnderChest plugin) throws IOException;
+    /**
+     * Import an inventory from another plugin. To help with the importing
+     * process, take a look at the Loader, LoadHelper and InventoryUtil classes.
+     * 
+     * @param inventoryName
+     * @param groupName
+     * @param plugin
+     * @return
+     * @throws IOException
+     */
+    public abstract Inventory importInventory(String inventoryName, String groupName, BetterEnderChest plugin) throws IOException;
 }

@@ -14,10 +14,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class VanillaImporter extends Importer{
+public class VanillaImporter extends Importer {
 
     @Override
-    public Inventory importInventory(final String inventoryName, BetterEnderChest plugin) throws IOException {
+    public Inventory importInventory(final String inventoryName, String groupName, BetterEnderChest plugin) throws IOException {
         Player player = Bukkit.getPlayerExact(inventoryName);
         Inventory betterEnderInventory;
         if (player == null) {

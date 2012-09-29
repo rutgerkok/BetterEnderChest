@@ -118,7 +118,7 @@ public class EnderSaveAndLoad {
         // TODO: allow other plugins, not a hardcoded vanilla.
         if (groupName.equals(BetterEnderChest.importingGroupName)) {
             try {
-                Inventory importedInventory = plugin.getConverter().getImport(inventoryName, "vanilla");
+                Inventory importedInventory = plugin.getConverter().importInventory(inventoryName, groupName, "multiinv");
                 if (importedInventory != null) {
                     return importedInventory;
                 }

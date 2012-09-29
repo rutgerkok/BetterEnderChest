@@ -6,8 +6,7 @@ import java.util.HashMap;
 import org.bukkit.inventory.Inventory;
 
 import nl.rutgerkok.BetterEnderChest.exporters.Exporter;
-import nl.rutgerkok.BetterEnderChest.importers.Importer;
-import nl.rutgerkok.BetterEnderChest.importers.VanillaImporter;
+import nl.rutgerkok.BetterEnderChest.importers.*;
 
 public class BetterEnderConverter {
     BetterEnderChest plugin;
@@ -23,12 +22,13 @@ public class BetterEnderConverter {
         
         // Add all importers
         importers.put("vanilla", new VanillaImporter());
+        importers.put("multiinv", new MultiInvImporter());
     }
     
-    public Inventory getImport(String inventoryName, String importerName) throws IOException {
+    public Inventory importInventory(String inventoryName, String groupName, String importerName) throws IOException {
         if(importers.containsKey(importerName)) {
             // Import
-            return importers.get(importerName).importInventory(inventoryName, plugin);
+            return importers.get(importerName).importInventory(inventoryName, groupName, plugin);
         }
         // Importer not found
         return null;

@@ -132,13 +132,15 @@ public class BetterEnderChest extends JavaPlugin {
     }
 
     /**
-     * Returns the command handler which can be used to modify the /betterenderchest command.
+     * Returns the command handler which can be used to modify the
+     * /betterenderchest command.
+     * 
      * @return
      */
     public EnderCommands getCommandHandler() {
         return commandHandler;
     }
-    
+
     /**
      * Returns the converter, which contains methods to import and export Ender
      * inventories from and to various plugins.
@@ -241,6 +243,21 @@ public class BetterEnderChest extends JavaPlugin {
         if (!(sender instanceof Player))
             return true; // console always has permission
         return hasPermission((Player) sender, permission, fallBack);
+    }
+
+    /**
+     * Returns whether the inventoryName is a special inventory (public chest,
+     * default chest, etc.).
+     * 
+     * @param inventoryName
+     * @return
+     */
+    public boolean isSpecialChest(String inventoryName) {
+        if (inventoryName.equals(BetterEnderChest.publicChestName))
+            return true;
+        if (inventoryName.equals(BetterEnderChest.defaultChestName))
+            return true;
+        return false;
     }
 
     /**
