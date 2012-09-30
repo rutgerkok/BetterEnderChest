@@ -49,7 +49,7 @@ public class BetterEnderChest extends JavaPlugin {
         // STOP if build is too low
         
         try {
-            Sound.getSound("CHEST_OPEN");
+            Sound.valueOf("CHEST_OPEN");
         } catch (NoClassDefFoundError e) {
             logThis("--------- SERVERE ---------", Level.SEVERE);
             logThis("Bukkit version is too old!", Level.SEVERE);
