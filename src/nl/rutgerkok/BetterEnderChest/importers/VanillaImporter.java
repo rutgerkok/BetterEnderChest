@@ -1,7 +1,6 @@
 package nl.rutgerkok.BetterEnderChest.importers;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ListIterator;
 
@@ -23,22 +22,20 @@ public class VanillaImporter extends Importer {
         if (player == null) {
 
             // Offline, load from file
-            File playerStorage = new File(Bukkit.getWorlds().get(0).getWorldFolder().getAbsolutePath() + "/players");
-            String[] files = playerStorage.list(new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String fileName) {
-                    return fileName.equalsIgnoreCase(inventoryName + ".dat");
-                }
-            });
+            File playerDirectory = new File(Bukkit.getWorlds().get(0).getWorldFolder().getAbsolutePath() + "/players");
 
-            // Check if the file exists
-            if (files.length == 0) {
-                // File not found, return null
-                return null;
+            File playerFile = new File(playerDirectory.getAbsolutePath() + "/" + inventoryName + ".dat");
+            if(!playerFile.exists()) {
+                // File doesn't exist. Maybe there is a problem with those case-sensitive file systems?
+                playerFile = LoadHelper.getCaseInsensitiveFile(playerDirectory, inventoryName + ".dat");
+                if(playerFile == null) {
+                    // Nope, the file really doesn't exist. Return nothing.
+                    return null;
+                }
             }
 
             // Load it from the file (mainworld/players/playername.dat)
-            betterEnderInventory = Loader.loadInventoryFromFile(inventoryName, new File(playerStorage.getAbsolutePath() + "/" + files[0]), "EnderItems", plugin);
+            betterEnderInventory = Loader.loadInventoryFromFile(inventoryName, playerFile, "EnderItems", plugin);
         } else {
             // Online, load now
             Inventory vanillaInventory = player.getEnderChest();

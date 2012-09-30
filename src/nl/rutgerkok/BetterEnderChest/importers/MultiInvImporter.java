@@ -2,8 +2,10 @@ package nl.rutgerkok.BetterEnderChest.importers;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
+import nl.rutgerkok.BetterEnderChest.InventoryHelper.LoadHelper;
 import nl.rutgerkok.BetterEnderChest.InventoryHelper.Loader;
 
 import org.bukkit.Bukkit;
@@ -23,6 +25,15 @@ public class MultiInvImporter extends Importer {
             return null;
         }
 
+        // Make groupName case-correct
+        HashMap<String, String> multiInvGroups = MIYamlFiles.getGroups();
+        for (String world : multiInvGroups.keySet()) {
+            if (multiInvGroups.get(world).equalsIgnoreCase(groupName)) {
+                groupName = multiInvGroups.get(world);
+                break;
+            }
+        }
+
         // Soon an inventory!
         Inventory betterInventory = Loader.loadEmptyInventory(inventoryName, plugin);
 
@@ -37,9 +48,11 @@ public class MultiInvImporter extends Importer {
             gameModeName = Bukkit.getDefaultGameMode().toString();
         }
 
-        System.out.println(inventoryName+","+groupName+","+gameModeName);
-        
-        // Load from MultiInv
+        System.out.println(inventoryName + "," + groupName + "," + gameModeName);
+
+        // Load from MultiInv Code is based on 
+        // https://github.com/Pluckerpluck/MultiInv/blob/ac45f24c5687ee571fd0a18fa0f23a1503f79b13/
+        //    src/uk/co/tggl/pluckerpluck/multiinv/listener/MIEnderChest.java#L72)
         MIEnderchestInventory multiInvEnderInventory = null;
         if (MIYamlFiles.config.getBoolean("useSQL")) {
             // Using SQL
@@ -51,28 +64,34 @@ public class MultiInvImporter extends Importer {
             File multiInvDataFolder = plugin.getServer().getPluginManager().getPlugin("MultiInv").getDataFolder();
             File multiInvWorldsFolder = new File(multiInvDataFolder, "Groups");
 
-            // TODO: case-insensitive
-            File file = new File(multiInvWorldsFolder, groupName + "/" + inventoryName + ".ec.yml");
-
-            YamlConfiguration playerFile = new YamlConfiguration();
-            if (file.exists()) {
-                try {
-                    playerFile.load(file);
-                } catch (InvalidConfigurationException e) {
-                    plugin.logThis("Cannot import from MultiINV: invalid chest file! (inventoryName: " + inventoryName + ", groupName:" + groupName + "");
-                    e.printStackTrace();
-                }
-                String inventoryString = playerFile.getString(gameModeName, null);
-                if (inventoryString == null || inventoryString == "") {
-                    // Nothing to return
+            // Get the save file
+            File multiInvFile = new File(multiInvWorldsFolder, groupName + "/" + inventoryName + ".ec.yml");
+            if (!multiInvFile.exists()) {
+                // File doesn't exist. Maybe there is a problem with those
+                // case-sensitive file systems?
+                multiInvFile = LoadHelper.getCaseInsensitiveFile(new File(multiInvWorldsFolder, groupName), inventoryName + ".ec.yml");
+                if (multiInvFile == null) {
+                    // Nope. File really doesn't exist. Return nothing.
                     return null;
                 }
-                // Make an MultiInv EnderInventory out of that string.
-                multiInvEnderInventory = new MIEnderchestInventory(inventoryString);
-            } else {
-                // No file, return nothing
+            }
+
+            // Load it
+            YamlConfiguration playerFile = new YamlConfiguration();
+
+            try {
+                playerFile.load(multiInvFile);
+            } catch (InvalidConfigurationException e) {
+                // Rethrow as IOException
+                throw new IOException("Cannot import from MultiINV: invalid chest file! (inventoryName: " + inventoryName + ", groupName:" + groupName + "");
+            }
+            String inventoryString = playerFile.getString(gameModeName, null);
+            if (inventoryString == null || inventoryString == "") {
+                // Nothing to return
                 return null;
             }
+            // Make an MultiInv EnderInventory out of that string.
+            multiInvEnderInventory = new MIEnderchestInventory(inventoryString);
         }
 
         if (multiInvEnderInventory == null) {
@@ -81,7 +100,7 @@ public class MultiInvImporter extends Importer {
         }
 
         // Add everything from multiInvEnderInventory to betterInventory
-        for (int i = 0; i < multiInvEnderInventory.getInventoryContents().length; i++) {
+        for (int i = 0; i < multiInvEnderInventory.getInventoryContents().length && i < betterInventory.getSize(); i++) {
             betterInventory.setItem(i, multiInvEnderInventory.getInventoryContents()[i].getItemStack());
         }
 
