@@ -25,6 +25,7 @@ public class BetterEnderConverter {
         // Add all importers
         importers.put("vanilla", new VanillaImporter());
         importers.put("multiinv", new MultiInvImporter());
+        importers.put("multiverse-inventories", new MultiverseInventoriesImporter());
     }
 
     /**

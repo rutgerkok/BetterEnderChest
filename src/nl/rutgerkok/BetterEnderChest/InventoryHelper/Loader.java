@@ -83,6 +83,10 @@ public class Loader {
 
         // Inventory tag, inside the file
         Tag inventoryNBT = mainNBT.findTagByName(inventoryTagName);
+        if(inventoryNBT == null) {
+            // Return nothing if there is no inventory tag
+            return null;
+        }
 
         // Inventory rows
         int inventoryRows = 0; // Start small
