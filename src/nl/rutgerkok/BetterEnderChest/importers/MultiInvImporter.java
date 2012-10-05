@@ -3,6 +3,7 @@ package nl.rutgerkok.BetterEnderChest.importers;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.logging.Level;
 
 import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
 import nl.rutgerkok.BetterEnderChest.InventoryHelper.LoadHelper;
@@ -25,17 +26,25 @@ public class MultiInvImporter extends Importer {
             return null;
         }
 
+        // Soon an inventory!
+        Inventory betterInventory = Loader.loadEmptyInventory(inventoryName, plugin);
+
         // Make groupName case-correct
+        boolean foundMatchingGroup = false;
         HashMap<String, String> multiInvGroups = MIYamlFiles.getGroups();
         for (String world : multiInvGroups.keySet()) {
             if (multiInvGroups.get(world).equalsIgnoreCase(groupName)) {
                 groupName = multiInvGroups.get(world);
+                foundMatchingGroup = true;
                 break;
             }
         }
 
-        // Soon an inventory!
-        Inventory betterInventory = Loader.loadEmptyInventory(inventoryName, plugin);
+        // Check if a matching group has been found
+        if (!foundMatchingGroup) {
+            plugin.logThis("No matching MultiInv group found for " + groupName + ". Cannot import " + inventoryName + ".", Level.WARNING);
+            return null;
+        }
 
         // Get the correct gamemode
         String gameModeName = null;
@@ -48,11 +57,10 @@ public class MultiInvImporter extends Importer {
             gameModeName = Bukkit.getDefaultGameMode().toString();
         }
 
-        System.out.println(inventoryName + "," + groupName + "," + gameModeName);
-
-        // Load from MultiInv Code is based on 
+        // Get the data
+        // Load from MultiInv Code is based on
         // https://github.com/Pluckerpluck/MultiInv/blob/ac45f24c5687ee571fd0a18fa0f23a1503f79b13/
-        //    src/uk/co/tggl/pluckerpluck/multiinv/listener/MIEnderChest.java#L72)
+        // src/uk/co/tggl/pluckerpluck/multiinv/listener/MIEnderChest.java#L72)
         MIEnderchestInventory multiInvEnderInventory = null;
         if (MIYamlFiles.config.getBoolean("useSQL")) {
             // Using SQL
@@ -104,6 +112,7 @@ public class MultiInvImporter extends Importer {
             betterInventory.setItem(i, multiInvEnderInventory.getInventoryContents()[i].getItemStack());
         }
 
+        // Return it
         return betterInventory;
     }
 
