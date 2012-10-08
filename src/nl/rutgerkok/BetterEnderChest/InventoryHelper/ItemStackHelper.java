@@ -32,10 +32,10 @@ public class ItemStackHelper {
                 CraftItemStack craftStack = new CraftItemStack(stack);
                 craftStack.getHandle().tag = NBTHelper.getNMSFromNBTTagCompound(metaDataNBT);
                 stack = craftStack;
-            } catch(NoClassDefFoundError e) {
+            } catch (NoClassDefFoundError e) {
                 // No craftbukkit, no meta tags!
             }
-            
+
         }
 
         return stack;
@@ -62,14 +62,15 @@ public class ItemStackHelper {
         Tag stackNBT = new Tag(Tag.Type.TAG_Compound, "", stackPropertyNBT);
 
         // Add metadata using some CraftBukkit magic
-        if(stack instanceof CraftItemStack) {
+        if (stack instanceof CraftItemStack) {
             CraftItemStack craftStack = (CraftItemStack) stack;
-            if(craftStack.getHandle() != null && craftStack.getHandle().tag != null) {
+            if (craftStack.getHandle() != null && craftStack.getHandle().tag != null) {
                 NBTTagCompound nmsMetaData = craftStack.getHandle().tag;
-                // For some reason, this line is needed (why would the server forget the name?)
+                // For some reason, this line is needed (why would the server
+                // forget the name?)
                 nmsMetaData.setName("tag");
                 Tag metaDataNBT = NBTHelper.getNBTFromNMSTagCompound(nmsMetaData);
-                if(((Tag[])metaDataNBT.getValue()).length > 1) {
+                if (((Tag[]) metaDataNBT.getValue()).length > 1) {
                     stackNBT.addTag(metaDataNBT);
                 }
             }
@@ -78,6 +79,5 @@ public class ItemStackHelper {
         // Return it
         return stackNBT;
     }
-
 
 }

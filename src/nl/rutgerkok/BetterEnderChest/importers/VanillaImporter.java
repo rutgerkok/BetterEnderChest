@@ -25,10 +25,11 @@ public class VanillaImporter extends Importer {
             File playerDirectory = new File(Bukkit.getWorlds().get(0).getWorldFolder().getAbsolutePath() + "/players");
 
             File playerFile = new File(playerDirectory.getAbsolutePath() + "/" + inventoryName + ".dat");
-            if(!playerFile.exists()) {
-                // File doesn't exist. Maybe there is a problem with those case-sensitive file systems?
+            if (!playerFile.exists()) {
+                // File doesn't exist. Maybe there is a problem with those
+                // case-sensitive file systems?
                 playerFile = LoadHelper.getCaseInsensitiveFile(playerDirectory, inventoryName + ".dat");
-                if(playerFile == null) {
+                if (playerFile == null) {
                     // Nope, the file really doesn't exist. Return nothing.
                     return null;
                 }

@@ -101,9 +101,10 @@ public class LoadHelper {
         // rank
         return plugin.getChestRows();
     }
-    
+
     /**
      * Get's a case-insensitive file
+     * 
      * @param directory
      * @param fileName
      * @return
@@ -121,7 +122,7 @@ public class LoadHelper {
             // File not found, return null
             return null;
         }
-        
+
         // Return the first (and hopefully only) file
         return new File(directory.getAbsolutePath() + File.pathSeparator + files[0]);
     }

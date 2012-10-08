@@ -8,21 +8,21 @@ public class LocketteBridge implements Bridge {
 
     @Override
     public boolean canAccess(Player player, Block block) {
-	return Lockette.isUser(block, player.getName(), true);
+        return Lockette.isUser(block, player.getName(), true);
     }
 
     @Override
     public String getBridgeName() {
-	return "Lockette";
+        return "Lockette";
     }
 
     @Override
     public String getOwnerName(Block block) {
-	return Lockette.getProtectedOwner(block);
+        return Lockette.getProtectedOwner(block);
     }
 
     @Override
     public boolean isProtected(Block block) {
-	return Lockette.isProtected(block);
+        return Lockette.isProtected(block);
     }
 }

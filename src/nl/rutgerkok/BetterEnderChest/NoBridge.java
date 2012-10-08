@@ -13,21 +13,21 @@ public class NoBridge implements Bridge {
 
     @Override
     public boolean canAccess(Player player, Block block) {
-	return false;
+        return false;
     }
 
     @Override
     public String getBridgeName() {
-	return "no bridge";
+        return "no bridge";
     }
 
     @Override
     public String getOwnerName(Block block) {
-	return "";
+        return "";
     }
 
     @Override
     public boolean isProtected(Block block) {
-	return false;
+        return false;
     }
 }
