@@ -29,7 +29,7 @@ public class BetterEnderChest extends JavaPlugin {
      * Inner class to store some variables.
      */
     public static class PublicChest {
-        public static boolean openOnOpeningUnprotectedChest, openOnOpeningPluginChest;
+        public static boolean openOnOpeningUnprotectedChest, openOnUsingCommand, openOnOpeningPluginChest;
         public static String displayName, closeMessage;
     }
 
@@ -81,6 +81,7 @@ public class BetterEnderChest extends JavaPlugin {
         // CommandHandler
         commandHandler = new EnderCommands(this);
         getCommand("betterenderchest").setExecutor(commandHandler);
+        getCommand("enderchest").setExecutor(commandHandler);
 
         // AutoSave (adds things to the save queue
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
@@ -396,9 +397,12 @@ public class BetterEnderChest extends JavaPlugin {
         }
 
         // Public chests
-        // enabled?
+        // show for unprotected chests?
         PublicChest.openOnOpeningUnprotectedChest = getConfig().getBoolean("PublicEnderChest.showOnOpeningUnprotectedChest", false);
         getConfig().set("PublicEnderChest.showOnOpeningUnprotectedChest", PublicChest.openOnOpeningUnprotectedChest);
+        // show for command?
+        PublicChest.openOnUsingCommand = getConfig().getBoolean("PublicEnderChest.showOnUsingCommand", PublicChest.openOnOpeningUnprotectedChest);
+        getConfig().set("PublicEnderChest.showOnUsingCommand", PublicChest.openOnUsingCommand);
         // display name?
         BetterEnderChest.PublicChest.displayName = getConfig().getString("PublicEnderChest.name", "Public Chest");
         if (BetterEnderChest.PublicChest.displayName.length() > 16) {

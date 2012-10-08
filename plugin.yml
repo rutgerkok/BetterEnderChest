@@ -7,6 +7,9 @@ commands:
     description: Administrative command for BetterEnderChest.
     aliases: [bec]
     usage: Type /<command> for more information.
+  enderchest:
+    description: Open the Ender Chest.
+    usage: Alias for /betterenderchest openinv.
 permissions:
   betterenderchest:
     description: Use all BetterEnderChest features. Only for administrators!
@@ -64,6 +67,7 @@ permissions:
     description: Open your Ender Chest inventory.
     children:
       betterenderchest.command.openinv.self: true
+      betterenderchest.command.openinv.other: true
   betterenderchest.command.openinv.self:
     description: Open your own Ender Chest inventory with a command, from the current world group.
   betterenderchest.command.openinv.other:
