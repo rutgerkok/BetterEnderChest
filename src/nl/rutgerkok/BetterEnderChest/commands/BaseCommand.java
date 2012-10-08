@@ -16,7 +16,7 @@ public abstract class BaseCommand {
 
     public abstract String getHelpText();
 
-    public abstract String getPermission();
+    public abstract boolean hasPermission(CommandSender sender);
 
     public abstract String getUsage();
 
@@ -38,7 +38,7 @@ public abstract class BaseCommand {
 
         return false;
     }
-    
+
     public boolean isValidGroup(String name) {
         return plugin.getGroups().groupExists(name);
     }

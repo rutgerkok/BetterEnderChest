@@ -29,19 +29,17 @@ public class EnderCommands implements CommandExecutor {
 
     private void showHelp(CommandSender sender, String label) {
         Set<String> keySet = commands.keySet();
-        int commandCount = 0; // Counts availible commands
-        
+        int commandCount = 0; // Counts available commands
+
         for (String key : keySet) {
             BaseCommand command = commands.get(key);
-            if(plugin.hasPermission(sender, command.getPermission(), false))
-            {
+            if (command.hasPermission(sender)) {
                 sender.sendMessage(ChatColor.GOLD + "/" + label + " " + key + " " + command.getUsage() + ": " + ChatColor.WHITE + command.getHelpText());
                 commandCount++;
             }
         }
-        
-        if(commandCount == 0)
-        {
+
+        if (commandCount == 0) {
             sender.sendMessage(ChatColor.GOLD + "Sorry, no availible commands for your rank.");
         }
     }
@@ -67,12 +65,12 @@ public class EnderCommands implements CommandExecutor {
         BaseCommand command = commands.get(name);
 
         if (command == null) {
-            sender.sendMessage(ChatColor.RED + "Command " + name + " not found... Availible commands:");
+            sender.sendMessage(ChatColor.RED + "Command " + name + " not found... Available commands:");
             showHelp(sender, label);
             return true;
         }
 
-        if (!plugin.hasPermission(sender, command.getPermission(), false)) {
+        if (!command.hasPermission(sender)) {
             sender.sendMessage(ChatColor.RED + "No permission to do this...");
             return true;
         }

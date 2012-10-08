@@ -73,8 +73,8 @@ public class SwapInvCommand extends BaseCommand {
     }
 
     @Override
-    public String getPermission() {
-        return "betterenderchest.command.swapinv";
+    public boolean hasPermission(CommandSender sender) {
+        return sender.hasPermission("betterenderchest.command.swapinv");
     }
 
     @Override

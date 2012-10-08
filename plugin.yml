@@ -8,52 +8,63 @@ commands:
     aliases: [bec]
     usage: Type /<command> for more information.
 permissions:
-  betterenderchest.*:
+  betterenderchest:
     description: Use all BetterEnderChest features. Only for administrators!
     children:
-      betterenderchest.command.*: true
-      betterenderchest.use.*: true
-  betterenderchest.use:
-    description: You can use both private and public Ender Chests. Same as betterenderchest.use.* .
+      betterenderchest.command: true
+      betterenderchest.user: true
+# User permissions
+  betterenderchest.user:
+    description: All basic Ender Chest functionality.
+    default: true
     children:
-      betterenderchest.use.*: true
-  betterenderchest.use.*:
-    description: You can use both private and public Ender Chests. Same as betterenderchest.use .
+      betterenderchest.user.craft: true
+      betterenderchest.user.place: true
+      betterenderchest.user.destroy: true
+      betterenderchest.user.open: true
+  betterenderchest.user.craft:
+    description: Craft the Ender Chest in the workbench.
+  betterenderchest.user.place:
+    description: Place the Ender Chest in the world.
+  betterenderchest.user.destroy:
+    description: Destroy placed Ender Chests.
+  betterenderchest.user.open:
+    description: Open the Ender Chest, both private and public chests.
     children:
-      betterenderchest.use.privatechest: true
-      betterenderchest.use.publicchest: true
-  betterenderchest.use.privatechest:
-    description: Use private chests
-    default: op
-  betterenderchest.use.publicchest:
-    description: Use public chests
-    default: op
+      betterenderchest.user.open.privatechest: true
+      betterenderchest.user.open.publicchest: true
+  betterenderchest.user.open.privatechest:
+    description: Open the private Ender Chest
+  betterenderchest.user.open.publicchest:
+    description: Open the public Ender Chest
+# Row permissions
   betterenderchest.rows.upgrade1:
     description: Get the rows as specified for this upgrade in the config.yml.
-    default: false
   betterenderchest.rows.upgrade2:
     description: Get the rows as specified for this upgrade in the config.yml.
-    default: false
+# Command permissions
   betterenderchest.command:
-    description: Use all commands. Same as betterenderchest.command.* .
-    children:
-      betterenderchest.command.*: true
-  betterenderchest.command.*:
-    description: Use all commands. Same as betterenderchest.command .
+    description: Use all commands.
     default: op
     children:
       betterenderchest.command.deleteinv: true
       betterenderchest.command.give: true
       betterenderchest.command.list: true
-      betterenderchest.command.openinv: true
       betterenderchest.command.swapinv: true
+      betterenderchest.command.openinv: true
   betterenderchest.command.deleteinv:
-    description: Delete the contents of an Ender inventory.
+    description: Delete the contents of an Ender Chest inventory.
   betterenderchest.command.give:
-    description: Give an item to an Ender inventory.  
+    description: Give an item to an Ender Chest inventory.  
   betterenderchest.command.list:
-    description: List all currently loaded Ender inventories.
-  betterenderchest.command.openinv:
-    description: Open someone's Ender inventory.
+    description: List all currently loaded Ender Chest inventories.
   betterenderchest.command.swapinv:
-    description: Swap two Ender inventories.
+    description: Swap two Ender Chest inventories.
+  betterenderchest.command.openinv:
+    description: Open your Ender Chest inventory.
+    children:
+      betterenderchest.command.openinv.self: true
+  betterenderchest.command.openinv.self:
+    description: Open your own Ender Chest inventory with a command, from the current world group.
+  betterenderchest.command.openinv.other:
+    description: Open someone else's (or your own) Ender Chest inventory with a command. Can be from another world group.  

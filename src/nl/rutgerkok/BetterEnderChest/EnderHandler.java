@@ -57,7 +57,7 @@ public class EnderHandler implements Listener {
                 // protected Ender Chest
                 if (protectionBridge.canAccess(player, event.getClickedBlock())) {
                     // player can access the chest
-                    if (plugin.hasPermission(player, "betterenderchest.use.privatechest", true)) {
+                    if (player.hasPermission("betterenderchest.user.open.privatechest")) {
                         // and has the correct permission node
 
                         // Get the owner's name
@@ -69,7 +69,7 @@ public class EnderHandler implements Listener {
                 }
             } else { // unprotected Ender chest
                 if (!player.getItemInHand().getType().equals(Material.SIGN) || !protectionBridge.getBridgeName().equals("Lockette")) {
-                    if (plugin.hasPermission(player, "betterenderchest.use.publicchest", true)) {
+                    if (player.hasPermission("betterenderchest.user.open.publicchest")) {
                         if (BetterEnderChest.PublicChest.openOnOpeningUnprotectedChest) {
                             // Show public chest
                             inventoryName = BetterEnderChest.publicChestName;
@@ -95,7 +95,7 @@ public class EnderHandler implements Listener {
             if (shouldResize(player, inventory, inventoryName, plugin)) {
                 // Kick all players from old inventory
                 InventoryUtils.closeInventory(inventory, ChatColor.YELLOW + "The owner got a different rank, and the inventory had to be resized.");
-                
+
                 // Get an inventory of the correct size and fill it
                 Inventory newInventory = Loader.loadEmptyInventory(inventoryName, plugin.getPlayerRows(player));
                 InventoryUtils.copyContents(inventory, newInventory, player.getLocation());

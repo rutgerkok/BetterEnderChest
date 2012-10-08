@@ -23,8 +23,8 @@ public class ListCommand extends BaseCommand {
     }
 
     @Override
-    public String getPermission() {
-        return "betterenderchest.command.list";
+    public boolean hasPermission(CommandSender sender) {
+        return sender.hasPermission("betterenderchest.command.list");
     }
 
     @Override

@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -47,7 +46,6 @@ public class BetterEnderChest extends JavaPlugin {
     public void onEnable() {
 
         // STOP if build is too low
-        
         try {
             Sound.valueOf("CHEST_OPEN");
         } catch (NoClassDefFoundError e) {
@@ -163,7 +161,7 @@ public class BetterEnderChest extends JavaPlugin {
     public int getPlayerRows(Player player) {
         // Check for upgrade permission
         for (int i = chestRows.length - 1; i > 0; i--) {
-            if (hasPermission(player, "betterenderchest.rows.upgrade" + i, false)) {
+            if (player.hasPermission("betterenderchest.rows.upgrade" + i)) {
                 return getChestRows(i);
             }
         }
@@ -203,48 +201,6 @@ public class BetterEnderChest extends JavaPlugin {
      */
     public int getPublicChestRows() {
         return publicChestRows;
-    }
-
-    /**
-     * If usePermissions is true, it returns whether the player has the
-     * permission. If it's false, it will return true if the player is Op.
-     * Otherwise it will return fallBack.
-     * 
-     * @param player
-     * @param permission
-     *            The permission to check
-     * @param fallBack
-     *            Returns this if player is not op and permissions are disabled
-     * @return If usePermissions is true, it returns whether the player has the
-     *         permission. Otherwise it will return true if the player is Op, or
-     *         it will return fallBack
-     */
-    public boolean hasPermission(Player player, String permission, boolean fallBack) {
-        if (!usePermissions) {
-            if (player.isOp())
-                return true;
-            return fallBack;
-        }
-        return player.hasPermission(permission);
-    }
-
-    /**
-     * If usePermissions is true, it returns whether the sender has the
-     * permission. If the sender is a console or is OP, it returns true.
-     * Otherwise it will return fallBack
-     * 
-     * @param sender
-     * @param permission
-     *            The permission to check
-     * @param fallBack
-     *            Returns this if sender is not a console and not op and
-     *            permissions are disabled
-     * @return
-     */
-    public boolean hasPermission(CommandSender sender, String permission, boolean fallBack) {
-        if (!(sender instanceof Player))
-            return true; // console always has permission
-        return hasPermission((Player) sender, permission, fallBack);
     }
 
     /**

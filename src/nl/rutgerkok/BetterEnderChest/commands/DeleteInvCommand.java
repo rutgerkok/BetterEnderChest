@@ -47,8 +47,8 @@ public class DeleteInvCommand extends BaseCommand {
     }
 
     @Override
-    public String getPermission() {
-        return "betterenderchest.command.deleteinv";
+    public boolean hasPermission(CommandSender sender) {
+        return sender.hasPermission("betterenderchest.command.deleteinv");
     }
 
     @Override

@@ -80,8 +80,8 @@ public class GiveCommand extends BaseCommand {
     }
 
     @Override
-    public String getPermission() {
-        return "betterenderchest.command.give";
+    public boolean hasPermission(CommandSender sender) {
+        return sender.hasPermission("betterenderchest.command.give");
     }
 
     @Override
