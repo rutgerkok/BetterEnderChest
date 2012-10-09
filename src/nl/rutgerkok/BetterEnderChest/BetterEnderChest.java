@@ -20,7 +20,6 @@ public class BetterEnderChest extends JavaPlugin {
     private Bridge protectionBridge;
     private int[] chestRows = new int[3];
     private int publicChestRows;
-    private boolean usePermissions;
     private static File chestSaveLocation;
     public String chestDrop, chestDropSilkTouch, chestDropCreative;
     public static final String publicChestName = "--publicchest", defaultChestName = "--defaultchest", defaultGroupName = "default";
@@ -29,7 +28,7 @@ public class BetterEnderChest extends JavaPlugin {
      * Inner class to store some variables.
      */
     public static class PublicChest {
-        public static boolean openOnOpeningUnprotectedChest, openOnUsingCommand, openOnOpeningPluginChest;
+        public static boolean openOnOpeningUnprotectedChest, openOnUsingCommand;
         public static String displayName, closeMessage;
     }
 
@@ -344,10 +343,6 @@ public class BetterEnderChest extends JavaPlugin {
             chestDropCreative = "NOTHING";
         }
         getConfig().set("BetterEnderChest.dropCreative", chestDropCreative);
-
-        // Permissions
-        usePermissions = getConfig().getBoolean("BetterEnderChest.usePermissions", false);
-        getConfig().set("BetterEnderChest.usePermissions", usePermissions);
 
         // Autosave
         // ticks?
