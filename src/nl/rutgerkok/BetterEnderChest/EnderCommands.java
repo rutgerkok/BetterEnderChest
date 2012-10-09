@@ -46,7 +46,7 @@ public class EnderCommands implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command bukkitCommand, String label, String[] originalArgs) {
-        if(bukkitCommand.getName().equalsIgnoreCase("enderchest")) {
+        if (bukkitCommand.getName().equalsIgnoreCase("enderchest")) {
             // Handle the /enderchest command
             BaseCommand command = commands.get("openinv");
             if (!command.hasPermission(sender)) {
@@ -58,7 +58,7 @@ public class EnderCommands implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "Wrong command usage! Correct usage:");
                 sender.sendMessage(ChatColor.RED + "/" + label + " " + command.getUsage());
             }
-        
+
             return true;
         }
 

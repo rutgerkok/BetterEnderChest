@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class BetterEnderChest extends JavaPlugin {
-    private EnderHandler enderHandler;
+    private BetterEnderHandler enderHandler;
     private EnderCommands commandHandler;
     private BetterEnderStorage enderStorage;
     private BetterEnderGroups groups;
@@ -74,7 +74,7 @@ public class BetterEnderChest extends JavaPlugin {
         enderStorage = new BetterEnderStorage(this);
 
         // EventHandler
-        enderHandler = new EnderHandler(this, protectionBridge);
+        enderHandler = new BetterEnderHandler(this, protectionBridge);
         getServer().getPluginManager().registerEvents(enderHandler, this);
 
         // CommandHandler
