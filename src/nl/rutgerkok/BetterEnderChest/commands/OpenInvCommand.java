@@ -32,13 +32,13 @@ public class OpenInvCommand extends BaseCommand {
             }
         } else {
             // Player wants to open someone else's Ender Chest
-            
+
             // Check for permissions
-            if(!player.hasPermission("betterenderchest.command.openinv.other")) {
-                player.sendMessage(ChatColor.RED+"You can only open your own Ender Chest.");
+            if (!player.hasPermission("betterenderchest.command.openinv.other")) {
+                player.sendMessage(ChatColor.RED + "You can only open your own Ender Chest.");
                 return true;
             }
-            
+
             // Execute the command
             String inventoryName = getInventoryName(args[0]);
             String groupName = getGroupName(args[0], sender);
@@ -70,7 +70,7 @@ public class OpenInvCommand extends BaseCommand {
 
     @Override
     public String getUsage() {
-        return "<player>";
+        return "[player]";
     }
 
 }
