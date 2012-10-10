@@ -43,8 +43,10 @@ permissions:
 # Row permissions
   betterenderchest.rows.upgrade1:
     description: Get the rows as specified for this upgrade in the config.yml.
+    default: false
   betterenderchest.rows.upgrade2:
     description: Get the rows as specified for this upgrade in the config.yml.
+    default: false
 # Command permissions
   betterenderchest.command:
     description: Use all commands.
@@ -55,6 +57,7 @@ permissions:
       betterenderchest.command.list: true
       betterenderchest.command.swapinv: true
       betterenderchest.command.openinv: true
+      betterenderchest.command.reload: true
   betterenderchest.command.deleteinv:
     description: Delete the contents of an Ender Chest inventory.
   betterenderchest.command.give:
@@ -71,4 +74,6 @@ permissions:
   betterenderchest.command.openinv.self:
     description: Open your own Ender Chest inventory with a command, from the current world group.
   betterenderchest.command.openinv.other:
-    description: Open someone else's (or your own) Ender Chest inventory with a command. Can be from another world group.  
+    description: Open someone else's (or your own) Ender Chest inventory with a command. Can be from another world group.
+  betterenderchest.command.reload:
+    description: Reload the configuration.

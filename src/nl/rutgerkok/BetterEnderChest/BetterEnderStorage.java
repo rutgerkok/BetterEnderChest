@@ -116,7 +116,8 @@ public class BetterEnderStorage {
     }
 
     /**
-     * Unloads the inventory from memory. Doesn't save!
+     * Unloads the inventory from memory. Doesn't save! Also, make sure that
+     * no-one is viewing the inventory!
      * 
      * @param inventoryName
      */
@@ -127,6 +128,15 @@ public class BetterEnderStorage {
         if (inventories.containsKey(groupName)) {
             inventories.get(groupName).remove(inventoryName);
         }
+    }
+
+    /**
+     * Unloads all inventories from memory. Doesn't save! Also, make sure that
+     * no-one is viewing an inventory!
+     */
+    public void unloadAllInventories() {
+        saveQueue.clear();
+        inventories.clear();
     }
 
     public void autoSave() {

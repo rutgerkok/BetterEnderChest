@@ -24,6 +24,7 @@ public class EnderCommands implements CommandExecutor {
         commands.put("give", new GiveCommand(plugin));
         commands.put("list", new ListCommand(plugin));
         commands.put("openinv", new OpenInvCommand(plugin));
+        commands.put("reload", new ReloadCommand(plugin));
         commands.put("swapinv", new SwapInvCommand(plugin));
     }
 

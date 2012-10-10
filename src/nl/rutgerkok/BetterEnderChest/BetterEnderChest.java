@@ -299,7 +299,7 @@ public class BetterEnderChest extends JavaPlugin {
 
     // Private methods
 
-    private void initConfig() {
+    public void initConfig() {
         // Converting
         if (getConfig().getInt("EnderChest.rows", -1) != -1) {
             // Found an old config!

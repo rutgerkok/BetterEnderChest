@@ -50,6 +50,10 @@ public class BetterEnderGroups {
     }
 
     public void initConfig() {
+        // Clear the lists (in case we're reloading)
+        worlds.clear();
+        imports.clear();
+        // Read and write
         readConfig();
         writeConfig();
     }
