@@ -19,6 +19,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -52,7 +54,6 @@ public class BetterEnderHandler implements Listener {
         String inventoryName = "";
 
         // Find out the inventory that should be opened
-
         if (protectionBridge.isProtected(event.getClickedBlock())) {
             // Protected Ender Chest
             if (protectionBridge.canAccess(player, event.getClickedBlock())) {
@@ -64,22 +65,26 @@ public class BetterEnderHandler implements Listener {
                     inventoryName = protectionBridge.getOwnerName(event.getClickedBlock());
                 } else {
                     // Show an error
-                    player.sendMessage(ChatColor.RED + "You do not have permissions to use private Ender Chests.");
+                    player.sendMessage(ChatColor.RED + "You do not have permissions to use your private Ender Chest.");
                 }
             }
         } else {
             // Unprotected Ender chest
             if (!player.getItemInHand().getType().equals(Material.SIGN) || !protectionBridge.getBridgeName().equals("Lockette")) {
-                if (player.hasPermission("betterenderchest.user.open.publicchest")) {
-                    if (BetterEnderChest.PublicChest.openOnOpeningUnprotectedChest) {
-                        // Show public chest
+                if (BetterEnderChest.PublicChest.openOnOpeningUnprotectedChest) {
+                    // Get public chest
+                    if (player.hasPermission("betterenderchest.user.open.publicchest")) {
                         inventoryName = BetterEnderChest.publicChestName;
                     } else {
-                        // Get player's name
-                        inventoryName = player.getName();
+                        player.sendMessage(ChatColor.RED + "You do not have permissions to use the public Ender Chest.");
                     }
                 } else {
-                    player.sendMessage(ChatColor.RED + "You do not have permissions to use public Ender Chests.");
+                    // Get player's name
+                    if (player.hasPermission("betterenderchest.user.open.privatechest")) {
+                        inventoryName = player.getName();
+                    } else {
+                        player.sendMessage(ChatColor.RED + "You do not have permissions to use your private Ender Chest.");
+                    }
                 }
             }
         }
@@ -107,9 +112,57 @@ public class BetterEnderHandler implements Listener {
 
         }
 
-        // Show the inventory and play a sound
-        player.getWorld().playSound(player.getLocation(), Sound.CHEST_OPEN, 1.0F, 1.0F);
+        // Show the inventory
         player.openInventory(inventory);
+    }
+
+    @EventHandler
+    public void onInventoryOpen(InventoryOpenEvent event) {
+        if (!(event.getPlayer() instanceof Player)) {
+            return;
+        }
+
+        Player player = (Player) event.getPlayer();
+
+        // Check for BetterEnderChests
+        if (event.getInventory().getHolder() instanceof BetterEnderHolder) {
+            player.getWorld().playSound(player.getLocation(), Sound.CHEST_OPEN, 1.0F, 1.0F);
+        }
+
+        // Check for vanilla Ender Chests
+        if (plugin.getCompabilityMode() && event.getInventory().getType().equals(InventoryType.ENDER_CHEST)) {
+            // Plugin opened the vanilla Ender Chest, take it over
+
+            String inventoryName = "";
+
+            event.setCancelled(true);
+
+            if (BetterEnderChest.PublicChest.openOnOpeningUnprotectedChest) {
+                // Get public chest
+                if (player.hasPermission("betterenderchest.user.open.publicchest")) {
+                    inventoryName = BetterEnderChest.publicChestName;
+                } else {
+                    player.sendMessage(ChatColor.RED + "You do not have permissions to use the public Ender Chest.");
+                }
+            } else {
+                // Get player's name
+                if (player.hasPermission("betterenderchest.user.open.privatechest")) {
+                    inventoryName = player.getName();
+                } else {
+                    player.sendMessage(ChatColor.RED + "You do not have permissions to use your private Ender Chest.");
+                }
+            }
+
+            // Stop if no name has been found
+            if (inventoryName.isEmpty()) {
+                return;
+            }
+
+            // Get and show the inventory
+            Inventory inventory = chests.getInventory(inventoryName, plugin.getGroups().getGroup(player.getWorld().getName()));
+            player.openInventory(inventory);
+        }
+
     }
 
     // Play sound and show warning message for public chests
@@ -138,10 +191,9 @@ public class BetterEnderHandler implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         Block block = event.getBlock();
-        Material material = block.getType();
         Player player = event.getPlayer();
 
-        if (!material.equals(plugin.getChestMaterial())) {
+        if (!block.getType().equals(plugin.getChestMaterial())) {
             // Another block is broken
             return;
         }
@@ -167,11 +219,13 @@ public class BetterEnderHandler implements Listener {
             chestDropString = plugin.chestDropCreative;
         }
 
-        // Drop it
-        if (chestDropString.equals("OBSIDIAN") || chestDropString.equals("OBSIDIAN_WITH_EYE_OF_ENDER") || chestDropString.equals("OBSIDIAN_WITH_ENDER_PEARL")) {
-            // Drop 8 obsidian
-            event.getPlayer().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(Material.OBSIDIAN, 8));
+        if (chestDropString.equals("EYE_OF_ENDER") || chestDropString.equals("ITSELF") || chestDropString.equals("ENDER_PEARL") || chestDropString.equals("NOTHING")) {
+            // Break it ourselves to prevent the default drop
+            event.setCancelled(true);
+            event.getBlock().setType(Material.AIR);
         }
+
+        // Drop it
         if (chestDropString.equals("OBSIDIAN_WITH_EYE_OF_ENDER") || chestDropString.equals("EYE_OF_ENDER")) {
             // Drop Eye of Ender
             event.getPlayer().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(Material.EYE_OF_ENDER));
@@ -182,9 +236,8 @@ public class BetterEnderHandler implements Listener {
         }
         if (chestDropString.equals("ITSELF")) {
             // Drop itself
-            event.getPlayer().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(material));
+            event.getPlayer().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(block.getType()));
         }
-
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

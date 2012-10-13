@@ -21,6 +21,7 @@ public class BetterEnderChest extends JavaPlugin {
     private int[] chestRows = new int[3];
     private int publicChestRows;
     private static File chestSaveLocation;
+    private boolean compabilityMode;
     public String chestDrop, chestDropSilkTouch, chestDropCreative;
     public static final String publicChestName = "--publicchest", defaultChestName = "--defaultchest", defaultGroupName = "default";
 
@@ -139,6 +140,14 @@ public class BetterEnderChest extends JavaPlugin {
      */
     public EnderCommands getCommandHandler() {
         return commandHandler;
+    }
+    
+    /**
+     * Returns if the plugin should take over Inventory events with the vanilla Ender Chest (called by other plugins)
+     * @return
+     */
+    public boolean getCompabilityMode() {
+        return compabilityMode;
     }
 
     /**
@@ -297,14 +306,17 @@ public class BetterEnderChest extends JavaPlugin {
         return new File("chests/");
     }
 
-    // Private methods
-
+    // Configuration
     public void initConfig() {
         // Converting
         if (getConfig().getInt("EnderChest.rows", -1) != -1) {
             // Found an old config!
             logThis("Converting config.yml to new format...");
             convertConfig();
+        }
+        if (getConfig().getString("BetterEnderChest.usePermissions", null) != null) {
+            logThis("The permission nodes have changed. See the BukkitDev page for more information.", Level.WARNING);
+            getConfig().set("BetterEnderChest.usePermissions", null);
         }
 
         // Save location
@@ -343,6 +355,10 @@ public class BetterEnderChest extends JavaPlugin {
             chestDropCreative = "NOTHING";
         }
         getConfig().set("BetterEnderChest.dropCreative", chestDropCreative);
+        
+        // CompabilityMode
+        compabilityMode = getConfig().getBoolean("BetterEnderChest.enderChestCompabilityMode");
+        getConfig().set("BetterEnderChest.enderChestCompabilityMode", compabilityMode);
 
         // Autosave
         // ticks?
@@ -418,6 +434,8 @@ public class BetterEnderChest extends JavaPlugin {
         }
         getConfig().set("PublicEnderChest.defaultRows", publicChestRows);
     }
+
+    // Private methods
 
     private void convertConfig() {
         // This imports the old config. For any missing options it uses the old
