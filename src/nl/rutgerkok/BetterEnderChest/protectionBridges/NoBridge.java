@@ -1,4 +1,5 @@
-package nl.rutgerkok.BetterEnderChest;
+package nl.rutgerkok.BetterEnderChest.protectionBridges;
+
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;

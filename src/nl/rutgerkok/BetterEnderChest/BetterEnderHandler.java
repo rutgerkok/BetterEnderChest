@@ -2,6 +2,7 @@ package nl.rutgerkok.BetterEnderChest;
 
 import nl.rutgerkok.BetterEnderChest.InventoryHelper.InventoryUtils;
 import nl.rutgerkok.BetterEnderChest.InventoryHelper.Loader;
+import nl.rutgerkok.BetterEnderChest.protectionBridges.Bridge;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;

@@ -10,12 +10,12 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-public class EnderCommands implements CommandExecutor {
+public class BetterEnderCommands implements CommandExecutor {
     BetterEnderChest plugin;
 
     public HashMap<String, BaseCommand> commands;
 
-    public EnderCommands(BetterEnderChest plugin) {
+    public BetterEnderCommands(BetterEnderChest plugin) {
         this.plugin = plugin;
 
         commands = new HashMap<String, BaseCommand>();

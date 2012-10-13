@@ -4,6 +4,11 @@ import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import nl.rutgerkok.BetterEnderChest.protectionBridges.Bridge;
+import nl.rutgerkok.BetterEnderChest.protectionBridges.LWCBridge;
+import nl.rutgerkok.BetterEnderChest.protectionBridges.LocketteBridge;
+import nl.rutgerkok.BetterEnderChest.protectionBridges.NoBridge;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -12,7 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class BetterEnderChest extends JavaPlugin {
     private BetterEnderHandler enderHandler;
-    private EnderCommands commandHandler;
+    private BetterEnderCommands commandHandler;
     private BetterEnderStorage enderStorage;
     private BetterEnderGroups groups;
     private BetterEnderConverter enderConverter;
@@ -79,7 +84,7 @@ public class BetterEnderChest extends JavaPlugin {
         getServer().getPluginManager().registerEvents(enderHandler, this);
 
         // CommandHandler
-        commandHandler = new EnderCommands(this);
+        commandHandler = new BetterEnderCommands(this);
         getCommand("betterenderchest").setExecutor(commandHandler);
         getCommand("enderchest").setExecutor(commandHandler);
 
@@ -138,7 +143,7 @@ public class BetterEnderChest extends JavaPlugin {
      * 
      * @return
      */
-    public EnderCommands getCommandHandler() {
+    public BetterEnderCommands getCommandHandler() {
         return commandHandler;
     }
     
