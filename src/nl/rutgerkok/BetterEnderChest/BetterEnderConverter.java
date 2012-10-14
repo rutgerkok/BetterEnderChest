@@ -26,6 +26,7 @@ public class BetterEnderConverter {
         importers.put("vanilla", new VanillaImporter());
         importers.put("multiinv", new MultiInvImporter());
         importers.put("multiverse-inventories", new MultiverseInventoriesImporter());
+        importers.put("worldinventories", new WorldInventoriesImporter());
     }
 
     /**
@@ -48,7 +49,7 @@ public class BetterEnderConverter {
             return null;
         }
 
-        if (importers.containsKey(importerName) && importers.get(importerName).isAvailible()) {
+        if (importers.containsKey(importerName) && importers.get(importerName).isAvailable()) {
             // Import
             return importers.get(importerName).importInventory(inventoryName, groupName, plugin);
         }
@@ -69,7 +70,7 @@ public class BetterEnderConverter {
         }
 
         // Check if it's availible
-        return importers.get(importerName).isAvailible();
+        return importers.get(importerName).isAvailable();
 
     }
 }

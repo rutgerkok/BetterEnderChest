@@ -22,9 +22,9 @@ public abstract class Importer {
     public abstract Inventory importInventory(String inventoryName, String groupName, BetterEnderChest plugin) throws IOException;
 
     /**
-     * Should check whether or not this importer is availible.
+     * Should check whether or not this importer is available.
      * 
      * @return
      */
-    public abstract boolean isAvailible();
+    public abstract boolean isAvailable();
 }

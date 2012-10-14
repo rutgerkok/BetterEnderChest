@@ -117,7 +117,7 @@ public class MultiInvImporter extends Importer {
     }
 
     @Override
-    public boolean isAvailible() {
+    public boolean isAvailable() {
         return (Bukkit.getServer().getPluginManager().getPlugin("MultiInv") != null);
     }
 

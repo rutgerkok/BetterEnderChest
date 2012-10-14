@@ -72,7 +72,7 @@ public class VanillaImporter extends Importer {
     }
 
     @Override
-    public boolean isAvailible() {
+    public boolean isAvailable() {
         // Vanilla is always availible
         return true;
     }

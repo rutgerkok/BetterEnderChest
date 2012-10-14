@@ -33,8 +33,8 @@ public class MultiverseInventoriesImporter extends Importer {
 
         // Make groupName case-correct
         boolean foundMatchingGroup = false;
-        List<WorldGroupProfile> multiverseInventoryGroups = multiverseInventories.getGroupManager().getGroups();
-        for (WorldGroupProfile group : multiverseInventoryGroups) {
+        List<WorldGroupProfile> multiverseInventoriesGroups = multiverseInventories.getGroupManager().getGroups();
+        for (WorldGroupProfile group : multiverseInventoriesGroups) {
             if (group.getName().equalsIgnoreCase(groupName)) {
                 groupName = group.getName();
                 foundMatchingGroup = true;
@@ -95,7 +95,7 @@ public class MultiverseInventoriesImporter extends Importer {
     }
 
     @Override
-    public boolean isAvailible() {
+    public boolean isAvailable() {
         return (Bukkit.getServer().getPluginManager().getPlugin("Multiverse-Inventories") != null);
     }
 
