@@ -1,6 +1,7 @@
 [Home](http://dev.bukkit.org/server-mods/ender-chest/) |
 **Source** | 
 [Configuration](http://dev.bukkit.org/server-mods/ender-chest/pages/reference/config-file/) | 
+[Permissions](http://dev.bukkit.org/server-mods/ender-chest/pages/reference/permissions/) |
 [Converter](http://dev.bukkit.org/server-mods/ender-chest/pages/reference/converter/) |
 [FAQ](http://dev.bukkit.org/server-mods/ender-chest/pages/reference/frequently-asked-questions/) | 
 [Changelog](http://dev.bukkit.org/server-mods/ender-chest/pages/reference/changelog/)
