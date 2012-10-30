@@ -37,6 +37,10 @@ public class VanillaImporter extends Importer {
 
             // Load it from the file (mainworld/players/playername.dat)
             betterEnderInventory = Loader.loadInventoryFromFile(inventoryName, playerFile, "EnderItems", plugin);
+            if(betterEnderInventory == null) {
+                // Cannot load the inventory from that file, most likely because it is empty
+                return null;
+            }
         } else {
             // Online, load now
             Inventory vanillaInventory = player.getEnderChest();
