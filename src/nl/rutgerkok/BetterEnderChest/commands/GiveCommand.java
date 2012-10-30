@@ -1,17 +1,30 @@
 package nl.rutgerkok.BetterEnderChest.commands;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.StringUtil;
 
 import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
 
 public class GiveCommand extends BaseCommand {
 
+    List<String> materials;
+
     public GiveCommand(BetterEnderChest plugin) {
         super(plugin);
+        // ArrayList
+        materials = new ArrayList<String>();
+        for (Material material : Material.values()) {
+            materials.add(material.toString());
+        }
     }
 
     @Override
@@ -62,7 +75,7 @@ public class GiveCommand extends BaseCommand {
                         sender.sendMessage("Item added to the Ender inventory of " + args[0]);
                     }
                 } else {
-                    sender.sendMessage("" + ChatColor.RED + material + " is not a valid material!");
+                    sender.sendMessage("" + ChatColor.RED + args[1] + " is not a valid material!");
                 }
             } else {
                 sender.sendMessage(ChatColor.RED + "The group " + groupName + " doesn't exist!");
@@ -87,6 +100,20 @@ public class GiveCommand extends BaseCommand {
     @Override
     public String getUsage() {
         return "<player> <item> [count] [damage]";
+    }
+
+    @Override
+    public List<String> autoComplete(CommandSender sender, String[] args) {
+        System.out.println("items" + Arrays.toString(args));
+        List<String> matches = new ArrayList<String>();
+        if (args.length == 1) {
+            return null;
+        }
+        if (args.length == 2) {
+            
+            return StringUtil.copyPartialMatches(args[1], materials, matches);
+        }
+        return matches;
     }
 
 }

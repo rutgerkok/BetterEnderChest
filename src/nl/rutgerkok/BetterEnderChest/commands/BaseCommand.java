@@ -1,5 +1,8 @@
 package nl.rutgerkok.BetterEnderChest.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
 
 import org.bukkit.Bukkit;
@@ -19,11 +22,18 @@ public abstract class BaseCommand {
     public abstract boolean hasPermission(CommandSender sender);
 
     public abstract String getUsage();
+    
+    // Not abstract for backwards compability
+    public List<String> autoComplete(CommandSender sender, String[] args) {
+        return new ArrayList<String>();
+    }
 
+    // Constructor
     public BaseCommand(BetterEnderChest plugin) {
         this.plugin = plugin;
     }
 
+    // Util methods
     public boolean isValidPlayer(String name) {
         if (name.equals(BetterEnderChest.publicChestName))
             return true;
