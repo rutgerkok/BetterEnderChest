@@ -99,18 +99,20 @@ public class BetterEnderHandler implements Listener {
         Inventory inventory = chests.getInventory(inventoryName, groupName);
 
         // Check if the inventory should resize (up/downgrades)
-        if (shouldResize(player, inventory, inventoryName, plugin)) {
+        Inventory resizedInventory = resize(player, inventory, inventoryName, plugin);
+        if(resizedInventory != null) {
+            // It has resized
+            System.out.println("Resizing");
+            
             // Kick all players from old inventory
             InventoryUtils.closeInventory(inventory, ChatColor.YELLOW + "The owner got a different rank, and the inventory had to be resized.");
-
-            // Get an inventory of the correct size and fill it
-            Inventory newInventory = Loader.loadEmptyInventory(inventoryName, plugin.getPlayerRows(player));
-            InventoryUtils.copyContents(inventory, newInventory, player.getLocation());
+            
+            // Move all items (and drop the excess)
+            InventoryUtils.copyContents(inventory, resizedInventory, player.getLocation());
 
             // Goodbye to old inventory!
-            chests.setInventory(inventoryName, groupName, newInventory);
-            inventory = newInventory;
-
+            chests.setInventory(inventoryName, groupName, resizedInventory);
+            inventory = resizedInventory;
         }
 
         // Show the inventory
@@ -274,34 +276,37 @@ public class BetterEnderHandler implements Listener {
     }
 
     /**
-     * Calculates if the inventory should be resized
-     * 
+     * Returns a resized inventory. Returns null if nothing had to be resized.
      * @param player
      * @param inventory
      * @param inventoryName
      * @param plugin
      * @return
      */
-    private boolean shouldResize(Player player, Inventory inventory, String inventoryName, BetterEnderChest plugin) {
-        if (plugin.getPlayerRows(player) == inventory.getSize() / 9) {
-            // Size is already correct
-            return false;
-        }
-        if (player.getName().equalsIgnoreCase(inventoryName)) {
-            // Player is owner of inventory, resize
-            return true;
-        }
+    private Inventory resize(Player player, Inventory inventory, String inventoryName, BetterEnderChest plugin) {
         if (inventoryName.equals(BetterEnderChest.publicChestName)) {
-            // It's the public chest, resize
-            return true;
+            // It's the public chest
+            if(inventory.getSize()/9 != plugin.getPublicChestRows()) {
+                // Resize
+                return Loader.loadEmptyInventory(inventoryName, plugin.getPublicChestRows());
+            }
+        } else if (inventoryName.equals(BetterEnderChest.defaultChestName)) {
+            // It's the public chest
+            if(inventory.getSize()/9 != plugin.getChestRows()) {
+                // Resize
+                return Loader.loadEmptyInventory(inventoryName, plugin.getChestRows());
+            }
+        } else {
+            // It's a private chest
+            if (plugin.getPlayerRows(player) != inventory.getSize() / 9) {
+                // Size is incorrect
+                if(inventoryName.equalsIgnoreCase(player.getName())) {
+                    // Player is owner
+                    return Loader.loadEmptyInventory(inventoryName, plugin.getPlayerRows(player));
+                }
+            }
         }
-        if (inventoryName.equals(BetterEnderChest.defaultChestName)) {
-            // It's the default chest, resize
-            return true;
-        }
-
-        // Wrong size, but player is not the owner, and it's not a special chest
-        // Don't resize yet.
-        return false;
+        // Don't resize
+        return null;
     }
 }

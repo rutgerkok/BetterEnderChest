@@ -194,7 +194,7 @@ public class BetterEnderStorage {
             if (group.size() > 0) {
                 builder.append("GROUP " + groupName + ":");
                 for (String inventoryName : group.keySet()) {
-                    builder.append(((BetterEnderHolder) group.get(inventoryName).getHolder()).getOwnerName());
+                    builder.append(((BetterEnderHolder) group.get(inventoryName).getHolder()).getOwnerName()+"("+group.get(inventoryName).getSize()/9+")");
                     builder.append(',');
                 }
             }

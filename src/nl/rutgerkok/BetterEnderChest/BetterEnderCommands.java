@@ -1,20 +1,23 @@
 package nl.rutgerkok.BetterEnderChest;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import nl.rutgerkok.BetterEnderChest.commands.*;
+import nl.rutgerkok.BetterEnderChest.commands.BaseCommand;
+import nl.rutgerkok.BetterEnderChest.commands.DeleteInvCommand;
+import nl.rutgerkok.BetterEnderChest.commands.GiveCommand;
+import nl.rutgerkok.BetterEnderChest.commands.ListCommand;
+import nl.rutgerkok.BetterEnderChest.commands.OpenInvCommand;
+import nl.rutgerkok.BetterEnderChest.commands.ReloadCommand;
+import nl.rutgerkok.BetterEnderChest.commands.SwapInvCommand;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.util.StringUtil;
-
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 public class BetterEnderCommands implements TabExecutor {
     BetterEnderChest plugin;
@@ -123,22 +126,6 @@ public class BetterEnderCommands implements TabExecutor {
             }
         }
 
-        /*if (originalArgs.length == 2) {
-            // Searching in a subcommand
-            BaseCommand baseCommand = commands.get(originalArgs[0]);
-            if (baseCommand != null) {
-                // Copy to new array, move all arguments one postion
-                // So ["give","Notch","GOLDEN_APPLE","64"] gets
-                // ["Notch","GOLDEN_APPLE","64"]
-                String[] args = new String[originalArgs.length - 1];
-                for (int i = 1; i < originalArgs.length; i++) {
-                    args[i - 1] = originalArgs[i];
-                    System.out.println("Adding " + originalArgs[i]);
-                }
-                System.out.println(Arrays.toString(args));
-                matches = baseCommand.autoComplete(sender, args);
-            }
-        }*/
         return matches;
     }
 }
