@@ -1,6 +1,6 @@
 name: BetterEnderChest
 main: nl.rutgerkok.BetterEnderChest.BetterEnderChest
-version: '1.0.2'
+version: '1.0.4'
 softdepend: [Lockette, LWC]
 commands:
   betterenderchest:
@@ -10,7 +10,6 @@ commands:
   enderchest:
     description: Open the Ender Chest.
     usage: Alias for /betterenderchest openinv.
-    permission: betterenderchest.command.openinv.self
 permissions:
   betterenderchest:
     description: Use all BetterEnderChest features. Only for administrators!
