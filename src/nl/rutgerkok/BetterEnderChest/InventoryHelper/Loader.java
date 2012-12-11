@@ -24,7 +24,7 @@ public class Loader {
      * @return
      */
     public static Inventory loadEmptyInventory(String inventoryName, BetterEnderChest plugin) {
-        return loadEmptyInventory(inventoryName, LoadHelper.getInventoryRows(inventoryName, plugin));
+        return loadEmptyInventory(inventoryName, LoadHelper.getInventoryRows(inventoryName, plugin), 0);
     }
 
     /**
@@ -35,7 +35,7 @@ public class Loader {
      * @param inventoryRows
      * @return
      */
-    public static Inventory loadEmptyInventory(String inventoryName, int inventoryRows) {
+    public static Inventory loadEmptyInventory(String inventoryName, int inventoryRows, int disabledSlots) {
 
         // Owner name
         // Find out if it's case-correct
@@ -55,7 +55,7 @@ public class Loader {
         }
 
         // Return the inventory
-        return Bukkit.createInventory(new BetterEnderHolder(inventoryName, caseCorrect), inventoryRows * 9, LoadHelper.getInventoryTitle(inventoryName)); // Smiley
+        return Bukkit.createInventory(new BetterEnderHolder(inventoryName, disabledSlots, caseCorrect), inventoryRows * 9, LoadHelper.getInventoryTitle(inventoryName)); // Smiley
     }
 
     /**
@@ -79,7 +79,9 @@ public class Loader {
             return null;
         }
         // Main tag, represents the file
-        Tag mainNBT = Tag.readFrom(new FileInputStream(file));
+        FileInputStream stream = new FileInputStream(file);
+        Tag mainNBT = Tag.readFrom(stream);
+        stream.close();
 
         // Inventory tag, inside the file
         Tag inventoryNBT = mainNBT.findTagByName(inventoryTagName);
@@ -96,6 +98,13 @@ public class Loader {
         } else {
             // Guess the number of rows
             inventoryRows = LoadHelper.getInventoryRows(inventoryName, inventoryNBT, plugin);
+        }
+        
+        // Inventory disabled slots
+        int disabledSlots = 0;
+        if (mainNBT.findTagByName("DisabledSlots") != null) {
+            // Load the number of rows
+            disabledSlots = ((Byte) mainNBT.findTagByName("DisabledSlots").getValue()).intValue();
         }
 
         // Whether the player name is case-correct (to be loaded from file)
@@ -130,7 +139,7 @@ public class Loader {
         }
 
         // Create the inventory
-        Inventory inventory = loadEmptyInventory(inventoryName, inventoryRows);
+        Inventory inventory = loadEmptyInventory(inventoryName, inventoryRows, disabledSlots);
         ((BetterEnderHolder) inventory.getHolder()).setOwnerName(inventoryName, caseCorrect);
 
         // Parse the stacks

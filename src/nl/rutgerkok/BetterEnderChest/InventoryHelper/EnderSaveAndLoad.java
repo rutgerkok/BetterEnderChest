@@ -45,12 +45,13 @@ public class EnderSaveAndLoad {
 
         // First of all, we create an array that holds two tags: the inventory
         // tag and the end tag.
-        Tag[] inventoryNBT = new Tag[5];
+        Tag[] inventoryNBT = new Tag[6];
         inventoryNBT[0] = new Tag("Inventory", Tag.Type.TAG_Compound);
         inventoryNBT[1] = new Tag(Tag.Type.TAG_String, "OwnerName", ((BetterEnderHolder) inventory.getHolder()).getOwnerName());
         inventoryNBT[2] = new Tag(Tag.Type.TAG_Byte, "NameCaseCorrect", nameCaseCorrect);
         inventoryNBT[3] = new Tag(Tag.Type.TAG_Byte, "Rows", (byte) (inventory.getSize() / 9));
-        inventoryNBT[4] = new Tag(Tag.Type.TAG_End, null, null);
+        inventoryNBT[4] = new Tag(Tag.Type.TAG_Byte, "DisabledSlots", (byte) ((BetterEnderHolder) inventory.getHolder()).getDisabledSlots());
+        inventoryNBT[5] = new Tag(Tag.Type.TAG_End, null, null);
 
         // Now we are going to read the inventory, ...
         ListIterator<ItemStack> iterator = inventory.iterator();
@@ -76,7 +77,10 @@ public class EnderSaveAndLoad {
             to.getParentFile().mkdirs();
             to.createNewFile();
             // Write to it
-            mainNBT.writeTo(new FileOutputStream(to));
+            FileOutputStream stream = new FileOutputStream(to);
+            mainNBT.writeTo(stream);
+            stream.flush();
+            stream.close();
         } catch (IOException e) { // And handle all IOExceptions
             plugin.logThis("Could not save inventory " + inventoryName, Level.SEVERE);
             e.printStackTrace();

@@ -11,7 +11,6 @@ import nl.rutgerkok.BetterEnderChest.protectionBridges.NoBridge;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -24,6 +23,7 @@ public class BetterEnderChest extends JavaPlugin {
     private Material chestMaterial = Material.ENDER_CHEST;
     private Bridge protectionBridge;
     private int[] chestRows = new int[3];
+    private int[] disabledSlots = new int[3];
     private int publicChestRows;
     private static File chestSaveLocation;
     private boolean compabilityMode;
@@ -49,17 +49,6 @@ public class BetterEnderChest extends JavaPlugin {
     // onEnable and onDisable
 
     public void onEnable() {
-
-        // STOP if build is too low
-        try {
-            Sound.valueOf("CHEST_OPEN");
-        } catch (NoClassDefFoundError e) {
-            logThis("--------- SERVERE ---------", Level.SEVERE);
-            logThis("Bukkit version is too old!", Level.SEVERE);
-            logThis("Use at least version 2346!", Level.SEVERE);
-            return;
-        }
-
         // ProtectionBridge
         if (initBridge()) {
             logThis("Linked to " + protectionBridge.getBridgeName());
@@ -82,6 +71,14 @@ public class BetterEnderChest extends JavaPlugin {
         // EventHandler
         enderHandler = new BetterEnderHandler(this, protectionBridge);
         getServer().getPluginManager().registerEvents(enderHandler, this);
+        for(int disabledSlot : disabledSlots) {
+            if(disabledSlot > 0) {
+                // Register the slots event to disable those slots
+                getServer().getPluginManager().registerEvents(new BetterEnderSlotsHandler(), this);
+                break;
+            }
+        }
+        
 
         // CommandHandler
         commandHandler = new BetterEnderCommands(this);
@@ -136,6 +133,19 @@ public class BetterEnderChest extends JavaPlugin {
     public int getChestRows(int upgrade) {
         return chestRows[upgrade];
     }
+    
+    /**
+     * Gets the rows in the chest
+     * 
+     * @return The rows in the chest
+     */
+    public int getDisabledSlots() {
+        return getDisabledSlots(0);
+    }
+
+    public int getDisabledSlots(int upgrade) {
+        return disabledSlots[upgrade];
+    }
 
     /**
      * Returns the command handler which can be used to modify the
@@ -181,6 +191,24 @@ public class BetterEnderChest extends JavaPlugin {
         }
         // No upgrade permissions found - return rows for no upgrades
         return getChestRows();
+    }
+    
+    /**
+     * Returns how much rows the player should have, based on his current
+     * permissions.
+     * 
+     * @param player
+     * @return
+     */
+    public int getDisabledSlots(Player player) {
+        // Check for upgrade permission
+        for (int i = disabledSlots.length - 1; i > 0; i--) {
+            if (player.hasPermission("betterenderchest.rows.upgrade" + i)) {
+                return getDisabledSlots(i);
+            }
+        }
+        // No upgrade permissions found - return rows for no upgrades
+        return getDisabledSlots();
     }
 
     /**
@@ -399,17 +427,25 @@ public class BetterEnderChest extends JavaPlugin {
         getConfig().set("AutoSave.showAutoSaveMessage", AutoSave.showAutoSaveMessage);
         // Private chests
         // rows?
+        int[] chestSlots = new int[chestRows.length];
         for (int i = 0; i < chestRows.length; i++) {
             // Correct setting
-            String settingName = i > 0 ? "PrivateEnderChest.rowsUpgrade" + i : "PrivateEnderChest.defaultRows";
+            String slotSettingName = i > 0 ? "PrivateEnderChest.slotsUpgrade" + i : "PrivateEnderChest.defaultSlots";
+            String rowSettingName = i > 0 ? "PrivateEnderChest.rowsUpgrade" + i : "PrivateEnderChest.defaultRows";
 
-            chestRows[i] = getConfig().getInt(settingName, 3);
-            if (chestRows[i] < 1 || chestRows[i] > 20) {
-                logThis("The number of rows (upgrade nr. " + i + ") in the private chest was " + chestRows[i] + "...", Level.WARNING);
-                logThis("Changed it to 3.", Level.WARNING);
-                chestRows[i] = 3;
+            chestSlots[i] = getConfig().getInt(slotSettingName, getConfig().getInt(rowSettingName, 3) * 9);
+            
+            if (chestSlots[i] < 1 || chestSlots[i] > 20 * 9) {
+                logThis("The number of slots (upgrade nr. " + i + ") in the private chest was " + chestSlots[i] + "...", Level.WARNING);
+                logThis("Changed it to 27.", Level.WARNING);
+                chestSlots[i] = 27;
             }
-            getConfig().set(settingName, chestRows[i]);
+            getConfig().set(rowSettingName, null); // Remove old setting
+            getConfig().set(slotSettingName, chestSlots[i]);
+            
+            chestRows[i] = (chestSlots[i] + 8) / 9;
+            disabledSlots[i] = (chestRows[i] * 9) - chestSlots[i];
+            logThis("" + chestRows[i] + " rows and " + disabledSlots[i] + " disabled slots");
         }
 
         // Public chests
