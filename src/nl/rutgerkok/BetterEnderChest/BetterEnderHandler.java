@@ -301,9 +301,9 @@ public class BetterEnderHandler implements Listener {
             // It's a private chest
             if (inventoryName.equalsIgnoreCase(player.getName())) {
                 // Player is the owner
-                if (plugin.getPlayerRows(player) != inventory.getSize() / 9 || ((BetterEnderHolder) inventory.getHolder()).getDisabledSlots() != plugin.getDisabledSlots(player)) {
+                if (plugin.getChestRows(player) != inventory.getSize() / 9 || ((BetterEnderHolder) inventory.getHolder()).getDisabledSlots() != plugin.getDisabledSlots(player)) {
                     // Number of slots is incorrect
-                    return Loader.loadEmptyInventory(inventoryName, plugin.getPlayerRows(player), plugin.getDisabledSlots(player));
+                    return Loader.loadEmptyInventory(inventoryName, plugin.getChestRows(player), plugin.getDisabledSlots(player));
                 }
             }
         }

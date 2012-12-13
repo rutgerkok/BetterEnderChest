@@ -13,11 +13,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 public class BetterEnderChest extends JavaPlugin {
     private BetterEnderHandler enderHandler;
     private BetterEnderCommands commandHandler;
     private BetterEnderStorage enderStorage;
+    private BukkitTask autoSave;
     private BetterEnderGroups groups;
     private BetterEnderConverter enderConverter;
     private Material chestMaterial = Material.ENDER_CHEST;
@@ -96,7 +98,7 @@ public class BetterEnderChest extends JavaPlugin {
         }, AutoSave.autoSaveIntervalTicks, AutoSave.autoSaveIntervalTicks);
 
         // AutoSaveTick
-        getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+        autoSave = getServer().getScheduler().runTaskTimer(this, new Runnable() {
             public void run() {
                 enderStorage.autoSaveTick();
             }
@@ -107,6 +109,9 @@ public class BetterEnderChest extends JavaPlugin {
         if (enderStorage != null) {
             logThis("Disabling... Saving all chests...");
             enderStorage.saveAllInventories();
+            autoSave.cancel();
+            enderStorage = null;
+            groups = null;
         }
     }
 
@@ -181,8 +186,20 @@ public class BetterEnderChest extends JavaPlugin {
      * 
      * @param player
      * @return
+     * @deprecated Use {@link #getChestRows(Player)} instead
      */
     public int getPlayerRows(Player player) {
+        return getChestRows(player);
+    }
+
+    /**
+     * Returns how much rows the player should have, based on his current
+     * permissions.
+     * 
+     * @param player
+     * @return
+     */
+    public int getChestRows(Player player) {
         // Check for upgrade permission
         for (int i = chestRows.length - 1; i > 0; i--) {
             if (player.hasPermission("betterenderchest.rows.upgrade" + i)) {
