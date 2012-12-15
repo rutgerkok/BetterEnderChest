@@ -289,7 +289,7 @@ public class BetterEnderHandler implements Listener {
             // It's the public chest
             if (inventory.getSize() / 9 != plugin.getPublicChestRows()) {
                 // Resize
-                return Loader.loadEmptyInventory(inventoryName, plugin.getPublicChestRows(), 0);
+                return Loader.loadEmptyInventory(inventoryName, plugin.getPublicChestRows(), plugin.getPublicChestDisabledSlots());
             }
         } else if (inventoryName.equals(BetterEnderChest.defaultChestName)) {
             // It's the default chest

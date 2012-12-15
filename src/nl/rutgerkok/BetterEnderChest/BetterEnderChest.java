@@ -26,7 +26,7 @@ public class BetterEnderChest extends JavaPlugin {
     private Bridge protectionBridge;
     private int[] chestRows = new int[3];
     private int[] disabledSlots = new int[3];
-    private int publicChestRows;
+    private int publicChestRows, publicChestDisabledSlots;
     private static File chestSaveLocation;
     private boolean compabilityMode;
     public String chestDrop, chestDropSilkTouch, chestDropCreative;
@@ -73,14 +73,13 @@ public class BetterEnderChest extends JavaPlugin {
         // EventHandler
         enderHandler = new BetterEnderHandler(this, protectionBridge);
         getServer().getPluginManager().registerEvents(enderHandler, this);
-        for(int disabledSlot : disabledSlots) {
-            if(disabledSlot > 0) {
+        for (int disabledSlot : disabledSlots) {
+            if (disabledSlot > 0) {
                 // Register the slots event to disable those slots
                 getServer().getPluginManager().registerEvents(new BetterEnderSlotsHandler(), this);
                 break;
             }
         }
-        
 
         // CommandHandler
         commandHandler = new BetterEnderCommands(this);
@@ -138,7 +137,7 @@ public class BetterEnderChest extends JavaPlugin {
     public int getChestRows(int upgrade) {
         return chestRows[upgrade];
     }
-    
+
     /**
      * Gets the rows in the chest
      * 
@@ -161,9 +160,11 @@ public class BetterEnderChest extends JavaPlugin {
     public BetterEnderCommands getCommandHandler() {
         return commandHandler;
     }
-    
+
     /**
-     * Returns if the plugin should take over Inventory events with the vanilla Ender Chest (called by other plugins)
+     * Returns if the plugin should take over Inventory events with the vanilla
+     * Ender Chest (called by other plugins)
+     * 
      * @return
      */
     public boolean getCompabilityMode() {
@@ -209,7 +210,14 @@ public class BetterEnderChest extends JavaPlugin {
         // No upgrade permissions found - return rows for no upgrades
         return getChestRows();
     }
-    
+
+    /**
+     * @return the chestSaveLocation
+     */
+    public static File getChestSaveLocation() {
+        return chestSaveLocation;
+    }
+
     /**
      * Returns how much rows the player should have, based on his current
      * permissions.
@@ -229,13 +237,6 @@ public class BetterEnderChest extends JavaPlugin {
     }
 
     /**
-     * @return the chestSaveLocation
-     */
-    public static File getChestSaveLocation() {
-        return chestSaveLocation;
-    }
-
-    /**
      * Gets a class to load/modify/save Ender Chests
      * 
      * @return
@@ -251,6 +252,15 @@ public class BetterEnderChest extends JavaPlugin {
      */
     public BetterEnderGroups getGroups() {
         return groups;
+    }
+
+    /**
+     * Gets the number of disabled slots in the public chest.
+     * 
+     * @return The number of disabled slots in the public chest.
+     */
+    public int getPublicChestDisabledSlots() {
+        return publicChestDisabledSlots;
     }
 
     /**
@@ -405,7 +415,7 @@ public class BetterEnderChest extends JavaPlugin {
             chestDropCreative = "NOTHING";
         }
         getConfig().set("BetterEnderChest.dropCreative", chestDropCreative);
-        
+
         // CompabilityMode
         compabilityMode = getConfig().getBoolean("BetterEnderChest.enderChestCompabilityMode");
         getConfig().set("BetterEnderChest.enderChestCompabilityMode", compabilityMode);
@@ -451,7 +461,7 @@ public class BetterEnderChest extends JavaPlugin {
             String rowSettingName = i > 0 ? "PrivateEnderChest.rowsUpgrade" + i : "PrivateEnderChest.defaultRows";
 
             chestSlots[i] = getConfig().getInt(slotSettingName, getConfig().getInt(rowSettingName, 3) * 9);
-            
+
             if (chestSlots[i] < 1 || chestSlots[i] > 20 * 9) {
                 logThis("The number of slots (upgrade nr. " + i + ") in the private chest was " + chestSlots[i] + "...", Level.WARNING);
                 logThis("Changed it to 27.", Level.WARNING);
@@ -459,10 +469,9 @@ public class BetterEnderChest extends JavaPlugin {
             }
             getConfig().set(rowSettingName, null); // Remove old setting
             getConfig().set(slotSettingName, chestSlots[i]);
-            
+
             chestRows[i] = (chestSlots[i] + 8) / 9;
             disabledSlots[i] = (chestRows[i] * 9) - chestSlots[i];
-            logThis("" + chestRows[i] + " rows and " + disabledSlots[i] + " disabled slots");
         }
 
         // Public chests
@@ -483,14 +492,18 @@ public class BetterEnderChest extends JavaPlugin {
         BetterEnderChest.PublicChest.closeMessage = getConfig().getString("PublicEnderChest.closeMessage", "This was a public Ender Chest. Remember that your items aren't save.");
         getConfig().set("PublicEnderChest.closeMessage", BetterEnderChest.PublicChest.closeMessage);
         BetterEnderChest.PublicChest.closeMessage = ChatColor.translateAlternateColorCodes('&', BetterEnderChest.PublicChest.closeMessage);
-        // rows?
-        publicChestRows = getConfig().getInt("PublicEnderChest.defaultRows", chestRows[0]);
-        if (publicChestRows < 1 || publicChestRows > 20) {
-            logThis("The number of rows in the public chest was " + publicChestRows + "...", Level.WARNING);
-            logThis("Changed it to 3.", Level.WARNING);
-            publicChestRows = 3;
+        // slots?
+        int publicChestSlots = getConfig().getInt("PublicEnderChest.defaultSlots", getConfig().getInt("PublicEnderChest.defaultRows", chestRows[0]) * 9);
+        if (publicChestSlots < 1 || publicChestSlots > 20 * 9) {
+            logThis("The number of slots in the public chest was " + publicChestSlots + "...", Level.WARNING);
+            logThis("Changed it to 27.", Level.WARNING);
+            publicChestSlots = 27;
         }
-        getConfig().set("PublicEnderChest.defaultRows", publicChestRows);
+        getConfig().set("PublicEnderChest.defaultRows", null); // Remove old
+                                                               // setting
+        getConfig().set("PublicEnderChest.defaultSlots", publicChestSlots);
+        publicChestRows = (publicChestSlots + 8) / 9;
+        publicChestDisabledSlots = (publicChestRows * 9) - publicChestSlots;
     }
 
     // Private methods
