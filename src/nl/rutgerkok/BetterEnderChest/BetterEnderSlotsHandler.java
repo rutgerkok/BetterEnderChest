@@ -1,5 +1,6 @@
 package nl.rutgerkok.BetterEnderChest;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -9,15 +10,19 @@ public class BetterEnderSlotsHandler implements Listener {
     @SuppressWarnings("deprecation")
     @EventHandler(ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
-        if(event.getInventory().getHolder() == null || !(event.getInventory().getHolder() instanceof BetterEnderHolder)) {
+        if (event.getInventory().getHolder() == null || !(event.getInventory().getHolder() instanceof BetterEnderHolder)) {
             return;
         }
-        if(event.getInventory().getSize() - event.getSlot() <= ((BetterEnderHolder)event.getInventory().getHolder()).getDisabledSlots()) {
+        if (event.getInventory().getSize() - event.getSlot() <= ((BetterEnderHolder) event.getInventory().getHolder()).getDisabledSlots()) {
             // Clicked on a disabled slot
-            if(event.getWhoClicked() instanceof Player) {
-                ((Player)event.getWhoClicked()).updateInventory();
+            if (event.getCursor().getType() != Material.AIR) {
+                // Only cancel if the player hasn't an empty hand (so that he
+                // can still take items out of the disabled slots).
+                if (event.getWhoClicked() instanceof Player) {
+                    ((Player) event.getWhoClicked()).updateInventory();
+                }
+                event.setCancelled(true);
             }
-            event.setCancelled(true);
         }
     }
 }
