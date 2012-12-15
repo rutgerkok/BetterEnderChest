@@ -102,7 +102,6 @@ public class BetterEnderHandler implements Listener {
         Inventory resizedInventory = resize(player, inventory, inventoryName, plugin);
         if (resizedInventory != null) {
             // It has resized
-            System.out.println("Resizing");
 
             // Kick all players from old inventory
             InventoryUtils.closeInventory(inventory, ChatColor.YELLOW + "The owner got a different rank, and the inventory had to be resized.");
@@ -285,15 +284,17 @@ public class BetterEnderHandler implements Listener {
      * @return
      */
     private Inventory resize(Player player, Inventory inventory, String inventoryName, BetterEnderChest plugin) {
+        int rows = inventory.getSize() / 9;
+        int disabledSlots = ((BetterEnderHolder) inventory.getHolder()).getDisabledSlots();
         if (inventoryName.equals(BetterEnderChest.publicChestName)) {
             // It's the public chest
-            if (inventory.getSize() / 9 != plugin.getPublicChestRows()) {
+            if (rows != plugin.getPublicChestRows() || disabledSlots != plugin.getPublicChestDisabledSlots()) {
                 // Resize
                 return Loader.loadEmptyInventory(inventoryName, plugin.getPublicChestRows(), plugin.getPublicChestDisabledSlots());
             }
         } else if (inventoryName.equals(BetterEnderChest.defaultChestName)) {
             // It's the default chest
-            if (inventory.getSize() / 9 != plugin.getChestRows()) {
+            if (rows != plugin.getChestRows() || disabledSlots != plugin.getDisabledSlots()) {
                 // Resize
                 return Loader.loadEmptyInventory(inventoryName, plugin.getChestRows(), plugin.getDisabledSlots());
             }
@@ -301,7 +302,7 @@ public class BetterEnderHandler implements Listener {
             // It's a private chest
             if (inventoryName.equalsIgnoreCase(player.getName())) {
                 // Player is the owner
-                if (plugin.getChestRows(player) != inventory.getSize() / 9 || ((BetterEnderHolder) inventory.getHolder()).getDisabledSlots() != plugin.getDisabledSlots(player)) {
+                if (rows != plugin.getChestRows(player) || disabledSlots != plugin.getDisabledSlots(player)) {
                     // Number of slots is incorrect
                     return Loader.loadEmptyInventory(inventoryName, plugin.getChestRows(player), plugin.getDisabledSlots(player));
                 }
