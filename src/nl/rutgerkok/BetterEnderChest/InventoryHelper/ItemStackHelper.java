@@ -18,27 +18,18 @@ public class ItemStackHelper {
         int count = Integer.parseInt(stackNBT.findTagByName("Count").getValue().toString());
         short damage = Short.parseShort(stackNBT.findTagByName("Damage").getValue().toString());
         int id = Integer.parseInt(stackNBT.findTagByName("id").getValue().toString());
-        ItemStack stack = new ItemStack(id);
-        stack.setAmount(count);
-        stack.setDurability(damage);
 
-        // Check for more data
+        // Check for more data (need to rewrite, as it's quite slow)
         if (stackNBT.findTagByName("tag") != null) {
-
             Tag metaDataNBT = stackNBT.findTagByName("tag");
 
             // Add metadata using some CraftBukkit magic
-            try {
-                CraftItemStack craftStack = new CraftItemStack(stack);
-                craftStack.getHandle().tag = NBTHelper.getNMSFromNBTTagCompound(metaDataNBT);
-                stack = craftStack;
-            } catch (NoClassDefFoundError e) {
-                // No craftbukkit, no meta tags!
-            }
-
+            net.minecraft.server.v1_4_5.ItemStack nmsStack = new net.minecraft.server.v1_4_5.ItemStack(id, count, damage);
+            nmsStack.tag = NBTHelper.getNMSFromNBTTagCompound(metaDataNBT);
+            return CraftItemStack.asCraftMirror(nmsStack);
+        } else {
+            return new ItemStack(id, count, damage);
         }
-
-        return stack;
     }
 
     /**
@@ -61,14 +52,16 @@ public class ItemStackHelper {
         stackPropertyNBT[4] = new Tag(Tag.Type.TAG_End, null, null);
         Tag stackNBT = new Tag(Tag.Type.TAG_Compound, "", stackPropertyNBT);
 
-        // Add metadata using some CraftBukkit magic
-        if (stack instanceof CraftItemStack) {
-            CraftItemStack craftStack = (CraftItemStack) stack;
-            if (craftStack.getHandle() != null && craftStack.getHandle().tag != null) {
-                NBTTagCompound nmsMetaData = craftStack.getHandle().tag;
+        // Add metadata using some CraftBukkit magic (need to rewrite, as it's
+        // slow)
+        if (stack.hasItemMeta()) {
+            net.minecraft.server.v1_4_5.ItemStack nmsStack = CraftItemStack.asNMSCopy(stack);
+            if (nmsStack.tag != null) {
+                NBTTagCompound nmsMetaData = nmsStack.tag;
                 // For some reason, this line is needed (why would the server
                 // forget the name?)
                 nmsMetaData.setName("tag");
+                
                 Tag metaDataNBT = NBTHelper.getNBTFromNMSTagCompound(nmsMetaData);
                 if (((Tag[]) metaDataNBT.getValue()).length > 1) {
                     stackNBT.addTag(metaDataNBT);
