@@ -1,7 +1,6 @@
 package nl.rutgerkok.BetterEnderChest;
 
 import nl.rutgerkok.BetterEnderChest.InventoryHelper.InventoryUtils;
-import nl.rutgerkok.BetterEnderChest.InventoryHelper.Loader;
 import nl.rutgerkok.BetterEnderChest.protectionBridges.Bridge;
 
 import org.bukkit.ChatColor;
@@ -11,7 +10,6 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -290,13 +288,13 @@ public class BetterEnderHandler implements Listener {
             // It's the public chest
             if (rows != plugin.getPublicChestRows() || disabledSlots != plugin.getPublicChestDisabledSlots()) {
                 // Resize
-                return Loader.loadEmptyInventory(inventoryName, plugin.getPublicChestRows(), plugin.getPublicChestDisabledSlots());
+                return plugin.getSaveAndLoadSystem().loadEmptyInventory(inventoryName, plugin.getPublicChestRows(), plugin.getPublicChestDisabledSlots());
             }
         } else if (inventoryName.equals(BetterEnderChest.defaultChestName)) {
             // It's the default chest
             if (rows != plugin.getChestRows() || disabledSlots != plugin.getDisabledSlots()) {
                 // Resize
-                return Loader.loadEmptyInventory(inventoryName, plugin.getChestRows(), plugin.getDisabledSlots());
+                return plugin.getSaveAndLoadSystem().loadEmptyInventory(inventoryName, plugin.getChestRows(), plugin.getDisabledSlots());
             }
         } else {
             // It's a private chest
@@ -304,7 +302,7 @@ public class BetterEnderHandler implements Listener {
                 // Player is the owner
                 if (rows != plugin.getChestRows(player) || disabledSlots != plugin.getDisabledSlots(player)) {
                     // Number of slots is incorrect
-                    return Loader.loadEmptyInventory(inventoryName, plugin.getChestRows(player), plugin.getDisabledSlots(player));
+                    return plugin.getSaveAndLoadSystem().loadEmptyInventory(inventoryName, plugin.getChestRows(player), plugin.getDisabledSlots(player));
                 }
             }
         }

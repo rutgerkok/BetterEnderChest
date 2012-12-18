@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
 
-import nl.rutgerkok.BetterEnderChest.InventoryHelper.EnderSaveAndLoad;
-
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 
@@ -37,7 +35,7 @@ public class BetterEnderStorage {
             return inventories.get(groupName).get(inventoryName);
         } else {
             // Inventory has to be loaded
-            Inventory enderInventory = EnderSaveAndLoad.loadInventory(inventoryName, groupName, plugin);
+            Inventory enderInventory = plugin.getSaveAndLoadSystem().loadInventory(inventoryName, groupName);
             // Check if something from that group has been loaded
             if (!inventories.containsKey(groupName)) {
                 // If not, create the group first
@@ -85,7 +83,7 @@ public class BetterEnderStorage {
             return;
         }
         // Save the inventory to disk
-        EnderSaveAndLoad.saveInventory(inventories.get(groupName).get(inventoryName), inventoryName, groupName, plugin);
+        plugin.getSaveAndLoadSystem().saveInventory(inventories.get(groupName).get(inventoryName), inventoryName, groupName);
     }
 
     /**
@@ -103,7 +101,7 @@ public class BetterEnderStorage {
                 String inventoryName = it.next();
                 Inventory inventory = group.get(inventoryName);
 
-                EnderSaveAndLoad.saveInventory(inventory, inventoryName, groupName, plugin);
+                plugin.getSaveAndLoadSystem().saveInventory(inventory, inventoryName, groupName);
 
                 if (!inventoryName.equals(BetterEnderChest.publicChestName) && !Bukkit.getOfflinePlayer(inventoryName).isOnline() && inventory.getViewers().size() == 0) {
                     // This inventory is NOT the public chest, the owner is NOT

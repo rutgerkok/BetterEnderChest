@@ -8,7 +8,6 @@ import me.drayshak.WorldInventories.EnderChestHelper;
 import me.drayshak.WorldInventories.Group;
 import me.drayshak.WorldInventories.WorldInventories;
 import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
-import nl.rutgerkok.BetterEnderChest.InventoryHelper.Loader;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
@@ -60,7 +59,7 @@ public class WorldInventoriesImporter extends Importer {
         }
 
         // Add everything from WorldInventories to betterInventory
-        Inventory betterInventory = Loader.loadEmptyInventory(inventoryName, plugin);
+        Inventory betterInventory = plugin.getSaveAndLoadSystem().loadEmptyInventory(inventoryName);
         betterInventory.setContents(stacks);
         return betterInventory;
     }

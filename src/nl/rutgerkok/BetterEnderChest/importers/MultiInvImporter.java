@@ -7,7 +7,6 @@ import java.util.logging.Level;
 
 import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
 import nl.rutgerkok.BetterEnderChest.InventoryHelper.LoadHelper;
-import nl.rutgerkok.BetterEnderChest.InventoryHelper.Loader;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -27,7 +26,7 @@ public class MultiInvImporter extends Importer {
         }
 
         // Soon an inventory!
-        Inventory betterInventory = Loader.loadEmptyInventory(inventoryName, plugin);
+        Inventory betterInventory = plugin.getSaveAndLoadSystem().loadEmptyInventory(inventoryName);
 
         // Make groupName case-correct
         boolean foundMatchingGroup = false;

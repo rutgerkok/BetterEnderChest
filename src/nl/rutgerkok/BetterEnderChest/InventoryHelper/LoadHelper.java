@@ -4,11 +4,10 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ListIterator;
 
+import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
+
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-
-import net.minecraftwiki.wiki.NBTClass.Tag;
-import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
 
 public class LoadHelper {
     /**
@@ -29,31 +28,6 @@ public class LoadHelper {
         }
 
         return title;
-    }
-
-    /**
-     * Get the amount of rows that are needed to fit all items. Is smart enough
-     * to give the chest a minimum amount of rows that's enough for all items to
-     * fit.
-     * 
-     * @param inventoryName
-     * @param contents
-     * @param minimal
-     * @return
-     */
-    public static int getInventoryRows(String inventoryName, Tag contents, BetterEnderChest plugin) {
-        // Iterates through all the items to find the highest slot number
-        int highestSlot = 0;
-        Tag[] stacksNBT = (Tag[]) contents.getValue();
-
-        for (Tag stackNBT : stacksNBT) {
-            // Replace the current highest slot if this slot is higher
-            highestSlot = Math.max(ItemStackHelper.getSlotFromNBT(stackNBT), highestSlot);
-        }
-
-        // Calculate the needed number of rows for the items, and return the
-        // required number of rows
-        return Math.max((int) Math.ceil(highestSlot / 9.0), getInventoryRows(inventoryName, plugin));
     }
 
     /**

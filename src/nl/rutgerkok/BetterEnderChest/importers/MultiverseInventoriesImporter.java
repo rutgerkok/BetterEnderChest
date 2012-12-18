@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.logging.Level;
 
 import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
-import nl.rutgerkok.BetterEnderChest.InventoryHelper.Loader;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
@@ -88,7 +87,7 @@ public class MultiverseInventoriesImporter extends Importer {
             }
 
             // Add everything from Multiverse-Inventories to betterInventory
-            Inventory betterInventory = Loader.loadEmptyInventory(inventoryName, plugin);
+            Inventory betterInventory = plugin.getSaveAndLoadSystem().loadEmptyInventory(inventoryName);
             betterInventory.setContents(stacks);
             return betterInventory;
         }

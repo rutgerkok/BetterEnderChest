@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import nl.rutgerkok.BetterEnderChest.InventoryHelper.BetterEnderIO;
+import nl.rutgerkok.BetterEnderChest.InventoryHelper.BetterEnderIONBT;
 import nl.rutgerkok.BetterEnderChest.protectionBridges.Bridge;
 import nl.rutgerkok.BetterEnderChest.protectionBridges.LWCBridge;
 import nl.rutgerkok.BetterEnderChest.protectionBridges.LocketteBridge;
@@ -29,6 +31,7 @@ public class BetterEnderChest extends JavaPlugin {
     private int publicChestRows, publicChestDisabledSlots;
     private static File chestSaveLocation;
     private boolean compabilityMode;
+    private BetterEnderIO saveAndLoadSystem;
     public String chestDrop, chestDropSilkTouch, chestDropCreative;
     public static final String publicChestName = "--publicchest", defaultChestName = "--defaultchest", defaultGroupName = "default";
 
@@ -66,6 +69,9 @@ public class BetterEnderChest extends JavaPlugin {
         initConfig();
         groups.initConfig();
         saveConfig();
+        
+        // Save and load systeml
+        saveAndLoadSystem = new BetterEnderIONBT(this);
 
         // Chests storage
         enderStorage = new BetterEnderStorage(this);
@@ -264,12 +270,20 @@ public class BetterEnderChest extends JavaPlugin {
     }
 
     /**
-     * Gets the rows in the public chest
+     * Gets the rows in the public chest.
      * 
-     * @return The rows in the chest
+     * @return The rows in the chest.
      */
     public int getPublicChestRows() {
         return publicChestRows;
+    }
+    
+    /**
+     * Get the save and load system.
+     * @return The save and load system.
+     */
+    public BetterEnderIO getSaveAndLoadSystem() {
+        return saveAndLoadSystem;
     }
 
     /**

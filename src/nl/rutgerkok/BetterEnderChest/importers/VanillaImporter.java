@@ -6,7 +6,6 @@ import java.util.ListIterator;
 
 import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
 import nl.rutgerkok.BetterEnderChest.InventoryHelper.LoadHelper;
-import nl.rutgerkok.BetterEnderChest.InventoryHelper.Loader;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -36,7 +35,7 @@ public class VanillaImporter extends Importer {
             }
 
             // Load it from the file (mainworld/players/playername.dat)
-            betterEnderInventory = Loader.loadInventoryFromFile(inventoryName, playerFile, "EnderItems", plugin);
+            betterEnderInventory = plugin.getSaveAndLoadSystem().loadInventoryFromFile(playerFile, inventoryName, "EnderItems");
             if(betterEnderInventory == null) {
                 // Cannot load the inventory from that file, most likely because it is empty
                 return null;
@@ -45,7 +44,7 @@ public class VanillaImporter extends Importer {
             // Online, load now
             Inventory vanillaInventory = player.getEnderChest();
             int inventoryRows = LoadHelper.getInventoryRows(inventoryName, vanillaInventory, plugin);
-            betterEnderInventory = Loader.loadEmptyInventory(inventoryName, inventoryRows, plugin.getDisabledSlots(player));
+            betterEnderInventory = plugin.getSaveAndLoadSystem().loadEmptyInventory(inventoryName, inventoryRows, plugin.getDisabledSlots(player));
 
             // Copy all items
             ListIterator<ItemStack> copyIterator = vanillaInventory.iterator();
@@ -77,7 +76,7 @@ public class VanillaImporter extends Importer {
 
     @Override
     public boolean isAvailable() {
-        // Vanilla is always availible
+        // Vanilla is always available
         return true;
     }
 
