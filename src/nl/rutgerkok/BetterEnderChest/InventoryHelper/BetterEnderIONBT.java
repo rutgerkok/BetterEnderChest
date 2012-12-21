@@ -8,13 +8,13 @@ import java.io.IOException;
 import java.util.logging.Level;
 
 import org.bukkit.Material;
-import net.minecraft.server.v1_4_5.NBTCompressedStreamTools;
-import net.minecraft.server.v1_4_5.NBTTagCompound;
-import net.minecraft.server.v1_4_5.NBTTagList;
+import net.minecraft.server.v1_4_6.NBTCompressedStreamTools;
+import net.minecraft.server.v1_4_6.NBTTagCompound;
+import net.minecraft.server.v1_4_6.NBTTagList;
 import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
 import nl.rutgerkok.BetterEnderChest.BetterEnderHolder;
 
-import org.bukkit.craftbukkit.v1_4_5.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_4_6.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -92,7 +92,7 @@ public class BetterEnderIONBT extends BetterEnderIO {
             for (int i = 0; i < inventoryTag.size(); i++) {
                 NBTTagCompound item = (NBTTagCompound) inventoryTag.get(i);
                 int slot = item.getByte("Slot") & 255;
-                inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_4_5.ItemStack.a(item)));
+                inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_4_6.ItemStack.a(item)));
             }
 
             // Return the inventory
