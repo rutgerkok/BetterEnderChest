@@ -236,7 +236,7 @@ public class BetterEnderHandler implements Listener {
         }
         if (chestDropString.equals("ITSELF")) {
             // Drop itself
-            event.getPlayer().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(block.getType()));
+            event.getPlayer().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(plugin.getChestMaterial()));
         }
     }
 
