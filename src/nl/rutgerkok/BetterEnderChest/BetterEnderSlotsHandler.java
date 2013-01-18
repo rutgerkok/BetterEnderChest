@@ -13,6 +13,12 @@ public class BetterEnderSlotsHandler implements Listener {
         if (event.getInventory().getHolder() == null || !(event.getInventory().getHolder() instanceof BetterEnderHolder)) {
             return;
         }
+       
+        if(event.isShiftClick() && ((BetterEnderHolder) event.getInventory().getHolder()).getDisabledSlots() != 0) {
+            // Temp fix, disable shift click
+            event.setCancelled(true);
+        }
+        
         if (event.getInventory().getSize() - event.getSlot() <= ((BetterEnderHolder) event.getInventory().getHolder()).getDisabledSlots()) {
             // Clicked on a disabled slot
             if (event.getCursor().getType() != Material.AIR) {
