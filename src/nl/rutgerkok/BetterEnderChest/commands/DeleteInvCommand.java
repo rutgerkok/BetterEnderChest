@@ -1,11 +1,11 @@
 package nl.rutgerkok.BetterEnderChest.commands;
 
+import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
+import nl.rutgerkok.BetterEnderChest.InventoryHelper.InventoryUtils;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.Inventory;
-
-import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
-import nl.rutgerkok.BetterEnderChest.InventoryHelper.InventoryUtils;
 
 public class DeleteInvCommand extends BaseCommand {
 

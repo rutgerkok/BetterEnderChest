@@ -1,8 +1,8 @@
 package nl.rutgerkok.BetterEnderChest.commands;
 
-import org.bukkit.command.CommandSender;
-
 import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
+
+import org.bukkit.command.CommandSender;
 
 public class ListCommand extends BaseCommand {
 

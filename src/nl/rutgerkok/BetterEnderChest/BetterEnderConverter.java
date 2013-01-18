@@ -3,10 +3,14 @@ package nl.rutgerkok.BetterEnderChest;
 import java.io.IOException;
 import java.util.HashMap;
 
-import org.bukkit.inventory.Inventory;
-
 import nl.rutgerkok.BetterEnderChest.exporters.Exporter;
-import nl.rutgerkok.BetterEnderChest.importers.*;
+import nl.rutgerkok.BetterEnderChest.importers.Importer;
+import nl.rutgerkok.BetterEnderChest.importers.MultiInvImporter;
+import nl.rutgerkok.BetterEnderChest.importers.MultiverseInventoriesImporter;
+import nl.rutgerkok.BetterEnderChest.importers.VanillaImporter;
+import nl.rutgerkok.BetterEnderChest.importers.WorldInventoriesImporter;
+
+import org.bukkit.inventory.Inventory;
 
 public class BetterEnderConverter {
     BetterEnderChest plugin;

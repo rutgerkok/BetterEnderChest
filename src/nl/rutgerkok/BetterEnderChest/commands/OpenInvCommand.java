@@ -1,10 +1,10 @@
 package nl.rutgerkok.BetterEnderChest.commands;
 
+import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
 
 public class OpenInvCommand extends BaseCommand {
 

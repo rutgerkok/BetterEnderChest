@@ -10,7 +10,6 @@ import java.util.logging.Level;
 import net.minecraft.server.v1_4_R1.NBTCompressedStreamTools;
 import net.minecraft.server.v1_4_R1.NBTTagCompound;
 import net.minecraft.server.v1_4_R1.NBTTagList;
-
 import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
 import nl.rutgerkok.BetterEnderChest.BetterEnderHolder;
 
