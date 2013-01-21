@@ -1,10 +1,12 @@
 package nl.rutgerkok.BetterEnderChest.commands;
 
 import nl.rutgerkok.BetterEnderChest.BetterEnderChest;
+import nl.rutgerkok.BetterEnderChest.InventoryHelper.InventoryUtils;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
 public class OpenInvCommand extends BaseCommand {
 
@@ -20,15 +22,17 @@ public class OpenInvCommand extends BaseCommand {
         }
 
         Player player = (Player) sender;
+        String inventoryName = null;
+        String groupName = getGroupName(player);
 
         if (args.length == 0) {
             // Player wants to open his own Ender Chest
             if (BetterEnderChest.PublicChest.openOnUsingCommand) {
                 // That's the public chest
-                player.openInventory(plugin.getEnderChests().getInventory(BetterEnderChest.publicChestName, getGroupName(player)));
+                inventoryName = BetterEnderChest.publicChestName;
             } else {
                 // That's the private chest
-                player.openInventory(plugin.getEnderChests().getInventory(player.getName(), getGroupName(player)));
+                inventoryName = player.getName();
             }
         } else {
             // Player wants to open someone else's Ender Chest
@@ -40,8 +44,8 @@ public class OpenInvCommand extends BaseCommand {
             }
 
             // Execute the command
-            String inventoryName = getInventoryName(args[0]);
-            String groupName = getGroupName(args[0], sender);
+            inventoryName = getInventoryName(args[0]);
+            groupName = getGroupName(args[0], sender);
             if (isValidPlayer(inventoryName)) {
                 if (isValidGroup(groupName)) {
                     // Open the Ender Chest
@@ -49,12 +53,37 @@ public class OpenInvCommand extends BaseCommand {
                 } else {
                     // Show error
                     sender.sendMessage(ChatColor.RED + "The group " + groupName + " doesn't exist.");
+                    inventoryName = null;
                 }
             } else {
                 // Show error
                 sender.sendMessage(ChatColor.RED + "The player " + inventoryName + " was never seen on this server.");
+                inventoryName = null;
             }
         }
+        
+        // Get the inventory object
+        Inventory inventory = plugin.getEnderChests().getInventory(inventoryName, groupName);
+
+        // Check if the inventory should resize (up/downgrades)
+        Inventory resizedInventory = plugin.getEnderHandler().resize(player, inventory, inventoryName, plugin);
+        if (resizedInventory != null) {
+            // It has resized
+
+            // Kick all players from old inventory
+            InventoryUtils.closeInventory(inventory, ChatColor.YELLOW + "The owner got a different rank, and the inventory had to be resized.");
+
+            // Move all items (and drop the excess)
+            InventoryUtils.copyContents(inventory, resizedInventory, player.getLocation());
+
+            // Goodbye to old inventory!
+            plugin.getEnderChests().setInventory(inventoryName, groupName, resizedInventory);
+            inventory = resizedInventory;
+        }
+
+        // Show the inventory
+        player.openInventory(inventory);
+        
         return true;
     }
 

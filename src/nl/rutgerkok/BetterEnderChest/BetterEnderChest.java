@@ -250,6 +250,15 @@ public class BetterEnderChest extends JavaPlugin {
     public BetterEnderStorage getEnderChests() {
         return enderStorage;
     }
+    
+    /**
+     * Returns the EnderHandler for the plugin, which handles the events.
+     * 
+     * @return The EnderHandler.
+     */
+    public BetterEnderHandler getEnderHandler() {
+        return enderHandler;
+    }
 
     /**
      * Returns the group settings

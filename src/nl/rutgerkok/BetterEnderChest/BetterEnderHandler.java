@@ -281,7 +281,7 @@ public class BetterEnderHandler implements Listener {
      * @param plugin
      * @return
      */
-    private Inventory resize(Player player, Inventory inventory, String inventoryName, BetterEnderChest plugin) {
+    public Inventory resize(Player player, Inventory inventory, String inventoryName, BetterEnderChest plugin) {
         int rows = inventory.getSize() / 9;
         int disabledSlots = ((BetterEnderHolder) inventory.getHolder()).getDisabledSlots();
         if (inventoryName.equals(BetterEnderChest.publicChestName)) {
