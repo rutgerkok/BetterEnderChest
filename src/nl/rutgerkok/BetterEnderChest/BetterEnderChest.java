@@ -26,8 +26,9 @@ public class BetterEnderChest extends JavaPlugin {
     private BetterEnderConverter enderConverter;
     private Material chestMaterial = Material.ENDER_CHEST;
     private Bridge protectionBridge;
-    private int[] chestRows = new int[3];
-    private int[] disabledSlots = new int[3];
+    private int rankUpgrades;
+    private int[] chestRows;
+    private int[] disabledSlots;
     private int publicChestRows, publicChestDisabledSlots;
     private static File chestSaveLocation;
     private boolean compabilityMode;
@@ -69,7 +70,7 @@ public class BetterEnderChest extends JavaPlugin {
         initConfig();
         groups.initConfig();
         saveConfig();
-        
+
         // Save and load systeml
         saveAndLoadSystem = new BetterEnderIONBT(this);
 
@@ -250,7 +251,7 @@ public class BetterEnderChest extends JavaPlugin {
     public BetterEnderStorage getEnderChests() {
         return enderStorage;
     }
-    
+
     /**
      * Returns the EnderHandler for the plugin, which handles the events.
      * 
@@ -286,9 +287,10 @@ public class BetterEnderChest extends JavaPlugin {
     public int getPublicChestRows() {
         return publicChestRows;
     }
-    
+
     /**
      * Get the save and load system.
+     * 
      * @return The save and load system.
      */
     public BetterEnderIO getSaveAndLoadSystem() {
@@ -476,6 +478,14 @@ public class BetterEnderChest extends JavaPlugin {
         AutoSave.showAutoSaveMessage = getConfig().getBoolean("AutoSave.showAutoSaveMessage", true);
         getConfig().set("AutoSave.showAutoSaveMessage", AutoSave.showAutoSaveMessage);
         // Private chests
+        rankUpgrades = getConfig().getInt("PrivateEnderChest.rankUpgrades", 2);
+        if (rankUpgrades < 0 || rankUpgrades > 20) {
+            logThis("The number of rank upgrades for the private chest was " + rankUpgrades + ". Changed it to 2.", Level.WARNING);
+            rankUpgrades = 2;
+        }
+        getConfig().set("PrivateEnderChest.rankUpgrades", rankUpgrades);
+        chestRows = new int[rankUpgrades + 1];
+        disabledSlots = new int[rankUpgrades + 1];
         // rows?
         int[] chestSlots = new int[chestRows.length];
         for (int i = 0; i < chestRows.length; i++) {
