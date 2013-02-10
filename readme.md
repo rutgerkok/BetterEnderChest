@@ -16,7 +16,7 @@ BetterEnderChest is a plugin for CraftBukkit (Minecraft server mod) that adds so
 
     Inventory enderInventory = betterEnderChest.getEnderChests().getInventory(player.getName(), String groupName);
 
-There are some other methods availible in the same class to save and unload inventories. This method always returns an inventory, if it doesn't exist it is created. So check the groupName and inventoryName!
+There are some other methods available in the same class to save and unload inventories. This method always returns an inventory, if it doesn't exist it is created. So check the groupName and inventoryName!
 
 ## Get the group name
 
