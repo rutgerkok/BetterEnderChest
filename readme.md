@@ -46,7 +46,7 @@ Changes to the default chest get used by new chests as soon as the chest is save
 ## Add a /betterenderchest subcommand
 Create a new class that inherits [BaseCommand](https://github.com/rutgerkok/BetterEnderChest/blob/master/src/nl/rutgerkok/BetterEnderChest/commands/BaseCommand.java). Then  you can add your command to the betterEnderChest.getCommandHandler().commands hashmap<String commandName, BaseCommand command>.
 
-Don't forget to look at the utility methods in CommandHandler, which can parse the [groupName/]inventoryName syntax. There is also a method availible that checks whether the player name can be used.
+Don't forget to look at the utility methods in CommandHandler, which can parse the [groupName/]inventoryName syntax. There is also a method available that checks whether the player name can be used.
 
 ## Compliling
 
