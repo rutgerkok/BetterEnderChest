@@ -47,21 +47,18 @@ public class OpenInvCommand extends BaseCommand {
             inventoryName = getInventoryName(args[0]);
             groupName = getGroupName(args[0], sender);
             if (isValidPlayer(inventoryName)) {
-                if (isValidGroup(groupName)) {
-                    // Open the Ender Chest
-                    ((Player) sender).openInventory(plugin.getEnderChests().getInventory(inventoryName, groupName));
-                } else {
+                if (!isValidGroup(groupName)) {
                     // Show error
                     sender.sendMessage(ChatColor.RED + "The group " + groupName + " doesn't exist.");
-                    inventoryName = null;
+                    return true;
                 }
             } else {
                 // Show error
                 sender.sendMessage(ChatColor.RED + "The player " + inventoryName + " was never seen on this server.");
-                inventoryName = null;
+                return true;
             }
         }
-        
+
         // Get the inventory object
         Inventory inventory = plugin.getEnderChests().getInventory(inventoryName, groupName);
 
@@ -83,7 +80,7 @@ public class OpenInvCommand extends BaseCommand {
 
         // Show the inventory
         player.openInventory(inventory);
-        
+
         return true;
     }
 
