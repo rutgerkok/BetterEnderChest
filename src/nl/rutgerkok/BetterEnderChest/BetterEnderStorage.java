@@ -29,6 +29,7 @@ public class BetterEnderStorage {
     public Inventory getInventory(String inventoryName, String groupName) {
         // Always lowercase
         inventoryName = inventoryName.toLowerCase();
+        groupName = groupName.toLowerCase();
         // Check if loaded
         if (inventories.containsKey(groupName) && inventories.get(groupName).containsKey(inventoryName)) {
             // Already loaded, return it
@@ -60,6 +61,7 @@ public class BetterEnderStorage {
     public void setInventory(String inventoryName, String groupName, Inventory enderInventory) {
         // Always lowercase
         inventoryName = inventoryName.toLowerCase();
+        groupName = groupName.toLowerCase();
         // Check if something from that group has been loaded
         if (!inventories.containsKey(groupName)) {
             // If not, create the group first
@@ -77,6 +79,7 @@ public class BetterEnderStorage {
     public void saveInventory(String inventoryName, String groupName) {
         // Always lowercase
         inventoryName = inventoryName.toLowerCase();
+        groupName = groupName.toLowerCase();
 
         if (!inventories.containsKey(groupName) || !inventories.get(groupName).containsKey(inventoryName)) {
             // Oops! Inventory hasn't been loaded. Nothing to save.
@@ -121,6 +124,7 @@ public class BetterEnderStorage {
      */
     public void unloadInventory(String inventoryName, String groupName) {
         inventoryName = inventoryName.toLowerCase();
+        groupName = groupName.toLowerCase();
 
         // Remove it from the list
         if (inventories.containsKey(groupName)) {
@@ -190,9 +194,9 @@ public class BetterEnderStorage {
         for (String groupName : inventories.keySet()) {
             HashMap<String, Inventory> group = inventories.get(groupName);
             if (group.size() > 0) {
-                builder.append("GROUP " + groupName + ":");
+                builder.append("Chests in group " + groupName + ":");
                 for (String inventoryName : group.keySet()) {
-                    builder.append(((BetterEnderHolder) group.get(inventoryName).getHolder()).getOwnerName()+"("+group.get(inventoryName).getSize()/9+")");
+                    builder.append(((BetterEnderHolder) group.get(inventoryName).getHolder()).getOwnerName());
                     builder.append(',');
                 }
             }

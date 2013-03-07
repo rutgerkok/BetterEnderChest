@@ -28,6 +28,7 @@ public class BetterEnderGroups {
      * @return
      */
     public String getGroup(String worldName) {
+        worldName = worldName.toLowerCase();
         String groupName = worlds.get(worldName);
         if (groupName == null) {
             groupName = BetterEnderChest.defaultGroupName;
@@ -42,6 +43,7 @@ public class BetterEnderGroups {
      * @return
      */
     public String getImport(String groupName) {
+        groupName = groupName.toLowerCase();
         if (!imports.containsKey(groupName)) {
             // Don't know what to import
             return plugin.getConverter().none;
