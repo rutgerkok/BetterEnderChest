@@ -135,7 +135,7 @@ public class BetterEnderIONBT extends BetterEnderIO {
     }
 
     private int getDisabledSlots(NBTTagCompound baseTag) {
-        if (baseTag.hasKey("DiabledSlots")) {
+        if (baseTag.hasKey("DisabledSlots")) {
             // Load the number of disabled slots
             return baseTag.getByte("DisabledSlots");
         } else {
