@@ -164,7 +164,7 @@ public class BetterEnderIOLogic {
 		// Try to import it from vanilla/some other plugin
 		try {
 			Inventory importedInventory = plugin.getInventoryImporter().importInventory(inventoryName, groupName,
-					plugin.getGroups().getImport(groupName));
+					plugin.getWorldGroupManager().getImport(groupName));
 			if (importedInventory != null) {
 				return importedInventory;
 			}

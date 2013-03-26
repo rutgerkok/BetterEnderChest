@@ -9,13 +9,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 
-public class BetterEnderGroups {
+public class BetterEnderWorldGroupManager {
 
 	private HashMap<String, String> imports;
 	private BetterEnderChestPlugin plugin;
 	private HashMap<String, String> worlds;
 
-	public BetterEnderGroups(BetterEnderChestPlugin plugin) {
+	public BetterEnderWorldGroupManager(BetterEnderChestPlugin plugin) {
 		this.plugin = plugin;
 		worlds = new HashMap<String, String>();// <World,Group>
 		imports = new HashMap<String, String>();// <Group,Import>
@@ -108,20 +108,8 @@ public class BetterEnderGroups {
 		ConfigurationSection importSection = plugin.getConfig().getConfigurationSection("Imports");
 		if (importSection == null) {
 			// No Imports section found
-			// Try to read the old Groups.importingGroup
-			String oldImportingGroup = plugin.getConfig().getString("Groups.importingGroup");
-			if (oldImportingGroup != null) {
-				// An old importingGroup found!
-				// Always lowercase
-				oldImportingGroup = oldImportingGroup.toLowerCase();
-				if (groupExists(oldImportingGroup)) {
-					// Only add it if it exists
-					imports.put(oldImportingGroup, "vanilla");
-				}
-			} else {
-				// We have a new config, set the default group to vanilla.
-				imports.put(BetterEnderChest.STANDARD_GROUP_NAME, "vanilla");
-			}
+			// Set the default group to vanilla.
+			imports.put(BetterEnderChest.STANDARD_GROUP_NAME, "vanilla");
 		} else {
 			// Add all the importing groups to the list
 			for (String groupName : importSection.getValues(false).keySet()) {

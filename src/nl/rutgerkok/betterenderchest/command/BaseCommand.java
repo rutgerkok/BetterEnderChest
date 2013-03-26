@@ -56,7 +56,7 @@ public abstract class BaseCommand {
 	public String getGroupName(CommandSender sender) {
 		// Return the the group of the current world if the sender is a Player
 		if (sender instanceof Player) {
-			return plugin.getGroups().getGroup(((Player) sender).getWorld().getName());
+			return plugin.getWorldGroupManager().getGroup(((Player) sender).getWorld().getName());
 		}
 
 		// Return the default group
@@ -134,7 +134,7 @@ public abstract class BaseCommand {
 	 * @return Whether the name given is a valid group name.
 	 */
 	public boolean isValidGroup(String name) {
-		return plugin.getGroups().groupExists(name);
+		return plugin.getWorldGroupManager().groupExists(name);
 	}
 
 	/**

@@ -79,13 +79,6 @@ public interface BetterEnderChest {
 	boolean getCompabilityMode();
 
 	/**
-	 * Returns the group settings
-	 * 
-	 * @return
-	 */
-	BetterEnderGroups getGroups();
-
-	/**
 	 * Gets the converter, which contains methods to import Ender Chest
 	 * inventories from and to various plugins.
 	 * 
@@ -102,11 +95,27 @@ public interface BetterEnderChest {
 	NMSHandler getNMSHandler();
 
 	/**
+	 * Returns the plugin folder, in which the config.yml is stored. Chest are
+	 * stored in getChestSaveLocation().
+	 * 
+	 * @return The plugin folder.
+	 */
+	File getPluginFolder();
+
+	/**
 	 * Get the save and load system.
 	 * 
 	 * @return The save and load system.
 	 */
 	BetterEnderIOLogic getSaveAndLoadSystem();
+
+	/**
+	 * Gets the world group manager. You can ask it in which world group a world
+	 * is.
+	 * 
+	 * @return The world group manager.
+	 */
+	BetterEnderWorldGroupManager getWorldGroupManager();
 
 	/**
 	 * Returns whether the inventoryName is a special inventory (public chest,
@@ -183,4 +192,12 @@ public interface BetterEnderChest {
 	 *            The new NMS handler.
 	 */
 	void setNMSHandler(NMSHandler nmsHandler);
+
+	/**
+	 * Sets the save and load system that should be used.
+	 * 
+	 * @param saveAndLoadSystem
+	 *            The save and load system that should be used.
+	 */
+	void setSaveAndLoadSystem(BetterEnderIOLogic saveAndLoadSystem);
 }

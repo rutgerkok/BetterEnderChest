@@ -191,7 +191,7 @@ public class BetterEnderEventHandler implements Listener {
 			}
 
 			// Get and show the inventory
-			Inventory inventory = chests.getInventory(inventoryName, plugin.getGroups().getGroup(player.getWorld().getName()));
+			Inventory inventory = chests.getInventory(inventoryName, plugin.getWorldGroupManager().getGroup(player.getWorld().getName()));
 			player.openInventory(inventory);
 		}
 
@@ -211,7 +211,7 @@ public class BetterEnderEventHandler implements Listener {
 
 		// Some objects
 		Player player = event.getPlayer();
-		String groupName = plugin.getGroups().getGroup(player.getWorld().getName());
+		String groupName = plugin.getWorldGroupManager().getGroup(player.getWorld().getName());
 		String inventoryName = "";
 
 		// Find out the inventory that should be opened

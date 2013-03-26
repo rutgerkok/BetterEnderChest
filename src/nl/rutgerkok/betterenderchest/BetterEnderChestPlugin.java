@@ -14,6 +14,7 @@ import nl.rutgerkok.betterenderchest.eventhandler.BetterEnderSlotsHandler;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
 import nl.rutgerkok.betterenderchest.io.BetterEnderNBTFileHandler;
+import nl.rutgerkok.betterenderchest.io.SaveLocation;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler_1_5_R2;
 
@@ -53,7 +54,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 	private BetterEnderCache enderCache;
 	private BetterEnderConverter enderConverter;
 	private BetterEnderEventHandler enderHandler;
-	private BetterEnderGroups groups;
+	private BetterEnderWorldGroupManager groups;
 	private NMSHandler nmsHandler;
 
 	private ProtectionBridge protectionBridge;
@@ -92,20 +93,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		return compabilityMode;
 	}
 
-	/**
-	 * Returns the EnderHandler for the plugin, which handles the events.
-	 * 
-	 * @return The EnderHandler.
-	 */
-	public BetterEnderEventHandler getEnderHandler() {
-		return enderHandler;
-	}
-
-	@Override
-	public BetterEnderGroups getGroups() {
-		return groups;
-	}
-
 	@Override
 	public BetterEnderConverter getInventoryImporter() {
 		return enderConverter;
@@ -117,8 +104,18 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 	}
 
 	@Override
+	public File getPluginFolder() {
+		return getDataFolder();
+	}
+
+	@Override
 	public BetterEnderIOLogic getSaveAndLoadSystem() {
 		return saveAndLoadSystem;
+	}
+
+	@Override
+	public BetterEnderWorldGroupManager getWorldGroupManager() {
+		return groups;
 	}
 
 	private boolean initBridge() {
@@ -145,14 +142,17 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		}
 
 		// Save location
-		String chestSaveLocationString = getConfig().getString("BetterEnderChest.saveFolderLocation", "PLUGIN_FOLDER");
-		chestSaveLocationString.toUpperCase();
-		if (!isValidSaveLocation(chestSaveLocationString)) {
-			log(chestSaveLocationString + " is not a valid save location. Defaulting to PLUGIN_FOLDER.", Level.WARNING);
-			chestSaveLocationString = "PLUGIN_FOLDER";
+		String defaultSaveLocation = SaveLocation.getDefaultSaveLocation().toString();
+		String givenSaveLocation = getConfig().getString("BetterEnderChest.saveFolderLocation", defaultSaveLocation);
+		SaveLocation saveLocation = SaveLocation.getSaveLocation(givenSaveLocation);
+
+		if (saveLocation == null) {
+			log(getConfig().getString("BetterEnderChest.saveFolderLocation")
+					+ " is not a valid save location. Defaulting to PLUGIN_FOLDER.", Level.WARNING);
+			saveLocation = SaveLocation.getDefaultSaveLocation();
 		}
-		chestSaveLocation = toSaveLocation(chestSaveLocationString);
-		getConfig().set("BetterEnderChest.saveFolderLocation", chestSaveLocationString);
+		chestSaveLocation = saveLocation.getFolder(this);
+		getConfig().set("BetterEnderChest.saveFolderLocation", saveLocation.toString());
 
 		// ChestDrop
 		chestDrop = getConfig().getString("BetterEnderChest.drop", "OBSIDIAN");
@@ -318,21 +318,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		return false;
 	}
 
-	/**
-	 * Returns whether the save location is valid. Case-sensetive
-	 * 
-	 * @param saveFolderLocation
-	 *            Must be SERVER_ROOT or PLUGIN_FOLDER
-	 * @return
-	 */
-	private boolean isValidSaveLocation(String saveFolderLocation) {
-		if (saveFolderLocation.equals("SERVER_ROOT"))
-			return true;
-		if (saveFolderLocation.equals("PLUGIN_FOLDER"))
-			return true;
-		return false;
-	}
-
 	@Override
 	public void log(String message) {
 		log(message, Level.INFO);
@@ -374,7 +359,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		nmsHandler = new NMSHandler_1_5_R2(this);
 
 		// Configuration
-		groups = new BetterEnderGroups(this);
+		groups = new BetterEnderWorldGroupManager(this);
 		initConfig();
 		groups.initConfig();
 		saveConfig();
@@ -438,7 +423,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		// Reload the config
 		reloadConfig();
 		initConfig();
-		getGroups().initConfig();
+		getWorldGroupManager().initConfig();
 		saveConfig();
 	}
 
@@ -462,34 +447,13 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		compabilityMode = newCompabilityMode;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * nl.rutgerkok.betterenderchest.impl.BetterEnderChest2#setNMSHandler(nl
-	 * .rutgerkok.betterenderchest.impl.nms.NMSHandler)
-	 */
 	@Override
 	public void setNMSHandler(NMSHandler nmsHandler) {
 		this.nmsHandler = nmsHandler;
 	}
 
-	/**
-	 * Returns a directory with the save location
-	 * 
-	 * @param saveFolderLocation
-	 *            Either PLUGIN_FOLDER or SERVER_ROOT.
-	 * @throws IllegalArgumentException
-	 *             If the saveFolderLocation is invalid.
-	 * @return
-	 */
-	public File toSaveLocation(String saveFolderLocation) {
-		if (!isValidSaveLocation(saveFolderLocation)) {
-			throw new IllegalArgumentException("Invalid save location: " + saveFolderLocation);
-		}
-		if (saveFolderLocation.equalsIgnoreCase("PLUGIN_FOLDER")) {
-			return new File(this.getDataFolder().getPath() + "/chests/");
-		}
-		return new File("chests/");
+	@Override
+	public void setSaveAndLoadSystem(BetterEnderIOLogic saveAndLoadSystem) {
+		this.saveAndLoadSystem = saveAndLoadSystem;
 	}
 }
