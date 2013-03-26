@@ -1,6 +1,6 @@
 name: BetterEnderChest
-main: nl.rutgerkok.BetterEnderChest.BetterEnderChest
-version: '1.2.2'
+main: nl.rutgerkok.betterenderchest.BetterEnderChestPlugin
+version: '2.0-pre1'
 author: Rutger Kok
 softdepend: [Lockette, LWC]
 commands:
