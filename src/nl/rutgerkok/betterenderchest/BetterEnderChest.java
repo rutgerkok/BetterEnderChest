@@ -9,6 +9,7 @@ import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 
 import org.bukkit.Material;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public interface BetterEnderChest {
 	/**
@@ -93,6 +94,13 @@ public interface BetterEnderChest {
 	 * @return The NMS handler.
 	 */
 	NMSHandler getNMSHandler();
+
+	/**
+	 * Gets the plugin that is implementing this interface.
+	 * 
+	 * @return The plugin that is implementing this interface.
+	 */
+	JavaPlugin getPlugin();
 
 	/**
 	 * Returns the plugin folder, in which the config.yml is stored. Chest are

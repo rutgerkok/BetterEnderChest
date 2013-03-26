@@ -104,6 +104,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 	}
 
 	@Override
+	public JavaPlugin getPlugin() {
+		return this;
+	}
+
+	@Override
 	public File getPluginFolder() {
 		return getDataFolder();
 	}
@@ -147,8 +152,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		SaveLocation saveLocation = SaveLocation.getSaveLocation(givenSaveLocation);
 
 		if (saveLocation == null) {
-			log(getConfig().getString("BetterEnderChest.saveFolderLocation")
-					+ " is not a valid save location. Defaulting to PLUGIN_FOLDER.", Level.WARNING);
+			log(givenSaveLocation + " is not a valid save location. Defaulting to " + defaultSaveLocation + ".", Level.WARNING);
 			saveLocation = SaveLocation.getDefaultSaveLocation();
 		}
 		chestSaveLocation = saveLocation.getFolder(this);

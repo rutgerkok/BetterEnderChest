@@ -2,6 +2,7 @@ package nl.rutgerkok.betterenderchest;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.ListIterator;
 
 import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
@@ -13,12 +14,20 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
+import org.bukkit.metadata.Metadatable;
 
 /**
  * Various utilities used in the BetterEnderChest plugin.
  * 
  */
 public class BetterEnderUtils {
+	// Constants for the metadata key names
+	private static final String LAST_CHEST_X = "BECLastChestX";
+	private static final String LAST_CHEST_Y = "BECLastChestY";
+	private static final String LAST_CHEST_Z = "BECLastChestZ";
+
 	/**
 	 * Closes the inventory for all the viewers. Always call this before
 	 * deleting it!
@@ -114,6 +123,35 @@ public class BetterEnderUtils {
 	}
 
 	/**
+	 * Returns the last location where the player opened an Ender Chest, or null
+	 * if it wasn't found.
+	 * 
+	 * @param player
+	 *            The player.
+	 * @return The last location where the player opened an Ender Chest.
+	 */
+	public static Location getLastEnderChestOpeningLocation(Player player) {
+		MetadataValue x = getMetadataValue(LAST_CHEST_X, player);
+		MetadataValue y = getMetadataValue(LAST_CHEST_Y, player);
+		MetadataValue z = getMetadataValue(LAST_CHEST_Z, player);
+		if (x != null && y != null && z != null) {
+			return new Location(player.getWorld(), x.asInt(), y.asInt(), z.asInt());
+		}
+		return null;
+	}
+
+	private static MetadataValue getMetadataValue(String key, Metadatable lookup) {
+		if (lookup == null) {
+			return null;
+		}
+		List<MetadataValue> values = lookup.getMetadata(key);
+		if (values == null || values.size() == 0) {
+			return null;
+		}
+		return values.get(0);
+	}
+
+	/**
 	 * Returns a resized inventory. Returns null if nothing had to be resized.
 	 * 
 	 * @param player
@@ -153,6 +191,28 @@ public class BetterEnderUtils {
 		}
 		// Don't resize
 		return null;
+	}
+
+	/**
+	 * Sets the location of the player where he/she last opened an Ender Chest.
+	 * Use null as the location to clear the stored chest location.
+	 * 
+	 * @param player
+	 *            The player that opened the Ender Chest.
+	 * @param location
+	 *            Where the Ender Chest was.
+	 * @param plugin
+	 *            The BetterEnderChest interface.
+	 */
+	public static void setLastEnderChestOpeningLocation(Player player, Location location, BetterEnderChest plugin) {
+		player.removeMetadata(LAST_CHEST_X, plugin.getPlugin());
+		player.removeMetadata(LAST_CHEST_Y, plugin.getPlugin());
+		player.removeMetadata(LAST_CHEST_Z, plugin.getPlugin());
+		if (location != null) {
+			player.setMetadata(LAST_CHEST_X, new FixedMetadataValue(plugin.getPlugin(), location.getBlockX()));
+			player.setMetadata(LAST_CHEST_Y, new FixedMetadataValue(plugin.getPlugin(), location.getBlockY()));
+			player.setMetadata(LAST_CHEST_Z, new FixedMetadataValue(plugin.getPlugin(), location.getBlockZ()));
+		}
 	}
 
 }

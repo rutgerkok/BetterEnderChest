@@ -10,8 +10,8 @@ import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -126,7 +126,7 @@ public class BetterEnderEventHandler implements Listener {
 		}
 	}
 
-	// Play sound and show warning message for public chests
+	// Play animation and show warning message for public chests
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent event) {
 		if (!(event.getPlayer() instanceof Player)) {
@@ -135,8 +135,14 @@ public class BetterEnderEventHandler implements Listener {
 		Player player = (Player) event.getPlayer();
 		if (event.getInventory().getHolder() instanceof BetterEnderInventoryHolder) {
 
-			// Play closing sound
-			player.getWorld().playSound(player.getLocation(), Sound.CHEST_CLOSE, 1.0F, 1.0F);
+			// Play closing animation
+			Location lastOpened = BetterEnderUtils.getLastEnderChestOpeningLocation(player);
+			if (lastOpened != null) {
+				plugin.getNMSHandler().closeEnderChest(lastOpened);
+
+				// Clear the inventory opening location
+				BetterEnderUtils.setLastEnderChestOpeningLocation(player, null, plugin);
+			}
 
 			// If it's a public chest, show a warning about that
 			BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) event.getInventory().getHolder();
@@ -148,6 +154,9 @@ public class BetterEnderEventHandler implements Listener {
 		}
 	}
 
+	/*
+	 * Takes over vanilla Ender Chest if another plugin opened them.
+	 */
 	@EventHandler
 	public void onInventoryOpen(InventoryOpenEvent event) {
 		if (!(event.getPlayer() instanceof Player)) {
@@ -155,11 +164,6 @@ public class BetterEnderEventHandler implements Listener {
 		}
 
 		Player player = (Player) event.getPlayer();
-
-		// Check for BetterEnderChests
-		if (event.getInventory().getHolder() instanceof BetterEnderInventoryHolder) {
-			player.getWorld().playSound(player.getLocation(), Sound.CHEST_OPEN, 1.0F, 1.0F);
-		}
 
 		// Check for vanilla Ender Chests
 		if (plugin.getCompabilityMode() && event.getInventory().getType().equals(InventoryType.ENDER_CHEST)) {
@@ -194,7 +198,6 @@ public class BetterEnderEventHandler implements Listener {
 			Inventory inventory = chests.getInventory(inventoryName, plugin.getWorldGroupManager().getGroup(player.getWorld().getName()));
 			player.openInventory(inventory);
 		}
-
 	}
 
 	// Makes sure the chests show up
@@ -211,19 +214,20 @@ public class BetterEnderEventHandler implements Listener {
 
 		// Some objects
 		Player player = event.getPlayer();
+		Block clickedBlock = event.getClickedBlock();
 		String groupName = plugin.getWorldGroupManager().getGroup(player.getWorld().getName());
 		String inventoryName = "";
 
 		// Find out the inventory that should be opened
-		if (protectionBridge.isProtected(event.getClickedBlock())) {
+		if (protectionBridge.isProtected(clickedBlock)) {
 			// Protected Ender Chest
-			if (protectionBridge.canAccess(player, event.getClickedBlock())) {
+			if (protectionBridge.canAccess(player, clickedBlock)) {
 				// player can access the chest
 				if (player.hasPermission("betterenderchest.user.open.privatechest")) {
 					// and has the correct permission node
 
 					// Get the owner's name
-					inventoryName = protectionBridge.getOwnerName(event.getClickedBlock());
+					inventoryName = protectionBridge.getOwnerName(clickedBlock);
 				} else {
 					// Show an error
 					player.sendMessage(ChatColor.RED + "You do not have permissions to use your private Ender Chest.");
@@ -261,6 +265,10 @@ public class BetterEnderEventHandler implements Listener {
 
 		// Show the inventory
 		player.openInventory(inventory);
+
+		// Play animation, store location
+		plugin.getNMSHandler().openEnderChest(clickedBlock.getLocation());
+		BetterEnderUtils.setLastEnderChestOpeningLocation(player, clickedBlock.getLocation(), plugin);
 	}
 
 }
