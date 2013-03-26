@@ -1,5 +1,7 @@
 package nl.rutgerkok.betterenderchest.eventhandler;
 
+import java.util.List;
+
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin;
 import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.PublicChest;
@@ -14,6 +16,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -21,10 +24,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -54,7 +57,7 @@ public class BetterEnderEventHandler implements Listener {
 		if (!player.hasPermission("betterenderchest.user.destroy")) {
 			// Player cannot break Ender Chests, cancel event
 			event.setCancelled(true);
-			player.sendMessage(ChatColor.RED + "You don't have permissions to break Ender Chests.");
+			player.sendMessage(ChatColor.RED + "You don't have permission to break Ender Chests.");
 			return;
 		}
 
@@ -104,25 +107,29 @@ public class BetterEnderEventHandler implements Listener {
 		Player player = event.getPlayer();
 		if (!player.hasPermission("betterenderchest.user.place")) {
 			event.setCancelled(true);
-			player.sendMessage(ChatColor.RED + "You don't have permissions to place Ender Chests.");
+			player.sendMessage(ChatColor.RED + "You don't have permission to place Ender Chests.");
 		}
 	}
 
+	/*
+	 * Blocks crafting of Ender Chest if necessary.
+	 */
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onCraftItem(CraftItemEvent event) {
-		if (event.getCurrentItem().getType() != plugin.getChestMaterial()) {
+	public void onPrepareCraftItem(PrepareItemCraftEvent event) {
+		if (event.getRecipe().getResult().getType() != plugin.getChestMaterial()) {
 			// Something else is being crafted
 			return;
 		}
 
-		if (!(event.getWhoClicked() instanceof Player)) {
-			// Not a player
+		List<HumanEntity> viewers = event.getViewers();
+		if (viewers == null || viewers.size() == 0 || !(viewers.get(0) instanceof Player)) {
+			// Not a player or no viewers
 			return;
 		}
 
-		Player player = (Player) event.getWhoClicked();
+		Player player = (Player) event.getViewers().get(0);
 		if (!player.hasPermission("betterenderchest.user.craft")) {
-			event.setCancelled(true);
+			event.getInventory().setResult(null);
 		}
 	}
 
@@ -178,14 +185,14 @@ public class BetterEnderEventHandler implements Listener {
 				if (player.hasPermission("betterenderchest.user.open.publicchest")) {
 					inventoryName = BetterEnderChest.PUBLIC_CHEST_NAME;
 				} else {
-					player.sendMessage(ChatColor.RED + "You do not have permissions to use the public Ender Chest.");
+					player.sendMessage(ChatColor.RED + "You don't have permission to use the public Ender Chest.");
 				}
 			} else {
 				// Get player's name
 				if (player.hasPermission("betterenderchest.user.open.privatechest")) {
 					inventoryName = player.getName();
 				} else {
-					player.sendMessage(ChatColor.RED + "You do not have permissions to use your private Ender Chest.");
+					player.sendMessage(ChatColor.RED + "You don't have permission to use your private Ender Chest.");
 				}
 			}
 
