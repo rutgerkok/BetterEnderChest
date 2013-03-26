@@ -1,6 +1,6 @@
 #***New repo [here](https://github.com/rutgerkok/BetterEnderChest). Repository won't be used anymore.***
 
-BetterEnderChest is a plugin for CraftBukkit (Minecraft server mod) that adds some functionality to the Ender Chest. The documentation of the plugin itself can be found on the home page. On this page there is some information about how to interact with this plugin.
+BetterEnderChest is a plugin for CraftBukkit (Minecraft server mod) that adds functionality to the Ender Chest. The documentation of the plugin itself can be found on the home page. On this page there is some information about how to interact with this plugin.
 
 ## Get the plugin instance
 
