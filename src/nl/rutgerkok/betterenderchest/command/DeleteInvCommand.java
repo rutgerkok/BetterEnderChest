@@ -47,6 +47,11 @@ public class DeleteInvCommand extends BaseCommand {
 	}
 
 	@Override
+	public String getName() {
+		return "deleteinv";
+	}
+
+	@Override
 	public String getUsage() {
 		return "<player>";
 	}

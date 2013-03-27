@@ -8,15 +8,23 @@ import nl.rutgerkok.betterenderchest.chestprotection.LWCBridge;
 import nl.rutgerkok.betterenderchest.chestprotection.LocketteBridge;
 import nl.rutgerkok.betterenderchest.chestprotection.NoBridge;
 import nl.rutgerkok.betterenderchest.chestprotection.ProtectionBridge;
+import nl.rutgerkok.betterenderchest.command.BaseCommand;
 import nl.rutgerkok.betterenderchest.command.BetterEnderCommandManager;
 import nl.rutgerkok.betterenderchest.eventhandler.BetterEnderEventHandler;
 import nl.rutgerkok.betterenderchest.eventhandler.BetterEnderSlotsHandler;
+import nl.rutgerkok.betterenderchest.importers.InventoryImporter;
+import nl.rutgerkok.betterenderchest.importers.MultiInvImporter;
+import nl.rutgerkok.betterenderchest.importers.MultiverseInventoriesImporter;
+import nl.rutgerkok.betterenderchest.importers.NoneImporter;
+import nl.rutgerkok.betterenderchest.importers.VanillaImporter;
+import nl.rutgerkok.betterenderchest.importers.WorldInventoriesImporter;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
 import nl.rutgerkok.betterenderchest.io.BetterEnderNBTFileHandler;
 import nl.rutgerkok.betterenderchest.io.SaveLocation;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler_1_5_R2;
+import nl.rutgerkok.betterenderchest.registry.Registry;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -50,14 +58,15 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 	private File chestSaveLocation;
 	private BetterEnderChestSizes chestSizes;
 	private BetterEnderCommandManager commandManager;
+	private Registry<BaseCommand> commands = new Registry<BaseCommand>();
 	private boolean compabilityMode;
 	private BetterEnderCache enderCache;
-	private BetterEnderConverter enderConverter;
 	private BetterEnderEventHandler enderHandler;
-	private BetterEnderWorldGroupManager groups;
-	private NMSHandler nmsHandler;
 
-	private ProtectionBridge protectionBridge;
+	private BetterEnderWorldGroupManager groups;
+	private Registry<InventoryImporter> importers = new Registry<InventoryImporter>();
+	private Registry<NMSHandler> nmsHandlers = new Registry<NMSHandler>();
+	private Registry<ProtectionBridge> protectionBridges = new Registry<ProtectionBridge>();
 
 	private int rankUpgrades;
 
@@ -89,18 +98,23 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 	}
 
 	@Override
+	public Registry<BaseCommand> getCommands() {
+		return commands;
+	}
+
+	@Override
 	public boolean getCompabilityMode() {
 		return compabilityMode;
 	}
 
 	@Override
-	public BetterEnderConverter getInventoryImporter() {
-		return enderConverter;
+	public Registry<InventoryImporter> getInventoryImporters() {
+		return importers;
 	}
 
 	@Override
-	public NMSHandler getNMSHandler() {
-		return nmsHandler;
+	public Registry<NMSHandler> getNMSHandlers() {
+		return nmsHandlers;
 	}
 
 	@Override
@@ -114,6 +128,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 	}
 
 	@Override
+	public Registry<ProtectionBridge> getProtectionBridges() {
+		return protectionBridges;
+	}
+
+	@Override
 	public BetterEnderIOLogic getSaveAndLoadSystem() {
 		return saveAndLoadSystem;
 	}
@@ -121,22 +140,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 	@Override
 	public BetterEnderWorldGroupManager getWorldGroupManager() {
 		return groups;
-	}
-
-	private boolean initBridge() {
-		if (getServer().getPluginManager().isPluginEnabled("Lockette")) {
-			protectionBridge = new LocketteBridge();
-			return true;
-		}
-
-		if (getServer().getPluginManager().isPluginEnabled("LWC")) {
-			protectionBridge = new LWCBridge();
-			return true;
-		}
-
-		// No bridge found
-		protectionBridge = new NoBridge();
-		return false;
 	}
 
 	// Configuration
@@ -282,13 +285,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		getChestSizes().setSizes(publicChestSlots, playerChestSlots);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * nl.rutgerkok.betterenderchest.impl.BetterEnderChest2#isSpecialChest(java
-	 * .lang.String)
-	 */
 	@Override
 	public boolean isSpecialChest(String inventoryName) {
 		if (inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME))
@@ -347,20 +343,29 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 	@Override
 	public void onEnable() {
 		// ProtectionBridge
-		if (initBridge()) {
-			log("Linked to " + protectionBridge.getBridgeName());
+		protectionBridges.register(new LocketteBridge());
+		protectionBridges.register(new LWCBridge());
+		protectionBridges.register(new NoBridge());
+		ProtectionBridge protectionBridge = protectionBridges.selectAvailableRegistration();
+		if (!protectionBridge.isFallback()) {
+			log("Linked to " + protectionBridge.getName());
 		} else {
 			log("Not linked to a block protection plugin like Lockette or LWC.");
 		}
 
 		// Converter
-		enderConverter = new BetterEnderConverter(this);
+		importers.register(new MultiInvImporter());
+		importers.register(new MultiverseInventoriesImporter());
+		importers.register(new WorldInventoriesImporter());
+		importers.register(new NoneImporter());
+		importers.selectRegistration(new VanillaImporter());
 
 		// Slots
 		chestSizes = new BetterEnderChestSizes();
 
 		// NMS handler
-		nmsHandler = new NMSHandler_1_5_R2(this);
+		nmsHandlers.register(new NMSHandler_1_5_R2(this));
+		nmsHandlers.selectAvailableRegistration();
 
 		// Configuration
 		groups = new BetterEnderWorldGroupManager(this);
@@ -375,7 +380,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		enderCache = new BetterEnderCache(this);
 
 		// EventHandler
-		enderHandler = new BetterEnderEventHandler(this, protectionBridge);
+		enderHandler = new BetterEnderEventHandler(this);
 		getServer().getPluginManager().registerEvents(enderHandler, this);
 		for (int i = 0; i <= chestSizes.getUpgradeCount(); i++) {
 			int disabledSlot = chestSizes.getDisabledSlots(i);
@@ -442,18 +447,13 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 	}
 
 	@Override
-	public void setCommandManager(BetterEnderCommandManager commandManager) {
+	public void setCommandHandler(BetterEnderCommandManager commandManager) {
 		this.commandManager = commandManager;
 	}
 
 	@Override
 	public void setCompabilityMode(boolean newCompabilityMode) {
 		compabilityMode = newCompabilityMode;
-	}
-
-	@Override
-	public void setNMSHandler(NMSHandler nmsHandler) {
-		this.nmsHandler = nmsHandler;
 	}
 
 	@Override

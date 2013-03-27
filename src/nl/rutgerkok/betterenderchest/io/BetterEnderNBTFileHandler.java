@@ -19,16 +19,16 @@ public class BetterEnderNBTFileHandler extends BetterEnderFileHandler {
 
 	@Override
 	public boolean isAvailable() {
-		return plugin.getNMSHandler() != null;
+		return plugin.getNMSHandlers().getSelectedRegistration() != null;
 	}
 
 	@Override
 	public Inventory load(File file, String inventoryName) {
-		return plugin.getNMSHandler().loadNBTInventory(file, inventoryName, "Inventory");
+		return plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(file, inventoryName, "Inventory");
 	}
 
 	@Override
 	public void save(File file, Inventory inventory, String inventoryName) {
-		plugin.getNMSHandler().saveInventoryAsNBT(file, inventory);
+		plugin.getNMSHandlers().getSelectedRegistration().saveInventoryAsNBT(file, inventory);
 	}
 }

@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ListIterator;
 
-import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin;
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
 
 import org.bukkit.Bukkit;
@@ -15,7 +15,12 @@ import org.bukkit.inventory.ItemStack;
 public class VanillaImporter extends InventoryImporter {
 
 	@Override
-	public Inventory importInventory(final String inventoryName, String groupName, BetterEnderChestPlugin plugin) throws IOException {
+	public String getName() {
+		return "vanilla";
+	}
+
+	@Override
+	public Inventory importInventory(final String inventoryName, String groupName, BetterEnderChest plugin) throws IOException {
 		Player player = Bukkit.getPlayerExact(inventoryName);
 		Inventory betterEnderInventory;
 		if (player == null) {
@@ -35,7 +40,8 @@ public class VanillaImporter extends InventoryImporter {
 			}
 
 			// Load it from the file (mainworld/players/playername.dat)
-			betterEnderInventory = plugin.getNMSHandler().loadNBTInventory(playerFile, inventoryName, "EnderItems");
+			betterEnderInventory = plugin.getNMSHandlers().getSelectedRegistration()
+					.loadNBTInventory(playerFile, inventoryName, "EnderItems");
 			if (betterEnderInventory == null) {
 				// Cannot load the inventory from that file, most likely because
 				// it is empty
@@ -80,6 +86,11 @@ public class VanillaImporter extends InventoryImporter {
 	public boolean isAvailable() {
 		// Vanilla is always available
 		return true;
+	}
+
+	@Override
+	public boolean isFallback() {
+		return false;
 	}
 
 }

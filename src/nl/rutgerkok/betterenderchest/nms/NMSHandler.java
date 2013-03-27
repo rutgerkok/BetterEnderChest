@@ -2,6 +2,8 @@ package nl.rutgerkok.betterenderchest.nms;
 
 import java.io.File;
 
+import nl.rutgerkok.betterenderchest.registry.Registration;
+
 import org.bukkit.Location;
 import org.bukkit.inventory.Inventory;
 
@@ -9,7 +11,7 @@ import org.bukkit.inventory.Inventory;
  * Class to help with all NMS tasks.
  * 
  */
-public interface NMSHandler {
+public abstract class NMSHandler implements Registration {
 
 	/**
 	 * Decrements one of the player counter of the Ender Chest at the location.
@@ -20,6 +22,11 @@ public interface NMSHandler {
 	 *            The location of the Ender Chest.
 	 */
 	public abstract void closeEnderChest(Location location);
+
+	@Override
+	public boolean isFallback() {
+		return false;
+	}
 
 	/**
 	 * Loads a BetterEnderChest inventory from the NBT file. The inventory will

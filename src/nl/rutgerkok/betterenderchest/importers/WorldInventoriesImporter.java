@@ -7,7 +7,7 @@ import java.util.logging.Level;
 
 import me.drayshak.WorldInventories.Group;
 import me.drayshak.WorldInventories.WorldInventories;
-import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin;
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -18,14 +18,19 @@ import org.bukkit.inventory.ItemStack;
 public class WorldInventoriesImporter extends InventoryImporter {
 
 	@Override
-	public Inventory importInventory(final String inventoryName, String groupName, BetterEnderChestPlugin plugin) throws IOException {
+	public String getName() {
+		return "worldinventories";
+	}
+
+	@Override
+	public Inventory importInventory(final String inventoryName, String groupName, BetterEnderChest plugin) throws IOException {
 		if (plugin.isSpecialChest(inventoryName)) {
 			// Public chests and default chests cannot be imported.
 			return null;
 		}
 
 		// Get the plugin
-		WorldInventories worldInventories = (WorldInventories) plugin.getServer().getPluginManager().getPlugin("WorldInventories");
+		WorldInventories worldInventories = (WorldInventories) Bukkit.getServer().getPluginManager().getPlugin("WorldInventories");
 
 		// Get the group
 		Group worldInventoriesGroup = null;
@@ -69,6 +74,11 @@ public class WorldInventoriesImporter extends InventoryImporter {
 	@Override
 	public boolean isAvailable() {
 		return (Bukkit.getServer().getPluginManager().getPlugin("WorldInventories") != null);
+	}
+
+	@Override
+	public boolean isFallback() {
+		return false;
 	}
 
 	@SuppressWarnings("unchecked")

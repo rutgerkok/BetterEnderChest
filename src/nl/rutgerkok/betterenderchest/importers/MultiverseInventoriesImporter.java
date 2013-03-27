@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 
-import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin;
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
@@ -21,14 +21,19 @@ import com.onarandombox.multiverseinventories.api.share.Sharables;
 public class MultiverseInventoriesImporter extends InventoryImporter {
 
 	@Override
-	public Inventory importInventory(final String inventoryName, String groupName, BetterEnderChestPlugin plugin) throws IOException {
+	public String getName() {
+		return "multiverse-inventories";
+	}
+
+	@Override
+	public Inventory importInventory(final String inventoryName, String groupName, BetterEnderChest plugin) throws IOException {
 		if (plugin.isSpecialChest(inventoryName)) {
 			// Public chests and default chests cannot be imported.
 			return null;
 		}
 
 		// Get the plugin
-		MultiverseInventories multiverseInventories = (MultiverseInventories) plugin.getServer().getPluginManager()
+		MultiverseInventories multiverseInventories = (MultiverseInventories) Bukkit.getServer().getPluginManager()
 				.getPlugin("Multiverse-Inventories");
 
 		// Make groupName case-correct
@@ -58,7 +63,7 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
 		// Multiverse-Inventories.
 		if (multiverseInventories.getGroupManager().getGroup(groupName).containsWorld(globalProfile.getWorld())) {
 			// Player is in the current group, load from vanilla
-			return plugin.getInventoryImporter().importers.get("vanilla").importInventory(inventoryName, groupName, plugin);
+			return plugin.getInventoryImporters().getRegistration("vanilla").importInventory(inventoryName, groupName, plugin);
 		} else {
 			// Get the correct gamemode
 			ProfileType profileType;
@@ -99,6 +104,11 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
 	@Override
 	public boolean isAvailable() {
 		return (Bukkit.getServer().getPluginManager().getPlugin("Multiverse-Inventories") != null);
+	}
+
+	@Override
+	public boolean isFallback() {
+		return false;
 	}
 
 }

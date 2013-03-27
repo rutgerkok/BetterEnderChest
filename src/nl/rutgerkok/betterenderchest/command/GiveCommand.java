@@ -80,6 +80,11 @@ public class GiveCommand extends BaseCommand {
 	}
 
 	@Override
+	public String getName() {
+		return "give";
+	}
+
+	@Override
 	public String getUsage() {
 		return "<player> <item> [count] [damage]";
 	}

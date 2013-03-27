@@ -35,11 +35,9 @@ import org.bukkit.inventory.ItemStack;
 public class BetterEnderEventHandler implements Listener {
 	private BetterEnderCache chests;
 	private BetterEnderChestPlugin plugin;
-	private ProtectionBridge protectionBridge;
 
-	public BetterEnderEventHandler(BetterEnderChestPlugin plugin, ProtectionBridge protectionBridge) {
+	public BetterEnderEventHandler(BetterEnderChestPlugin plugin) {
 		this.plugin = plugin;
-		this.protectionBridge = protectionBridge;
 		chests = plugin.getChestsCache();
 	}
 
@@ -111,28 +109,6 @@ public class BetterEnderEventHandler implements Listener {
 		}
 	}
 
-	/*
-	 * Blocks crafting of Ender Chest if necessary.
-	 */
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onPrepareCraftItem(PrepareItemCraftEvent event) {
-		if (event.getRecipe().getResult().getType() != plugin.getChestMaterial()) {
-			// Something else is being crafted
-			return;
-		}
-
-		List<HumanEntity> viewers = event.getViewers();
-		if (viewers == null || viewers.size() == 0 || !(viewers.get(0) instanceof Player)) {
-			// Not a player or no viewers
-			return;
-		}
-
-		Player player = (Player) event.getViewers().get(0);
-		if (!player.hasPermission("betterenderchest.user.craft")) {
-			event.getInventory().setResult(null);
-		}
-	}
-
 	// Play animation and show warning message for public chests
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent event) {
@@ -145,7 +121,7 @@ public class BetterEnderEventHandler implements Listener {
 			// Play closing animation
 			Location lastOpened = BetterEnderUtils.getLastEnderChestOpeningLocation(player);
 			if (lastOpened != null) {
-				plugin.getNMSHandler().closeEnderChest(lastOpened);
+				plugin.getNMSHandlers().getSelectedRegistration().closeEnderChest(lastOpened);
 
 				// Clear the inventory opening location
 				BetterEnderUtils.setLastEnderChestOpeningLocation(player, null, plugin);
@@ -226,6 +202,7 @@ public class BetterEnderEventHandler implements Listener {
 		String inventoryName = "";
 
 		// Find out the inventory that should be opened
+		ProtectionBridge protectionBridge = plugin.getProtectionBridges().getSelectedRegistration();
 		if (protectionBridge.isProtected(clickedBlock)) {
 			// Protected Ender Chest
 			if (protectionBridge.canAccess(player, clickedBlock)) {
@@ -242,7 +219,7 @@ public class BetterEnderEventHandler implements Listener {
 			}
 		} else {
 			// Unprotected Ender chest
-			if (!player.getItemInHand().getType().equals(Material.SIGN) || !protectionBridge.getBridgeName().equals("Lockette")) {
+			if (!player.getItemInHand().getType().equals(Material.SIGN) || !protectionBridge.getName().equals("Lockette")) {
 				if (PublicChest.openOnOpeningUnprotectedChest) {
 					// Get public chest
 					if (player.hasPermission("betterenderchest.user.open.publicchest")) {
@@ -274,8 +251,30 @@ public class BetterEnderEventHandler implements Listener {
 		player.openInventory(inventory);
 
 		// Play animation, store location
-		plugin.getNMSHandler().openEnderChest(clickedBlock.getLocation());
+		plugin.getNMSHandlers().getSelectedRegistration().openEnderChest(clickedBlock.getLocation());
 		BetterEnderUtils.setLastEnderChestOpeningLocation(player, clickedBlock.getLocation(), plugin);
+	}
+
+	/*
+	 * Blocks crafting of Ender Chest if necessary.
+	 */
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onPrepareCraftItem(PrepareItemCraftEvent event) {
+		if (event.getRecipe().getResult().getType() != plugin.getChestMaterial()) {
+			// Something else is being crafted
+			return;
+		}
+
+		List<HumanEntity> viewers = event.getViewers();
+		if (viewers == null || viewers.size() == 0 || !(viewers.get(0) instanceof Player)) {
+			// Not a player or no viewers
+			return;
+		}
+
+		Player player = (Player) event.getViewers().get(0);
+		if (!player.hasPermission("betterenderchest.user.craft")) {
+			event.getInventory().setResult(null);
+		}
 	}
 
 }

@@ -3,10 +3,14 @@ package nl.rutgerkok.betterenderchest;
 import java.io.File;
 import java.util.logging.Level;
 
+import nl.rutgerkok.betterenderchest.chestprotection.ProtectionBridge;
+import nl.rutgerkok.betterenderchest.command.BaseCommand;
 import nl.rutgerkok.betterenderchest.command.BetterEnderCommandManager;
+import nl.rutgerkok.betterenderchest.importers.InventoryImporter;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
+import nl.rutgerkok.betterenderchest.registry.Registry;
 
 import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -65,6 +69,13 @@ public interface BetterEnderChest {
 	BetterEnderCommandManager getCommandManager();
 
 	/**
+	 * Gets the registered commands. New commands can be registered here.
+	 * 
+	 * @return The registered commands.
+	 */
+	Registry<BaseCommand> getCommands();
+
+	/**
 	 * Gets if the plugin should take over other plugins opening the vanilla
 	 * Ender Chest.
 	 * <p />
@@ -80,20 +91,20 @@ public interface BetterEnderChest {
 	boolean getCompabilityMode();
 
 	/**
-	 * Gets the converter, which contains methods to import Ender Chest
-	 * inventories from and to various plugins.
+	 * Gets the importers which can import Ender Chest inventories from and to
+	 * various plugins.
 	 * 
 	 * @return The converter.
 	 */
-	BetterEnderConverter getInventoryImporter();
+	Registry<InventoryImporter> getInventoryImporters();
 
 	/**
-	 * Gets the NMS handler where all things that bypass Bukkit are done. Can
-	 * return null if there is no available NMS handler.
+	 * Gets the NMS handlers where all things that bypass Bukkit are done.
+	 * Register your own NMS handlers here.
 	 * 
-	 * @return The NMS handler.
+	 * @return The NMS handlers.
 	 */
-	NMSHandler getNMSHandler();
+	Registry<NMSHandler> getNMSHandlers();
 
 	/**
 	 * Gets the plugin that is implementing this interface.
@@ -109,6 +120,13 @@ public interface BetterEnderChest {
 	 * @return The plugin folder.
 	 */
 	File getPluginFolder();
+
+	/**
+	 * Gets the protection bridges.
+	 * 
+	 * @return The protection bridges.
+	 */
+	Registry<ProtectionBridge> getProtectionBridges();
 
 	/**
 	 * Get the save and load system.
@@ -182,7 +200,7 @@ public interface BetterEnderChest {
 	 * @param newCommandHandler
 	 *            The new command handler.
 	 */
-	void setCommandManager(BetterEnderCommandManager newCommandHandler);
+	void setCommandHandler(BetterEnderCommandManager newCommandHandler);
 
 	/**
 	 * Sets the new compabilityMode. See also getCompabilityMode.
@@ -191,15 +209,6 @@ public interface BetterEnderChest {
 	 *            Whether compability mode should be enabled.
 	 */
 	void setCompabilityMode(boolean newCompabilityMode);
-
-	/**
-	 * Forcibly sets the NMS handler to this one, ignoring whether it is save to
-	 * do so.
-	 * 
-	 * @param nmsHandler
-	 *            The new NMS handler.
-	 */
-	void setNMSHandler(NMSHandler nmsHandler);
 
 	/**
 	 * Sets the save and load system that should be used.

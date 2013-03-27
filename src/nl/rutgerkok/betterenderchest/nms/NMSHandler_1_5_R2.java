@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
 
+import net.minecraft.server.v1_5_R2.MinecraftServer;
 import net.minecraft.server.v1_5_R2.NBTCompressedStreamTools;
 import net.minecraft.server.v1_5_R2.NBTTagCompound;
 import net.minecraft.server.v1_5_R2.NBTTagList;
@@ -22,7 +23,7 @@ import org.bukkit.craftbukkit.v1_5_R2.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class NMSHandler_1_5_R2 implements NMSHandler {
+public class NMSHandler_1_5_R2 extends NMSHandler {
 	private BetterEnderChest plugin;
 
 	public NMSHandler_1_5_R2(BetterEnderChest plugin) {
@@ -48,6 +49,11 @@ public class NMSHandler_1_5_R2 implements NMSHandler {
 		}
 	}
 
+	@Override
+	public String getName() {
+		return "v1_5_R2";
+	}
+
 	private int getRows(String inventoryName, NBTTagCompound baseTag, NBTTagList inventoryListTag) {
 		if (baseTag.hasKey("Rows")) {
 			// Load the number of rows
@@ -65,6 +71,16 @@ public class NMSHandler_1_5_R2 implements NMSHandler {
 			// Calculate the needed number of rows for the items, and return the
 			// required number of rows
 			return Math.max((int) Math.ceil(highestSlot / 9.0), plugin.getSaveAndLoadSystem().getInventoryRows(inventoryName));
+		}
+	}
+
+	@Override
+	public boolean isAvailable() {
+		try {
+			MinecraftServer.getServer();
+			return true;
+		} catch (Throwable t) {
+			return false;
 		}
 	}
 

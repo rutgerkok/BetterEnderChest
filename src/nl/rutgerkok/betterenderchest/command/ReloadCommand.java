@@ -36,6 +36,11 @@ public class ReloadCommand extends BaseCommand {
 	}
 
 	@Override
+	public String getName() {
+		return "reload";
+	}
+
+	@Override
 	public String getUsage() {
 		return "";
 	}

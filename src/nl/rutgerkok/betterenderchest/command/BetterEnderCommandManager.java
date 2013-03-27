@@ -1,12 +1,11 @@
 package nl.rutgerkok.betterenderchest.command;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.registry.Registry;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -14,29 +13,19 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.util.StringUtil;
 
-import com.google.common.collect.ImmutableMap;
-
 public class BetterEnderCommandManager implements TabExecutor {
-	private HashMap<String, BaseCommand> commands;
+	private BetterEnderChest plugin;
 
 	public BetterEnderCommandManager(BetterEnderChest plugin) {
-		commands = new HashMap<String, BaseCommand>();
+		this.plugin = plugin;
 
-		commands.put("deleteinv", new DeleteInvCommand(plugin));
-		commands.put("give", new GiveCommand(plugin));
-		commands.put("list", new ListCommand(plugin));
-		commands.put("openinv", new OpenInvCommand(plugin));
-		commands.put("reload", new ReloadCommand(plugin));
-		commands.put("swapinv", new SwapInvCommand(plugin));
-	}
-
-	/**
-	 * Gets the commands. The returned map cannot be changed.
-	 * 
-	 * @return The commands.
-	 */
-	public Map<String, BaseCommand> getCommands() {
-		return ImmutableMap.copyOf(commands);
+		Registry<BaseCommand> commands = plugin.getCommands();
+		commands.register(new DeleteInvCommand(plugin));
+		commands.register(new GiveCommand(plugin));
+		commands.register(new ListCommand(plugin));
+		commands.register(new OpenInvCommand(plugin));
+		commands.register(new ReloadCommand(plugin));
+		commands.register(new SwapInvCommand(plugin));
 	}
 
 	/*
@@ -46,8 +35,8 @@ public class BetterEnderCommandManager implements TabExecutor {
 	public boolean onCommand(CommandSender sender, Command bukkitCommand, String label, String[] originalArgs) {
 		if (bukkitCommand.getName().equalsIgnoreCase("enderchest")) {
 			// Handle the /enderchest command
-			BaseCommand command = commands.get("openinv");
-			if (!command.hasPermission(sender)) {
+			BaseCommand command = plugin.getCommands().getRegistration("openinv");
+			if (command == null || !command.hasPermission(sender)) {
 				sender.sendMessage(ChatColor.RED + "No permission to do this...");
 				return true;
 			}
@@ -76,7 +65,7 @@ public class BetterEnderCommandManager implements TabExecutor {
 			args[i - 1] = originalArgs[i];
 		}
 
-		BaseCommand command = commands.get(name);
+		BaseCommand command = plugin.getCommands().getRegistration(originalArgs[0]);
 
 		if (command == null) {
 			sender.sendMessage(ChatColor.RED + "Command " + name + " not found... Available commands:");
@@ -99,7 +88,7 @@ public class BetterEnderCommandManager implements TabExecutor {
 	}
 
 	/*
-	 * Internal method to execute tab autocompletion.
+	 * Internal method to execute tab auto-completion.
 	 */
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] originalArgs) {
@@ -109,10 +98,9 @@ public class BetterEnderCommandManager implements TabExecutor {
 			// Searching for a subcommand
 			matches = new ArrayList<String>();
 
-			for (String baseCommandName : commands.keySet()) {
-				BaseCommand baseCommand = commands.get(baseCommandName);
-				if (StringUtil.startsWithIgnoreCase(baseCommandName, originalArgs[0]) && baseCommand.hasPermission(sender)) {
-					matches.add(baseCommandName);
+			for (BaseCommand baseCommand : plugin.getCommands().getRegistrations()) {
+				if (StringUtil.startsWithIgnoreCase(baseCommand.getName(), originalArgs[0]) && baseCommand.hasPermission(sender)) {
+					matches.add(baseCommand.getName());
 				}
 			}
 		}
@@ -120,34 +108,22 @@ public class BetterEnderCommandManager implements TabExecutor {
 		return matches;
 	}
 
-	/**
-	 * Registers a command.
-	 * 
-	 * @param name
-	 *            Name of the command. Case-insensitive.
-	 * @param command
-	 *            The command to register.
-	 */
-	public void registerCommand(String name, BaseCommand command) {
-		commands.put(name.toLowerCase(), command);
-	}
-
 	/*
 	 * Internal method to show a list of commands along with their usage.
 	 */
 	private void showHelp(CommandSender sender, String label) {
-		Set<String> keySet = commands.keySet();
+		Collection<BaseCommand> commands = plugin.getCommands().getRegistrations();
 		int commandCount = 0; // Counts available commands
 
-		for (String key : keySet) {
-			BaseCommand command = commands.get(key);
+		for (BaseCommand command : commands) {
 			if (command.hasPermission(sender)) {
 				if (!command.getUsage().equals("")) {
 					// Only display usage message if it has one
-					sender.sendMessage(ChatColor.GOLD + "/" + label + " " + key + " " + command.getUsage() + ": " + ChatColor.WHITE
-							+ command.getHelpText());
+					sender.sendMessage(ChatColor.GOLD + "/" + label + " " + command.getName() + " " + command.getUsage() + ": "
+							+ ChatColor.WHITE + command.getHelpText());
 				} else {
-					sender.sendMessage(ChatColor.GOLD + "/" + label + " " + key + ": " + ChatColor.WHITE + command.getHelpText());
+					sender.sendMessage(ChatColor.GOLD + "/" + label + " " + command.getName() + ": " + ChatColor.WHITE
+							+ command.getHelpText());
 				}
 
 				commandCount++;

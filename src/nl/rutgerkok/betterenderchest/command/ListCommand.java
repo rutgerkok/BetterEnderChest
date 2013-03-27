@@ -23,6 +23,11 @@ public class ListCommand extends BaseCommand {
 	}
 
 	@Override
+	public String getName() {
+		return "list";
+	}
+
+	@Override
 	public String getUsage() {
 		return "";
 	}

@@ -75,6 +75,11 @@ public class SwapInvCommand extends BaseCommand {
 	}
 
 	@Override
+	public String getName() {
+		return "swapinv";
+	}
+
+	@Override
 	public String getUsage() {
 		return "<player1> <player2>";
 	}

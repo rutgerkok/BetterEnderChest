@@ -78,6 +78,11 @@ public class OpenInvCommand extends BaseCommand {
 	}
 
 	@Override
+	public String getName() {
+		return "openinv";
+	}
+
+	@Override
 	public String getUsage() {
 		return "[player]";
 	}

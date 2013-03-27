@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.registry.Registration;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public abstract class BaseCommand {
+public abstract class BaseCommand implements Registration {
 
 	protected BetterEnderChest plugin;
 
@@ -53,7 +54,7 @@ public abstract class BaseCommand {
 	 *            The one to get the current group name of.
 	 * @return The group name of the sender.
 	 */
-	public String getGroupName(CommandSender sender) {
+	protected String getGroupName(CommandSender sender) {
 		// Return the the group of the current world if the sender is a Player
 		if (sender instanceof Player) {
 			return plugin.getWorldGroupManager().getGroup(((Player) sender).getWorld().getName());
@@ -73,7 +74,7 @@ public abstract class BaseCommand {
 	 * 
 	 * @return
 	 */
-	public String getGroupName(String inventoryName, CommandSender sender) {
+	protected String getGroupName(String inventoryName, CommandSender sender) {
 		String[] parts = inventoryName.split("/");
 
 		// Return the group name if a group has been given
@@ -85,6 +86,11 @@ public abstract class BaseCommand {
 		return getGroupName(sender);
 	}
 
+	/**
+	 * Gets the help text for this command, like "gives an item".
+	 * 
+	 * @return The help text.
+	 */
 	public abstract String getHelpText();
 
 	/**
@@ -95,7 +101,7 @@ public abstract class BaseCommand {
 	 * @param inventoryName
 	 * @return
 	 */
-	public String getInventoryName(String inventoryName) {
+	protected String getInventoryName(String inventoryName) {
 		String[] parts = inventoryName.split("/");
 
 		// Return the world name if a world has been given
@@ -126,6 +132,16 @@ public abstract class BaseCommand {
 	 */
 	public abstract boolean hasPermission(CommandSender sender);
 
+	@Override
+	public boolean isAvailable() {
+		return true; // Commands are always available.
+	}
+
+	@Override
+	public boolean isFallback() {
+		return false;
+	}
+
 	/**
 	 * Returns whether the name given is a valid group name.
 	 * 
@@ -133,7 +149,7 @@ public abstract class BaseCommand {
 	 *            The name to check.
 	 * @return Whether the name given is a valid group name.
 	 */
-	public boolean isValidGroup(String name) {
+	protected boolean isValidGroup(String name) {
 		return plugin.getWorldGroupManager().groupExists(name);
 	}
 
@@ -145,7 +161,7 @@ public abstract class BaseCommand {
 	 *            The name to check.
 	 * @return Whether the name given is a valid player name.
 	 */
-	public boolean isValidPlayer(String name) {
+	protected boolean isValidPlayer(String name) {
 		if (name.equals(BetterEnderChest.PUBLIC_CHEST_NAME))
 			return true;
 		if (name.equals(BetterEnderChest.DEFAULT_CHEST_NAME))

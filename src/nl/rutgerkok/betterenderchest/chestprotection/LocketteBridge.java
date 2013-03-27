@@ -1,5 +1,6 @@
 package nl.rutgerkok.betterenderchest.chestprotection;
 
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.yi.acru.bukkit.Lockette.Lockette;
@@ -12,13 +13,23 @@ public class LocketteBridge implements ProtectionBridge {
 	}
 
 	@Override
-	public String getBridgeName() {
+	public String getName() {
 		return "Lockette";
 	}
 
 	@Override
 	public String getOwnerName(Block block) {
 		return Lockette.getProtectedOwner(block);
+	}
+
+	@Override
+	public boolean isAvailable() {
+		return Bukkit.getPluginManager().getPlugin("Lockette") != null;
+	}
+
+	@Override
+	public boolean isFallback() {
+		return false;
 	}
 
 	@Override

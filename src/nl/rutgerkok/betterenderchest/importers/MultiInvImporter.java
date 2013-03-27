@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
 
-import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin;
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
 
 import org.bukkit.Bukkit;
@@ -19,7 +19,12 @@ import uk.co.tggl.pluckerpluck.multiinv.inventory.MIEnderchestInventory;
 public class MultiInvImporter extends InventoryImporter {
 
 	@Override
-	public Inventory importInventory(final String inventoryName, String groupName, BetterEnderChestPlugin plugin) throws IOException {
+	public String getName() {
+		return "multiinv";
+	}
+
+	@Override
+	public Inventory importInventory(final String inventoryName, String groupName, BetterEnderChest plugin) throws IOException {
 		if (plugin.isSpecialChest(inventoryName)) {
 			// Public chests and default chests cannot be imported.
 			return null;
@@ -68,7 +73,7 @@ public class MultiInvImporter extends InventoryImporter {
 			// From a file
 
 			// Find and load configuration file for the player's enderchest
-			File multiInvDataFolder = plugin.getServer().getPluginManager().getPlugin("MultiInv").getDataFolder();
+			File multiInvDataFolder = Bukkit.getServer().getPluginManager().getPlugin("MultiInv").getDataFolder();
 			File multiInvWorldsFolder = new File(multiInvDataFolder, "Groups");
 
 			// Get the save file
@@ -120,6 +125,11 @@ public class MultiInvImporter extends InventoryImporter {
 	@Override
 	public boolean isAvailable() {
 		return (Bukkit.getServer().getPluginManager().getPlugin("MultiInv") != null);
+	}
+
+	@Override
+	public boolean isFallback() {
+		return false;
 	}
 
 }

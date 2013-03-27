@@ -5,20 +5,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 
+import nl.rutgerkok.betterenderchest.importers.InventoryImporter;
+
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 
 public class BetterEnderWorldGroupManager {
 
-	private HashMap<String, String> imports;
+	private HashMap<String, InventoryImporter> imports;
 	private BetterEnderChestPlugin plugin;
 	private HashMap<String, String> worlds;
 
 	public BetterEnderWorldGroupManager(BetterEnderChestPlugin plugin) {
 		this.plugin = plugin;
 		worlds = new HashMap<String, String>();// <World,Group>
-		imports = new HashMap<String, String>();// <Group,Import>
+		imports = new HashMap<String, InventoryImporter>();// <Group,Import>
 	}
 
 	/**
@@ -42,11 +44,11 @@ public class BetterEnderWorldGroupManager {
 	 * @param group
 	 * @return
 	 */
-	public String getImport(String groupName) {
+	public InventoryImporter getImport(String groupName) {
 		groupName = groupName.toLowerCase();
 		if (!imports.containsKey(groupName)) {
 			// Don't know what to import
-			return plugin.getInventoryImporter().none;
+			return plugin.getInventoryImporters().getAvailableFallback();
 		}
 		return imports.get(groupName);
 	}
@@ -109,7 +111,7 @@ public class BetterEnderWorldGroupManager {
 		if (importSection == null) {
 			// No Imports section found
 			// Set the default group to vanilla.
-			imports.put(BetterEnderChest.STANDARD_GROUP_NAME, "vanilla");
+			imports.put(BetterEnderChest.STANDARD_GROUP_NAME, plugin.getInventoryImporters().getSelectedRegistration());
 		} else {
 			// Add all the importing groups to the list
 			for (String groupName : importSection.getValues(false).keySet()) {
@@ -120,9 +122,10 @@ public class BetterEnderWorldGroupManager {
 				groupName = groupName.toLowerCase();
 
 				// If it's valid, add it to the list
-				if (plugin.getInventoryImporter().isValidImporter(importerName)) {
+				InventoryImporter importer = plugin.getInventoryImporters().getAvailableRegistration(importerName);
+				if (importer != null) {
 					if (groupExists(groupName)) {
-						imports.put(groupName.toLowerCase(), importerName);
+						imports.put(groupName.toLowerCase(), importer);
 					} else {
 						plugin.log("The import " + importerName + " was added for the non-existant group " + groupName + "!", Level.WARNING);
 					}

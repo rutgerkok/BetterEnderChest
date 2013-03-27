@@ -6,8 +6,6 @@ import org.bukkit.entity.Player;
 /**
  * If there is no Lockette or LWC present, the plugin will use this class.
  * 
- * @author Rutger
- * 
  */
 public class NoBridge implements ProtectionBridge {
 
@@ -17,13 +15,23 @@ public class NoBridge implements ProtectionBridge {
 	}
 
 	@Override
-	public String getBridgeName() {
+	public String getName() {
 		return "no bridge";
 	}
 
 	@Override
 	public String getOwnerName(Block block) {
 		return "";
+	}
+
+	@Override
+	public boolean isAvailable() {
+		return true;
+	}
+
+	@Override
+	public boolean isFallback() {
+		return true;
 	}
 
 	@Override

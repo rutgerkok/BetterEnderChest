@@ -1,5 +1,6 @@
 package nl.rutgerkok.betterenderchest.chestprotection;
 
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -13,13 +14,23 @@ public class LWCBridge implements ProtectionBridge {
 	}
 
 	@Override
-	public String getBridgeName() {
+	public String getName() {
 		return "LWC";
 	}
 
 	@Override
 	public String getOwnerName(Block block) {
 		return LWC.getInstance().findProtection(block).getOwner();
+	}
+
+	@Override
+	public boolean isAvailable() {
+		return Bukkit.getPluginManager().getPlugin("LWC") != null;
+	}
+
+	@Override
+	public boolean isFallback() {
+		return false;
 	}
 
 	@Override
