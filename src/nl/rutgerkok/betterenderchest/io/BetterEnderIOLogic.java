@@ -58,19 +58,38 @@ public class BetterEnderIOLogic {
 	}
 
 	/**
-	 * Get the amount of rows that are needed to fit all items. Is smart enough
-	 * to give the chest a minimum amount of rows that's enough for all items to
-	 * fit.
+	 * Guesses the number of chest rows based on both the contents and the
+	 * inventory name. It will calculate the minimum number of rows to fit all
+	 * the items. It will also guess the number of rows based on the name, just
+	 * like {@link #getInventoryRows(String)}. It will then return the highest
+	 * number of the two.
 	 * 
 	 * @param inventoryName
+	 *            The name of the inventory.
 	 * @param contents
-	 * @param plugin
-	 * @return
+	 *            The inventory itself.
+	 * @return Guessed number of rows.
 	 */
 	public int getInventoryRows(String inventoryName, Inventory contents) {
+		return getInventoryRows(inventoryName, contents.iterator());
+	}
+
+	/**
+	 * Guesses the number of chest rows based on both the contents and the
+	 * inventory name. It will calculate the minimum number of rows to fit all
+	 * the items. It will also guess the number of rows based on the name, just
+	 * like {@link #getInventoryRows(String)}. It will then return the highest
+	 * number of the two.
+	 * 
+	 * @param inventoryName
+	 *            The name of the inventory.
+	 * @param it
+	 *            Iterating over the contents in the inventory.
+	 * @return Guessed number of rows.
+	 */
+	public int getInventoryRows(String inventoryName, ListIterator<ItemStack> it) {
 		// Iterates through all the items to find the highest slot number
 		int highestSlot = 0;
-		ListIterator<ItemStack> it = contents.iterator();
 
 		while (it.hasNext()) {
 			int currentSlot = it.nextIndex();
