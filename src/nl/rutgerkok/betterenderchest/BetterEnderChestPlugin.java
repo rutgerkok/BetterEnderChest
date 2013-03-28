@@ -19,6 +19,7 @@ import nl.rutgerkok.betterenderchest.importers.NoneImporter;
 import nl.rutgerkok.betterenderchest.importers.VanillaImporter;
 import nl.rutgerkok.betterenderchest.importers.WorldInventoriesImporter;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
+import nl.rutgerkok.betterenderchest.io.BetterEnderFileHandler;
 import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
 import nl.rutgerkok.betterenderchest.io.BetterEnderNBTFileHandler;
 import nl.rutgerkok.betterenderchest.io.SaveLocation;
@@ -62,14 +63,12 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 	private boolean compabilityMode;
 	private BetterEnderCache enderCache;
 	private BetterEnderEventHandler enderHandler;
-
+	private Registry<BetterEnderFileHandler> fileHandlers = new Registry<BetterEnderFileHandler>();
 	private BetterEnderWorldGroupManager groups;
 	private Registry<InventoryImporter> importers = new Registry<InventoryImporter>();
 	private Registry<NMSHandler> nmsHandlers = new Registry<NMSHandler>();
 	private Registry<ProtectionBridge> protectionBridges = new Registry<ProtectionBridge>();
-
 	private int rankUpgrades;
-
 	private BetterEnderIOLogic saveAndLoadSystem;
 
 	@Override
@@ -105,6 +104,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 	@Override
 	public boolean getCompabilityMode() {
 		return compabilityMode;
+	}
+
+	@Override
+	public Registry<BetterEnderFileHandler> getFileHandlers() {
+		return fileHandlers;
 	}
 
 	@Override
@@ -363,9 +367,13 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		// Slots
 		chestSizes = new BetterEnderChestSizes();
 
-		// NMS handler
+		// NMS handlers
 		nmsHandlers.register(new NMSHandler_1_5_R2(this));
 		nmsHandlers.selectAvailableRegistration();
+		
+		// File handlers
+		fileHandlers.register(new BetterEnderNBTFileHandler(this));
+		fileHandlers.selectAvailableRegistration();
 
 		// Configuration
 		groups = new BetterEnderWorldGroupManager(this);
@@ -374,7 +382,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		saveConfig();
 
 		// Save and load system
-		saveAndLoadSystem = new BetterEnderIOLogic(this, new BetterEnderNBTFileHandler(this));
+		saveAndLoadSystem = new BetterEnderIOLogic(this);
 
 		// Chests storage
 		enderCache = new BetterEnderCache(this);

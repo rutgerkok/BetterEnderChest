@@ -23,7 +23,7 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
 
 	@Override
 	public Inventory getInventory() {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public String getName() {

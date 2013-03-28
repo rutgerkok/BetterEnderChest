@@ -18,6 +18,11 @@ public class BetterEnderNBTFileHandler extends BetterEnderFileHandler {
 	}
 
 	@Override
+	public String getName() {
+		return "nbt";
+	}
+
+	@Override
 	public boolean isAvailable() {
 		return plugin.getNMSHandlers().getSelectedRegistration() != null;
 	}
@@ -28,7 +33,7 @@ public class BetterEnderNBTFileHandler extends BetterEnderFileHandler {
 	}
 
 	@Override
-	public void save(File file, Inventory inventory, String inventoryName) {
+	public void save(File file, Inventory inventory) {
 		plugin.getNMSHandlers().getSelectedRegistration().saveInventoryAsNBT(file, inventory);
 	}
 }

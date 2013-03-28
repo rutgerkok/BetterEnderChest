@@ -19,22 +19,21 @@ import org.bukkit.inventory.ItemStack;
  * 
  */
 public class BetterEnderIOLogic {
-	protected BetterEnderFileHandler fileHandler;
 	protected BetterEnderChest plugin;
 
-	public BetterEnderIOLogic(BetterEnderChest plugin, BetterEnderFileHandler fileHandler) {
+	public BetterEnderIOLogic(BetterEnderChest plugin) {
 		this.plugin = plugin;
-		this.fileHandler = fileHandler;
 	}
 
 	public File getChestFile(String inventoryName, String groupName) {
 		if (groupName.equals(BetterEnderChest.STANDARD_GROUP_NAME)) {
 			// Default group? File isn't in a subdirectory.
-			return new File(plugin.getChestSaveLocation().getPath() + "/" + inventoryName + "." + fileHandler.getExtension());
+			return new File(plugin.getChestSaveLocation().getPath() + "/" + inventoryName + "."
+					+ plugin.getFileHandlers().getSelectedRegistration().getExtension());
 		} else {
 			// Another group? Save in subdirectory.
 			return new File(plugin.getChestSaveLocation().getPath() + "/" + groupName + "/" + inventoryName + "."
-					+ fileHandler.getExtension());
+					+ plugin.getFileHandlers().getSelectedRegistration().getExtension());
 		}
 	}
 
@@ -106,7 +105,7 @@ public class BetterEnderIOLogic {
 	}
 
 	/**
-	 * Get the title of the inventory
+	 * Get the title of the inventory.
 	 * 
 	 * @param inventoryName
 	 * @return
@@ -161,17 +160,20 @@ public class BetterEnderIOLogic {
 
 	/**
 	 * Load the inventory. It will automatically try to load it from a file, or
-	 * from something else.
+	 * import it from another plugin, or use the default chest.
 	 * 
 	 * @param inventoryName
+	 *            Name of the inventory.
 	 * @param groupName
-	 * @return
+	 *            Name of the world group the inventory is in.
+	 * @return The Inventory. {@link BetterEnderInventoryHolder} will be the
+	 *         holder of the inventory.
 	 */
 	public Inventory loadInventory(String inventoryName, String groupName) {
 		// Try to load it from a file
 		File file = getChestFile(inventoryName, groupName);
 		if (file.exists()) {
-			Inventory chestInventory = fileHandler.load(file, inventoryName);
+			Inventory chestInventory = plugin.getFileHandlers().getSelectedRegistration().load(file, inventoryName);
 			if (chestInventory != null) {
 				return chestInventory;
 			} else {
@@ -199,7 +201,7 @@ public class BetterEnderIOLogic {
 
 		// Try to load the default inventory
 		File defaultFile = getChestFile(BetterEnderChest.DEFAULT_CHEST_NAME, groupName);
-		Inventory defaultInventory = fileHandler.load(defaultFile, inventoryName);
+		Inventory defaultInventory = plugin.getFileHandlers().getSelectedRegistration().load(defaultFile, inventoryName);
 		if (defaultInventory != null) {
 			return defaultInventory;
 		} else {
@@ -208,7 +210,17 @@ public class BetterEnderIOLogic {
 
 	}
 
+	/**
+	 * Saves an inventory.
+	 * 
+	 * @param inventory
+	 *            The inventory to save.
+	 * @param inventoryName
+	 *            The name of the inventory.
+	 * @param groupName
+	 *            The world group the inventory is in.
+	 */
 	public void saveInventory(Inventory inventory, String inventoryName, String groupName) {
-		fileHandler.save(getChestFile(inventoryName, groupName), inventory, inventoryName);
+		plugin.getFileHandlers().getSelectedRegistration().save(getChestFile(inventoryName, groupName), inventory);
 	}
 }

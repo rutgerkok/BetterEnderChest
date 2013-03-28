@@ -153,7 +153,7 @@ public class BetterEnderWorldGroupManager {
 			if (list.isEmpty()) {
 				// If the group isn't yet added, it's also the right time to add
 				// which group should import.
-				plugin.getConfig().set("Imports." + groupName, getImport(groupName));
+				plugin.getConfig().set("Imports." + groupName, getImport(groupName).getName());
 			}
 			// Add the world to the list
 			list.add(worldName);

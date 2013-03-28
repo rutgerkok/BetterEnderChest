@@ -8,6 +8,7 @@ import nl.rutgerkok.betterenderchest.command.BaseCommand;
 import nl.rutgerkok.betterenderchest.command.BetterEnderCommandManager;
 import nl.rutgerkok.betterenderchest.importers.InventoryImporter;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
+import nl.rutgerkok.betterenderchest.io.BetterEnderFileHandler;
 import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.registry.Registry;
@@ -89,6 +90,13 @@ public interface BetterEnderChest {
 	 *         vanilla Ender Chest.
 	 */
 	boolean getCompabilityMode();
+
+	/**
+	 * Returns the file handlers, which save and load to files.
+	 * 
+	 * @return The file handlers.
+	 */
+	Registry<BetterEnderFileHandler> getFileHandlers();
 
 	/**
 	 * Gets the importers which can import Ender Chest inventories from and to
