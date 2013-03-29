@@ -85,7 +85,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 	public BetterEnderCache getChestsCache() {
 		return enderCache;
 	}
-
+	
 	@Override
 	public BetterEnderChestSizes getChestSizes() {
 		return chestSizes;
@@ -365,12 +365,14 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		importers.selectRegistration(new VanillaImporter());
 
 		// Slots
-		chestSizes = new BetterEnderChestSizes();
+		if (chestSizes == null) {
+			chestSizes = new BetterEnderChestSizes();
+		}
 
 		// NMS handlers
 		nmsHandlers.register(new NMSHandler_1_5_R2(this));
 		nmsHandlers.selectAvailableRegistration();
-		
+
 		// File handlers
 		fileHandlers.register(new BetterEnderNBTFileHandler(this));
 		fileHandlers.selectAvailableRegistration();
@@ -382,7 +384,9 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		saveConfig();
 
 		// Save and load system
-		saveAndLoadSystem = new BetterEnderIOLogic(this);
+		if (saveAndLoadSystem == null) {
+			saveAndLoadSystem = new BetterEnderIOLogic(this);
+		}
 
 		// Chests storage
 		enderCache = new BetterEnderCache(this);
@@ -422,6 +426,13 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 				enderCache.autoSaveTick();
 			}
 		}, 60, AutoSave.saveTickInterval);
+
+		// Safeguard message
+		if (!getSaveAndLoadSystem().canSaveAndLoad()) {
+			log("Cannot save and load! Outdated plugin?", Level.SEVERE);
+			log("Plugin will stay enabled to prevent anyone from opening Ender Chests and corrupting data.", Level.SEVERE);
+			log("Please look for a BetterEnderChest file matching your CraftBukkit version!", Level.SEVERE);
+		}
 	}
 
 	@Override
@@ -447,6 +458,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 	@Override
 	public void setChestMaterial(Material material) {
 		this.chestMaterial = material;
+	}
+
+	@Override
+	public void setChestsCache(BetterEnderCache cache) {
+		enderCache = cache;
 	}
 
 	@Override

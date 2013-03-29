@@ -192,6 +192,14 @@ public interface BetterEnderChest {
 	void setChestMaterial(Material newMaterial);
 
 	/**
+	 * Sets the cache system that should be used.
+	 * 
+	 * @param cache
+	 *            The cache system to use.
+	 */
+	void setChestsCache(BetterEnderCache cache);
+
+	/**
 	 * Sets the chest size calculator. If you want to have your own calculator
 	 * for the chest sizes, you can register it here. This is not always needed,
 	 * most of the time you can just give the number of slots for each upgrade

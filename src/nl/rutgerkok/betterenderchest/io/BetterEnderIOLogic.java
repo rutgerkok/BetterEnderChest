@@ -25,6 +25,16 @@ public class BetterEnderIOLogic {
 		this.plugin = plugin;
 	}
 
+	/**
+	 * Gets whether chests can be saved and loaded. Saving and loading may be
+	 * disabled if BetterEnderChest is outdated.
+	 * 
+	 * @return Whether chests can be saved and loaded.
+	 */
+	public boolean canSaveAndLoad() {
+		return plugin.getFileHandlers().getSelectedRegistration() != null;
+	}
+
 	public File getChestFile(String inventoryName, String groupName) {
 		if (groupName.equals(BetterEnderChest.STANDARD_GROUP_NAME)) {
 			// Default group? File isn't in a subdirectory.
@@ -170,6 +180,11 @@ public class BetterEnderIOLogic {
 	 *         holder of the inventory.
 	 */
 	public Inventory loadInventory(String inventoryName, String groupName) {
+		if (!canSaveAndLoad()) {
+			// Cannot load chest, no file handler
+			return loadEmptyInventory(inventoryName);
+		}
+
 		// Try to load it from a file
 		File file = getChestFile(inventoryName, groupName);
 		if (file.exists()) {
@@ -211,7 +226,7 @@ public class BetterEnderIOLogic {
 	}
 
 	/**
-	 * Saves an inventory.
+	 * Saves an inventory. Does nothing if there is no save system.
 	 * 
 	 * @param inventory
 	 *            The inventory to save.
@@ -221,6 +236,8 @@ public class BetterEnderIOLogic {
 	 *            The world group the inventory is in.
 	 */
 	public void saveInventory(Inventory inventory, String inventoryName, String groupName) {
-		plugin.getFileHandlers().getSelectedRegistration().save(getChestFile(inventoryName, groupName), inventory);
+		if (canSaveAndLoad()) {
+			plugin.getFileHandlers().getSelectedRegistration().save(getChestFile(inventoryName, groupName), inventory);
+		}
 	}
 }

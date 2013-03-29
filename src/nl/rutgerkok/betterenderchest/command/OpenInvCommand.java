@@ -22,6 +22,11 @@ public class OpenInvCommand extends BaseCommand {
 			return true;
 		}
 
+		if (!plugin.getSaveAndLoadSystem().canSaveAndLoad()) {
+			sender.sendMessage(ChatColor.RED + "Ender Chests have been disabled, because the plugin handling them is outdated.");
+			return true;
+		}
+
 		Player player = (Player) sender;
 		String inventoryName = null;
 		String groupName = getGroupName(player);

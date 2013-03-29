@@ -51,7 +51,8 @@ public class NMSHandler_1_5_R2 extends NMSHandler {
 
 	@Override
 	public String getName() {
-		return "v1_5_R2";
+		// Dynamic, otherwise I will forget to update it :)
+		return getClass().getSimpleName().replace("NMSHandler_", "v");
 	}
 
 	private int getRows(String inventoryName, NBTTagCompound baseTag, NBTTagList inventoryListTag) {
@@ -77,6 +78,7 @@ public class NMSHandler_1_5_R2 extends NMSHandler {
 	@Override
 	public boolean isAvailable() {
 		try {
+			// Test whether nms access works.
 			MinecraftServer.getServer();
 			return true;
 		} catch (Throwable t) {

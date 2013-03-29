@@ -9,6 +9,7 @@ import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
 import nl.rutgerkok.betterenderchest.chestprotection.ProtectionBridge;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
+import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -121,7 +122,10 @@ public class BetterEnderEventHandler implements Listener {
 			// Play closing animation
 			Location lastOpened = BetterEnderUtils.getLastEnderChestOpeningLocation(player);
 			if (lastOpened != null) {
-				plugin.getNMSHandlers().getSelectedRegistration().closeEnderChest(lastOpened);
+				NMSHandler nmsHandler = plugin.getNMSHandlers().getSelectedRegistration();
+				if (nmsHandler != null) {
+					nmsHandler.closeEnderChest(lastOpened);
+				}
 
 				// Clear the inventory opening location
 				BetterEnderUtils.setLastEnderChestOpeningLocation(player, null, plugin);
@@ -201,6 +205,14 @@ public class BetterEnderEventHandler implements Listener {
 		String groupName = plugin.getWorldGroupManager().getGroup(player.getWorld().getName());
 		String inventoryName = "";
 
+		// Are the chests enabled?
+
+		if (!plugin.getSaveAndLoadSystem().canSaveAndLoad()) {
+			// Incompatible BetterEnderChest version installed
+			player.sendMessage(ChatColor.RED + "Ender Chests have been disabled, because the plugin handling them is outdated.");
+			return;
+		}
+
 		// Find out the inventory that should be opened
 		ProtectionBridge protectionBridge = plugin.getProtectionBridges().getSelectedRegistration();
 		if (protectionBridge.isProtected(clickedBlock)) {
@@ -251,7 +263,10 @@ public class BetterEnderEventHandler implements Listener {
 		player.openInventory(inventory);
 
 		// Play animation, store location
-		plugin.getNMSHandlers().getSelectedRegistration().openEnderChest(clickedBlock.getLocation());
+		NMSHandler nmsHandler = plugin.getNMSHandlers().getSelectedRegistration();
+		if (nmsHandler != null) {
+			nmsHandler.openEnderChest(clickedBlock.getLocation());
+		}
 		BetterEnderUtils.setLastEnderChestOpeningLocation(player, clickedBlock.getLocation(), plugin);
 	}
 
