@@ -6,8 +6,8 @@ import java.util.ListIterator;
 import java.util.logging.Level;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
-import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.PublicChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
+import nl.rutgerkok.betterenderchest.Translations;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -125,10 +125,13 @@ public class BetterEnderIOLogic {
 
 		if (inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME)) {
 			// Public chest
-			title = "Ender Chest (" + PublicChest.displayName + ")";
+			title = Translations.PUBLIC_CHEST_TITLE.toString();
+		} else if (inventoryName.equals(BetterEnderChest.DEFAULT_CHEST_NAME)) {
+			// Default chest
+			title = Translations.DEFAULT_CHEST_TITLE.toString();
 		} else {
 			// Private chest
-			title = "Ender Chest (" + inventoryName + ")";
+			title = Translations.PRIVATE_CHEST_TITLE.toString(inventoryName);
 		}
 
 		return title;

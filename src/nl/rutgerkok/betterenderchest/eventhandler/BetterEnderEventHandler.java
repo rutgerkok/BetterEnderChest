@@ -7,6 +7,7 @@ import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin;
 import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.PublicChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
+import nl.rutgerkok.betterenderchest.Translations;
 import nl.rutgerkok.betterenderchest.chestprotection.ProtectionBridge;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
@@ -134,8 +135,8 @@ public class BetterEnderEventHandler implements Listener {
 			// If it's a public chest, show a warning about that
 			BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) event.getInventory().getHolder();
 			if (holder.getName().equals(BetterEnderChest.PUBLIC_CHEST_NAME)) {
-				if (!PublicChest.closeMessage.isEmpty()) {
-					player.sendMessage(PublicChest.closeMessage);
+				if (!Translations.PUBLIC_CHEST_CLOSE_MESSAGE.isEmpty()) {
+					player.sendMessage(Translations.PUBLIC_CHEST_CLOSE_MESSAGE.toString());
 				}
 			}
 		}
@@ -209,7 +210,7 @@ public class BetterEnderEventHandler implements Listener {
 
 		if (!plugin.getSaveAndLoadSystem().canSaveAndLoad()) {
 			// Incompatible BetterEnderChest version installed
-			player.sendMessage(ChatColor.RED + "Ender Chests have been disabled, because the plugin handling them is outdated.");
+			player.sendMessage(ChatColor.RED + Translations.ENDER_CHESTS_DISABLED.toString());
 			return;
 		}
 

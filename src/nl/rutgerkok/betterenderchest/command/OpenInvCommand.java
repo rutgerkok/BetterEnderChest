@@ -3,6 +3,7 @@ package nl.rutgerkok.betterenderchest.command;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.PublicChest;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
+import nl.rutgerkok.betterenderchest.Translations;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -23,7 +24,7 @@ public class OpenInvCommand extends BaseCommand {
 		}
 
 		if (!plugin.getSaveAndLoadSystem().canSaveAndLoad()) {
-			sender.sendMessage(ChatColor.RED + "Ender Chests have been disabled, because the plugin handling them is outdated.");
+			sender.sendMessage(ChatColor.RED + Translations.ENDER_CHESTS_DISABLED.toString());
 			return true;
 		}
 

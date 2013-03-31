@@ -1,6 +1,7 @@
 package nl.rutgerkok.betterenderchest;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,6 +31,7 @@ import nl.rutgerkok.betterenderchest.registry.Registry;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -47,7 +49,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 	 * Inner class to store some variables.
 	 */
 	public static class PublicChest {
-		public static String displayName, closeMessage;
 		public static boolean openOnOpeningUnprotectedChest, openOnUsingCommand;
 	}
 
@@ -85,7 +86,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 	public BetterEnderCache getChestsCache() {
 		return enderCache;
 	}
-	
+
 	@Override
 	public BetterEnderChestSizes getChestSizes() {
 		return chestSizes;
@@ -146,12 +147,19 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		return groups;
 	}
 
-	// Configuration
+	// Configuration - only saves the translations
 	public void initConfig() {
-		if (getConfig().getString("BetterEnderChest.usePermissions", null) != null) {
-			log("The permission nodes have changed. See the BukkitDev page for more information.", Level.WARNING);
-			getConfig().set("BetterEnderChest.usePermissions", null);
+		// Reading translations
+		String language = getConfig().getString("BetterEnderChest.language", "en");
+		File translationsFile = new File(getDataFolder(), "translations-" + language + ".yml");
+		YamlConfiguration translationSettings = null;
+		if (translationsFile.exists()) {
+			translationSettings = YamlConfiguration.loadConfiguration(translationsFile);
+			Translations.load(translationSettings);
+		} else {
+			translationSettings = new YamlConfiguration();
 		}
+		getConfig().set("BetterEnderChest.language", language);
 
 		// Save location
 		String defaultSaveLocation = SaveLocation.getDefaultSaveLocation().toString();
@@ -228,7 +236,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		}
 		getConfig().set("AutoSave.chestsPerSaveTick", AutoSave.chestsPerSaveTick);
 		// enable message?
-		AutoSave.showAutoSaveMessage = getConfig().getBoolean("AutoSave.showAutoSaveMessage", true);
+		AutoSave.showAutoSaveMessage = getConfig().getBoolean("AutoSave.showAutoSaveMessage", false);
 		getConfig().set("AutoSave.showAutoSaveMessage", AutoSave.showAutoSaveMessage);
 		// Private chests
 		rankUpgrades = getConfig().getInt("PrivateEnderChest.rankUpgrades", 2);
@@ -261,19 +269,20 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		PublicChest.openOnUsingCommand = getConfig().getBoolean("PublicEnderChest.showOnUsingCommand",
 				PublicChest.openOnOpeningUnprotectedChest);
 		getConfig().set("PublicEnderChest.showOnUsingCommand", PublicChest.openOnUsingCommand);
-		// display name?
-		PublicChest.displayName = getConfig().getString("PublicEnderChest.name", "Public Chest");
-		if (PublicChest.displayName.length() > 16) {
-			log("The public chest display name " + PublicChest.displayName + " is too long. (Max lenght:15). Resetting it to Public Chest.",
-					Level.WARNING);
-			PublicChest.displayName = "Public Chest";
+		
+		// display name (moved to translations file)
+		String publicDisplayName = getConfig().getString("PublicEnderChest.name", null);
+		if (publicDisplayName != null) {
+			Translations.PUBLIC_CHEST_TITLE = new Translation("Ender Chest (" + publicDisplayName + ")");
+			getConfig().set("PublicEnderChest.name", null);
 		}
-		getConfig().set("PublicEnderChest.name", PublicChest.displayName);
-		// close message?
-		PublicChest.closeMessage = getConfig().getString("PublicEnderChest.closeMessage",
-				"This was a public Ender Chest. Remember that your items aren't save.");
-		getConfig().set("PublicEnderChest.closeMessage", PublicChest.closeMessage);
-		PublicChest.closeMessage = ChatColor.translateAlternateColorCodes('&', PublicChest.closeMessage);
+		// close message (moved to translations file)
+		String publicCloseMessage = getConfig().getString("PublicEnderChest.closeMessage", null);
+		if (publicCloseMessage != null) {
+			Translations.PUBLIC_CHEST_CLOSE_MESSAGE = new Translation(publicCloseMessage);
+			getConfig().set("PublicEnderChest.closeMessage", null);
+		}
+		
 		// slots?
 		int publicChestSlots = getConfig().getInt("PublicEnderChest.defaultSlots", playerChestSlots[0]);
 		if (publicChestSlots < 1 || publicChestSlots > 20 * 9) {
@@ -287,6 +296,15 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
 		// Set slots
 		getChestSizes().setSizes(publicChestSlots, playerChestSlots);
+		
+		// Save translations
+		Translations.save(translationSettings);
+		try {
+			translationSettings.save(translationsFile);
+		} catch (IOException e) {
+			log("Cannot save translations!", Level.SEVERE);
+			e.printStackTrace();
+		}
 	}
 
 	@Override
