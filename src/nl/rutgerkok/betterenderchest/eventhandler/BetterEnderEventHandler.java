@@ -57,7 +57,7 @@ public class BetterEnderEventHandler implements Listener {
 		if (!player.hasPermission("betterenderchest.user.destroy")) {
 			// Player cannot break Ender Chests, cancel event
 			event.setCancelled(true);
-			player.sendMessage(ChatColor.RED + "You don't have permission to break Ender Chests.");
+			player.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
 			return;
 		}
 
@@ -107,7 +107,7 @@ public class BetterEnderEventHandler implements Listener {
 		Player player = event.getPlayer();
 		if (!player.hasPermission("betterenderchest.user.place")) {
 			event.setCancelled(true);
-			player.sendMessage(ChatColor.RED + "You don't have permission to place Ender Chests.");
+			player.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
 		}
 	}
 
@@ -166,14 +166,14 @@ public class BetterEnderEventHandler implements Listener {
 				if (player.hasPermission("betterenderchest.user.open.publicchest")) {
 					inventoryName = BetterEnderChest.PUBLIC_CHEST_NAME;
 				} else {
-					player.sendMessage(ChatColor.RED + "You don't have permission to use the public Ender Chest.");
+					player.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
 				}
 			} else {
 				// Get player's name
 				if (player.hasPermission("betterenderchest.user.open.privatechest")) {
 					inventoryName = player.getName();
 				} else {
-					player.sendMessage(ChatColor.RED + "You don't have permission to use your private Ender Chest.");
+					player.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
 				}
 			}
 
@@ -227,25 +227,26 @@ public class BetterEnderEventHandler implements Listener {
 					inventoryName = protectionBridge.getOwnerName(clickedBlock);
 				} else {
 					// Show an error
-					player.sendMessage(ChatColor.RED + "You do not have permissions to use your private Ender Chest.");
+					player.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
 				}
 			}
 		} else {
 			// Unprotected Ender chest
 			if (!player.getItemInHand().getType().equals(Material.SIGN) || !protectionBridge.getName().equals("Lockette")) {
+				// Don't cancel Lockette's sign placement
 				if (PublicChest.openOnOpeningUnprotectedChest) {
 					// Get public chest
 					if (player.hasPermission("betterenderchest.user.open.publicchest")) {
 						inventoryName = BetterEnderChest.PUBLIC_CHEST_NAME;
 					} else {
-						player.sendMessage(ChatColor.RED + "You do not have permissions to use the public Ender Chest.");
+						player.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
 					}
 				} else {
 					// Get player's name
 					if (player.hasPermission("betterenderchest.user.open.privatechest")) {
 						inventoryName = player.getName();
 					} else {
-						player.sendMessage(ChatColor.RED + "You do not have permissions to use your private Ender Chest.");
+						player.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
 					}
 				}
 			}

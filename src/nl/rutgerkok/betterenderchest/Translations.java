@@ -10,6 +10,7 @@ public class Translations {
 	public static Translation PUBLIC_CHEST_TITLE = new Translation("Ender Chest (Public Chest)");
 	public static Translation PRIVATE_CHEST_TITLE = new Translation("Ender Chest (%s)");
 	public static Translation DEFAULT_CHEST_TITLE = new Translation("Editing the default Ender Chest...");
+	public static Translation NO_PERMISSION = new Translation("You don't have permission to do this.");
 
 	/**
 	 * Loads all translations from the specified config.

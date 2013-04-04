@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.Translations;
 import nl.rutgerkok.betterenderchest.registry.Registry;
 
 import org.bukkit.ChatColor;
@@ -37,7 +38,7 @@ public class BetterEnderCommandManager implements TabExecutor {
 			// Handle the /enderchest command
 			BaseCommand command = plugin.getCommands().getRegistration("openinv");
 			if (command == null || !command.hasPermission(sender)) {
-				sender.sendMessage(ChatColor.RED + "No permission to do this...");
+				sender.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
 				return true;
 			}
 
@@ -74,7 +75,7 @@ public class BetterEnderCommandManager implements TabExecutor {
 		}
 
 		if (!command.hasPermission(sender)) {
-			sender.sendMessage(ChatColor.RED + "No permission to do this...");
+			sender.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
 			return true;
 		}
 
