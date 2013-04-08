@@ -1,5 +1,7 @@
 package nl.rutgerkok.betterenderchest.command;
 
+import java.util.List;
+
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.PublicChest;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
@@ -98,5 +100,16 @@ public class OpenInvCommand extends BaseCommand {
 		return (sender.hasPermission("betterenderchest.command.openinv.self") || sender
 				.hasPermission("betterenderchest.command.openinv.other"));
 	}
+	
+	@Override
+	public List<String> autoComplete(CommandSender sender, String[] args) {
+	    plugin.log("Start");
+        if(args.length == 1 && sender.hasPermission("betterenderchest.command.openinv.other")) {
+            plugin.log("Complete");
+            // Makes it return a player list
+            return null;
+        }
+        return super.autoComplete(sender, args);
+    }
 
 }

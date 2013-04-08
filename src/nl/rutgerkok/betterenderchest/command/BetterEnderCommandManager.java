@@ -2,6 +2,7 @@ package nl.rutgerkok.betterenderchest.command;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
@@ -93,20 +94,35 @@ public class BetterEnderCommandManager implements TabExecutor {
 	 */
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] originalArgs) {
-		List<String> matches = null;
-
+	    if (command.getName().equalsIgnoreCase("enderchest")) {
+            // Handle the /enderchest command
+            BaseCommand baseCommand = plugin.getCommands().getRegistration("openinv");
+            if (baseCommand == null || !baseCommand.hasPermission(sender)) {
+                return Collections.emptyList();
+            }
+            return baseCommand.autoComplete(sender, originalArgs);
+        }
 		if (originalArgs.length == 1) {
 			// Searching for a subcommand
-			matches = new ArrayList<String>();
+		    List<String> matches = new ArrayList<String>();
 
 			for (BaseCommand baseCommand : plugin.getCommands().getRegistrations()) {
 				if (StringUtil.startsWithIgnoreCase(baseCommand.getName(), originalArgs[0]) && baseCommand.hasPermission(sender)) {
 					matches.add(baseCommand.getName());
 				}
 			}
+			return matches;
+		} else if (originalArgs.length > 1) {
+		    // Searching in a subcommand
+		    BaseCommand baseCommand = plugin.getCommands().getRegistration(originalArgs[0]);
+		    if(baseCommand != null && baseCommand.hasPermission(sender)) {
+		        String[] args = new String[originalArgs.length - 1];
+                System.arraycopy(originalArgs, 1, args, 0, originalArgs.length - 1);
+		        return baseCommand.autoComplete(sender, args);
+		    }
 		}
 
-		return matches;
+		return Collections.emptyList();
 	}
 
 	/*

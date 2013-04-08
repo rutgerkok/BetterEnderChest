@@ -1,6 +1,6 @@
 package nl.rutgerkok.betterenderchest.command;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
@@ -22,6 +22,7 @@ public abstract class BaseCommand implements Registration {
 
 	/**
 	 * Returns all possible autoComplete options for this command.
+	 * Will only be executed if {@link #hasPermission(CommandSender)} returns true.
 	 * 
 	 * @param sender
 	 *            Who pressed tab.
@@ -30,11 +31,12 @@ public abstract class BaseCommand implements Registration {
 	 * @return All possible autoComplete options.
 	 */
 	public List<String> autoComplete(CommandSender sender, String[] args) {
-		return new ArrayList<String>();
+		return Collections.emptyList();
 	}
 
 	/**
 	 * Performs this command.
+	 * Will only be executed if {@link #hasPermission(CommandSender)} returns true.
 	 * 
 	 * @param sender
 	 *            The one who executed the command.
