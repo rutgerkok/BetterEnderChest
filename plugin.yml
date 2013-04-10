@@ -59,6 +59,7 @@ permissions:
       betterenderchest.command.swapinv: true
       betterenderchest.command.openinv: true
       betterenderchest.command.reload: true
+      betterenderchest.command.viewinv: true
   betterenderchest.command.deleteinv:
     description: Delete the contents of an Ender Chest inventory.
   betterenderchest.command.give:
@@ -78,3 +79,5 @@ permissions:
     description: Open someone else's (or your own) Ender Chest inventory with a command. Can be from another world group.
   betterenderchest.command.reload:
     description: Reload the configuration.
+  betterenderchest.command.viewinv:
+    description: View someone else's Ender Chest inventory without being able to modify/steal from it.

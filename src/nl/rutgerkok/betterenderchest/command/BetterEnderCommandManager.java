@@ -28,6 +28,7 @@ public class BetterEnderCommandManager implements TabExecutor {
 		commands.register(new OpenInvCommand(plugin));
 		commands.register(new ReloadCommand(plugin));
 		commands.register(new SwapInvCommand(plugin));
+		commands.register(new ViewInvCommand(plugin));
 	}
 
 	/*

@@ -89,9 +89,4 @@ public class GiveCommand extends BaseCommand {
 		return "<player> <item> [count] [damage]";
 	}
 
-	@Override
-	public boolean hasPermission(CommandSender sender) {
-		return sender.hasPermission("betterenderchest.command.give");
-	}
-
 }

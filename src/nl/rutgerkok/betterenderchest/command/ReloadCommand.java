@@ -45,9 +45,4 @@ public class ReloadCommand extends BaseCommand {
 		return "";
 	}
 
-	@Override
-	public boolean hasPermission(CommandSender sender) {
-		return sender.hasPermission("betterenderchest.command.reload");
-	}
-
 }

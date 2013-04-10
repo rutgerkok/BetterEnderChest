@@ -84,9 +84,4 @@ public class SwapInvCommand extends BaseCommand {
 		return "<player1> <player2>";
 	}
 
-	@Override
-	public boolean hasPermission(CommandSender sender) {
-		return sender.hasPermission("betterenderchest.command.swapinv");
-	}
-
 }

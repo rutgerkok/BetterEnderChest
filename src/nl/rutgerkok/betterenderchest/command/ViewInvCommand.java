@@ -3,23 +3,35 @@ package nl.rutgerkok.betterenderchest.command;
 import java.util.List;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
-import nl.rutgerkok.betterenderchest.BetterEnderUtils;
+import nl.rutgerkok.betterenderchest.ImmutableInventory;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
-public class DeleteInvCommand extends BaseCommand {
+public class ViewInvCommand extends BaseCommand {
 
-    public DeleteInvCommand(BetterEnderChest plugin) {
+    public ViewInvCommand(BetterEnderChest plugin) {
         super(plugin);
     }
 
     @Override
-    public boolean execute(CommandSender sender, String[] args) {
-        if (args.length != 1)
-            return false; // Wrong argument count!
+    public String getName() {
+        return "viewinv";
+    }
 
+    @Override
+    public boolean execute(CommandSender sender, String[] args) {
+        if (args.length != 1) {
+            return false; // Wrong argument count!
+        }
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(ChatColor.RED + "You cannot view an Ender inventory from the console. Use a NBT editor.");
+            return true;
+        }
+
+        Player player = (Player) sender;
         String inventoryName = getInventoryName(args[0]);
         String groupName = getGroupName(args[0], sender);
 
@@ -27,13 +39,7 @@ public class DeleteInvCommand extends BaseCommand {
             if (isValidGroup(groupName)) {
                 // Get the inventory
                 Inventory inventory = plugin.getChestsCache().getInventory(inventoryName, groupName);
-
-                // Remove all the viewers
-                BetterEnderUtils.closeInventory(inventory, ChatColor.YELLOW + "An admin just deleted this inventory.");
-
-                // Clear it.
-                inventory.clear();
-                sender.sendMessage(ChatColor.GREEN + "Succesfully removed inventory!");
+                player.openInventory(ImmutableInventory.copyOf(inventory));
             } else {
                 sender.sendMessage(ChatColor.RED + "The group " + groupName + " doesn't exist.");
             }
@@ -45,12 +51,7 @@ public class DeleteInvCommand extends BaseCommand {
 
     @Override
     public String getHelpText() {
-        return "deletes an Ender inventory";
-    }
-
-    @Override
-    public String getName() {
-        return "deleteinv";
+        return "views an Ender inventory";
     }
 
     @Override

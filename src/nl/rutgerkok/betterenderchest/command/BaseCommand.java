@@ -132,7 +132,9 @@ public abstract class BaseCommand implements Registration {
 	 *            Who used the command.
 	 * @return Whether he/she has permission to execute this command.
 	 */
-	public abstract boolean hasPermission(CommandSender sender);
+	public boolean hasPermission(CommandSender sender) {
+	    return sender.hasPermission("betterenderchest.command." + getName());
+	}
 
 	@Override
 	public boolean isAvailable() {

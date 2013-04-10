@@ -55,7 +55,8 @@ public class BetterEnderUtils {
 	 * @param newInventory
 	 *            The new inventory to copy the items to.
 	 * @param dropLocation
-	 *            The location to drop all the items that don't fit.
+	 *            The location to drop all the items that don't fit. Set it to
+	 *            null to destroy the items that don't fit.
 	 */
 	public static void copyContents(Inventory oldInventory, Inventory newInventory, Location dropLocation) {
 		int sizeNew = newInventory.getSize();
@@ -73,7 +74,9 @@ public class BetterEnderUtils {
 					HashMap<Integer, ItemStack> excess = newInventory.addItem(stack);
 					// Drop everything that doesn't fit
 					for (ItemStack excessStack : excess.values()) {
-						dropLocation.getWorld().dropItem(dropLocation, excessStack);
+					    if(dropLocation != null) {
+					        dropLocation.getWorld().dropItem(dropLocation, excessStack);
+					    }
 					}
 				}
 

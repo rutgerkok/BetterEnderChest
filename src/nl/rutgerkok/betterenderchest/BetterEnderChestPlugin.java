@@ -63,7 +63,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 	private Registry<BaseCommand> commands = new Registry<BaseCommand>();
 	private boolean compabilityMode;
 	private BetterEnderCache enderCache;
-	private BetterEnderEventHandler enderHandler;
 	private Registry<BetterEnderFileHandler> fileHandlers = new Registry<BetterEnderFileHandler>();
 	private BetterEnderWorldGroupManager groups;
 	private Registry<InventoryImporter> importers = new Registry<InventoryImporter>();
@@ -410,16 +409,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 		enderCache = new BetterEnderCache(this);
 
 		// EventHandler
-		enderHandler = new BetterEnderEventHandler(this);
-		getServer().getPluginManager().registerEvents(enderHandler, this);
-		for (int i = 0; i <= chestSizes.getUpgradeCount(); i++) {
-			int disabledSlot = chestSizes.getDisabledSlots(i);
-			if (disabledSlot > 0) {
-				// Register the slots event to disable those slots
-				getServer().getPluginManager().registerEvents(new BetterEnderSlotsHandler(), this);
-				break;
-			}
-		}
+		getServer().getPluginManager().registerEvents(new BetterEnderEventHandler(this), this);
+		getServer().getPluginManager().registerEvents(new BetterEnderSlotsHandler(), this);
 
 		// CommandHandler
 		commandManager = new BetterEnderCommandManager(this);
