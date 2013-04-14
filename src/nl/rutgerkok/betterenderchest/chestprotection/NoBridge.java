@@ -9,33 +9,33 @@ import org.bukkit.entity.Player;
  */
 public class NoBridge implements ProtectionBridge {
 
-	@Override
-	public boolean canAccess(Player player, Block block) {
-		return false;
-	}
+    @Override
+    public boolean canAccess(Player player, Block block) {
+        return false;
+    }
 
-	@Override
-	public String getName() {
-		return "no bridge";
-	}
+    @Override
+    public String getName() {
+        return "no bridge";
+    }
 
-	@Override
-	public String getOwnerName(Block block) {
-		return "";
-	}
+    @Override
+    public String getOwnerName(Block block) {
+        return "";
+    }
 
-	@Override
-	public boolean isAvailable() {
-		return true;
-	}
+    @Override
+    public boolean isAvailable() {
+        return true;
+    }
 
-	@Override
-	public boolean isFallback() {
-		return true;
-	}
+    @Override
+    public boolean isFallback() {
+        return true;
+    }
 
-	@Override
-	public boolean isProtected(Block block) {
-		return false;
-	}
+    @Override
+    public boolean isProtected(Block block) {
+        return false;
+    }
 }

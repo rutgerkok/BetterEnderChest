@@ -13,50 +13,50 @@ import org.bukkit.inventory.Inventory;
  * 
  */
 public abstract class BetterEnderFileHandler implements Registration {
-	protected final BetterEnderChest plugin;
+    protected final BetterEnderChest plugin;
 
-	public BetterEnderFileHandler(BetterEnderChest plugin) {
-		this.plugin = plugin;
-	}
+    public BetterEnderFileHandler(BetterEnderChest plugin) {
+        this.plugin = plugin;
+    }
 
-	/**
-	 * Gets the extension of this file format, like "dat" or "yml".
-	 * 
-	 * @return The extension of this file format.
-	 */
-	public abstract String getExtension();
+    /**
+     * Gets the extension of this file format, like "dat" or "yml".
+     * 
+     * @return The extension of this file format.
+     */
+    public abstract String getExtension();
 
-	@Override
-	public boolean isFallback() {
-		return false;
-	}
+    @Override
+    public boolean isFallback() {
+        return false;
+    }
 
-	/**
-	 * Loads an inventory from a file in a certain format. It should read or
-	 * guess the number of rows and disabled slots. The returned inventory must
-	 * have {@link BetterEnderInventoryHolder} as the holder. You only need to
-	 * use
-	 * 
-	 * @param file
-	 *            The file to read from.
-	 * @param inventoryName
-	 *            The name that the inventory should have. Use
-	 *            {@link BetterEnderIOLogic#getInventoryTitle(String)} to
-	 *            convert it to a title.
-	 * @return An inventory.
-	 */
-	public abstract Inventory load(File file, String inventoryName);
+    /**
+     * Loads an inventory from a file in a certain format. It should read or
+     * guess the number of rows and disabled slots. The returned inventory must
+     * have {@link BetterEnderInventoryHolder} as the holder. You only need to
+     * use
+     * 
+     * @param file
+     *            The file to read from.
+     * @param inventoryName
+     *            The name that the inventory should have. Use
+     *            {@link BetterEnderIOLogic#getInventoryTitle(String)} to
+     *            convert it to a title.
+     * @return An inventory.
+     */
+    public abstract Inventory load(File file, String inventoryName);
 
-	/**
-	 * Saves an inventory to a file. It should cache things like the number of
-	 * rows, the number of disabled slots and the inventory name. The holder of
-	 * this inventory name is always a {@link BetterEnderInventoryHolder}.
-	 * 
-	 * 
-	 * @param file
-	 *            The file to save to.
-	 * @param inventory
-	 *            The inventory to save.
-	 */
-	public abstract void save(File file, Inventory inventory);
+    /**
+     * Saves an inventory to a file. It should cache things like the number of
+     * rows, the number of disabled slots and the inventory name. The holder of
+     * this inventory name is always a {@link BetterEnderInventoryHolder}.
+     * 
+     * 
+     * @param file
+     *            The file to save to.
+     * @param inventory
+     *            The inventory to save.
+     */
+    public abstract void save(File file, Inventory inventory);
 }

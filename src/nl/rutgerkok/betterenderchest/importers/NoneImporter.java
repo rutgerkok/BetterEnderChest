@@ -12,24 +12,24 @@ import org.bukkit.inventory.Inventory;
  */
 public class NoneImporter extends InventoryImporter {
 
-	@Override
-	public String getName() {
-		return "none";
-	}
+    @Override
+    public String getName() {
+        return "none";
+    }
 
-	@Override
-	public Inventory importInventory(String inventoryName, String groupName, BetterEnderChest plugin) throws IOException {
-		return null;
-	}
+    @Override
+    public Inventory importInventory(String inventoryName, String groupName, BetterEnderChest plugin) throws IOException {
+        return null;
+    }
 
-	@Override
-	public boolean isAvailable() {
-		return true;
-	}
+    @Override
+    public boolean isAvailable() {
+        return true;
+    }
 
-	@Override
-	public boolean isFallback() {
-		return true;
-	}
+    @Override
+    public boolean isFallback() {
+        return true;
+    }
 
 }

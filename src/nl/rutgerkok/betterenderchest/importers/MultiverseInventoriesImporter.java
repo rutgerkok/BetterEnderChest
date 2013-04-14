@@ -20,95 +20,95 @@ import com.onarandombox.multiverseinventories.api.share.Sharables;
 
 public class MultiverseInventoriesImporter extends InventoryImporter {
 
-	@Override
-	public String getName() {
-		return "multiverse-inventories";
-	}
+    @Override
+    public String getName() {
+        return "multiverse-inventories";
+    }
 
-	@Override
-	public Inventory importInventory(final String inventoryName, String groupName, BetterEnderChest plugin) throws IOException {
-		if (plugin.isSpecialChest(inventoryName)) {
-			// Public chests and default chests cannot be imported.
-			return null;
-		}
+    @Override
+    public Inventory importInventory(final String inventoryName, String groupName, BetterEnderChest plugin) throws IOException {
+        if (plugin.isSpecialChest(inventoryName)) {
+            // Public chests and default chests cannot be imported.
+            return null;
+        }
 
-		// Get the plugin
-		MultiverseInventories multiverseInventories = (MultiverseInventories) Bukkit.getServer().getPluginManager()
-				.getPlugin("Multiverse-Inventories");
+        // Get the plugin
+        MultiverseInventories multiverseInventories = (MultiverseInventories) Bukkit.getServer().getPluginManager()
+                .getPlugin("Multiverse-Inventories");
 
-		// Make groupName case-correct
-		boolean foundMatchingGroup = false;
-		List<WorldGroupProfile> multiverseInventoriesGroups = multiverseInventories.getGroupManager().getGroups();
-		for (WorldGroupProfile group : multiverseInventoriesGroups) {
-			if (group.getName().equalsIgnoreCase(groupName)) {
-				groupName = group.getName();
-				foundMatchingGroup = true;
-				break;
-			}
-		}
+        // Make groupName case-correct
+        boolean foundMatchingGroup = false;
+        List<WorldGroupProfile> multiverseInventoriesGroups = multiverseInventories.getGroupManager().getGroups();
+        for (WorldGroupProfile group : multiverseInventoriesGroups) {
+            if (group.getName().equalsIgnoreCase(groupName)) {
+                groupName = group.getName();
+                foundMatchingGroup = true;
+                break;
+            }
+        }
 
-		// Check if a matching group has been found
-		if (!foundMatchingGroup) {
-			plugin.log("No matching Multiverse-Inventories group found for " + groupName + ". Cannot import " + inventoryName + ".",
-					Level.WARNING);
-			return null;
-		}
+        // Check if a matching group has been found
+        if (!foundMatchingGroup) {
+            plugin.log("No matching Multiverse-Inventories group found for " + groupName + ". Cannot import " + inventoryName + ".",
+                    Level.WARNING);
+            return null;
+        }
 
-		// Get the global profile of the player
-		GlobalProfile globalProfile = multiverseInventories.getData().getGlobalProfile(inventoryName);
+        // Get the global profile of the player
+        GlobalProfile globalProfile = multiverseInventories.getData().getGlobalProfile(inventoryName);
 
-		// If the player is in the current worldgroup, it should load from
-		// vanilla (Multiverse-Inventories would return an outdated inventory).
-		// If the player is in anthor worldgroup, it should load from
-		// Multiverse-Inventories.
-		if (multiverseInventories.getGroupManager().getGroup(groupName).containsWorld(globalProfile.getWorld())) {
-			// Player is in the current group, load from vanilla
-			return plugin.getInventoryImporters().getRegistration("vanilla").importInventory(inventoryName, groupName, plugin);
-		} else {
-			// Get the correct gamemode
-			ProfileType profileType;
-			if (multiverseInventories.getMVIConfig().isUsingGameModeProfiles()) {
-				// BetterEnderChest doesn't support seperation of gamemodes, so
-				// use the default gamemode of the server
-				profileType = ProfileTypes.forGameMode(Bukkit.getDefaultGameMode());
-			} else {
-				// Multiverse-Inventories gamemode seperation disabled, use
-				// SURVIVAL
-				profileType = ProfileTypes.SURVIVAL;
-			}
+        // If the player is in the current worldgroup, it should load from
+        // vanilla (Multiverse-Inventories would return an outdated inventory).
+        // If the player is in anthor worldgroup, it should load from
+        // Multiverse-Inventories.
+        if (multiverseInventories.getGroupManager().getGroup(groupName).containsWorld(globalProfile.getWorld())) {
+            // Player is in the current group, load from vanilla
+            return plugin.getInventoryImporters().getRegistration("vanilla").importInventory(inventoryName, groupName, plugin);
+        } else {
+            // Get the correct gamemode
+            ProfileType profileType;
+            if (multiverseInventories.getMVIConfig().isUsingGameModeProfiles()) {
+                // BetterEnderChest doesn't support seperation of gamemodes, so
+                // use the default gamemode of the server
+                profileType = ProfileTypes.forGameMode(Bukkit.getDefaultGameMode());
+            } else {
+                // Multiverse-Inventories gamemode seperation disabled, use
+                // SURVIVAL
+                profileType = ProfileTypes.SURVIVAL;
+            }
 
-			// Get the data
-			PlayerProfile playerData = multiverseInventories.getGroupManager().getGroup(groupName)
-					.getPlayerData(profileType, Bukkit.getOfflinePlayer(inventoryName));
+            // Get the data
+            PlayerProfile playerData = multiverseInventories.getGroupManager().getGroup(groupName)
+                    .getPlayerData(profileType, Bukkit.getOfflinePlayer(inventoryName));
 
-			// Return nothing if there is nothing
-			if (playerData == null) {
-				return null;
-			}
+            // Return nothing if there is nothing
+            if (playerData == null) {
+                return null;
+            }
 
-			// Get the item stacks
-			ItemStack[] stacks = playerData.get(Sharables.ENDER_CHEST);
+            // Get the item stacks
+            ItemStack[] stacks = playerData.get(Sharables.ENDER_CHEST);
 
-			// Return nothing if there is nothing
-			if (stacks == null || stacks.length == 0) {
-				return null;
-			}
+            // Return nothing if there is nothing
+            if (stacks == null || stacks.length == 0) {
+                return null;
+            }
 
-			// Add everything from Multiverse-Inventories to betterInventory
-			Inventory betterInventory = plugin.getSaveAndLoadSystem().loadEmptyInventory(inventoryName);
-			betterInventory.setContents(stacks);
-			return betterInventory;
-		}
-	}
+            // Add everything from Multiverse-Inventories to betterInventory
+            Inventory betterInventory = plugin.getSaveAndLoadSystem().loadEmptyInventory(inventoryName);
+            betterInventory.setContents(stacks);
+            return betterInventory;
+        }
+    }
 
-	@Override
-	public boolean isAvailable() {
-		return (Bukkit.getServer().getPluginManager().getPlugin("Multiverse-Inventories") != null);
-	}
+    @Override
+    public boolean isAvailable() {
+        return (Bukkit.getServer().getPluginManager().getPlugin("Multiverse-Inventories") != null);
+    }
 
-	@Override
-	public boolean isFallback() {
-		return false;
-	}
+    @Override
+    public boolean isFallback() {
+        return false;
+    }
 
 }

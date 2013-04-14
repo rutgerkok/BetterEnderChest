@@ -7,33 +7,33 @@ import org.yi.acru.bukkit.Lockette.Lockette;
 
 public class LocketteBridge implements ProtectionBridge {
 
-	@Override
-	public boolean canAccess(Player player, Block block) {
-		return Lockette.isUser(block, player.getName(), true);
-	}
+    @Override
+    public boolean canAccess(Player player, Block block) {
+        return Lockette.isUser(block, player.getName(), true);
+    }
 
-	@Override
-	public String getName() {
-		return "Lockette";
-	}
+    @Override
+    public String getName() {
+        return "Lockette";
+    }
 
-	@Override
-	public String getOwnerName(Block block) {
-		return Lockette.getProtectedOwner(block);
-	}
+    @Override
+    public String getOwnerName(Block block) {
+        return Lockette.getProtectedOwner(block);
+    }
 
-	@Override
-	public boolean isAvailable() {
-		return Bukkit.getPluginManager().getPlugin("Lockette") != null;
-	}
+    @Override
+    public boolean isAvailable() {
+        return Bukkit.getPluginManager().getPlugin("Lockette") != null;
+    }
 
-	@Override
-	public boolean isFallback() {
-		return false;
-	}
+    @Override
+    public boolean isFallback() {
+        return false;
+    }
 
-	@Override
-	public boolean isProtected(Block block) {
-		return Lockette.isProtected(block);
-	}
+    @Override
+    public boolean isProtected(Block block) {
+        return Lockette.isProtected(block);
+    }
 }

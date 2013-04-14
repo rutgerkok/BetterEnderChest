@@ -8,41 +8,41 @@ import org.bukkit.entity.Player;
 
 public class ReloadCommand extends BaseCommand {
 
-	public ReloadCommand(BetterEnderChest plugin) {
-		super(plugin);
-	}
+    public ReloadCommand(BetterEnderChest plugin) {
+        super(plugin);
+    }
 
-	@Override
-	public boolean execute(CommandSender sender, String[] args) {
+    @Override
+    public boolean execute(CommandSender sender, String[] args) {
 
-		sender.sendMessage(ChatColor.YELLOW + "Saving all inventories...");
+        sender.sendMessage(ChatColor.YELLOW + "Saving all inventories...");
 
-		// Unload all inventories
+        // Unload all inventories
 
-		// Log message
-		plugin.log("Configuration and chests reloaded.");
+        // Log message
+        plugin.log("Configuration and chests reloaded.");
 
-		// Print message if it's a player
-		if (sender instanceof Player) {
-			sender.sendMessage(ChatColor.YELLOW + "Configuration and chests reloaded.");
-		}
+        // Print message if it's a player
+        if (sender instanceof Player) {
+            sender.sendMessage(ChatColor.YELLOW + "Configuration and chests reloaded.");
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	@Override
-	public String getHelpText() {
-		return "reload the chests and the config.yml.";
-	}
+    @Override
+    public String getHelpText() {
+        return "reload the chests and the config.yml.";
+    }
 
-	@Override
-	public String getName() {
-		return "reload";
-	}
+    @Override
+    public String getName() {
+        return "reload";
+    }
 
-	@Override
-	public String getUsage() {
-		return "";
-	}
+    @Override
+    public String getUsage() {
+        return "";
+    }
 
 }
