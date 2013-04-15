@@ -4,6 +4,7 @@ import java.util.List;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.ImmutableInventory;
+import nl.rutgerkok.betterenderchest.Translations;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -44,7 +45,7 @@ public class ViewInvCommand extends BaseCommand {
                 sender.sendMessage(ChatColor.RED + "The group " + groupName + " doesn't exist.");
             }
         } else {
-            sender.sendMessage(ChatColor.RED + "The player " + inventoryName + " was never seen on this server.");
+            sender.sendMessage(ChatColor.RED + Translations.PLAYER_NOT_SEEN_ON_SERVER.toString(inventoryName));
         }
         return true;
     }

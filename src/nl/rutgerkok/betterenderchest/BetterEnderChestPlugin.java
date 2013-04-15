@@ -31,6 +31,7 @@ import nl.rutgerkok.betterenderchest.registry.Registry;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -146,10 +147,14 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         return groups;
     }
 
-    // Configuration - only saves the translations
+    // Configuration - saves and loads everything
     public void initConfig() {
+        // Reading config
+        reloadConfig();
+        FileConfiguration config = getConfig();
+
         // Reading translations
-        String language = getConfig().getString("BetterEnderChest.language", "en");
+        String language = config.getString("BetterEnderChest.language", "en");
         File translationsFile = new File(getDataFolder(), "translations-" + language + ".yml");
         YamlConfiguration translationSettings = null;
         if (translationsFile.exists()) {
@@ -158,140 +163,136 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         } else {
             translationSettings = new YamlConfiguration();
         }
-        getConfig().set("BetterEnderChest.language", language);
+        config.set("BetterEnderChest.language", language);
 
         // Save location
         String defaultSaveLocation = SaveLocation.getDefaultSaveLocation().toString();
-        String givenSaveLocation = getConfig().getString("BetterEnderChest.saveFolderLocation", defaultSaveLocation);
+        String givenSaveLocation = config.getString("BetterEnderChest.saveFolderLocation", defaultSaveLocation);
         SaveLocation saveLocation = SaveLocation.getSaveLocation(givenSaveLocation);
-
         if (saveLocation == null) {
             log(givenSaveLocation + " is not a valid save location. Defaulting to " + defaultSaveLocation + ".", Level.WARNING);
             saveLocation = SaveLocation.getDefaultSaveLocation();
         }
         chestSaveLocation = saveLocation.getFolder(this);
-        getConfig().set("BetterEnderChest.saveFolderLocation", saveLocation.toString());
+        config.set("BetterEnderChest.saveFolderLocation", saveLocation.toString());
 
         // ChestDrop
-        chestDrop = getConfig().getString("BetterEnderChest.drop", "OBSIDIAN");
+        chestDrop = config.getString("BetterEnderChest.drop", "OBSIDIAN");
         chestDrop = chestDrop.toUpperCase();
         if (!isValidChestDrop(chestDrop)) { // cannot understand value
             log("Could not understand the drop " + chestDrop + ", defaulting to OBSIDIAN", Level.WARNING);
             chestDrop = "OBSIDIAN";
         }
-        getConfig().set("BetterEnderChest.drop", chestDrop);
+        config.set("BetterEnderChest.drop", chestDrop);
 
         // ChestDropSilkTouch
-        chestDropSilkTouch = getConfig().getString("BetterEnderChest.dropSilkTouch", "ITSELF");
+        chestDropSilkTouch = config.getString("BetterEnderChest.dropSilkTouch", "ITSELF");
         chestDropSilkTouch = chestDropSilkTouch.toUpperCase();
         if (!isValidChestDrop(chestDropSilkTouch)) { // cannot understand value
             log("Could not understand the Silk Touch drop " + chestDropSilkTouch + ", defaulting to ITSELF", Level.WARNING);
             chestDropSilkTouch = "ITSELF";
         }
-        getConfig().set("BetterEnderChest.dropSilkTouch", chestDropSilkTouch);
+        config.set("BetterEnderChest.dropSilkTouch", chestDropSilkTouch);
 
         // ChestDropCreative
-        chestDropCreative = getConfig().getString("BetterEnderChest.dropCreative", "NOTHING");
+        chestDropCreative = config.getString("BetterEnderChest.dropCreative", "NOTHING");
         chestDropCreative = chestDropCreative.toUpperCase();
         if (!isValidChestDrop(chestDropCreative)) { // cannot understand value
             log("Could not understand the drop for Creative Mode " + chestDropCreative + ", defaulting to NOTHING", Level.WARNING);
             chestDropCreative = "NOTHING";
         }
-        getConfig().set("BetterEnderChest.dropCreative", chestDropCreative);
+        config.set("BetterEnderChest.dropCreative", chestDropCreative);
 
         // CompabilityMode
-        compabilityMode = getConfig().getBoolean("BetterEnderChest.enderChestCompabilityMode");
-        getConfig().set("BetterEnderChest.enderChestCompabilityMode", compabilityMode);
+        compabilityMode = config.getBoolean("BetterEnderChest.enderChestCompabilityMode");
+        config.set("BetterEnderChest.enderChestCompabilityMode", compabilityMode);
 
         // Autosave
         // ticks?
-        int autoSaveIntervalSeconds = getConfig().getInt("AutoSave.autoSaveIntervalSeconds", 300);
+        int autoSaveIntervalSeconds = config.getInt("AutoSave.autoSaveIntervalSeconds", 300);
         if (autoSaveIntervalSeconds < 120) {
             log("You need at least two minutes between each autosave. Changed it to two minutes.", Level.WARNING);
             autoSaveIntervalSeconds = 120;
         }
         if (autoSaveIntervalSeconds >= 60 * 15) {
-            log("You have set a long time between the autosaves. Remember that chest unloading is also done during the autosave.",
-                    Level.WARNING);
+            log("You have set a long time between the autosaves. Remember that chest unloading is also done during the autosave.", Level.WARNING);
         }
-        getConfig().set("AutoSave.autoSaveIntervalSeconds", autoSaveIntervalSeconds);
+        config.set("AutoSave.autoSaveIntervalSeconds", autoSaveIntervalSeconds);
         AutoSave.autoSaveIntervalTicks = autoSaveIntervalSeconds * 20;
         // saveTick every x ticks?
-        AutoSave.saveTickInterval = getConfig().getInt("AutoSave.saveTickIntervalTicks", AutoSave.saveTickInterval);
+        AutoSave.saveTickInterval = config.getInt("AutoSave.saveTickIntervalTicks", AutoSave.saveTickInterval);
         if (AutoSave.saveTickInterval < 1) {
             log("AutoSave.saveTickIntervalTicks was " + AutoSave.saveTickInterval + ". Changed it to 3.", Level.WARNING);
             AutoSave.saveTickInterval = 3;
         }
-        getConfig().set("AutoSave.saveTickIntervalTicks", AutoSave.saveTickInterval);
+        config.set("AutoSave.saveTickIntervalTicks", AutoSave.saveTickInterval);
         // chests per saveTick?
-        AutoSave.chestsPerSaveTick = getConfig().getInt("AutoSave.chestsPerSaveTick", 3);
+        AutoSave.chestsPerSaveTick = config.getInt("AutoSave.chestsPerSaveTick", 3);
         if (AutoSave.chestsPerSaveTick < 1) {
             log("You can't save " + AutoSave.chestsPerSaveTick + " chest per saveTick! Changed it to 3.", Level.WARNING);
             AutoSave.chestsPerSaveTick = 3;
         }
         if (AutoSave.chestsPerSaveTick > 10) {
-            log("You have set AutoSave.chestsPerSaveTick to " + AutoSave.chestsPerSaveTick
-                    + ". This could cause lag when it has to save a lot of chests.", Level.WARNING);
+            log("You have set AutoSave.chestsPerSaveTick to " + AutoSave.chestsPerSaveTick + ". This could cause lag when it has to save a lot of chests.", Level.WARNING);
         }
-        getConfig().set("AutoSave.chestsPerSaveTick", AutoSave.chestsPerSaveTick);
+        config.set("AutoSave.chestsPerSaveTick", AutoSave.chestsPerSaveTick);
         // enable message?
-        AutoSave.showAutoSaveMessage = getConfig().getBoolean("AutoSave.showAutoSaveMessage", false);
-        getConfig().set("AutoSave.showAutoSaveMessage", AutoSave.showAutoSaveMessage);
+        AutoSave.showAutoSaveMessage = config.getBoolean("AutoSave.showAutoSaveMessage", false);
+        config.set("AutoSave.showAutoSaveMessage", AutoSave.showAutoSaveMessage);
         // Private chests
-        rankUpgrades = getConfig().getInt("PrivateEnderChest.rankUpgrades", 2);
+        rankUpgrades = config.getInt("PrivateEnderChest.rankUpgrades", 2);
         if (rankUpgrades < 0 || rankUpgrades > 20) {
             log("The number of rank upgrades for the private chest was " + rankUpgrades + ". Changed it to 2.", Level.WARNING);
             rankUpgrades = 2;
         }
-        getConfig().set("PrivateEnderChest.rankUpgrades", rankUpgrades);
+        config.set("PrivateEnderChest.rankUpgrades", rankUpgrades);
         // slots?
         int[] playerChestSlots = new int[rankUpgrades + 1];
         for (int i = 0; i < playerChestSlots.length; i++) {
             // Correct setting
             String slotSettingName = i > 0 ? "PrivateEnderChest.slotsUpgrade" + i : "PrivateEnderChest.defaultSlots";
 
-            playerChestSlots[i] = getConfig().getInt(slotSettingName, 27);
+            playerChestSlots[i] = config.getInt(slotSettingName, 27);
 
             if (playerChestSlots[i] < 1 || playerChestSlots[i] > 20 * 9) {
                 log("The number of slots (upgrade nr. " + i + ") in the private chest was " + playerChestSlots[i] + "...", Level.WARNING);
                 log("Changed it to 27.", Level.WARNING);
                 playerChestSlots[i] = 27;
             }
-            getConfig().set(slotSettingName, playerChestSlots[i]);
+            config.set(slotSettingName, playerChestSlots[i]);
         }
 
         // Public chests
         // show for unprotected chests?
-        PublicChest.openOnOpeningUnprotectedChest = getConfig().getBoolean("PublicEnderChest.showOnOpeningUnprotectedChest", false);
-        getConfig().set("PublicEnderChest.showOnOpeningUnprotectedChest", PublicChest.openOnOpeningUnprotectedChest);
+        PublicChest.openOnOpeningUnprotectedChest = config.getBoolean("PublicEnderChest.showOnOpeningUnprotectedChest", false);
+        config.set("PublicEnderChest.showOnOpeningUnprotectedChest", PublicChest.openOnOpeningUnprotectedChest);
         // show for command?
-        PublicChest.openOnUsingCommand = getConfig().getBoolean("PublicEnderChest.showOnUsingCommand",
-                PublicChest.openOnOpeningUnprotectedChest);
-        getConfig().set("PublicEnderChest.showOnUsingCommand", PublicChest.openOnUsingCommand);
+        PublicChest.openOnUsingCommand = config.getBoolean("PublicEnderChest.showOnUsingCommand", PublicChest.openOnOpeningUnprotectedChest);
+        config.set("PublicEnderChest.showOnUsingCommand", PublicChest.openOnUsingCommand);
 
         // display name (moved to translations file)
-        String publicDisplayName = getConfig().getString("PublicEnderChest.name", null);
+        String publicDisplayName = config.getString("PublicEnderChest.name", null);
         if (publicDisplayName != null) {
             Translations.PUBLIC_CHEST_TITLE = new Translation("Ender Chest (" + publicDisplayName + ")");
-            getConfig().set("PublicEnderChest.name", null);
+            config.set("PublicEnderChest.name", null);
         }
         // close message (moved to translations file)
-        String publicCloseMessage = getConfig().getString("PublicEnderChest.closeMessage", null);
+        String publicCloseMessage = config.getString("PublicEnderChest.closeMessage", null);
         if (publicCloseMessage != null) {
             Translations.PUBLIC_CHEST_CLOSE_MESSAGE = new Translation(publicCloseMessage);
-            getConfig().set("PublicEnderChest.closeMessage", null);
+            config.set("PublicEnderChest.closeMessage", null);
         }
 
         // slots?
-        int publicChestSlots = getConfig().getInt("PublicEnderChest.defaultSlots", playerChestSlots[0]);
+        int publicChestSlots = config.getInt("PublicEnderChest.defaultSlots", playerChestSlots[0]);
         if (publicChestSlots < 1 || publicChestSlots > 20 * 9) {
             log("The number of slots in the public chest was " + publicChestSlots + "...", Level.WARNING);
             log("Changed it to 27.", Level.WARNING);
             publicChestSlots = 27;
         }
-        getConfig().set("PublicEnderChest.defaultRows", null); // Remove old //
-                                                               // setting
-        getConfig().set("PublicEnderChest.defaultSlots", publicChestSlots);
+        config.set("PublicEnderChest.defaultRows", null); // Remove old //
+                                                          // setting
+        config.set("PublicEnderChest.defaultSlots", publicChestSlots);
 
         // Set slots
         getChestSizes().setSizes(publicChestSlots, playerChestSlots);
@@ -304,6 +305,12 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             log("Cannot save translations!", Level.SEVERE);
             e.printStackTrace();
         }
+
+        // Groups
+        groups.initConfig();
+
+        // Save all settings
+        saveConfig();
     }
 
     @Override
@@ -397,8 +404,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         // Configuration
         groups = new BetterEnderWorldGroupManager(this);
         initConfig();
-        groups.initConfig();
-        saveConfig();
 
         // Save and load system
         if (saveAndLoadSystem == null) {
@@ -458,10 +463,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         getChestsCache().unloadAllInventories();
 
         // Reload the config
-        reloadConfig();
         initConfig();
-        getWorldGroupManager().initConfig();
-        saveConfig();
     }
 
     @Override

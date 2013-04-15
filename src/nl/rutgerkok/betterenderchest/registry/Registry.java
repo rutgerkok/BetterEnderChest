@@ -177,7 +177,7 @@ public class Registry<T extends Registration> {
     public T selectRegistration(T registration) {
         selectedIsInited = true;
 
-        if (registered != null && !registered.containsValue(registration)) {
+        if (registration != null && !registered.containsValue(registration)) {
             register(registration);
         }
         selected = registration;

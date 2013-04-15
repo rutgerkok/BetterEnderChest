@@ -63,7 +63,7 @@ public class OpenInvCommand extends BaseCommand {
                 }
             } else {
                 // Show error
-                sender.sendMessage(ChatColor.RED + "The player " + inventoryName + " was never seen on this server.");
+                sender.sendMessage(ChatColor.RED + Translations.PLAYER_NOT_SEEN_ON_SERVER.toString(inventoryName));
                 return true;
             }
         }

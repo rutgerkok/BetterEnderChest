@@ -116,7 +116,7 @@ public class NMSHandler_1_5_R2 extends NMSHandler {
             return null;
         } catch (IOException e) {
             // Read error
-            plugin.log("Could not load inventory " + inventoryName + ". Could not read file.", Level.SEVERE);
+            plugin.log("Could not load inventory " + inventoryName + ". " + "File corruption/permissions?", Level.SEVERE);
             e.printStackTrace();
             return null;
         } catch (Throwable e) {
@@ -137,43 +137,49 @@ public class NMSHandler_1_5_R2 extends NMSHandler {
 
     @Override
     public void saveInventoryAsNBT(File file, Inventory inventory) {
-        BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
-        NBTTagCompound baseTag = new NBTTagCompound();
-        NBTTagList inventoryTag = new NBTTagList();
-
-        // Chest metadata
-        baseTag.setByte("Rows", (byte) (inventory.getSize() / 9));
-        baseTag.setByte("DisabledSlots", (byte) holder.getDisabledSlots());
-        baseTag.setString("OwnerName", holder.getName());
-        baseTag.setByte("NameCaseCorrect", (byte) (holder.isOwnerNameCaseCorrect() ? 1 : 0));
-
-        // Add all items to the inventory tag
-        for (int i = 0; i < inventory.getSize(); i++) {
-            ItemStack stack = inventory.getItem(i);
-            if (stack != null && stack.getType() != Material.AIR) {
-                NBTTagCompound item = new NBTTagCompound();
-                item.setByte("Slot", (byte) i);
-                inventoryTag.add(CraftItemStack.asNMSCopy(stack).save(item));
-            }
-        }
-
-        // Add the inventory tag to the base tag
-        baseTag.set("Inventory", inventoryTag);
-
-        // Create the file and directories
-        file.getParentFile().mkdirs();
-
-        // Write inventory to it
         try {
+            BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
+            NBTTagCompound baseTag = new NBTTagCompound();
+            NBTTagList inventoryTag = new NBTTagList();
+
+            // Chest metadata
+            baseTag.setByte("Rows", (byte) (inventory.getSize() / 9));
+            baseTag.setByte("DisabledSlots", (byte) holder.getDisabledSlots());
+            baseTag.setString("OwnerName", holder.getName());
+            baseTag.setByte("NameCaseCorrect", (byte) (holder.isOwnerNameCaseCorrect() ? 1 : 0));
+
+            // Add all items to the inventory tag
+            for (int i = 0; i < inventory.getSize(); i++) {
+                ItemStack stack = inventory.getItem(i);
+                if (stack != null && stack.getType() != Material.AIR) {
+                    NBTTagCompound item = new NBTTagCompound();
+                    item.setByte("Slot", (byte) i);
+                    inventoryTag.add(CraftItemStack.asNMSCopy(stack).save(item));
+                }
+            }
+
+            // Add the inventory tag to the base tag
+            baseTag.set("Inventory", inventoryTag);
+
+            // Create the file and directories
+            file.getParentFile().mkdirs();
+
+            // Write inventory to it
             FileOutputStream stream;
             file.createNewFile();
             stream = new FileOutputStream(file);
             NBTCompressedStreamTools.a(baseTag, stream);
             stream.flush();
             stream.close();
+            throw new IOException("test");
         } catch (IOException e) {
-            plugin.log("Cannot save the inventory", Level.SEVERE);
+            plugin.log("Cannot save the inventory! Write error!", Level.SEVERE);
             e.printStackTrace();
+            // Disable this NMS handler, it is too dangerous to save more things
+            plugin.getNMSHandlers().selectRegistration(null);
+        } catch (Throwable t) {
+            plugin.log("Cannot save the inventory! Outdated plugin?", Level.SEVERE);
+            t.printStackTrace();
         }
     }
 
