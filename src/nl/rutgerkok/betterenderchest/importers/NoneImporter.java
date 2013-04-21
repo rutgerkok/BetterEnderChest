@@ -3,6 +3,7 @@ package nl.rutgerkok.betterenderchest.importers;
 import java.io.IOException;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.WorldGroup;
 
 import org.bukkit.inventory.Inventory;
 
@@ -18,7 +19,7 @@ public class NoneImporter extends InventoryImporter {
     }
 
     @Override
-    public Inventory importInventory(String inventoryName, String groupName, BetterEnderChest plugin) throws IOException {
+    public Inventory importInventory(String inventoryName, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
         return null;
     }
 

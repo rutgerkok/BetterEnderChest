@@ -10,6 +10,24 @@ public class Translation {
     }
 
     /**
+     * Gets the original string, with & and %.
+     * 
+     * @return The original string.
+     */
+    public String getOriginalString() {
+        return originalString;
+    }
+
+    /**
+     * Returns true if, and only if, the string length is 0.
+     * 
+     * @return If the string length is 0.
+     */
+    public boolean isEmpty() {
+        return originalString.isEmpty();
+    }
+
+    /**
      * Returns the string with proper ChatColors.
      * 
      * @return The string with proper ChatColors.
@@ -28,23 +46,5 @@ public class Translation {
      */
     public String toString(Object... args) {
         return ChatColor.translateAlternateColorCodes('&', String.format(originalString, args));
-    }
-
-    /**
-     * Gets the original string, with & and %.
-     * 
-     * @return The original string.
-     */
-    public String getOriginalString() {
-        return originalString;
-    }
-
-    /**
-     * Returns true if, and only if, the string length is 0.
-     * 
-     * @return If the string length is 0.
-     */
-    public boolean isEmpty() {
-        return originalString.isEmpty();
     }
 }

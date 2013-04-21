@@ -106,7 +106,7 @@ public class BetterEnderUtils {
         return new File(directory.getAbsolutePath(), files[0]);
     }
 
-    public static Inventory getCorrectlyResizedInventory(Player player, Inventory inventory, String groupName, BetterEnderChest plugin) {
+    public static Inventory getCorrectlyResizedInventory(Player player, Inventory inventory, WorldGroup group, BetterEnderChest plugin) {
         String inventoryName = ((BetterEnderInventoryHolder) inventory.getHolder()).getName();
         Inventory resizedInventory = getResizedEmptyInventory(player, inventory, inventoryName, plugin);
         if (resizedInventory != null) {
@@ -119,7 +119,7 @@ public class BetterEnderUtils {
             copyContents(inventory, resizedInventory, player.getLocation());
 
             // Goodbye to old inventory!
-            plugin.getChestsCache().setInventory(inventoryName, groupName, resizedInventory);
+            plugin.getChestsCache().setInventory(inventoryName, group, resizedInventory);
             inventory = resizedInventory;
         }
         return inventory;

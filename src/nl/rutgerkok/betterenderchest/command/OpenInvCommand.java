@@ -6,6 +6,7 @@ import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.PublicChest;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
 import nl.rutgerkok.betterenderchest.Translations;
+import nl.rutgerkok.betterenderchest.WorldGroup;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -16,6 +17,17 @@ public class OpenInvCommand extends BaseCommand {
 
     public OpenInvCommand(BetterEnderChest plugin) {
         super(plugin);
+    }
+
+    @Override
+    public List<String> autoComplete(CommandSender sender, String[] args) {
+        plugin.log("Start");
+        if (args.length == 1 && sender.hasPermission("betterenderchest.command.openinv.other")) {
+            plugin.log("Complete");
+            // Makes it return a player list
+            return null;
+        }
+        return super.autoComplete(sender, args);
     }
 
     @Override
@@ -32,7 +44,7 @@ public class OpenInvCommand extends BaseCommand {
 
         Player player = (Player) sender;
         String inventoryName = null;
-        String groupName = getGroupName(player);
+        WorldGroup group = getGroup(player);
 
         if (args.length == 0) {
             // Player wants to open his own Ender Chest
@@ -54,11 +66,11 @@ public class OpenInvCommand extends BaseCommand {
 
             // Execute the command
             inventoryName = getInventoryName(args[0]);
-            groupName = getGroupName(args[0], sender);
+            group = getGroup(args[0], sender);
             if (isValidPlayer(inventoryName)) {
-                if (!isValidGroup(groupName)) {
+                if (group == null) {
                     // Show error
-                    sender.sendMessage(ChatColor.RED + "The group " + groupName + " doesn't exist.");
+                    sender.sendMessage(ChatColor.RED + "That group doesn't exist.");
                     return true;
                 }
             } else {
@@ -69,10 +81,10 @@ public class OpenInvCommand extends BaseCommand {
         }
 
         // Get the inventory object
-        Inventory inventory = plugin.getChestsCache().getInventory(inventoryName, groupName);
+        Inventory inventory = plugin.getChestsCache().getInventory(inventoryName, group);
 
         // Check if the inventory should resize (up/downgrades)
-        inventory = BetterEnderUtils.getCorrectlyResizedInventory(player, inventory, groupName, plugin);
+        inventory = BetterEnderUtils.getCorrectlyResizedInventory(player, inventory, group, plugin);
 
         // Show the inventory
         player.openInventory(inventory);
@@ -98,17 +110,6 @@ public class OpenInvCommand extends BaseCommand {
     @Override
     public boolean hasPermission(CommandSender sender) {
         return (sender.hasPermission("betterenderchest.command.openinv.self") || sender.hasPermission("betterenderchest.command.openinv.other"));
-    }
-
-    @Override
-    public List<String> autoComplete(CommandSender sender, String[] args) {
-        plugin.log("Start");
-        if (args.length == 1 && sender.hasPermission("betterenderchest.command.openinv.other")) {
-            plugin.log("Complete");
-            // Makes it return a player list
-            return null;
-        }
-        return super.autoComplete(sender, args);
     }
 
 }

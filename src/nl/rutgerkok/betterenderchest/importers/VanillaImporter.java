@@ -6,6 +6,7 @@ import java.util.ListIterator;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
+import nl.rutgerkok.betterenderchest.WorldGroup;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -20,7 +21,7 @@ public class VanillaImporter extends InventoryImporter {
     }
 
     @Override
-    public Inventory importInventory(final String inventoryName, String groupName, BetterEnderChest plugin) throws IOException {
+    public Inventory importInventory(final String inventoryName, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
         Player player = Bukkit.getPlayerExact(inventoryName);
         Inventory betterEnderInventory;
         if (player == null) {

@@ -3,6 +3,7 @@ package nl.rutgerkok.betterenderchest.importers;
 import java.io.IOException;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.registry.Registration;
 
 import org.bukkit.inventory.Inventory;
@@ -17,10 +18,13 @@ public abstract class InventoryImporter implements Registration {
      * import.
      * 
      * @param inventoryName
-     * @param groupName
+     *            The name of the inventory.
+     * @param worldGroup
+     *            The group the inventory is in.
      * @param plugin
+     *            The BetterEnderChest plugin.
      * @return
      * @throws IOException
      */
-    public abstract Inventory importInventory(String inventoryName, String groupName, BetterEnderChest plugin) throws IOException;
+    public abstract Inventory importInventory(String inventoryName, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException;
 }

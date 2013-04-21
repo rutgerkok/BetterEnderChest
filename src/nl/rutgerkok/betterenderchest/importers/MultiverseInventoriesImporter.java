@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.WorldGroup;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
@@ -26,7 +27,9 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
     }
 
     @Override
-    public Inventory importInventory(final String inventoryName, String groupName, BetterEnderChest plugin) throws IOException {
+    public Inventory importInventory(final String inventoryName, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
+        String groupName = worldGroup.getGroupName();
+
         if (plugin.isSpecialChest(inventoryName)) {
             // Public chests and default chests cannot be imported.
             return null;
@@ -61,7 +64,7 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
         // Multiverse-Inventories.
         if (multiverseInventories.getGroupManager().getGroup(groupName).containsWorld(globalProfile.getWorld())) {
             // Player is in the current group, load from vanilla
-            return plugin.getInventoryImporters().getRegistration("vanilla").importInventory(inventoryName, groupName, plugin);
+            return plugin.getInventoryImporters().getRegistration("vanilla").importInventory(inventoryName, worldGroup, plugin);
         } else {
             // Get the correct gamemode
             ProfileType profileType;

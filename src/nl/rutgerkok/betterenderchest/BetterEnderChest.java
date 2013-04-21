@@ -14,7 +14,7 @@ import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.registry.Registry;
 
 import org.bukkit.Material;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.Plugin;
 
 public interface BetterEnderChest {
     /**
@@ -119,7 +119,7 @@ public interface BetterEnderChest {
      * 
      * @return The plugin that is implementing this interface.
      */
-    JavaPlugin getPlugin();
+    Plugin getPlugin();
 
     /**
      * Returns the plugin folder, in which the config.yml is stored. Chest are

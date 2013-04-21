@@ -2,6 +2,7 @@ package nl.rutgerkok.betterenderchest.command;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.Translations;
+import nl.rutgerkok.betterenderchest.WorldGroup;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -21,11 +22,11 @@ public class GiveCommand extends BaseCommand {
             return false;
 
         String inventoryName = getInventoryName(args[0]);
-        String groupName = getGroupName(args[0], sender);
+        WorldGroup group = getGroup(args[0], sender);
 
         if (isValidPlayer(inventoryName)) {
-            if (isValidGroup(groupName)) {
-                Inventory inventory = plugin.getChestsCache().getInventory(inventoryName, groupName);
+            if (group != null) {
+                Inventory inventory = plugin.getChestsCache().getInventory(inventoryName, group);
                 boolean valid = true;
 
                 Material material = Material.matchMaterial(args[1]);
@@ -66,7 +67,7 @@ public class GiveCommand extends BaseCommand {
                     sender.sendMessage("" + ChatColor.RED + args[1] + " is not a valid material!");
                 }
             } else {
-                sender.sendMessage(ChatColor.RED + "The group " + groupName + " doesn't exist!");
+                sender.sendMessage(ChatColor.RED + "The group " + group + " doesn't exist!");
             }
         } else {
             sender.sendMessage(ChatColor.RED + Translations.PLAYER_NOT_SEEN_ON_SERVER.toString(inventoryName));

@@ -11,15 +11,15 @@ import org.bukkit.inventory.InventoryHolder;
  */
 public class ImmutableInventory implements InventoryHolder {
 
-    @Override
-    public Inventory getInventory() {
-        return null;
-    }
-
     public static Inventory copyOf(Inventory inventory) {
         Inventory copy = Bukkit.createInventory(new ImmutableInventory(), inventory.getSize(), inventory.getTitle());
         BetterEnderUtils.copyContents(inventory, copy, null);
         return copy;
+    }
+
+    @Override
+    public Inventory getInventory() {
+        return null;
     }
 
 }

@@ -22,19 +22,6 @@ public class BetterEnderSlotsHandler implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onInventoryClick(InventoryClickEvent event) {
-        InventoryHolder inventoryHolder = event.getInventory().getHolder();
-        if (inventoryHolder instanceof BetterEnderInventoryHolder) {
-            handleDisabledSlots(event);
-            return;
-        }
-        if (inventoryHolder instanceof ImmutableInventory) {
-            event.setCancelled(true);
-            return;
-        }
-    }
-
     /**
      * Makes sure that players cannot put items in disabled slots. Assumes that
      * the inventory has {@link BetterEnderInventoryHolder} as the holder.
@@ -159,5 +146,18 @@ public class BetterEnderSlotsHandler implements Listener {
 
         // If we have reached this point, some items couldn't be added
         event.setCurrentItem(adding);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onInventoryClick(InventoryClickEvent event) {
+        InventoryHolder inventoryHolder = event.getInventory().getHolder();
+        if (inventoryHolder instanceof BetterEnderInventoryHolder) {
+            handleDisabledSlots(event);
+            return;
+        }
+        if (inventoryHolder instanceof ImmutableInventory) {
+            event.setCancelled(true);
+            return;
+        }
     }
 }

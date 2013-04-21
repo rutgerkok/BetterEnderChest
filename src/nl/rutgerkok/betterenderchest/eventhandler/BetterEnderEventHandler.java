@@ -8,6 +8,7 @@ import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.PublicChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
 import nl.rutgerkok.betterenderchest.Translations;
+import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestprotection.ProtectionBridge;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
@@ -182,7 +183,7 @@ public class BetterEnderEventHandler implements Listener {
             }
 
             // Get and show the inventory
-            Inventory inventory = chests.getInventory(inventoryName, plugin.getWorldGroupManager().getGroup(player.getWorld().getName()));
+            Inventory inventory = chests.getInventory(inventoryName, plugin.getWorldGroupManager().getGroupByWorld(player.getWorld()));
             player.openInventory(inventory);
         }
     }
@@ -202,7 +203,7 @@ public class BetterEnderEventHandler implements Listener {
         // Some objects
         Player player = event.getPlayer();
         Block clickedBlock = event.getClickedBlock();
-        String groupName = plugin.getWorldGroupManager().getGroup(player.getWorld().getName());
+        WorldGroup group = plugin.getWorldGroupManager().getGroupByWorld(player.getWorld());
         String inventoryName = "";
 
         // Are the chests enabled?
@@ -257,7 +258,7 @@ public class BetterEnderEventHandler implements Listener {
         }
 
         // Get the inventory object
-        Inventory inventory = BetterEnderUtils.getCorrectlyResizedInventory(player, chests.getInventory(inventoryName, groupName), groupName, plugin);
+        Inventory inventory = BetterEnderUtils.getCorrectlyResizedInventory(player, chests.getInventory(inventoryName, group), group, plugin);
 
         // Show the inventory
         player.openInventory(inventory);

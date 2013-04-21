@@ -7,6 +7,7 @@ import java.util.logging.Level;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
+import nl.rutgerkok.betterenderchest.WorldGroup;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -24,7 +25,9 @@ public class MultiInvImporter extends InventoryImporter {
     }
 
     @Override
-    public Inventory importInventory(final String inventoryName, String groupName, BetterEnderChest plugin) throws IOException {
+    public Inventory importInventory(final String inventoryName, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
+        String groupName = worldGroup.getGroupName();
+
         if (plugin.isSpecialChest(inventoryName)) {
             // Public chests and default chests cannot be imported.
             return null;

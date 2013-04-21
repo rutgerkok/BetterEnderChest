@@ -3,6 +3,7 @@ package nl.rutgerkok.betterenderchest.command;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
+import nl.rutgerkok.betterenderchest.WorldGroup;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -20,17 +21,17 @@ public class SwapInvCommand extends BaseCommand {
             return false;
 
         String inventoryName1 = getInventoryName(args[0]);
-        String groupName1 = getGroupName(args[0], sender);
+        WorldGroup group1 = getGroup(args[0], sender);
         String inventoryName2 = getInventoryName(args[1]);
-        String groupName2 = getGroupName(args[1], sender);
+        WorldGroup group2 = getGroup(args[1], sender);
 
         // Check if both players exist (separate conditions for separate error
         // messages)
         if (isValidPlayer(inventoryName1) && isValidPlayer(inventoryName2)) {
-            if (isValidGroup(groupName1) && isValidGroup(groupName2)) {
+            if (group1 != null && group2 != null) {
                 // Get the inventories
-                Inventory firstInventory = plugin.getChestsCache().getInventory(inventoryName1, groupName1);
-                Inventory secondInventory = plugin.getChestsCache().getInventory(inventoryName2, groupName2);
+                Inventory firstInventory = plugin.getChestsCache().getInventory(inventoryName1, group1);
+                Inventory secondInventory = plugin.getChestsCache().getInventory(inventoryName2, group2);
 
                 // Get rid of the viewers
                 BetterEnderUtils.closeInventory(firstInventory, ChatColor.YELLOW + "An admin just swapped this inventory with another.");
@@ -46,20 +47,20 @@ public class SwapInvCommand extends BaseCommand {
                 ((BetterEnderInventoryHolder) secondInventory.getHolder()).setOwnerName(firstOwnerName, firstOwnerNameCaseCorrect);
 
                 // Now swap them in the list
-                plugin.getChestsCache().setInventory(inventoryName1, groupName1, secondInventory);
-                plugin.getChestsCache().setInventory(inventoryName2, groupName2, firstInventory);
+                plugin.getChestsCache().setInventory(inventoryName1, group1, secondInventory);
+                plugin.getChestsCache().setInventory(inventoryName2, group2, firstInventory);
 
                 // Unload them (so that they will get reloaded with correct
                 // titles)
-                plugin.getChestsCache().saveInventory(inventoryName1, groupName1);
-                plugin.getChestsCache().unloadInventory(inventoryName1, groupName1);
-                plugin.getChestsCache().saveInventory(inventoryName2, groupName2);
-                plugin.getChestsCache().unloadInventory(inventoryName2, groupName2);
+                plugin.getChestsCache().saveInventory(inventoryName1, group1);
+                plugin.getChestsCache().unloadInventory(inventoryName1, group1);
+                plugin.getChestsCache().saveInventory(inventoryName2, group2);
+                plugin.getChestsCache().unloadInventory(inventoryName2, group2);
 
                 // Show a message
                 sender.sendMessage(ChatColor.GREEN + "Succesfully swapped inventories!");
             } else {
-                sender.sendMessage(ChatColor.RED + "One of the groups (" + groupName1 + " or " + groupName2 + ") is invalid.");
+                sender.sendMessage(ChatColor.RED + "One of the groups is invalid.");
             }
         } else {
             sender.sendMessage(ChatColor.RED + "One of the players (" + inventoryName1 + " or " + inventoryName2 + ") was never seen on this server.");

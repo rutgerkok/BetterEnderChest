@@ -5,6 +5,7 @@ import java.util.List;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.ImmutableInventory;
 import nl.rutgerkok.betterenderchest.Translations;
+import nl.rutgerkok.betterenderchest.WorldGroup;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -18,8 +19,12 @@ public class ViewInvCommand extends BaseCommand {
     }
 
     @Override
-    public String getName() {
-        return "viewinv";
+    public List<String> autoComplete(CommandSender sender, String[] args) {
+        if (args.length == 1) {
+            return null;
+        } else {
+            return super.autoComplete(sender, args);
+        }
     }
 
     @Override
@@ -34,15 +39,15 @@ public class ViewInvCommand extends BaseCommand {
 
         Player player = (Player) sender;
         String inventoryName = getInventoryName(args[0]);
-        String groupName = getGroupName(args[0], sender);
+        WorldGroup group = getGroup(args[0], sender);
 
         if (isValidPlayer(inventoryName)) {
-            if (isValidGroup(groupName)) {
+            if (group != null) {
                 // Get the inventory
-                Inventory inventory = plugin.getChestsCache().getInventory(inventoryName, groupName);
+                Inventory inventory = plugin.getChestsCache().getInventory(inventoryName, group);
                 player.openInventory(ImmutableInventory.copyOf(inventory));
             } else {
-                sender.sendMessage(ChatColor.RED + "The group " + groupName + " doesn't exist.");
+                sender.sendMessage(ChatColor.RED + "That group doesn't exist.");
             }
         } else {
             sender.sendMessage(ChatColor.RED + Translations.PLAYER_NOT_SEEN_ON_SERVER.toString(inventoryName));
@@ -56,17 +61,13 @@ public class ViewInvCommand extends BaseCommand {
     }
 
     @Override
-    public String getUsage() {
-        return "<player>";
+    public String getName() {
+        return "viewinv";
     }
 
     @Override
-    public List<String> autoComplete(CommandSender sender, String[] args) {
-        if (args.length == 1) {
-            return null;
-        } else {
-            return super.autoComplete(sender, args);
-        }
+    public String getUsage() {
+        return "<player>";
     }
 
 }
