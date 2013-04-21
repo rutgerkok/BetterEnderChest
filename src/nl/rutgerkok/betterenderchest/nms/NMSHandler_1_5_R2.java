@@ -171,7 +171,6 @@ public class NMSHandler_1_5_R2 extends NMSHandler {
             NBTCompressedStreamTools.a(baseTag, stream);
             stream.flush();
             stream.close();
-            throw new IOException("test");
         } catch (IOException e) {
             plugin.log("Cannot save the inventory! Write error!", Level.SEVERE);
             e.printStackTrace();
