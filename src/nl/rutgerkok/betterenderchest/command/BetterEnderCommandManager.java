@@ -137,11 +137,9 @@ public class BetterEnderCommandManager implements TabExecutor {
             if (command.hasPermission(sender)) {
                 if (!command.getUsage().equals("")) {
                     // Only display usage message if it has one
-                    sender.sendMessage(ChatColor.GOLD + "/" + label + " " + command.getName() + " " + command.getUsage() + ": "
-                            + ChatColor.WHITE + command.getHelpText());
+                    sender.sendMessage(ChatColor.GOLD + "/" + label + " " + command.getName() + " " + command.getUsage() + ": " + ChatColor.WHITE + command.getHelpText());
                 } else {
-                    sender.sendMessage(ChatColor.GOLD + "/" + label + " " + command.getName() + ": " + ChatColor.WHITE
-                            + command.getHelpText());
+                    sender.sendMessage(ChatColor.GOLD + "/" + label + " " + command.getName() + ": " + ChatColor.WHITE + command.getHelpText());
                 }
 
                 commandCount++;

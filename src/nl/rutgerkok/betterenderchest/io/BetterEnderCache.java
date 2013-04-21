@@ -58,8 +58,7 @@ public class BetterEnderCache {
             saveInventory(inventoryName, groupName);
 
             // Unloading
-            if (!inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME) && !Bukkit.getOfflinePlayer(inventoryName).isOnline()
-                    && inventory.getViewers().size() == 0) {
+            if (!inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME) && !Bukkit.getOfflinePlayer(inventoryName).isOnline() && inventory.getViewers().size() == 0) {
                 // This inventory is NOT the public chest, the owner is NOT
                 // online and NO ONE is viewing it
                 // So unload it
@@ -118,8 +117,7 @@ public class BetterEnderCache {
 
                 plugin.getSaveAndLoadSystem().saveInventory(inventory, inventoryName, groupName);
 
-                if (!inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME) && !Bukkit.getOfflinePlayer(inventoryName).isOnline()
-                        && inventory.getViewers().size() == 0) {
+                if (!inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME) && !Bukkit.getOfflinePlayer(inventoryName).isOnline() && inventory.getViewers().size() == 0) {
                     // This inventory is NOT the public chest, the owner is NOT
                     // online and NO ONE is viewing it
                     // So unload it

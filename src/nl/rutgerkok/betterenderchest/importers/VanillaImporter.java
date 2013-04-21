@@ -40,8 +40,7 @@ public class VanillaImporter extends InventoryImporter {
             }
 
             // Load it from the file (mainworld/players/playername.dat)
-            betterEnderInventory = plugin.getNMSHandlers().getSelectedRegistration()
-                    .loadNBTInventory(playerFile, inventoryName, "EnderItems");
+            betterEnderInventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(playerFile, inventoryName, "EnderItems");
             if (betterEnderInventory == null) {
                 // Cannot load the inventory from that file, most likely because
                 // it is empty
@@ -51,8 +50,7 @@ public class VanillaImporter extends InventoryImporter {
             // Online, load now
             Inventory vanillaInventory = player.getEnderChest();
             int inventoryRows = plugin.getSaveAndLoadSystem().getInventoryRows(inventoryName, vanillaInventory);
-            betterEnderInventory = plugin.getSaveAndLoadSystem().loadEmptyInventory(inventoryName, inventoryRows,
-                    plugin.getChestSizes().getDisabledSlots(player));
+            betterEnderInventory = plugin.getSaveAndLoadSystem().loadEmptyInventory(inventoryName, inventoryRows, plugin.getChestSizes().getDisabledSlots(player));
 
             // Copy all items
             ListIterator<ItemStack> copyIterator = vanillaInventory.iterator();

@@ -33,8 +33,7 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
         }
 
         // Get the plugin
-        MultiverseInventories multiverseInventories = (MultiverseInventories) Bukkit.getServer().getPluginManager()
-                .getPlugin("Multiverse-Inventories");
+        MultiverseInventories multiverseInventories = (MultiverseInventories) Bukkit.getServer().getPluginManager().getPlugin("Multiverse-Inventories");
 
         // Make groupName case-correct
         boolean foundMatchingGroup = false;
@@ -49,8 +48,7 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
 
         // Check if a matching group has been found
         if (!foundMatchingGroup) {
-            plugin.log("No matching Multiverse-Inventories group found for " + groupName + ". Cannot import " + inventoryName + ".",
-                    Level.WARNING);
+            plugin.log("No matching Multiverse-Inventories group found for " + groupName + ". Cannot import " + inventoryName + ".", Level.WARNING);
             return null;
         }
 
@@ -78,8 +76,7 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
             }
 
             // Get the data
-            PlayerProfile playerData = multiverseInventories.getGroupManager().getGroup(groupName)
-                    .getPlayerData(profileType, Bukkit.getOfflinePlayer(inventoryName));
+            PlayerProfile playerData = multiverseInventories.getGroupManager().getGroup(groupName).getPlayerData(profileType, Bukkit.getOfflinePlayer(inventoryName));
 
             // Return nothing if there is nothing
             if (playerData == null) {

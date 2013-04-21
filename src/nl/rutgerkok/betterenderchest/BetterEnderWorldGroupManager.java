@@ -85,8 +85,7 @@ public class BetterEnderWorldGroupManager {
                         // Always lowercase
                         if (worlds.containsKey(world.toLowerCase())) {
                             // ALARM! Duplicate world!
-                            plugin.log("The world " + world + " was added to two different groups! Removing it from the second.",
-                                    Level.WARNING);
+                            plugin.log("The world " + world + " was added to two different groups! Removing it from the second.", Level.WARNING);
                         } else {
                             // Add it to the world list
                             worlds.put(world.toLowerCase(), groupName.toLowerCase());

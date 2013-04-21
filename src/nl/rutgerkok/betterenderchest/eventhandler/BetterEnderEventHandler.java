@@ -75,8 +75,7 @@ public class BetterEnderEventHandler implements Listener {
             chestDropString = plugin.chestDropCreative;
         }
 
-        if (chestDropString.equals("EYE_OF_ENDER") || chestDropString.equals("ITSELF") || chestDropString.equals("ENDER_PEARL")
-                || chestDropString.equals("NOTHING")) {
+        if (chestDropString.equals("EYE_OF_ENDER") || chestDropString.equals("ITSELF") || chestDropString.equals("ENDER_PEARL") || chestDropString.equals("NOTHING")) {
             // Break it ourselves to prevent the default drop
             event.setCancelled(true);
             event.getBlock().setType(Material.AIR);
@@ -258,8 +257,7 @@ public class BetterEnderEventHandler implements Listener {
         }
 
         // Get the inventory object
-        Inventory inventory = BetterEnderUtils.getCorrectlyResizedInventory(player, chests.getInventory(inventoryName, groupName),
-                groupName, plugin);
+        Inventory inventory = BetterEnderUtils.getCorrectlyResizedInventory(player, chests.getInventory(inventoryName, groupName), groupName, plugin);
 
         // Show the inventory
         player.openInventory(inventory);

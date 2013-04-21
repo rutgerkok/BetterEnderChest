@@ -415,7 +415,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
         // EventHandler
         getServer().getPluginManager().registerEvents(new BetterEnderEventHandler(this), this);
-        getServer().getPluginManager().registerEvents(new BetterEnderSlotsHandler(), this);
+        getServer().getPluginManager().registerEvents(new BetterEnderSlotsHandler(this), this);
 
         // CommandHandler
         commandManager = new BetterEnderCommandManager(this);

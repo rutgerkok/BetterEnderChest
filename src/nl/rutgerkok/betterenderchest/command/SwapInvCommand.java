@@ -40,8 +40,7 @@ public class SwapInvCommand extends BaseCommand {
                 String firstOwnerName = ((BetterEnderInventoryHolder) firstInventory.getHolder()).getName();
                 boolean firstOwnerNameCaseCorrect = ((BetterEnderInventoryHolder) firstInventory.getHolder()).isOwnerNameCaseCorrect();
 
-                ((BetterEnderInventoryHolder) firstInventory.getHolder()).setOwnerName(
-                        ((BetterEnderInventoryHolder) secondInventory.getHolder()).getName(),
+                ((BetterEnderInventoryHolder) firstInventory.getHolder()).setOwnerName(((BetterEnderInventoryHolder) secondInventory.getHolder()).getName(),
                         ((BetterEnderInventoryHolder) secondInventory.getHolder()).isOwnerNameCaseCorrect());
 
                 ((BetterEnderInventoryHolder) secondInventory.getHolder()).setOwnerName(firstOwnerName, firstOwnerNameCaseCorrect);
@@ -63,8 +62,7 @@ public class SwapInvCommand extends BaseCommand {
                 sender.sendMessage(ChatColor.RED + "One of the groups (" + groupName1 + " or " + groupName2 + ") is invalid.");
             }
         } else {
-            sender.sendMessage(ChatColor.RED + "One of the players (" + inventoryName1 + " or " + inventoryName2
-                    + ") was never seen on this server.");
+            sender.sendMessage(ChatColor.RED + "One of the players (" + inventoryName1 + " or " + inventoryName2 + ") was never seen on this server.");
         }
         return true;
     }

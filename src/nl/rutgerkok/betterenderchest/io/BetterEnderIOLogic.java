@@ -38,12 +38,10 @@ public class BetterEnderIOLogic {
     public File getChestFile(String inventoryName, String groupName) {
         if (groupName.equals(BetterEnderChest.STANDARD_GROUP_NAME)) {
             // Default group? File isn't in a subdirectory.
-            return new File(plugin.getChestSaveLocation().getPath() + "/" + inventoryName + "."
-                    + plugin.getFileHandlers().getSelectedRegistration().getExtension());
+            return new File(plugin.getChestSaveLocation().getPath() + "/" + inventoryName + "." + plugin.getFileHandlers().getSelectedRegistration().getExtension());
         } else {
             // Another group? Save in subdirectory.
-            return new File(plugin.getChestSaveLocation().getPath() + "/" + groupName + "/" + inventoryName + "."
-                    + plugin.getFileHandlers().getSelectedRegistration().getExtension());
+            return new File(plugin.getChestSaveLocation().getPath() + "/" + groupName + "/" + inventoryName + "." + plugin.getFileHandlers().getSelectedRegistration().getExtension());
         }
     }
 
@@ -167,8 +165,7 @@ public class BetterEnderIOLogic {
         }
 
         // Return the inventory
-        return Bukkit.createInventory(new BetterEnderInventoryHolder(inventoryName, disabledSlots, caseCorrect), inventoryRows * 9,
-                getInventoryTitle(inventoryName));
+        return Bukkit.createInventory(new BetterEnderInventoryHolder(inventoryName, disabledSlots, caseCorrect), inventoryRows * 9, getInventoryTitle(inventoryName));
     }
 
     /**
@@ -202,8 +199,7 @@ public class BetterEnderIOLogic {
 
         // Try to import it from vanilla/some other plugin
         try {
-            Inventory importedInventory = plugin.getWorldGroupManager().getImport(groupName)
-                    .importInventory(inventoryName, groupName, plugin);
+            Inventory importedInventory = plugin.getWorldGroupManager().getImport(groupName).importInventory(inventoryName, groupName, plugin);
             if (importedInventory != null) {
                 return importedInventory;
             }

@@ -81,8 +81,7 @@ public class MultiInvImporter extends InventoryImporter {
             if (!multiInvFile.exists()) {
                 // File doesn't exist. Maybe there is a problem with those
                 // case-sensitive file systems?
-                multiInvFile = BetterEnderUtils
-                        .getCaseInsensitiveFile(new File(multiInvWorldsFolder, groupName), inventoryName + ".ec.yml");
+                multiInvFile = BetterEnderUtils.getCaseInsensitiveFile(new File(multiInvWorldsFolder, groupName), inventoryName + ".ec.yml");
                 if (multiInvFile == null) {
                     // Nope. File really doesn't exist. Return nothing.
                     return null;
@@ -96,8 +95,7 @@ public class MultiInvImporter extends InventoryImporter {
                 playerFile.load(multiInvFile);
             } catch (InvalidConfigurationException e) {
                 // Rethrow as IOException
-                throw new IOException("Cannot import from MultiINV: invalid chest file! (inventoryName: " + inventoryName + ", groupName:"
-                        + groupName + "");
+                throw new IOException("Cannot import from MultiINV: invalid chest file! (inventoryName: " + inventoryName + ", groupName:" + groupName + "");
             }
             String inventoryString = playerFile.getString(gameModeName, null);
             if (inventoryString == null || inventoryString == "") {

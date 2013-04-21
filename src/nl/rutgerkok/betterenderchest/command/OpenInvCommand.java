@@ -97,8 +97,7 @@ public class OpenInvCommand extends BaseCommand {
 
     @Override
     public boolean hasPermission(CommandSender sender) {
-        return (sender.hasPermission("betterenderchest.command.openinv.self") || sender
-                .hasPermission("betterenderchest.command.openinv.other"));
+        return (sender.hasPermission("betterenderchest.command.openinv.self") || sender.hasPermission("betterenderchest.command.openinv.other"));
     }
 
     @Override

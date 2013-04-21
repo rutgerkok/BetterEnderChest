@@ -45,8 +45,7 @@ public class WorldInventoriesImporter extends InventoryImporter {
 
         // Check if a matching group has been found
         if (worldInventoriesGroup == null) {
-            plugin.log("No matching WorldInventories group found for " + groupName + ". Cannot import " + inventoryName + ".",
-                    Level.WARNING);
+            plugin.log("No matching WorldInventories group found for " + groupName + ". Cannot import " + inventoryName + ".", Level.WARNING);
             return null;
         }
 
