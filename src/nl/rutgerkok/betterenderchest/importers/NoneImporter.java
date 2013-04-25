@@ -1,6 +1,7 @@
 package nl.rutgerkok.betterenderchest.importers;
 
 import java.io.IOException;
+import java.util.HashSet;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
@@ -19,17 +20,22 @@ public class NoneImporter extends InventoryImporter {
     }
 
     @Override
+    public Priority getPriority() {
+        return Priority.FALLBACK;
+    }
+
+    @Override
     public Inventory importInventory(String inventoryName, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
         return null;
     }
 
     @Override
-    public boolean isAvailable() {
-        return true;
+    public Iterable<WorldGroup> importWorldGroups(BetterEnderChest plugin) {
+        return new HashSet<WorldGroup>();
     }
 
     @Override
-    public boolean isFallback() {
+    public boolean isAvailable() {
         return true;
     }
 

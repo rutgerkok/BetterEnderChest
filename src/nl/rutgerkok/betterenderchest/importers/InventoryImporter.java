@@ -23,8 +23,20 @@ public abstract class InventoryImporter implements Registration {
      *            The group the inventory is in.
      * @param plugin
      *            The BetterEnderChest plugin.
-     * @return
+     * @return The inventory, or null if there was nothing to import.
      * @throws IOException
+     *             When something went wrong.
      */
     public abstract Inventory importInventory(String inventoryName, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException;
+
+    /**
+     * Imports all the groups from the other plugin, so that the group structure
+     * in BetterEnderChest is the same as in the other plugin. The inventories
+     * are not imported yet.
+     * 
+     * @param plugin
+     *            The BetterEnderChest plugin.
+     * @return The world groups.
+     */
+    public abstract Iterable<WorldGroup> importWorldGroups(BetterEnderChest plugin);
 }

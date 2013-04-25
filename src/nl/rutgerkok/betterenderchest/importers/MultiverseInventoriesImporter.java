@@ -1,7 +1,9 @@
 package nl.rutgerkok.betterenderchest.importers;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
@@ -24,6 +26,11 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
     @Override
     public String getName() {
         return "multiverse-inventories";
+    }
+
+    @Override
+    public Priority getPriority() {
+        return Priority.NORMAL;
     }
 
     @Override
@@ -102,13 +109,22 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
     }
 
     @Override
-    public boolean isAvailable() {
-        return (Bukkit.getServer().getPluginManager().getPlugin("Multiverse-Inventories") != null);
+    public Iterable<WorldGroup> importWorldGroups(BetterEnderChest plugin) {
+        Set<WorldGroup> becGroups = new HashSet<WorldGroup>();
+        MultiverseInventories multiverseInventories = (MultiverseInventories) Bukkit.getServer().getPluginManager().getPlugin("Multiverse-Inventories");
+        for (WorldGroupProfile miGroup : multiverseInventories.getGroupManager().getGroups()) {
+            // Convert each group config
+            WorldGroup worldGroup = new WorldGroup(miGroup.getName());
+            worldGroup.setInventoryImporter(this);
+            worldGroup.addWorlds(miGroup.getWorlds());
+            becGroups.add(worldGroup);
+        }
+        return becGroups;
     }
 
     @Override
-    public boolean isFallback() {
-        return false;
+    public boolean isAvailable() {
+        return (Bukkit.getServer().getPluginManager().getPlugin("Multiverse-Inventories") != null);
     }
 
 }

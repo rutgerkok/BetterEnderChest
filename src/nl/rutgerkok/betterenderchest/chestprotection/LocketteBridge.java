@@ -23,13 +23,13 @@ public class LocketteBridge implements ProtectionBridge {
     }
 
     @Override
-    public boolean isAvailable() {
-        return Bukkit.getPluginManager().getPlugin("Lockette") != null;
+    public Priority getPriority() {
+        return Priority.NORMAL;
     }
 
     @Override
-    public boolean isFallback() {
-        return false;
+    public boolean isAvailable() {
+        return Bukkit.getPluginManager().getPlugin("Lockette") != null;
     }
 
     @Override

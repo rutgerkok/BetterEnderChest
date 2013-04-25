@@ -2,7 +2,9 @@ package nl.rutgerkok.betterenderchest.importers;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.ListIterator;
+import java.util.Set;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
@@ -18,6 +20,11 @@ public class VanillaImporter extends InventoryImporter {
     @Override
     public String getName() {
         return "vanilla";
+    }
+
+    @Override
+    public Priority getPriority() {
+        return Priority.LOW;
     }
 
     @Override
@@ -82,14 +89,19 @@ public class VanillaImporter extends InventoryImporter {
     }
 
     @Override
-    public boolean isAvailable() {
-        // Vanilla is always available
-        return true;
+    public Iterable<WorldGroup> importWorldGroups(BetterEnderChest plugin) {
+        Set<WorldGroup> worldGroups = new HashSet<WorldGroup>();
+        WorldGroup standardGroup = new WorldGroup(BetterEnderChest.STANDARD_GROUP_NAME);
+        standardGroup.setInventoryImporter(this);
+        standardGroup.addWorlds(Bukkit.getWorlds());
+        worldGroups.add(standardGroup);
+        return worldGroups;
     }
 
     @Override
-    public boolean isFallback() {
-        return false;
+    public boolean isAvailable() {
+        // Vanilla is always available
+        return true;
     }
 
 }

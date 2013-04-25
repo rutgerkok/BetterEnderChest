@@ -3,6 +3,7 @@ package nl.rutgerkok.betterenderchest.io;
 import java.io.File;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.registry.Registration;
 
 import org.bukkit.inventory.Inventory;
@@ -27,8 +28,8 @@ public abstract class BetterEnderFileHandler implements Registration {
     public abstract String getExtension();
 
     @Override
-    public boolean isFallback() {
-        return false;
+    public Priority getPriority() {
+        return Priority.NORMAL;
     }
 
     /**

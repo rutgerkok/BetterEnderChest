@@ -1,8 +1,13 @@
 name: BetterEnderChest
 main: nl.rutgerkok.betterenderchest.BetterEnderChestPlugin
 version: '2.0-pre1'
-author: Rutger Kok
-softdepend: [Lockette, LWC]
+author: 'Rutger Kok'
+softdepend:
+- 'Lockette'
+- 'LWC'
+- 'Multiverse-Inventories'
+- 'MultiInv'
+- 'WorldInventories'
 commands:
   betterenderchest:
     description: Administrative command for BetterEnderChest.

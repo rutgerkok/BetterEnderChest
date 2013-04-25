@@ -41,21 +41,6 @@ public class Registry<T extends Registration> {
     }
 
     /**
-     * Returns an available fallback, for example for when
-     * {@link #getAvailableRegistration(String)} returned null.
-     * 
-     * @return An available fallback.
-     */
-    public T getAvailableFallback() {
-        for (T registration : registered.values()) {
-            if (registration.isAvailable() && registration.isFallback()) {
-                return registration;
-            }
-        }
-        return null;
-    }
-
-    /**
      * Returns an available registration. Registrations that return false in
      * their {@link Registration#isAvailable()} won't be returned. Returns null
      * if no registration is found. Registration can be a fallback.
@@ -120,7 +105,8 @@ public class Registry<T extends Registration> {
      * Selects the first registration that is available, so it can later be
      * retrieved with {@link #getSelectedRegistration()}. Can be used for
      * registers where usually one registration is available (NMS handlers, for
-     * example). Non-fallbacks will take priority over fallback registrations.
+     * example). Registrations with a higher priority over registrations with a
+     * lower priority.
      * 
      * @return The just selected registration, or null if no registration was
      *         available.
@@ -128,25 +114,45 @@ public class Registry<T extends Registration> {
     public T selectAvailableRegistration() {
         selectedIsInited = true;
 
-        T selected = null;
-        T fallback = null;
+        T selectedHigh = null;
+        T selectedNormal = null;
+        T selectedLow = null;
+        T selectedFallback = null;
         for (T registration : registered.values()) {
             if (registration.isAvailable()) {
-                if (registration.isFallback()) {
-                    fallback = registration;
-                } else {
-                    selected = registration;
+                switch (registration.getPriority()) {
+                    case FALLBACK:
+                        selectedFallback = registration;
+                        break;
+                    case HIGH:
+                        selectedHigh = registration;
+                        break;
+                    case LOW:
+                        selectedLow = registration;
+                        break;
+                    case NORMAL:
+                        selectedNormal = registration;
+                        break;
                 }
-                break;
             }
         }
-        if (selected != null) {
-            this.selected = selected;
+        if (selectedHigh != null) {
+            selected = selectedHigh;
             return selected;
-        } else {
-            this.selected = fallback;
-            return fallback;
         }
+        if (selectedNormal != null) {
+            selected = selectedNormal;
+            return selected;
+        }
+        if (selectedLow != null) {
+            selected = selectedLow;
+            return selected;
+        }
+        if (selectedFallback != null) {
+            selected = selectedFallback;
+            return selected;
+        }
+        return selected;
     }
 
     /**

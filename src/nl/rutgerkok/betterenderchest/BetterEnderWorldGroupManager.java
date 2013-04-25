@@ -7,7 +7,6 @@ import java.util.logging.Level;
 
 import nl.rutgerkok.betterenderchest.importers.InventoryImporter;
 
-import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -20,7 +19,6 @@ public class BetterEnderWorldGroupManager {
     public BetterEnderWorldGroupManager(BetterEnderChestPlugin plugin) {
         this.plugin = plugin;
         groups = new HashMap<String, WorldGroup>();
-        groups.put(BetterEnderChest.STANDARD_GROUP_NAME, new WorldGroup(plugin, BetterEnderChest.STANDARD_GROUP_NAME));
     }
 
     /**
@@ -70,7 +68,7 @@ public class BetterEnderWorldGroupManager {
         WorldGroup group = groups.get(groupName);
         if (group == null) {
             // Create the group if it doesn't exist yet
-            group = new WorldGroup(plugin, groupName);
+            group = new WorldGroup(groupName);
             groups.put(groupName, group);
         }
         return group;
@@ -93,7 +91,6 @@ public class BetterEnderWorldGroupManager {
         // Clear the list (in case we're reloading)
         if (groups.size() > 1) {
             groups.clear();
-            groups.put(BetterEnderChest.STANDARD_GROUP_NAME, new WorldGroup(plugin, BetterEnderChest.STANDARD_GROUP_NAME));
         }
         // Read and write
         readConfig();
@@ -121,12 +118,36 @@ public class BetterEnderWorldGroupManager {
      * Stores all groups in the groups map.
      */
     public void readConfig() {
-        // Get the Groups
-        ConfigurationSection section = plugin.getConfig().getConfigurationSection("Groups");
+        // Read the imports
+        ConfigurationSection importSection = plugin.getConfig().getConfigurationSection("Imports");
+        if (importSection == null) {
+            // No Imports section found, use defaults
+            InventoryImporter importer = plugin.getInventoryImporters().selectAvailableRegistration();
+            for (WorldGroup group : importer.importWorldGroups(plugin)) {
+                groups.put(group.getGroupName(), group);
+            }
+        } else {
+            // Add all imports to the list
+            for (String groupName : importSection.getValues(false).keySet()) {
+                // Get the importer
+                String importerName = importSection.getString(groupName).toLowerCase();
+                InventoryImporter importer = plugin.getInventoryImporters().getAvailableRegistration(importerName);
+                if (importer == null) {
+                    plugin.log("The import " + importerName + " for the group " + groupName + " isn't a valid importer.", Level.WARNING);
+                    continue;
+                }
 
-        // Check if the "Groups" section exists
+                // Get the group and add it to the list
+                WorldGroup group = getOrCreateWorldGroup(groupName);
+                group.setInventoryImporter(importer);
+            }
+        }
+
+        // Read the groups
+        ConfigurationSection section = plugin.getConfig().getConfigurationSection("Groups");
         if (section != null) {
-            // If yes, loop through all the groups inside the Groups section.
+            // Only read this if the group section exists
+            // Loop through all the groups inside the Groups section.
             for (String groupName : section.getValues(false).keySet()) {
                 // Get all worlds for each group
                 List<String> worldsInGroup = section.getStringList(groupName);
@@ -141,44 +162,6 @@ public class BetterEnderWorldGroupManager {
                 }
             }
         }
-
-        // Add all missing world to the default group (might fail, because other
-        // plugins can load after BetterEnderChest)
-        for (World world : Bukkit.getWorlds()) {
-            String worldName = world.getName();
-            if (!isWorldListed(worldName)) {
-                // Found missing world! Add it to the default group.
-                groups.get(BetterEnderChest.STANDARD_GROUP_NAME).addWorld(world);
-            }
-        }
-
-        // Read the imports
-        ConfigurationSection importSection = plugin.getConfig().getConfigurationSection("Imports");
-        if (importSection == null) {
-            // No Imports section found
-            // Set the default group to vanilla.
-            groups.get(BetterEnderChest.STANDARD_GROUP_NAME).setInventoryImporter(plugin.getInventoryImporters().getSelectedRegistration());
-        } else {
-            // Add all the importing groups to the list
-            for (String groupName : importSection.getValues(false).keySet()) {
-                // Get the importer
-                String importerName = importSection.getString(groupName).toLowerCase();
-                InventoryImporter importer = plugin.getInventoryImporters().getAvailableRegistration(importerName);
-                if (importer == null) {
-                    plugin.log("The import " + importerName + " for the group " + groupName + " isn't a valid importer.", Level.WARNING);
-                    continue;
-                }
-
-                // Get the group
-                WorldGroup group = groups.get(groupName.toLowerCase());
-                if (group == null) {
-                    plugin.log("The import " + importerName + " was added for the non-existant group " + groupName + "!", Level.WARNING);
-                }
-
-                // If it's valid, add it to the list
-                group.setInventoryImporter(importer);
-            }
-        }
     }
 
     /**
@@ -191,8 +174,10 @@ public class BetterEnderWorldGroupManager {
         config.set("Imports", null);
 
         for (WorldGroup group : groups.values()) {
-            config.set("Groups." + group.getGroupName(), group.getWorldNames());
-            config.set("Imports." + group.getGroupName(), group.getInventoryImporter().getName());
+            if (group.hasWorlds()) {
+                config.set("Groups." + group.getGroupName(), group.getWorldNames());
+                config.set("Imports." + group.getGroupName(), group.getInventoryImporter().getName());
+            }
         }
     }
 

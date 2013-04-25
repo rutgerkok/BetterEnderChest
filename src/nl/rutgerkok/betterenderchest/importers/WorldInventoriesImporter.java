@@ -2,7 +2,9 @@ package nl.rutgerkok.betterenderchest.importers;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 import me.drayshak.WorldInventories.Group;
@@ -24,6 +26,11 @@ public class WorldInventoriesImporter extends InventoryImporter {
     }
 
     @Override
+    public Priority getPriority() {
+        return Priority.NORMAL;
+    }
+
+    @Override
     public Inventory importInventory(final String inventoryName, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
         String groupName = worldGroup.getGroupName();
 
@@ -37,7 +44,7 @@ public class WorldInventoriesImporter extends InventoryImporter {
 
         // Get the group
         Group worldInventoriesGroup = null;
-        List<Group> worldInventoriesGroups = worldInventories.getGroups();
+        List<Group> worldInventoriesGroups = WorldInventories.groups;
         for (Group group : worldInventoriesGroups) {
             if (group.getName().equalsIgnoreCase(groupName)) {
                 groupName = group.getName();
@@ -74,13 +81,21 @@ public class WorldInventoriesImporter extends InventoryImporter {
     }
 
     @Override
-    public boolean isAvailable() {
-        return (Bukkit.getServer().getPluginManager().getPlugin("WorldInventories") != null);
+    public Iterable<WorldGroup> importWorldGroups(BetterEnderChest plugin) {
+        Set<WorldGroup> becGroups = new HashSet<WorldGroup>();
+        for (Group wiGroup : WorldInventories.groups) {
+            // Convert each group config
+            WorldGroup becGroup = new WorldGroup(wiGroup.getName());
+            becGroup.setInventoryImporter(this);
+            becGroup.addWorlds(wiGroup.getWorlds());
+            becGroups.add(becGroup);
+        }
+        return becGroups;
     }
 
     @Override
-    public boolean isFallback() {
-        return false;
+    public boolean isAvailable() {
+        return (Bukkit.getServer().getPluginManager().getPlugin("WorldInventories") != null);
     }
 
     @SuppressWarnings("unchecked")

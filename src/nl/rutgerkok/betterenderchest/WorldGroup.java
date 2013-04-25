@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import nl.rutgerkok.betterenderchest.importers.InventoryImporter;
+import nl.rutgerkok.betterenderchest.importers.NoneImporter;
 
 import org.bukkit.World;
 
@@ -19,9 +20,9 @@ public class WorldGroup {
     private InventoryImporter inventoryImporter;
     private Set<String> worlds;
 
-    public WorldGroup(BetterEnderChest plugin, String groupName) {
+    public WorldGroup(String groupName) {
         worlds = new HashSet<String>();
-        inventoryImporter = plugin.getInventoryImporters().getAvailableFallback();
+        inventoryImporter = new NoneImporter();
         if (inventoryImporter == null) {
             throw new RuntimeException("No fallback importer found! Please report! This is a bug!");
         }
@@ -46,6 +47,24 @@ public class WorldGroup {
      */
     public void addWorld(World world) {
         addWorld(world.getName());
+    }
+
+    /**
+     * Adda all worlds to this group.
+     * 
+     * @param worlds
+     *            Either Iterable<String> or Iterable<World>.
+     */
+    public void addWorlds(Iterable<?> worlds) {
+        for (Object world : worlds) {
+            if (world instanceof World) {
+                addWorld((World) world);
+            } else if (world instanceof String) {
+                addWorld((String) world);
+            } else {
+                throw new IllegalArgumentException("addWorlds only accepts Iterable<String> and Iterable<World>");
+            }
+        }
     }
 
     @Override

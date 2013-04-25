@@ -24,8 +24,8 @@ public abstract class NMSHandler implements Registration {
     public abstract void closeEnderChest(Location location);
 
     @Override
-    public boolean isFallback() {
-        return false;
+    public Priority getPriority() {
+        return Priority.NORMAL;
     }
 
     /**

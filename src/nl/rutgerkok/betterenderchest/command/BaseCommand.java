@@ -132,6 +132,11 @@ public abstract class BaseCommand implements Registration {
         }
     }
 
+    @Override
+    public Priority getPriority() {
+        return Priority.NORMAL;
+    }
+
     /**
      * Returns how to use the command, like "[player] [item] [count] [damage]".
      * If there are no arguments, it should return an empty string.
@@ -155,11 +160,6 @@ public abstract class BaseCommand implements Registration {
     @Override
     public boolean isAvailable() {
         return true; // Commands are always available.
-    }
-
-    @Override
-    public boolean isFallback() {
-        return false;
     }
 
     /**

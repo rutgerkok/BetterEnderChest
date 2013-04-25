@@ -26,6 +26,7 @@ import nl.rutgerkok.betterenderchest.io.BetterEnderNBTFileHandler;
 import nl.rutgerkok.betterenderchest.io.SaveLocation;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler_1_5_R2;
+import nl.rutgerkok.betterenderchest.registry.Registration;
 import nl.rutgerkok.betterenderchest.registry.Registry;
 
 import org.bukkit.Bukkit;
@@ -375,7 +376,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         protectionBridges.register(new LWCBridge());
         protectionBridges.register(new NoBridge());
         ProtectionBridge protectionBridge = protectionBridges.selectAvailableRegistration();
-        if (!protectionBridge.isFallback()) {
+        if (!protectionBridge.getPriority().equals(Registration.Priority.FALLBACK)) {
             log("Linked to " + protectionBridge.getName());
         } else {
             log("Not linked to a block protection plugin like Lockette or LWC.");

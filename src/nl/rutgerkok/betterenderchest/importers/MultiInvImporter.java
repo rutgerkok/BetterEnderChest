@@ -3,6 +3,8 @@ package nl.rutgerkok.betterenderchest.importers;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
@@ -22,6 +24,11 @@ public class MultiInvImporter extends InventoryImporter {
     @Override
     public String getName() {
         return "multiinv";
+    }
+
+    @Override
+    public Priority getPriority() {
+        return Priority.NORMAL;
     }
 
     @Override
@@ -124,13 +131,28 @@ public class MultiInvImporter extends InventoryImporter {
     }
 
     @Override
-    public boolean isAvailable() {
-        return (Bukkit.getServer().getPluginManager().getPlugin("MultiInv") != null);
+    public Iterable<WorldGroup> importWorldGroups(BetterEnderChest plugin) {
+        Map<String, WorldGroup> becGroups = new HashMap<String, WorldGroup>();
+        for (Entry<String, String> miGroup : MIYamlFiles.getGroups().entrySet()) {
+            String worldName = miGroup.getKey();
+            // Used as key in becGroups, so has to be lowercase
+            String groupName = miGroup.getValue().toLowerCase();
+            WorldGroup becGroup = becGroups.get(groupName);
+            if (becGroup == null) {
+                // Add the group if it doesn't exist yet
+                becGroup = new WorldGroup(groupName);
+                becGroup.setInventoryImporter(this);
+                becGroups.put(groupName, becGroup);
+            }
+            // Add the world to the correct BetterEnderChest group
+            becGroup.addWorld(worldName);
+        }
+        return becGroups.values();
     }
 
     @Override
-    public boolean isFallback() {
-        return false;
+    public boolean isAvailable() {
+        return (Bukkit.getServer().getPluginManager().getPlugin("MultiInv") != null);
     }
 
 }

@@ -25,12 +25,12 @@ public class NoBridge implements ProtectionBridge {
     }
 
     @Override
-    public boolean isAvailable() {
-        return true;
+    public Priority getPriority() {
+        return Priority.FALLBACK;
     }
 
     @Override
-    public boolean isFallback() {
+    public boolean isAvailable() {
         return true;
     }
 
