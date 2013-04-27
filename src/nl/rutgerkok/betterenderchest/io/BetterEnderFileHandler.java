@@ -10,7 +10,7 @@ import org.bukkit.inventory.Inventory;
 
 /**
  * Represents a file format. If you aren't saving to a file, you can better
- * override {@link BetterEnderIOLogic} and/or {@link BetterEnderCache}.
+ * override {@link BetterEnderIOLogic} and/or {@link BetterEnderFileCache}.
  * 
  */
 public abstract class BetterEnderFileHandler implements Registration {

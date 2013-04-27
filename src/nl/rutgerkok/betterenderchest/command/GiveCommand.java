@@ -1,8 +1,11 @@
 package nl.rutgerkok.betterenderchest.command;
 
+import java.util.Map;
+
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.Translations;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.io.Consumer;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -17,7 +20,7 @@ public class GiveCommand extends BaseCommand {
     }
 
     @Override
-    public boolean execute(CommandSender sender, String[] args) {
+    public boolean execute(final CommandSender sender, final String[] args) {
         if (args.length < 2)
             return false;
 
@@ -26,12 +29,10 @@ public class GiveCommand extends BaseCommand {
 
         if (isValidPlayer(inventoryName)) {
             if (group != null) {
-                Inventory inventory = plugin.getChestsCache().getInventory(inventoryName, group);
                 boolean valid = true;
+                final Material material = Material.matchMaterial(args[1]);
 
-                Material material = Material.matchMaterial(args[1]);
                 if (material != null) {
-
                     // Count
                     int count = 1;
                     if (args.length >= 3) { // set the count
@@ -48,10 +49,10 @@ public class GiveCommand extends BaseCommand {
                     }
 
                     // Damage value
-                    byte damage = 0;
+                    short damage = 0;
                     if (args.length >= 4) { // Set the damage
                         try {
-                            damage = Byte.parseByte(args[3]);
+                            damage = Short.parseShort(args[3]);
                         } catch (NumberFormatException e) {
                             sender.sendMessage("" + ChatColor.RED + args[3] + " is not a valid damage value!");
                             valid = false;
@@ -60,8 +61,20 @@ public class GiveCommand extends BaseCommand {
 
                     // Add the item to the inventory
                     if (valid) {
-                        inventory.addItem(new ItemStack(material, count, damage));
-                        sender.sendMessage("Item added to the Ender inventory of " + args[0]);
+
+                        final ItemStack adding = new ItemStack(material, count, damage);
+                        plugin.getChestsCache().getInventory(inventoryName, group, new Consumer<Inventory>() {
+                            @Override
+                            public void consume(Inventory inventory) {
+
+                                Map<Integer, ItemStack> overflow = inventory.addItem(adding);
+                                if (overflow.isEmpty()) {
+                                    sender.sendMessage("Item added to the Ender Chest inventory of " + args[0]);
+                                } else {
+                                    sender.sendMessage("One or more items have not been added; Ender Chest inventory of " + args[0] + " was full.");
+                                }
+                            }
+                        });
                     }
                 } else {
                     sender.sendMessage("" + ChatColor.RED + args[1] + " is not a valid material!");

@@ -11,6 +11,7 @@ import nl.rutgerkok.betterenderchest.Translations;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestprotection.ProtectionBridge;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
+import nl.rutgerkok.betterenderchest.io.Consumer;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 
 import org.bukkit.ChatColor;
@@ -151,7 +152,7 @@ public class BetterEnderEventHandler implements Listener {
             return;
         }
 
-        Player player = (Player) event.getPlayer();
+        final Player player = (Player) event.getPlayer();
 
         // Check for vanilla Ender Chests
         if (plugin.getCompabilityMode() && event.getInventory().getType().equals(InventoryType.ENDER_CHEST)) {
@@ -183,8 +184,12 @@ public class BetterEnderEventHandler implements Listener {
             }
 
             // Get and show the inventory
-            Inventory inventory = chests.getInventory(inventoryName, plugin.getWorldGroupManager().getGroupByWorld(player.getWorld()));
-            player.openInventory(inventory);
+            chests.getInventory(inventoryName, plugin.getWorldGroupManager().getGroupByWorld(player.getWorld()), new Consumer<Inventory>() {
+                @Override
+                public void consume(Inventory inventory) {
+                    player.openInventory(inventory);
+                }
+            });
         }
     }
 
@@ -201,9 +206,9 @@ public class BetterEnderEventHandler implements Listener {
         event.setCancelled(true);
 
         // Some objects
-        Player player = event.getPlayer();
-        Block clickedBlock = event.getClickedBlock();
-        WorldGroup group = plugin.getWorldGroupManager().getGroupByWorld(player.getWorld());
+        final Player player = event.getPlayer();
+        final Block clickedBlock = event.getClickedBlock();
+        final WorldGroup group = plugin.getWorldGroupManager().getGroupByWorld(player.getWorld());
         String inventoryName = "";
 
         // Are the chests enabled?
@@ -258,17 +263,22 @@ public class BetterEnderEventHandler implements Listener {
         }
 
         // Get the inventory object
-        Inventory inventory = BetterEnderUtils.getCorrectlyResizedInventory(player, chests.getInventory(inventoryName, group), group, plugin);
+        chests.getInventory(inventoryName, group, new Consumer<Inventory>() {
+            @Override
+            public void consume(Inventory inventory) {
+                inventory = BetterEnderUtils.getCorrectlyResizedInventory(player, inventory, group, plugin);
 
-        // Show the inventory
-        player.openInventory(inventory);
+                // Show the inventory
+                player.openInventory(inventory);
 
-        // Play animation, store location
-        NMSHandler nmsHandler = plugin.getNMSHandlers().getSelectedRegistration();
-        if (nmsHandler != null) {
-            nmsHandler.openEnderChest(clickedBlock.getLocation());
-        }
-        BetterEnderUtils.setLastEnderChestOpeningLocation(player, clickedBlock.getLocation(), plugin);
+                // Play animation, store location
+                NMSHandler nmsHandler = plugin.getNMSHandlers().getSelectedRegistration();
+                if (nmsHandler != null) {
+                    nmsHandler.openEnderChest(clickedBlock.getLocation());
+                }
+                BetterEnderUtils.setLastEnderChestOpeningLocation(player, clickedBlock.getLocation(), plugin);
+            }
+        });
     }
 
     /*

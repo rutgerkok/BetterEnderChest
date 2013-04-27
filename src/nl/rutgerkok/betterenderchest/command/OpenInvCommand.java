@@ -7,6 +7,7 @@ import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.PublicChest;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
 import nl.rutgerkok.betterenderchest.Translations;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.io.Consumer;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -42,7 +43,7 @@ public class OpenInvCommand extends BaseCommand {
             return true;
         }
 
-        Player player = (Player) sender;
+        final Player player = (Player) sender;
         String inventoryName = null;
         WorldGroup group = getGroup(player);
 
@@ -81,13 +82,18 @@ public class OpenInvCommand extends BaseCommand {
         }
 
         // Get the inventory object
-        Inventory inventory = plugin.getChestsCache().getInventory(inventoryName, group);
+        final WorldGroup finalGroup = group;
+        plugin.getChestsCache().getInventory(inventoryName, group, new Consumer<Inventory>() {
 
-        // Check if the inventory should resize (up/downgrades)
-        inventory = BetterEnderUtils.getCorrectlyResizedInventory(player, inventory, group, plugin);
+            @Override
+            public void consume(Inventory inventory) {
+                // Check if the inventory should resize (up/downgrades)
+                inventory = BetterEnderUtils.getCorrectlyResizedInventory(player, inventory, finalGroup, plugin);
 
-        // Show the inventory
-        player.openInventory(inventory);
+                // Show the inventory
+                player.openInventory(inventory);
+            }
+        });
 
         return true;
     }

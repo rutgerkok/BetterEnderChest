@@ -6,6 +6,7 @@ import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.ImmutableInventory;
 import nl.rutgerkok.betterenderchest.Translations;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.io.Consumer;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -37,15 +38,20 @@ public class ViewInvCommand extends BaseCommand {
             return true;
         }
 
-        Player player = (Player) sender;
+        final Player player = (Player) sender;
         String inventoryName = getInventoryName(args[0]);
         WorldGroup group = getGroup(args[0], sender);
 
         if (isValidPlayer(inventoryName)) {
             if (group != null) {
                 // Get the inventory
-                Inventory inventory = plugin.getChestsCache().getInventory(inventoryName, group);
-                player.openInventory(ImmutableInventory.copyOf(inventory));
+                plugin.getChestsCache().getInventory(inventoryName, group, new Consumer<Inventory>() {
+                    @Override
+                    public void consume(Inventory inventory) {
+                        player.openInventory(ImmutableInventory.copyOf(inventory));
+                    }
+                });
+
             } else {
                 sender.sendMessage(ChatColor.RED + "That group doesn't exist.");
             }

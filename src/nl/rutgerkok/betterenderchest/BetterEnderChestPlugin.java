@@ -20,6 +20,7 @@ import nl.rutgerkok.betterenderchest.importers.NoneImporter;
 import nl.rutgerkok.betterenderchest.importers.VanillaImporter;
 import nl.rutgerkok.betterenderchest.importers.WorldInventoriesImporter;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
+import nl.rutgerkok.betterenderchest.io.BetterEnderFileCache;
 import nl.rutgerkok.betterenderchest.io.BetterEnderFileHandler;
 import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
 import nl.rutgerkok.betterenderchest.io.BetterEnderNBTFileHandler;
@@ -412,7 +413,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         }
 
         // Chests storage
-        enderCache = new BetterEnderCache(this);
+        enderCache = new BetterEnderFileCache(this);
 
         // EventHandler
         getServer().getPluginManager().registerEvents(new BetterEnderEventHandler(this), this);

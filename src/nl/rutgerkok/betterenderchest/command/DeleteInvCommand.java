@@ -6,13 +6,13 @@ import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
 import nl.rutgerkok.betterenderchest.Translations;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.io.Consumer;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.Inventory;
 
 public class DeleteInvCommand extends BaseCommand {
-
     public DeleteInvCommand(BetterEnderChest plugin) {
         super(plugin);
     }
@@ -27,7 +27,7 @@ public class DeleteInvCommand extends BaseCommand {
     }
 
     @Override
-    public boolean execute(CommandSender sender, String[] args) {
+    public boolean execute(final CommandSender sender, String[] args) {
         if (args.length != 1)
             return false; // Wrong argument count!
 
@@ -37,14 +37,17 @@ public class DeleteInvCommand extends BaseCommand {
         if (isValidPlayer(inventoryName)) {
             if (group != null) {
                 // Get the inventory
-                Inventory inventory = plugin.getChestsCache().getInventory(inventoryName, group);
+                plugin.getChestsCache().getInventory(inventoryName, group, new Consumer<Inventory>() {
+                    @Override
+                    public void consume(Inventory inventory) {
+                        // Remove all the viewers
+                        BetterEnderUtils.closeInventory(inventory, ChatColor.YELLOW + "An admin just deleted this inventory.");
 
-                // Remove all the viewers
-                BetterEnderUtils.closeInventory(inventory, ChatColor.YELLOW + "An admin just deleted this inventory.");
-
-                // Clear it.
-                inventory.clear();
-                sender.sendMessage(ChatColor.GREEN + "Succesfully removed inventory!");
+                        // Clear it.
+                        inventory.clear();
+                        sender.sendMessage(ChatColor.GREEN + "Succesfully removed inventory!");
+                    }
+                });
             } else {
                 sender.sendMessage(ChatColor.RED + "The group in which the inventory should be was not found.");
             }
