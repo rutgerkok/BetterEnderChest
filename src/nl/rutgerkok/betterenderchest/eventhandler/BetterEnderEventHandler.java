@@ -42,7 +42,7 @@ public class BetterEnderEventHandler implements Listener {
 
     public BetterEnderEventHandler(BetterEnderChestPlugin plugin) {
         this.plugin = plugin;
-        chests = plugin.getChestsCache();
+        chests = plugin.getChestCache();
     }
 
     // Change the drop and check if the chest can be broken

@@ -119,7 +119,7 @@ public class BetterEnderUtils {
             copyContents(inventory, resizedInventory, player.getLocation());
 
             // Goodbye to old inventory!
-            plugin.getChestsCache().setInventory(inventoryName, group, resizedInventory);
+            plugin.getChestCache().setInventory(inventoryName, group, resizedInventory);
             inventory = resizedInventory;
         }
         return inventory;

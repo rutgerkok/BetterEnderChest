@@ -62,9 +62,7 @@ public class BetterEnderFileCache implements BetterEnderCache {
         }
     }
 
-    /**
-     * Called whenever the plugin should save some chest
-     */
+    @Override
     public void autoSaveTick() {
         for (int i = 0; i < AutoSave.chestsPerSaveTick; i++) {
             if (saveQueue.isEmpty())

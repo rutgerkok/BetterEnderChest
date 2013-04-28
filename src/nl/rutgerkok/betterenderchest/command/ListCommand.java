@@ -13,7 +13,7 @@ public class ListCommand extends BaseCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         sender.sendMessage("All currently loaded inventories:");
-        sender.sendMessage(plugin.getChestsCache().toString());
+        sender.sendMessage(plugin.getChestCache().toString());
         return true;
     }
 

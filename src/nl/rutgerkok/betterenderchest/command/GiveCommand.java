@@ -63,7 +63,7 @@ public class GiveCommand extends BaseCommand {
                     if (valid) {
 
                         final ItemStack adding = new ItemStack(material, count, damage);
-                        plugin.getChestsCache().getInventory(inventoryName, group, new Consumer<Inventory>() {
+                        plugin.getChestCache().getInventory(inventoryName, group, new Consumer<Inventory>() {
                             @Override
                             public void consume(Inventory inventory) {
 

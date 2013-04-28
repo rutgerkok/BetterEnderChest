@@ -14,40 +14,69 @@ BetterEnderChest is a plugin for CraftBukkit (Minecraft server mod) that adds fu
 
 ## Get someone's inventory
 
-    Inventory enderInventory = betterEnderChest.getEnderChests().getInventory(player.getName(), String groupName);
+    betterEnderChest.getChestsCache().getInventory(inventoryName, group, new Consumer<Inventory>() {
+            @Override
+            public void consume(Inventory inventory) {
+                // Do your stuff here
+            }
+        });
 
-There are some other methods available in the same class to save and unload inventories. This method always returns an inventory, if it doesn't exist it is created. So check the groupName and inventoryName!
+getInventory always gives an inventory back, even if no player with that name exists. So make sure to check the player name!
 
-## Get the group name
+There are some other methods available in the same class to save and unload inventories.
+
+## Get the world group
 
 The group name should always be lowercase (only important if the player entered the group name).
 
-Get it by world:
+You can get the group a world is in with the following method:
 
-    String groupName = betterEnderChest.getGroups().getGroup(String worldName);
+    WorldGroup group = betterEnderChest.getWorldGroupManager().getGroupByWorld(World world);
+    
+or, if you just have the world name (name is case-insensitive):
 
-Check if the group exists:
+    WorldGroup group = betterEnderChest.getWorldGroupManager().getGroupByWorldName(String worldName);
+    
+Both will always return a group. It will return the standard group if the world is not placed in a group.
 
-    if(betterEnderChest.getGroups().groupExists(String groupName))
+You can also get the group by the group name. This method will return null if the group doesn't exist. Group name is case-insensitve.
 
-There is a static BetterEnderChest.defaultGroupName, but it is just the group name that saves directly in the /chests, instead of in some subfolder. The server owner may have removed the default group. To get the group of te main world you can better do:
+    WorldGroup group = betterEnderChest.getWorldGroupManager().getGroupByGroupName(String groupName);
+
+There is a static BetterEnderChest.STANDARD_GROUP_NAME, but it is just the group name that saves directly in the /chests, instead of in some subfolder. The server owner may have removed the default group. To get the group of te main world you can better do:
 
     World mainWorld = Bukkit.getServer().getWorlds().get(0);
-    String mainGroupName = betterEnderChest.getGroups().getGroup(mainWorld.getName());
+    WorldGroup mainGroup = betterEnderChest.getGroups().getGroupByWorld(mainWorld);
 
 ## Get public/default chest
-    Inventory publicEnderInventory = betterEnderChest.getEnderChests().getInventory(BetterEnderChest.publicChestName, String groupName);
-    Inventory defaultEnderInventory = betterEnderChest.getEnderChests().getInventory(BetterEnderChest.defaultChestName, String groupName);
+The public and default chest aren't that different from standard chests, they just have a special name.
 
-Changes to the default chest get used by new chests as soon as the chest is saved. If you can't wait for the autosave, just call the save function manually:
-
-    betterEnderChest.getEnderChests().saveInventory(BetterEnderChest.defaultChestName, String groupName);
+    Inventory publicEnderInventory = betterEnderChest.getEnderChests().getInventory(BetterEnderChest.PUBLIC_CHEST_NAME, WorldGroup group);
+    Inventory defaultEnderInventory = betterEnderChest.getEnderChests().getInventory(BetterEnderChest.DEFAULT_CHEST_NAME, WorldGroup group);
 
 ## Add a /betterenderchest subcommand
-Create a new class that inherits [BaseCommand](https://github.com/rutgerkok/BetterEnderChest/blob/master/src/nl/rutgerkok/BetterEnderChest/commands/BaseCommand.java). Then  you can add your command to the betterEnderChest.getCommandHandler().commands hashmap<String commandName, BaseCommand command>.
+Create a new class that inherits [BaseCommand](https://github.com/rutgerkok/BetterEnderChest/blob/master/src/nl/rutgerkok/BetterEnderChest/commands/BaseCommand.java). Then you can add your command using 
 
-Don't forget to look at the utility methods in CommandHandler, which can parse the [groupName/]inventoryName syntax. There is also a method available that checks whether the player name can be used.
+    betterEnderChest.getCommands().register(BaseCommand command);
 
-## Compliling
+Don't forget to look at the utility methods in BaseCommand, which can parse the [groupName/]inventoryName syntax. There is also a method available that checks whether the player name can be used.
 
-You need to complie against CraftBukkit, Lockette, LWC, MultiInv, World Inventories and Multiverse-Inventories.
+## Compiling BetterEnderChest
+You need to complie against CraftBukkit, Lockette, LWC, MultiInv, WorldInventories and Multiverse-Inventories.
+
+## Pull request
+Pull requests are greatly appreciated. Just try to follow my formatting (spaces, not tabs and opening brackets on the same line) but don't worry too much if you mess up the style: I'll fix it after the request is pulled. If you are about to implement something big, please send me a PM on BukkitDev, so that we can discuss it first.
+
+## License
+The BSD License
+
+Copyright (c) 2013, Rutger Kok
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. Neither the name of the owner nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

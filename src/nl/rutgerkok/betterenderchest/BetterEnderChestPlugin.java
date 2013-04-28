@@ -75,6 +75,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private BetterEnderIOLogic saveAndLoadSystem;
 
     @Override
+    public BetterEnderCache getChestCache() {
+        return enderCache;
+    }
+
+    @Override
     public Material getChestMaterial() {
         return chestMaterial;
     }
@@ -82,11 +87,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public File getChestSaveLocation() {
         return chestSaveLocation;
-    }
-
-    @Override
-    public BetterEnderCache getChestsCache() {
-        return enderCache;
     }
 
     @Override
@@ -461,21 +461,21 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
                 player.sendMessage(ChatColor.YELLOW + "An admin reloaded all Ender Chests!");
             }
         }
-        getChestsCache().saveAllInventories();
-        getChestsCache().unloadAllInventories();
+        getChestCache().saveAllInventories();
+        getChestCache().unloadAllInventories();
 
         // Reload the config
         initConfig();
     }
 
     @Override
-    public void setChestMaterial(Material material) {
-        this.chestMaterial = material;
+    public void setChestCache(BetterEnderCache cache) {
+        enderCache = cache;
     }
 
     @Override
-    public void setChestsCache(BetterEnderCache cache) {
-        enderCache = cache;
+    public void setChestMaterial(Material material) {
+        this.chestMaterial = material;
     }
 
     @Override

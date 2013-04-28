@@ -83,7 +83,7 @@ public class OpenInvCommand extends BaseCommand {
 
         // Get the inventory object
         final WorldGroup finalGroup = group;
-        plugin.getChestsCache().getInventory(inventoryName, group, new Consumer<Inventory>() {
+        plugin.getChestCache().getInventory(inventoryName, group, new Consumer<Inventory>() {
 
             @Override
             public void consume(Inventory inventory) {

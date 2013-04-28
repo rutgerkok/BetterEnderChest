@@ -45,7 +45,7 @@ public class ViewInvCommand extends BaseCommand {
         if (isValidPlayer(inventoryName)) {
             if (group != null) {
                 // Get the inventory
-                plugin.getChestsCache().getInventory(inventoryName, group, new Consumer<Inventory>() {
+                plugin.getChestCache().getInventory(inventoryName, group, new Consumer<Inventory>() {
                     @Override
                     public void consume(Inventory inventory) {
                         player.openInventory(ImmutableInventory.copyOf(inventory));

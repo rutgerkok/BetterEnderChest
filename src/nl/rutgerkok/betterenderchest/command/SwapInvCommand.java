@@ -31,10 +31,10 @@ public class SwapInvCommand extends BaseCommand {
         if (isValidPlayer(inventoryName1) && isValidPlayer(inventoryName2)) {
             if (group1 != null && group2 != null) {
                 // Get the inventories
-                plugin.getChestsCache().getInventory(inventoryName1, group1, new Consumer<Inventory>() {
+                plugin.getChestCache().getInventory(inventoryName1, group1, new Consumer<Inventory>() {
                     @Override
                     public void consume(final Inventory firstInventory) {
-                        plugin.getChestsCache().getInventory(inventoryName2, group2, new Consumer<Inventory>() {
+                        plugin.getChestCache().getInventory(inventoryName2, group2, new Consumer<Inventory>() {
                             @Override
                             public void consume(Inventory secondInventory) {
                                 swap(sender, group1, group2, firstInventory, secondInventory);
@@ -86,14 +86,14 @@ public class SwapInvCommand extends BaseCommand {
         ((BetterEnderInventoryHolder) secondInventory.getHolder()).setOwnerName(firstOwnerName, firstOwnerNameCaseCorrect);
 
         // Now swap them in the list
-        plugin.getChestsCache().setInventory(inventoryName1, group1, secondInventory);
-        plugin.getChestsCache().setInventory(inventoryName2, group2, firstInventory);
+        plugin.getChestCache().setInventory(inventoryName1, group1, secondInventory);
+        plugin.getChestCache().setInventory(inventoryName2, group2, firstInventory);
 
         // Unload them (so that they will get reloaded with correct titles)
-        plugin.getChestsCache().saveInventory(inventoryName1, group1);
-        plugin.getChestsCache().unloadInventory(inventoryName1, group1);
-        plugin.getChestsCache().saveInventory(inventoryName2, group2);
-        plugin.getChestsCache().unloadInventory(inventoryName2, group2);
+        plugin.getChestCache().saveInventory(inventoryName1, group1);
+        plugin.getChestCache().unloadInventory(inventoryName1, group1);
+        plugin.getChestCache().saveInventory(inventoryName2, group2);
+        plugin.getChestCache().unloadInventory(inventoryName2, group2);
 
         // Show a message
         sender.sendMessage(ChatColor.GREEN + "Succesfully swapped inventories!");

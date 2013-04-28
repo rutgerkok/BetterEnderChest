@@ -34,6 +34,14 @@ public interface BetterEnderChest {
     public static final String STANDARD_GROUP_NAME = "default";
 
     /**
+     * Returns the cache of the plugin. Use this to load files from disk and to
+     * save them.
+     * 
+     * @return The cache of the plugin.
+     */
+    BetterEnderCache getChestCache();
+
+    /**
      * Gets the current chest material.
      * 
      * @return The current chest material.
@@ -46,14 +54,6 @@ public interface BetterEnderChest {
      * @return The save directory of the Ender Chests.
      */
     File getChestSaveLocation();
-
-    /**
-     * Returns the cache of the plugin. Use this to load files from disk and to
-     * save them.
-     * 
-     * @return The cache of the plugin.
-     */
-    BetterEnderCache getChestsCache();
 
     /**
      * Gets the calculator of the preferred size of all Ender Chests.
@@ -184,20 +184,20 @@ public interface BetterEnderChest {
     void reload();
 
     /**
+     * Sets the cache system that should be used.
+     * 
+     * @param cache
+     *            The cache system to use.
+     */
+    void setChestCache(BetterEnderCache cache);
+
+    /**
      * Sets the current chest material.
      * 
      * @param newMaterial
      *            The new chest material.
      */
     void setChestMaterial(Material newMaterial);
-
-    /**
-     * Sets the cache system that should be used.
-     * 
-     * @param cache
-     *            The cache system to use.
-     */
-    void setChestsCache(BetterEnderCache cache);
 
     /**
      * Sets the chest size calculator. If you want to have your own calculator

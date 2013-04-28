@@ -43,7 +43,7 @@ public class BetterEnderChestSizes {
     public int getChestRows(Player player) {
         // Check for upgrade permission
         for (int i = playerChestRows.length - 1; i > 0; i--) {
-            if (player.hasPermission("betterenderchest.rows.upgrade" + i)) {
+            if (player.hasPermission("betterenderchest.slots.upgrade" + i)) {
                 return getChestRows(i);
             }
         }
@@ -90,7 +90,7 @@ public class BetterEnderChestSizes {
     public int getDisabledSlots(Player player) {
         // Check for upgrade permission
         for (int i = playerChestDisabledSlots.length - 1; i > 0; i--) {
-            if (player.hasPermission("betterenderchest.rows.upgrade" + i)) {
+            if (player.hasPermission("betterenderchest.slots.upgrade" + i)) {
                 return getDisabledSlots(i);
             }
         }
