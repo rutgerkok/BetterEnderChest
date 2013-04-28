@@ -396,7 +396,12 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         }
 
         // NMS handlers
-        nmsHandlers.register(new NMSHandler_1_5_R2(this));
+        try {
+            nmsHandlers.register(new NMSHandler_1_5_R2(this));
+        } catch (Throwable t) {
+            // Ignored, it is possible that another save system has been
+            // installed. See message shown at the end of this method.
+        }
         nmsHandlers.selectAvailableRegistration();
 
         // File handlers
