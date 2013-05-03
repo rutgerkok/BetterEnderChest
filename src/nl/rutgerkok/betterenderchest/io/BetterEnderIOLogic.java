@@ -37,12 +37,12 @@ public class BetterEnderIOLogic {
     }
 
     public File getChestFile(String inventoryName, WorldGroup worldGroup) {
-        if (worldGroup.equals(BetterEnderChest.STANDARD_GROUP_NAME)) {
+        if (worldGroup.getGroupName().equals(BetterEnderChest.STANDARD_GROUP_NAME)) {
             // Default group? File isn't in a subdirectory.
             return new File(plugin.getChestSaveLocation().getPath() + "/" + inventoryName + "." + plugin.getFileHandlers().getSelectedRegistration().getExtension());
         } else {
             // Another group? Save in subdirectory.
-            return new File(plugin.getChestSaveLocation().getPath() + "/" + worldGroup + "/" + inventoryName + "." + plugin.getFileHandlers().getSelectedRegistration().getExtension());
+            return new File(plugin.getChestSaveLocation().getPath() + "/" + worldGroup.getGroupName() + "/" + inventoryName + "." + plugin.getFileHandlers().getSelectedRegistration().getExtension());
         }
     }
 
