@@ -201,6 +201,11 @@ public class BetterEnderEventHandler implements Listener {
         if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || !event.getClickedBlock().getType().equals(plugin.getChestMaterial())) {
             return;
         }
+        
+        // Ignore shift-click
+        if(event.getPlayer().isSneaking()) {
+            return;
+        }
 
         // Cancel the event
         event.setCancelled(true);
