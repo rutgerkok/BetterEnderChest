@@ -10,6 +10,7 @@ import nl.rutgerkok.betterenderchest.io.CaseInsensitiveFileFilter;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -80,6 +81,53 @@ public class BetterEnderUtils {
                     }
                 }
 
+            }
+        }
+    }
+
+    /**
+     * Drops all items on the ground that are in disabled slots. Just a
+     * safeguard against glitches and hacked clients, as normally the
+     * InventoryClickEvent should prevent items in disabled slots. This doesn't
+     * do anything if the player is not the owner of the chest.
+     * 
+     * @param inventory
+     *            The inventory in question.
+     * @param player
+     *            The player that is opening the inventory.
+     * @param plugin
+     *            The plugin, for chest size calculations.
+     */
+    public static void dropItemsInDisabledSlots(Inventory inventory, Player player, BetterEnderChest plugin) {
+        String inventoryName = inventory.getName();
+        String ownerName = ((BetterEnderInventoryHolder) inventory.getHolder()).getName();
+        int disabledSlots = -1;
+
+        // Get the correct number of disabled slots
+        if (inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME)) {
+            disabledSlots = plugin.getChestSizes().getPublicChestDisabledSlots();
+        }
+        if (inventoryName.equals(BetterEnderChest.DEFAULT_CHEST_NAME)) {
+            disabledSlots = plugin.getChestSizes().getDisabledSlots();
+        }
+        if (ownerName.equalsIgnoreCase(player.getName())) {
+            disabledSlots = plugin.getChestSizes().getDisabledSlots(player);
+        }
+
+        if (disabledSlots > 0) {
+            Location playerLocation = player.getLocation();
+            int droppedCount = 0;
+            for (int i = 1; i <= disabledSlots; i++) {
+                ItemStack stackInDisabledSlot = inventory.getItem(inventory.getSize() - i);
+                if (stackInDisabledSlot != null && !stackInDisabledSlot.getType().equals(Material.AIR)) {
+                    inventory.setItem(inventory.getSize() - i, null);
+                    player.getWorld().dropItemNaturally(playerLocation, stackInDisabledSlot);
+                    droppedCount++;
+                }
+            }
+            if (droppedCount > 0) {
+                player.sendMessage(ChatColor.YELLOW + Translations.OVERFLOWING_CHEST_CLOSE.toString());
+                plugin.log("There were items in disabled slots in the Ender Chest of " + ownerName + ". Demoted? Glitch? Hacking? " + droppedCount + " stacks are ejected.");
             }
         }
     }

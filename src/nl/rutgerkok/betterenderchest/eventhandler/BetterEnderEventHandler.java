@@ -133,6 +133,9 @@ public class BetterEnderEventHandler implements Listener {
                 BetterEnderUtils.setLastEnderChestOpeningLocation(player, null, plugin);
             }
 
+            // Clear disabled slots
+            BetterEnderUtils.dropItemsInDisabledSlots(event.getInventory(), player, plugin);
+
             // If it's a public chest, show a warning about that
             BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) event.getInventory().getHolder();
             if (holder.getName().equals(BetterEnderChest.PUBLIC_CHEST_NAME)) {
@@ -201,9 +204,9 @@ public class BetterEnderEventHandler implements Listener {
         if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || !event.getClickedBlock().getType().equals(plugin.getChestMaterial())) {
             return;
         }
-        
+
         // Ignore shift-click
-        if(event.getPlayer().isSneaking()) {
+        if (event.getPlayer().isSneaking()) {
             return;
         }
 
