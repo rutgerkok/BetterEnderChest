@@ -15,11 +15,9 @@ import nl.rutgerkok.betterenderchest.io.Consumer;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 
 import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,7 +32,6 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 public class BetterEnderEventHandler implements Listener {
     private BetterEnderCache chests;
@@ -65,37 +62,8 @@ public class BetterEnderEventHandler implements Listener {
 
         // Can break Ender Chests
 
-        // Get the right chest drop
-        String chestDropString = plugin.chestDrop;
-
-        if (event.getPlayer().getItemInHand().getEnchantments().containsKey(Enchantment.SILK_TOUCH)) {
-            // Silk touch
-            chestDropString = plugin.chestDropSilkTouch;
-        }
-        if (event.getPlayer().getGameMode() == GameMode.CREATIVE) {
-            // Creative mode
-            chestDropString = plugin.chestDropCreative;
-        }
-
-        if (chestDropString.equals("EYE_OF_ENDER") || chestDropString.equals("ITSELF") || chestDropString.equals("ENDER_PEARL") || chestDropString.equals("NOTHING")) {
-            // Break it ourselves to prevent the default drop
-            event.setCancelled(true);
-            event.getBlock().setType(Material.AIR);
-        }
-
-        // Drop it
-        if (chestDropString.equals("OBSIDIAN_WITH_EYE_OF_ENDER") || chestDropString.equals("EYE_OF_ENDER")) {
-            // Drop Eye of Ender
-            event.getPlayer().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(Material.EYE_OF_ENDER));
-        }
-        if (chestDropString.equals("OBSIDIAN_WITH_ENDER_PEARL") || chestDropString.equals("ENDER_PEARL")) {
-            // Drop Ender Pearl
-            event.getPlayer().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(Material.ENDER_PEARL));
-        }
-        if (chestDropString.equals("ITSELF")) {
-            // Drop itself
-            event.getPlayer().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(plugin.getChestMaterial()));
-        }
+        // Drop the Ender Chest
+        plugin.getChestDropForPlayer(player).drop(event, plugin);
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)

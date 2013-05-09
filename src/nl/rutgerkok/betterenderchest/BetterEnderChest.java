@@ -14,6 +14,7 @@ import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.registry.Registry;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 public interface BetterEnderChest {
@@ -40,6 +41,37 @@ public interface BetterEnderChest {
      * @return The cache of the plugin.
      */
     BetterEnderCache getChestCache();
+
+    /**
+     * Gets the chest drop that is used for players in creative.
+     * 
+     * @return The chest drop.
+     */
+    ChestDrop getChestDropCreative();
+
+    /**
+     * Gets the chest drop that is used for that player: normal, creative or
+     * silk touch.
+     * 
+     * @param player
+     *            The player to check.
+     * @return The chest drop.
+     */
+    ChestDrop getChestDropForPlayer(Player player);
+
+    /**
+     * Gets the chest drop that is used normally.
+     * 
+     * @return The chest drop.
+     */
+    ChestDrop getChestDropNormal();
+
+    /**
+     * Gets the chest drop that is used for players with a silk touch pickaxe.
+     * 
+     * @return The chest drop.
+     */
+    ChestDrop getChestDropSilkTouch();
 
     /**
      * Gets the current chest material.

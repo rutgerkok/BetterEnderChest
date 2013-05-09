@@ -33,9 +33,11 @@ import nl.rutgerkok.betterenderchest.registry.Registry;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -58,8 +60,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
     private BukkitTask autoSave;
 
-    public String chestDrop, chestDropSilkTouch, chestDropCreative;
-
+    private ChestDrop chestDrop, chestDropSilkTouch, chestDropCreative;
     private Material chestMaterial = Material.ENDER_CHEST;
     private File chestSaveLocation;
     private BetterEnderChestSizes chestSizes;
@@ -78,6 +79,35 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public BetterEnderCache getChestCache() {
         return enderCache;
+    }
+
+    @Override
+    public ChestDrop getChestDropCreative() {
+        return chestDropCreative;
+    }
+
+    @Override
+    public ChestDrop getChestDropForPlayer(Player player) {
+        if (player.getGameMode() == GameMode.CREATIVE) {
+            // Creative mode
+            return chestDropCreative;
+        }
+        if (player.getItemInHand().getEnchantments().containsKey(Enchantment.SILK_TOUCH)) {
+            // Silk touch
+            return chestDropSilkTouch;
+        }
+        // Normally
+        return chestDrop;
+    }
+
+    @Override
+    public ChestDrop getChestDropNormal() {
+        return chestDrop;
+    }
+
+    @Override
+    public ChestDrop getChestDropSilkTouch() {
+        return chestDropSilkTouch;
     }
 
     @Override
@@ -180,31 +210,34 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         config.set("BetterEnderChest.saveFolderLocation", saveLocation.toString());
 
         // ChestDrop
-        chestDrop = config.getString("BetterEnderChest.drop", "OBSIDIAN");
+        String chestDrop = config.getString("BetterEnderChest.drop", "OBSIDIAN");
         chestDrop = chestDrop.toUpperCase();
         if (!isValidChestDrop(chestDrop)) { // cannot understand value
             log("Could not understand the drop " + chestDrop + ", defaulting to OBSIDIAN", Level.WARNING);
-            chestDrop = "OBSIDIAN";
+            chestDrop = ChestDrop.OBSIDIAN.toString();
         }
         config.set("BetterEnderChest.drop", chestDrop);
+        this.chestDrop = ChestDrop.valueOf(chestDrop);
 
         // ChestDropSilkTouch
-        chestDropSilkTouch = config.getString("BetterEnderChest.dropSilkTouch", "ITSELF");
+        String chestDropSilkTouch = config.getString("BetterEnderChest.dropSilkTouch", "ITSELF");
         chestDropSilkTouch = chestDropSilkTouch.toUpperCase();
         if (!isValidChestDrop(chestDropSilkTouch)) { // cannot understand value
             log("Could not understand the Silk Touch drop " + chestDropSilkTouch + ", defaulting to ITSELF", Level.WARNING);
-            chestDropSilkTouch = "ITSELF";
+            chestDropSilkTouch = ChestDrop.ITSELF.toString();
         }
         config.set("BetterEnderChest.dropSilkTouch", chestDropSilkTouch);
+        this.chestDropSilkTouch = ChestDrop.valueOf(chestDropSilkTouch);
 
         // ChestDropCreative
-        chestDropCreative = config.getString("BetterEnderChest.dropCreative", "NOTHING");
+        String chestDropCreative = config.getString("BetterEnderChest.dropCreative", "NOTHING");
         chestDropCreative = chestDropCreative.toUpperCase();
         if (!isValidChestDrop(chestDropCreative)) { // cannot understand value
             log("Could not understand the drop for Creative Mode " + chestDropCreative + ", defaulting to NOTHING", Level.WARNING);
-            chestDropCreative = "NOTHING";
+            chestDropCreative = ChestDrop.NOTHING.toString();
         }
         config.set("BetterEnderChest.dropCreative", chestDropCreative);
+        this.chestDropCreative = ChestDrop.valueOf(chestDropCreative);
 
         // CompabilityMode
         compabilityMode = config.getBoolean("BetterEnderChest.enderChestCompabilityMode");
@@ -332,21 +365,12 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
      * @return
      */
     public boolean isValidChestDrop(String drop) {
-        if (drop.equals("OBSIDIAN"))
+        try {
+            ChestDrop.valueOf(drop);
             return true;
-        if (drop.equals("OBSIDIAN_WITH_EYE_OF_ENDER"))
-            return true;
-        if (drop.equals("OBSIDIAN_WITH_ENDER_PEARL"))
-            return true;
-        if (drop.equals("EYE_OF_ENDER"))
-            return true;
-        if (drop.equals("ENDER_PEARL"))
-            return true;
-        if (drop.equals("ITSELF"))
-            return true;
-        if (drop.equals("NOTHING"))
-            return true;
-        return false;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     @Override
