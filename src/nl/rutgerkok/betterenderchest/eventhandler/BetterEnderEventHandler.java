@@ -3,7 +3,6 @@ package nl.rutgerkok.betterenderchest.eventhandler;
 import java.util.List;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
-import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin;
 import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.PublicChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
@@ -35,9 +34,9 @@ import org.bukkit.inventory.Inventory;
 
 public class BetterEnderEventHandler implements Listener {
     private BetterEnderCache chests;
-    private BetterEnderChestPlugin plugin;
+    private BetterEnderChest plugin;
 
-    public BetterEnderEventHandler(BetterEnderChestPlugin plugin) {
+    public BetterEnderEventHandler(BetterEnderChest plugin) {
         this.plugin = plugin;
         chests = plugin.getChestCache();
     }

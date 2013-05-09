@@ -89,7 +89,7 @@ public class BetterEnderWorldGroupManager {
 
     public void initConfig() {
         // Clear the list (in case we're reloading)
-        if (groups.size() > 1) {
+        if (groups.size() >= 1) {
             groups.clear();
         }
         // Read and write

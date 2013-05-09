@@ -17,7 +17,8 @@ public class ReloadCommand extends BaseCommand {
 
         sender.sendMessage(ChatColor.YELLOW + "Saving all inventories...");
 
-        // Unload all inventories
+        // Reloading
+        plugin.reload();
 
         // Log message
         plugin.log("Configuration and chests reloaded.");
