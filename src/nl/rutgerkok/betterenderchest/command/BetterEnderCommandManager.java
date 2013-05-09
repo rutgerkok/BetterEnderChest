@@ -36,22 +36,6 @@ public class BetterEnderCommandManager implements TabExecutor {
      */
     @Override
     public boolean onCommand(CommandSender sender, Command bukkitCommand, String label, String[] originalArgs) {
-        if (bukkitCommand.getName().equalsIgnoreCase("enderchest")) {
-            // Handle the /enderchest command
-            BaseCommand command = plugin.getCommands().getRegistration("openinv");
-            if (command == null || !command.hasPermission(sender)) {
-                sender.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
-                return true;
-            }
-
-            if (!command.execute(sender, originalArgs)) {
-                sender.sendMessage(ChatColor.RED + "Wrong command usage! Correct usage:");
-                sender.sendMessage(ChatColor.RED + "/" + label + " " + command.getUsage());
-            }
-
-            return true;
-        }
-
         // Handle the /betterenderchest command
         if (originalArgs.length == 0) {
             showHelp(sender, label);
@@ -95,14 +79,6 @@ public class BetterEnderCommandManager implements TabExecutor {
      */
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] originalArgs) {
-        if (command.getName().equalsIgnoreCase("enderchest")) {
-            // Handle the /enderchest command
-            BaseCommand baseCommand = plugin.getCommands().getRegistration("openinv");
-            if (baseCommand == null || !baseCommand.hasPermission(sender)) {
-                return Collections.emptyList();
-            }
-            return baseCommand.autoComplete(sender, originalArgs);
-        }
         if (originalArgs.length == 1) {
             // Searching for a subcommand
             List<String> matches = new ArrayList<String>();

@@ -22,7 +22,7 @@ public class OpenInvCommand extends BaseCommand {
 
     @Override
     public List<String> autoComplete(CommandSender sender, String[] args) {
-        if (args.length == 1 && sender.hasPermission("betterenderchest.command.openinv")) {
+        if (args.length == 1 && sender.hasPermission("betterenderchest.command.openinv.other")) {
             // Makes it return a player list
             return null;
         }
@@ -59,7 +59,7 @@ public class OpenInvCommand extends BaseCommand {
 
             // Check for permissions
             if (!player.hasPermission("betterenderchest.command.openinv")) {
-                player.sendMessage(ChatColor.RED + "You can only open your own Ender Chest.");
+                player.sendMessage(ChatColor.RED + Translations.CAN_ONLY_OPEN_OWN_CHEST.toString());
                 return true;
             }
 
@@ -113,7 +113,7 @@ public class OpenInvCommand extends BaseCommand {
 
     @Override
     public boolean hasPermission(CommandSender sender) {
-        return (sender.hasPermission("betterenderchest.command.openinv.self") || sender.hasPermission("betterenderchest.command.openinv"));
+        return sender.hasPermission("betterenderchest.command.openinv.self");
     }
 
 }

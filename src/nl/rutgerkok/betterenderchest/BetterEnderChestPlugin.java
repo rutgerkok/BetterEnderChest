@@ -11,6 +11,7 @@ import nl.rutgerkok.betterenderchest.chestprotection.NoBridge;
 import nl.rutgerkok.betterenderchest.chestprotection.ProtectionBridge;
 import nl.rutgerkok.betterenderchest.command.BaseCommand;
 import nl.rutgerkok.betterenderchest.command.BetterEnderCommandManager;
+import nl.rutgerkok.betterenderchest.command.EnderChestCommand;
 import nl.rutgerkok.betterenderchest.eventhandler.BetterEnderEventHandler;
 import nl.rutgerkok.betterenderchest.eventhandler.BetterEnderSlotsHandler;
 import nl.rutgerkok.betterenderchest.importers.InventoryImporter;
@@ -427,7 +428,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         // CommandHandler
         commandManager = new BetterEnderCommandManager(this);
         getCommand("betterenderchest").setExecutor(commandManager);
-        getCommand("enderchest").setExecutor(commandManager);
+        getCommand("enderchest").setExecutor(new EnderChestCommand(this));
 
         // AutoSave (adds things to the save queue
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
