@@ -1,7 +1,7 @@
 name: BetterEnderChest
 main: nl.rutgerkok.betterenderchest.BetterEnderChestPlugin
 description: 'Secure and configurable Ender Chests'
-version: '2.0.2'
+version: '2.0.3'
 author: 'Rutger Kok'
 softdepend:
 - 'Lockette'
@@ -11,12 +11,12 @@ softdepend:
 - 'WorldInventories'
 commands:
   betterenderchest:
-    description: Administrative command for BetterEnderChest.
+    description: Administrative command for BetterEnderChest
     aliases: [bec]
     usage: Type /<command> for more information.
     permission: bec.internal.autocomplete_bec
   enderchest:
-    description: Open/view the Ender Chest.
+    description: Open/view the Ender Chest
     usage: /enderchest [playername]
     permission: bec.internal.autocomplete_ec
 permissions:
