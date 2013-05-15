@@ -6,7 +6,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 public class Translations {
     public static Translation CAN_ONLY_OPEN_OWN_CHEST = new Translation("You can only open your own Ender Chest.");
-    public static Translation DEFAULT_CHEST_TITLE = new Translation("Editing the default Ender Chest...");
+    public static Translation DEFAULT_CHEST_TITLE = new Translation("Editing the default Ender Chest");
     public static Translation ENDER_CHESTS_DISABLED = new Translation("Ender Chests have been disabled, because chests cannot be saved or loaded.");
     public static Translation NO_PERMISSION = new Translation("You don't have permission to do this.");
     public static Translation OVERFLOWING_CHEST_CLOSE = new Translation("Some slots in this Ender Chest were disabled, but somehow there were items in those slots. Dropping them on the ground.");
