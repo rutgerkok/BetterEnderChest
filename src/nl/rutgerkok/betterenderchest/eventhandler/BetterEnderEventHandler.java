@@ -103,12 +103,14 @@ public class BetterEnderEventHandler implements Listener {
             // Clear disabled slots
             BetterEnderUtils.dropItemsInDisabledSlots(event.getInventory(), player, plugin);
 
-            // If it's a public chest, show a warning about that
+            // If it's a special chest, show a message about that
             BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) event.getInventory().getHolder();
             if (holder.getName().equals(BetterEnderChest.PUBLIC_CHEST_NAME)) {
                 if (!Translations.PUBLIC_CHEST_CLOSE_MESSAGE.isEmpty()) {
                     player.sendMessage(Translations.PUBLIC_CHEST_CLOSE_MESSAGE.toString());
                 }
+            } else if(holder.getName().equals(BetterEnderChest.DEFAULT_CHEST_NAME)) {
+                player.sendMessage("Default chest is edited. After this chest is (auto)saved, new players will find those items in their Ender Chest.");
             }
         }
     }
@@ -171,9 +173,11 @@ public class BetterEnderEventHandler implements Listener {
         if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || !event.getClickedBlock().getType().equals(plugin.getChestMaterial())) {
             return;
         }
+        
+        final Player player = event.getPlayer();
 
-        // Ignore shift-click
-        if (event.getPlayer().isSneaking()) {
+        // Ignore shift-clicking with a block
+        if (player.isSneaking() && player.getItemInHand() != null && !player.getItemInHand().getType().equals(Material.AIR)) {
             return;
         }
 
@@ -181,7 +185,6 @@ public class BetterEnderEventHandler implements Listener {
         event.setCancelled(true);
 
         // Some objects
-        final Player player = event.getPlayer();
         final Block clickedBlock = event.getClickedBlock();
         final WorldGroup group = plugin.getWorldGroupManager().getGroupByWorld(player.getWorld());
         String inventoryName = "";
