@@ -17,13 +17,13 @@ BetterEnderChest is a plugin for CraftBukkit (Minecraft server mod) that adds fu
     betterEnderChest.getChestsCache().getInventory(inventoryName, group, new Consumer<Inventory>() {
             @Override
             public void consume(Inventory inventory) {
-                // Do your stuff here
+                // Do your stuff here, like editing, counting items, etc.
             }
         });
 
-getInventory always gives an inventory back, even if no player with that name exists. So make sure to check the player name!
+`getInventory` always gives an inventory back, even if no player with that name exists. So make sure to check the player name!
 
-There are some other methods available in the same class to save and unload inventories.
+There are some other methods available in the same class to save and unload inventories. If you don't call them, BetterEnderChest will automatically save your changes and unload the inventory during the next autosave.
 
 ## Get the world group
 
