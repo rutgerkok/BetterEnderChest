@@ -1,10 +1,10 @@
-[Home](http://dev.bukkit.org/server-mods/ender-chest/) |
+[Home](http://dev.bukkit.org/bukkit-mods/ender-chest/) |
 **Source** | 
-[Configuration](http://dev.bukkit.org/server-mods/ender-chest/pages/reference/config-file/) | 
-[Permissions](http://dev.bukkit.org/server-mods/ender-chest/pages/reference/permissions/) |
-[Converter](http://dev.bukkit.org/server-mods/ender-chest/pages/reference/converter/) |
-[FAQ](http://dev.bukkit.org/server-mods/ender-chest/pages/reference/frequently-asked-questions/) | 
-[Changelog](http://dev.bukkit.org/server-mods/ender-chest/pages/reference/changelog/)
+[Configuration](http://dev.bukkit.org/bukkit-mods/ender-chest/pages/reference/config-file/) | 
+[Permissions](http://dev.bukkit.org/bukkit-mods/ender-chest/pages/reference/permissions/) |
+[Converter](http://dev.bukkit.org/bukkit-mods/ender-chest/pages/reference/converter/) |
+[FAQ](http://dev.bukkit.org/bukkit-mods/ender-chest/pages/reference/frequently-asked-questions/) | 
+[Changelog](http://dev.bukkit.org/bukkit-mods/ender-chest/pages/reference/changelog/)
 
 BetterEnderChest is a plugin for CraftBukkit (Minecraft server mod) that adds functionality to the Ender Chest. The documentation of the plugin itself can be found on the home page. On this page there is some information about how to interact with this plugin.
 
@@ -55,7 +55,7 @@ The public and default chest aren't that different from standard chests, they ju
     Inventory defaultEnderInventory = betterEnderChest.getEnderChests().getInventory(BetterEnderChest.DEFAULT_CHEST_NAME, WorldGroup group);
 
 ## Add a /betterenderchest subcommand
-Create a new class that inherits [BaseCommand](https://github.com/rutgerkok/BetterEnderChest/blob/master/src/nl/rutgerkok/BetterEnderChest/commands/BaseCommand.java). Then you can add your command using 
+Create a new class that inherits [BaseCommand](https://github.com/rutgerkok/BetterEnderChest/blob/master/src/nl/rutgerkok/betterenderchest/command/BaseCommand.java). Then you can add your command using 
 
     betterEnderChest.getCommands().register(BaseCommand command);
 
@@ -64,7 +64,7 @@ Don't forget to look at the utility methods in BaseCommand, which can parse the 
 ## Compiling BetterEnderChest
 You need to complie against CraftBukkit, Lockette, LWC, MultiInv, WorldInventories and Multiverse-Inventories.
 
-## Pull request
+## Pull requests
 Pull requests are greatly appreciated. Just try to follow my formatting (spaces, not tabs and opening brackets on the same line) but don't worry too much if you mess up the style: I'll fix it after the request is pulled. If you are about to implement something big, please send me a PM on BukkitDev, so that we can discuss it first.
 
 ## License
