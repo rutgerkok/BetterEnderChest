@@ -46,30 +46,33 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
         MultiverseInventories multiverseInventories = (MultiverseInventories) Bukkit.getServer().getPluginManager().getPlugin("Multiverse-Inventories");
 
         // Make groupName case-correct
-        boolean foundMatchingGroup = false;
+        WorldGroupProfile group = null;
         List<WorldGroupProfile> multiverseInventoriesGroups = multiverseInventories.getGroupManager().getGroups();
-        for (WorldGroupProfile group : multiverseInventoriesGroups) {
-            if (group.getName().equalsIgnoreCase(groupName)) {
-                groupName = group.getName();
-                foundMatchingGroup = true;
+        for (WorldGroupProfile aGroup : multiverseInventoriesGroups) {
+            if (aGroup.getName().equalsIgnoreCase(groupName)) {
+                group = aGroup;
                 break;
             }
         }
 
         // Check if a matching group has been found
-        if (!foundMatchingGroup) {
+        if (group == null) {
             plugin.log("No matching Multiverse-Inventories group found for " + groupName + ". Cannot import " + inventoryName + ".", Level.WARNING);
             return null;
         }
 
         // Get the global profile of the player
         GlobalProfile globalProfile = multiverseInventories.getData().getGlobalProfile(inventoryName);
+        if(globalProfile == null) {
+            // Nothing to import for this player
+            return null;
+        }
 
         // If the player is in the current worldgroup, it should load from
         // vanilla (Multiverse-Inventories would return an outdated inventory).
         // If the player is in anthor worldgroup, it should load from
         // Multiverse-Inventories.
-        if (multiverseInventories.getGroupManager().getGroup(groupName).containsWorld(globalProfile.getWorld())) {
+        if (group.containsWorld(globalProfile.getWorld())) {
             // Player is in the current group, load from vanilla
             return plugin.getInventoryImporters().getRegistration("vanilla").importInventory(inventoryName, worldGroup, plugin);
         } else {
