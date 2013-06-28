@@ -265,4 +265,12 @@ public interface BetterEnderChest {
      *            The save and load system that should be used.
      */
     void setSaveAndLoadSystem(BetterEnderIOLogic saveAndLoadSystem);
+
+    /**
+     * Logs a debug message.
+     * 
+     * @param string
+     *            The string to print.
+     */
+    void debug(String string);
 }

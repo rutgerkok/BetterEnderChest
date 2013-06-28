@@ -75,6 +75,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private Registry<ProtectionBridge> protectionBridges = new Registry<ProtectionBridge>();
     private int rankUpgrades;
     private BetterEnderIOLogic saveAndLoadSystem;
+    private boolean debug;
 
     @Override
     public BetterEnderCache getChestCache() {
@@ -242,6 +243,10 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         // CompabilityMode
         compabilityMode = config.getBoolean("BetterEnderChest.enderChestCompabilityMode");
         config.set("BetterEnderChest.enderChestCompabilityMode", compabilityMode);
+
+        // Debugging
+        debug = config.getBoolean("BetterEnderChest.showDebugMessages", false);
+        config.set("BetterEnderChest.showDebugMessages", debug);
 
         // Autosave
         // ticks?
@@ -479,6 +484,9 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             log("Plugin will stay enabled to prevent anyone from opening Ender Chests and corrupting data.", Level.SEVERE);
             log("Please look for a BetterEnderChest file matching your CraftBukkit version!", Level.SEVERE);
         }
+
+        // Debug message
+        debug("Debug mode enabled. Thanks for helping to debug an issue! BetterEnderChest depends on people like you.");
     }
 
     @Override
@@ -526,5 +534,12 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public void setSaveAndLoadSystem(BetterEnderIOLogic saveAndLoadSystem) {
         this.saveAndLoadSystem = saveAndLoadSystem;
+    }
+
+    @Override
+    public void debug(String string) {
+        if (debug) {
+            this.log("[Debug] " + string, Level.INFO);
+        }
     }
 }

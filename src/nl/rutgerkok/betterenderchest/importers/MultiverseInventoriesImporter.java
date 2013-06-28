@@ -63,8 +63,12 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
 
         // Get the global profile of the player
         GlobalProfile globalProfile = multiverseInventories.getData().getGlobalProfile(inventoryName);
-        if(globalProfile == null) {
-            // Nothing to import for this player
+        if (globalProfile == null) {
+            plugin.debug("It seems that there is no data for " + inventoryName + ", so nothing can be imported.");
+            return null;
+        }
+        if (globalProfile.getWorld() == null) {
+            plugin.debug("It seems that the world of " + inventoryName + " is null, so nothing can be imported.");
             return null;
         }
 
