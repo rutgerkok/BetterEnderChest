@@ -86,6 +86,8 @@ public class NMSHandler_1_5_R3 extends NMSHandler {
         }
     }
 
+    @SuppressWarnings("resource")
+    // ^ NBTCompressedStreamTools already closes stream
     @Override
     public Inventory loadNBTInventory(File file, String inventoryName, String inventoryTagName) {
         FileInputStream inputStream;
