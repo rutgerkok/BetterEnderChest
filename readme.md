@@ -62,7 +62,7 @@ Create a new class that inherits [BaseCommand](https://github.com/rutgerkok/Bett
 Don't forget to look at the utility methods in BaseCommand, which can parse the [groupName/]inventoryName syntax. There is also a method available that checks whether the player name can be used.
 
 ## Compiling BetterEnderChest
-You need to complie against CraftBukkit, Lockette, LWC, MultiInv, WorldInventories and Multiverse-Inventories.
+BetterEnderChest uses [Maven](http://maven.apache.org/download.cgi), so you can build it using `mvn clean install`.
 
 ## Pull requests
 Pull requests are greatly appreciated. Just try to follow my formatting (spaces, not tabs and opening brackets on the same line) but don't worry too much if you mess up the style: I'll fix it after the request is pulled. If you are about to implement something big, please send me a PM on BukkitDev, so that we can discuss it first.
