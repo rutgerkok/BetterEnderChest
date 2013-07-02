@@ -27,7 +27,7 @@ import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
 import nl.rutgerkok.betterenderchest.io.BetterEnderNBTFileHandler;
 import nl.rutgerkok.betterenderchest.io.SaveLocation;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
-import nl.rutgerkok.betterenderchest.nms.NMSHandler_1_5_R3;
+import nl.rutgerkok.betterenderchest.nms.NMSHandler_1_6_R1;
 import nl.rutgerkok.betterenderchest.registry.Registration;
 import nl.rutgerkok.betterenderchest.registry.Registry;
 
@@ -427,7 +427,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
         // NMS handlers
         try {
-            nmsHandlers.register(new NMSHandler_1_5_R3(this));
+            nmsHandlers.register(new NMSHandler_1_6_R1(this));
         } catch (Throwable t) {
             // Ignored, it is possible that another save system has been
             // installed. See message shown at the end of this method.
