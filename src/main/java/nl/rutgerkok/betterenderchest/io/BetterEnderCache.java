@@ -49,9 +49,6 @@ public interface BetterEnderCache {
      */
     void setInventory(String inventoryName, WorldGroup group, Inventory enderInventory);
 
-    @Override
-    String toString();
-
     /**
      * Unloads all inventories from memory. Doesn't save! Also, make sure that
      * no-one is viewing an inventory!

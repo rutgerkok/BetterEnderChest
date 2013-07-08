@@ -99,8 +99,8 @@ public class BetterEnderUtils {
      *            The plugin, for chest size calculations.
      */
     public static void dropItemsInDisabledSlots(Inventory inventory, Player player, BetterEnderChest plugin) {
+        BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
         String inventoryName = inventory.getName();
-        String ownerName = ((BetterEnderInventoryHolder) inventory.getHolder()).getName();
         int disabledSlots = -1;
 
         // Get the correct number of disabled slots
@@ -110,7 +110,7 @@ public class BetterEnderUtils {
         if (inventoryName.equals(BetterEnderChest.DEFAULT_CHEST_NAME)) {
             disabledSlots = plugin.getChestSizes().getDisabledSlots();
         }
-        if (ownerName.equalsIgnoreCase(player.getName())) {
+        if (holder.getName().equalsIgnoreCase(player.getName())) {
             disabledSlots = plugin.getChestSizes().getDisabledSlots(player);
         }
 
@@ -127,7 +127,10 @@ public class BetterEnderUtils {
             }
             if (droppedCount > 0) {
                 player.sendMessage(ChatColor.YELLOW + Translations.OVERFLOWING_CHEST_CLOSE.toString());
-                plugin.log("There were items in disabled slots in the Ender Chest of " + ownerName + ". Demoted? Glitch? Hacking? " + droppedCount + " stacks are ejected.");
+                plugin.log("There were items in disabled slots in the Ender Chest of " + holder.getName() + ". Demoted? Glitch? Hacking? " + droppedCount + " stacks are ejected.");
+
+                // Make sure that chest gets saved
+                holder.setHasUnsavedChanges(true);
             }
         }
     }

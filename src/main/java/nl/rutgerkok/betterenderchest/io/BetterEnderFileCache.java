@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
@@ -55,9 +56,14 @@ public class BetterEnderFileCache implements BetterEnderCache {
         for (Iterator<WorldGroup> outerIterator = inventories.keySet().iterator(); outerIterator.hasNext();) {
             WorldGroup group = outerIterator.next();
             HashMap<String, Inventory> inGroup = inventories.get(group);
-            for (Iterator<String> it = inGroup.keySet().iterator(); it.hasNext();) {
-                String inventoryName = it.next();
-                saveQueue.add(new SaveQueueEntry(inventoryName, group));
+            for (Iterator<Entry<String, Inventory>> it = inGroup.entrySet().iterator(); it.hasNext();) {
+                Entry<String, Inventory> inventoryEntry = it.next();
+                if (((BetterEnderInventoryHolder) inventoryEntry.getValue().getHolder()).hasUnsavedChanges()) {
+                    // Add to save queue, but only if there are unsaved changes
+                    saveQueue.add(new SaveQueueEntry(inventoryEntry.getKey(), group));
+                } else {
+                    plugin.debug("Not adding " + inventoryEntry.getKey() + " to the save queue, because it appears to be unchanged.");
+                }
             }
         }
     }
@@ -151,8 +157,10 @@ public class BetterEnderFileCache implements BetterEnderCache {
             // Oops! Inventory hasn't been loaded. Nothing to save.
             return;
         }
-        // Save the inventory to disk
-        plugin.getSaveAndLoadSystem().saveInventory(inventories.get(group).get(inventoryName), inventoryName, group);
+        // Save the inventory to disk and mark as saved
+        Inventory inventory = inventories.get(group).get(inventoryName);
+        plugin.getSaveAndLoadSystem().saveInventory(inventory, inventoryName, group);
+        ((BetterEnderInventoryHolder) inventory.getHolder()).setHasUnsavedChanges(false);
     }
 
     @Override

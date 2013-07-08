@@ -4,12 +4,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
 public class BetterEnderInventoryHolder implements InventoryHolder {
-    // from 0 to 8
     private boolean correctCase; // Whether the name has been verified to be
     private byte disabledSlots; // The number of disabled slots in the chest,
+    private boolean hasUnsavedChanges;
     private String ownerName; // Never displayed, stores the name
-
-    // case-correct
 
     public BetterEnderInventoryHolder(String ownerName, int disabledSlots, boolean correctCase) {
         this.ownerName = ownerName;
@@ -30,8 +28,29 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
         return ownerName;
     }
 
+    /**
+     * Gets whether there are unsaved changes in this chest.
+     * 
+     * @return Whether there are unsaved changes in this chest.
+     */
+    public boolean hasUnsavedChanges() {
+        return hasUnsavedChanges;
+    }
+
     public boolean isOwnerNameCaseCorrect() {
         return correctCase;
+    }
+
+    /**
+     * Sets whether there are changes made to this chest that are not yet saved.
+     * Set this to true when an user clicks in the Ender inventory, set this to
+     * false when you have just saved the chest.
+     * 
+     * @param unsavedChanges
+     *            Whether there are unsaved changes.
+     */
+    public void setHasUnsavedChanges(boolean unsavedChanges) {
+        this.hasUnsavedChanges = unsavedChanges;
     }
 
     public void setOwnerName(String newName, boolean correctCase) {

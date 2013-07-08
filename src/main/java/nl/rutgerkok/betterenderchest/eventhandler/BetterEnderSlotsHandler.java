@@ -152,10 +152,14 @@ public class BetterEnderSlotsHandler implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         InventoryHolder inventoryHolder = event.getInventory().getHolder();
         if (inventoryHolder instanceof BetterEnderInventoryHolder) {
+            // Make sure disabled slots stay disabled.
             handleDisabledSlots(event);
+            // Set that changes were made
+            ((BetterEnderInventoryHolder) inventoryHolder).setHasUnsavedChanges(true);
             return;
         }
         if (inventoryHolder instanceof ImmutableInventory) {
+            // Make chest immutable.
             event.setCancelled(true);
             return;
         }

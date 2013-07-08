@@ -3,6 +3,7 @@ package nl.rutgerkok.betterenderchest.command;
 import java.util.Map;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.Translations;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.io.Consumer;
@@ -61,18 +62,20 @@ public class GiveCommand extends BaseCommand {
 
                     // Add the item to the inventory
                     if (valid) {
-
                         final ItemStack adding = new ItemStack(material, count, damage);
                         plugin.getChestCache().getInventory(inventoryName, group, new Consumer<Inventory>() {
                             @Override
                             public void consume(Inventory inventory) {
-
                                 Map<Integer, ItemStack> overflow = inventory.addItem(adding);
                                 if (overflow.isEmpty()) {
                                     sender.sendMessage("Item added to the Ender Chest inventory of " + args[0]);
                                 } else {
                                     sender.sendMessage("One or more items have not been added; Ender Chest inventory of " + args[0] + " was full.");
                                 }
+
+                                // Mark for resave,
+                                // now that there are changed items.
+                                ((BetterEnderInventoryHolder) inventory.getHolder()).setHasUnsavedChanges(true);
                             }
                         });
                     }
