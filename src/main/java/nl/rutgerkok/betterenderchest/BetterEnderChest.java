@@ -35,6 +35,14 @@ public interface BetterEnderChest {
     public static final String STANDARD_GROUP_NAME = "default";
 
     /**
+     * Logs a debug message.
+     * 
+     * @param string
+     *            The string to print.
+     */
+    void debug(String string);
+
+    /**
      * Returns the cache of the plugin. Use this to load files from disk and to
      * save them.
      * 
@@ -265,12 +273,4 @@ public interface BetterEnderChest {
      *            The save and load system that should be used.
      */
     void setSaveAndLoadSystem(BetterEnderIOLogic saveAndLoadSystem);
-
-    /**
-     * Logs a debug message.
-     * 
-     * @param string
-     *            The string to print.
-     */
-    void debug(String string);
 }

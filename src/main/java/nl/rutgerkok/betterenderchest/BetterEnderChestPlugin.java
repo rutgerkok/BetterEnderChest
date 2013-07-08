@@ -67,6 +67,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private BetterEnderCommandManager commandManager;
     private Registry<BaseCommand> commands = new Registry<BaseCommand>();
     private boolean compabilityMode;
+    private boolean debug;
     private BetterEnderCache enderCache;
     private Registry<BetterEnderFileHandler> fileHandlers = new Registry<BetterEnderFileHandler>();
     private BetterEnderWorldGroupManager groups;
@@ -75,7 +76,13 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private Registry<ProtectionBridge> protectionBridges = new Registry<ProtectionBridge>();
     private int rankUpgrades;
     private BetterEnderIOLogic saveAndLoadSystem;
-    private boolean debug;
+
+    @Override
+    public void debug(String string) {
+        if (debug) {
+            this.log("[Debug] " + string, Level.INFO);
+        }
+    }
 
     @Override
     public BetterEnderCache getChestCache() {
@@ -534,12 +541,5 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public void setSaveAndLoadSystem(BetterEnderIOLogic saveAndLoadSystem) {
         this.saveAndLoadSystem = saveAndLoadSystem;
-    }
-
-    @Override
-    public void debug(String string) {
-        if (debug) {
-            this.log("[Debug] " + string, Level.INFO);
-        }
     }
 }

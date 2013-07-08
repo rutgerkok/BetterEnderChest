@@ -137,21 +137,6 @@ public class BetterEnderIOLogic {
     }
 
     /**
-     * Titles can be up to 32 characters. If the given title is too long, this
-     * function trims the title to the max allowed length. If the title isn't
-     * too long, the title itself is returned.
-     * 
-     * @param title The title to trim.
-     * @return The trimmed title.
-     */
-    private String trimTitle(String title) {
-        if (title.length() <= 32) {
-            return title;
-        }
-        return title.substring(0, 32);
-    }
-
-    /**
      * Loads an empty inventory with the given name.
      * 
      * @param inventoryName
@@ -254,5 +239,21 @@ public class BetterEnderIOLogic {
         if (canSaveAndLoad()) {
             plugin.getFileHandlers().getSelectedRegistration().save(getChestFile(inventoryName, groupName), inventory);
         }
+    }
+
+    /**
+     * Titles can be up to 32 characters. If the given title is too long, this
+     * function trims the title to the max allowed length. If the title isn't
+     * too long, the title itself is returned.
+     * 
+     * @param title
+     *            The title to trim.
+     * @return The trimmed title.
+     */
+    private String trimTitle(String title) {
+        if (title.length() <= 32) {
+            return title;
+        }
+        return title.substring(0, 32);
     }
 }

@@ -109,7 +109,7 @@ public class BetterEnderEventHandler implements Listener {
                 if (!Translations.PUBLIC_CHEST_CLOSE_MESSAGE.isEmpty()) {
                     player.sendMessage(Translations.PUBLIC_CHEST_CLOSE_MESSAGE.toString());
                 }
-            } else if(holder.getName().equals(BetterEnderChest.DEFAULT_CHEST_NAME)) {
+            } else if (holder.getName().equals(BetterEnderChest.DEFAULT_CHEST_NAME)) {
                 player.sendMessage("Default chest is edited. After this chest is (auto)saved, new players will find those items in their Ender Chest.");
             }
         }
@@ -173,7 +173,7 @@ public class BetterEnderEventHandler implements Listener {
         if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || !event.getClickedBlock().getType().equals(plugin.getChestMaterial())) {
             return;
         }
-        
+
         final Player player = event.getPlayer();
 
         // Ignore shift-clicking with a block
