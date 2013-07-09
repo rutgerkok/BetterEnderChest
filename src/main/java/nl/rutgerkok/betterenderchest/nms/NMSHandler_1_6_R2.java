@@ -7,26 +7,26 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.logging.Level;
 
-import net.minecraft.server.v1_6_R1.MinecraftServer;
-import net.minecraft.server.v1_6_R1.NBTCompressedStreamTools;
-import net.minecraft.server.v1_6_R1.NBTTagCompound;
-import net.minecraft.server.v1_6_R1.NBTTagList;
-import net.minecraft.server.v1_6_R1.TileEntity;
-import net.minecraft.server.v1_6_R1.TileEntityEnderChest;
+import net.minecraft.server.v1_6_R2.MinecraftServer;
+import net.minecraft.server.v1_6_R2.NBTCompressedStreamTools;
+import net.minecraft.server.v1_6_R2.NBTTagCompound;
+import net.minecraft.server.v1_6_R2.NBTTagList;
+import net.minecraft.server.v1_6_R2.TileEntity;
+import net.minecraft.server.v1_6_R2.TileEntityEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_6_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_6_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_6_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_6_R2.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class NMSHandler_1_6_R1 extends NMSHandler {
+public class NMSHandler_1_6_R2 extends NMSHandler {
     private BetterEnderChest plugin;
 
-    public NMSHandler_1_6_R1(BetterEnderChest plugin) {
+    public NMSHandler_1_6_R2(BetterEnderChest plugin) {
         this.plugin = plugin;
     }
 
@@ -107,7 +107,7 @@ public class NMSHandler_1_6_R1 extends NMSHandler {
             for (int i = 0; i < inventoryTag.size(); i++) {
                 NBTTagCompound item = (NBTTagCompound) inventoryTag.get(i);
                 int slot = item.getByte("Slot") & 255;
-                inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_6_R1.ItemStack.createStack(item)));
+                inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_6_R2.ItemStack.createStack(item)));
             }
 
             // Return the inventory
