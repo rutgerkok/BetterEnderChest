@@ -16,7 +16,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 
 public class BetterEnderFileCache implements BetterEnderCache {
-    private class SaveQueueEntry {
+    private static class SaveQueueEntry {
         private final WorldGroup group;
         private final String inventoryName;
 
@@ -58,12 +58,8 @@ public class BetterEnderFileCache implements BetterEnderCache {
             HashMap<String, Inventory> inGroup = inventories.get(group);
             for (Iterator<Entry<String, Inventory>> it = inGroup.entrySet().iterator(); it.hasNext();) {
                 Entry<String, Inventory> inventoryEntry = it.next();
-                if (((BetterEnderInventoryHolder) inventoryEntry.getValue().getHolder()).hasUnsavedChanges()) {
-                    // Add to save queue, but only if there are unsaved changes
-                    saveQueue.add(new SaveQueueEntry(inventoryEntry.getKey(), group));
-                } else {
-                    plugin.debug("Not adding " + inventoryEntry.getKey() + " to the save queue, because it appears to be unchanged.");
-                }
+                // Add to save queue, but only if there are unsaved changes
+                saveQueue.add(new SaveQueueEntry(inventoryEntry.getKey(), group));
             }
         }
     }
@@ -71,27 +67,41 @@ public class BetterEnderFileCache implements BetterEnderCache {
     @Override
     public void autoSaveTick() {
         for (int i = 0; i < AutoSave.chestsPerSaveTick; i++) {
-            if (saveQueue.isEmpty())
-                return; // Nothing to save
+            while (true) {
+                if (saveQueue.isEmpty()) {
+                    return; // Nothing to save
+                }
 
-            SaveQueueEntry toSave = saveQueue.get(saveQueue.size() - 1);
-            String inventoryName = toSave.getInventoryName();
-            WorldGroup group = toSave.getWorldGroup();
-            Inventory inventory = getInventory(inventoryName, group);
+                SaveQueueEntry toSave = saveQueue.get(saveQueue.size() - 1);
+                String inventoryName = toSave.getInventoryName();
+                WorldGroup group = toSave.getWorldGroup();
+                Inventory inventory = getInventory(inventoryName, group);
+                boolean needsSave = ((BetterEnderInventoryHolder) inventory.getHolder()).hasUnsavedChanges();
 
-            // Saving
-            saveInventory(inventoryName, group);
+                // Saving
+                if (needsSave) {
+                    saveInventory(inventoryName, group);
+                } else {
+                    plugin.debug("Not saving " + inventoryName + ", because it appears to be unchanged.");
+                }
 
-            // Unloading
-            if (!inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME) && !Bukkit.getOfflinePlayer(inventoryName).isOnline() && inventory.getViewers().size() == 0) {
-                // This inventory is NOT the public chest, the owner is NOT
-                // online and NO ONE is viewing it
-                // So unload it
-                unloadInventory(inventoryName, group);
+                // Unloading
+                if (!inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME) && !Bukkit.getOfflinePlayer(inventoryName).isOnline() && inventory.getViewers().size() == 0) {
+                    // This inventory is NOT the public chest, the owner is NOT
+                    // online and NO ONE is viewing it
+                    // So unload it
+                    unloadInventory(inventoryName, group);
+                }
+
+                // Remove it from the save queue
+                saveQueue.remove(saveQueue.size() - 1);
+
+                // Break out the while loop if chest was saved,
+                // otherwise continue immediately with the next chest
+                if (needsSave) {
+                    break;
+                }
             }
-
-            // Remove it from the save queue
-            saveQueue.remove(saveQueue.size() - 1);
         }
 
     }
@@ -202,18 +212,13 @@ public class BetterEnderFileCache implements BetterEnderCache {
         inventories.clear();
     }
 
-    private void unloadInventory(String inventoryName, String groupName) {
-        inventoryName = inventoryName.toLowerCase();
-        groupName = groupName.toLowerCase();
-
-        // Remove it from the list
-        if (inventories.containsKey(groupName)) {
-            inventories.get(groupName).remove(inventoryName);
-        }
-    }
-
     @Override
     public void unloadInventory(String inventoryName, WorldGroup group) {
-        unloadInventory(inventoryName, group.getGroupName());
+        inventoryName = inventoryName.toLowerCase();
+
+        // Remove it from the list
+        if (inventories.containsKey(group)) {
+            inventories.get(group).remove(inventoryName);
+        }
     }
 }

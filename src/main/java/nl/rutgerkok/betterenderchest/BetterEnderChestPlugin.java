@@ -258,9 +258,9 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         // Autosave
         // ticks?
         int autoSaveIntervalSeconds = config.getInt("AutoSave.autoSaveIntervalSeconds", 300);
-        if (autoSaveIntervalSeconds < 120) {
-            log("You need at least two minutes between each autosave. Changed it to two minutes.", Level.WARNING);
-            autoSaveIntervalSeconds = 120;
+        if (autoSaveIntervalSeconds < 1) {
+            log("You need at one second between each autosave. Changed it to one minute.", Level.WARNING);
+            autoSaveIntervalSeconds = 60;
         }
         if (autoSaveIntervalSeconds >= 60 * 15) {
             log("You have set a long time between the autosaves. Remember that chest unloading is also done during the autosave.", Level.WARNING);
@@ -466,7 +466,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         getCommand("betterenderchest").setExecutor(commandManager);
         getCommand("enderchest").setExecutor(new EnderChestCommand(this));
 
-        // AutoSave (adds things to the save queue
+        // AutoSave (adds things to the save queue)
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
             public void run() {
