@@ -26,6 +26,7 @@ import nl.rutgerkok.betterenderchest.io.BetterEnderFileHandler;
 import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
 import nl.rutgerkok.betterenderchest.io.BetterEnderNBTFileHandler;
 import nl.rutgerkok.betterenderchest.io.SaveLocation;
+import nl.rutgerkok.betterenderchest.mysql.DatabaseSettings;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler_1_6_R2;
 import nl.rutgerkok.betterenderchest.registry.Registration;
@@ -67,6 +68,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private BetterEnderCommandManager commandManager;
     private Registry<BaseCommand> commands = new Registry<BaseCommand>();
     private boolean compabilityMode;
+    private DatabaseSettings databaseSettings;
     private boolean debug;
     private BetterEnderCache enderCache;
     private Registry<BetterEnderFileHandler> fileHandlers = new Registry<BetterEnderFileHandler>();
@@ -146,6 +148,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public boolean getCompabilityMode() {
         return compabilityMode;
+    }
+
+    @Override
+    public DatabaseSettings getDatabaseSettings() {
+        return databaseSettings;
     }
 
     @Override
@@ -338,12 +345,15 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             log("Changed it to 27.", Level.WARNING);
             publicChestSlots = 27;
         }
-        config.set("PublicEnderChest.defaultRows", null); // Remove old //
-                                                          // setting
         config.set("PublicEnderChest.defaultSlots", publicChestSlots);
 
         // Set slots
         getChestSizes().setSizes(publicChestSlots, playerChestSlots);
+
+        // Database settings
+        if (databaseSettings == null) {
+            databaseSettings = new DatabaseSettings(config);
+        }
 
         // Save translations
         Translations.save(translationSettings);
@@ -400,7 +410,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     public void onDisable() {
         if (enderCache != null) {
             log("Disabling... Saving all chests...");
-            enderCache.saveAllInventories();
+            enderCache.disable();
             autoSave.cancel();
             enderCache = null;
             groups = null;
@@ -455,6 +465,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         }
 
         // Chests storage
+        // TODO MySQL support
         enderCache = new BetterEnderFileCache(this);
 
         // EventHandler
@@ -536,6 +547,14 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public void setCompabilityMode(boolean newCompabilityMode) {
         compabilityMode = newCompabilityMode;
+    }
+
+    @Override
+    public void setDatabaseSettings(DatabaseSettings settings) throws IllegalStateException {
+        if (this.databaseSettings != null) {
+            throw new IllegalStateException("Database settings have already been set");
+        }
+        this.databaseSettings = settings;
     }
 
     @Override

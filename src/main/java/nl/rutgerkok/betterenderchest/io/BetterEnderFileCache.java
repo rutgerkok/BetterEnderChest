@@ -106,6 +106,12 @@ public class BetterEnderFileCache implements BetterEnderCache {
 
     }
 
+    @Override
+    public void disable() {
+        this.saveAllInventories();
+        this.unloadAllInventories();
+    }
+
     private Inventory getInventory(String inventoryName, WorldGroup worldGroup) {
         // Always lowercase
         inventoryName = inventoryName.toLowerCase();

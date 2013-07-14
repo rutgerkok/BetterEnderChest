@@ -10,6 +10,7 @@ import nl.rutgerkok.betterenderchest.importers.InventoryImporter;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.BetterEnderFileHandler;
 import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
+import nl.rutgerkok.betterenderchest.mysql.DatabaseSettings;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.registry.Registry;
 
@@ -130,6 +131,14 @@ public interface BetterEnderChest {
      *         vanilla Ender Chest.
      */
     boolean getCompabilityMode();
+
+    /**
+     * Gets the database settings to user. Returns null if the settings have not
+     * been read yet.
+     * 
+     * @return The database settings.
+     */
+    DatabaseSettings getDatabaseSettings();
 
     /**
      * Returns the file handlers, which save and load to files.
@@ -265,6 +274,17 @@ public interface BetterEnderChest {
      *            Whether compability mode should be enabled.
      */
     void setCompabilityMode(boolean newCompabilityMode);
+
+    /**
+     * Sets the database settings to use when using MySQL. You need to call this
+     * in {@link org.bukkit.plugin.java.JavaPlugin#onLoad()}.
+     * 
+     * @param settings
+     *            The database settings.
+     * @throws IllegalStateException
+     *             When the settings are already set.
+     */
+    void setDatabaseSettings(DatabaseSettings settings) throws IllegalStateException;
 
     /**
      * Sets the save and load system that should be used.

@@ -16,6 +16,13 @@ public interface BetterEnderCache {
     void autoSaveTick();
 
     /**
+     * Disables the cache. Called when the plugin is shutting down. The cache
+     * should save and unload all inventories and break the connection with the
+     * database.
+     */
+    void disable();
+
+    /**
      * Loads an inventory.
      * 
      * @param inventoryName
