@@ -26,6 +26,7 @@ import nl.rutgerkok.betterenderchest.io.BetterEnderFileHandler;
 import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
 import nl.rutgerkok.betterenderchest.io.BetterEnderNBTFileHandler;
 import nl.rutgerkok.betterenderchest.io.SaveLocation;
+import nl.rutgerkok.betterenderchest.mysql.BetterEnderSQLCache;
 import nl.rutgerkok.betterenderchest.mysql.DatabaseSettings;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler_1_6_R2;
@@ -466,8 +467,13 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         }
 
         // Chests storage
-        // TODO MySQL support
-        enderCache = new BetterEnderFileCache(this);
+        if (enderCache == null) {
+            if (databaseSettings.isEnabled()) {
+                enderCache = new BetterEnderSQLCache(this);
+            } else {
+                enderCache = new BetterEnderFileCache(this);
+            }
+        }
 
         // EventHandler
         getServer().getPluginManager().registerEvents(new BetterEnderEventHandler(this), this);

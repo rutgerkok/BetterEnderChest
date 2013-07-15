@@ -14,16 +14,19 @@ import nl.rutgerkok.betterenderchest.io.Consumer;
 
 public class BetterEnderSQLCache implements BetterEnderCache {
     private final Connection connection;
+    private BetterEnderChest plugin;
 
     public BetterEnderSQLCache(BetterEnderChest plugin) {
+        this.plugin = plugin;
         DatabaseSettings settings = plugin.getDatabaseSettings();
 
         // Set up the connection
         Connection connection = null;
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager
-                    .getConnection("jdbc:mysql://" + settings.getHost() + ":" + settings.getPort() + "/" + settings.getDatabaseName(), settings.getUsername(), settings.getPassword());
+            String connectionString = "jdbc:mysql://" + settings.getHost() + ":" + settings.getPort() + "/" + settings.getDatabaseName();
+            connection = DriverManager.getConnection(connectionString, settings.getUsername(), settings.getPassword());
+            plugin.debug("Successfully connected to database");
         } catch (SQLException e) {
             plugin.log("Could not connect to MySQL server! Error: " + e.getMessage(), Level.SEVERE);
         } catch (ClassNotFoundException e) {
@@ -52,6 +55,8 @@ public class BetterEnderSQLCache implements BetterEnderCache {
         // TODO Save and unload
         try {
             connection.close();
+            // TODO remove following line
+            plugin.log("Successfully closed database connection");
         } catch (SQLException e) {
             e.printStackTrace();
         }

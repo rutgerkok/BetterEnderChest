@@ -3,6 +3,7 @@ package nl.rutgerkok.betterenderchest.mysql;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class DatabaseSettings {
+    private final boolean enabled;
     private final String databaseName;
     private final String host;
     private final String password;
@@ -17,6 +18,8 @@ public class DatabaseSettings {
      *            The config file.
      */
     public DatabaseSettings(FileConfiguration config) {
+        enabled = config.getBoolean("Database.enabled", false);
+        config.set("Database.enabled", enabled);
         host = config.getString("Database.host", "localhost");
         config.set("Database.host", host);
         port = config.getInt("Database.port", 3306);
@@ -29,7 +32,8 @@ public class DatabaseSettings {
         config.set("Database.password", password);
     }
 
-    public DatabaseSettings(String host, int port, String databaseName, String username, String password) {
+    public DatabaseSettings(boolean enabled, String host, int port, String databaseName, String username, String password) {
+        this.enabled = enabled;
         this.host = host;
         this.port = port;
         this.databaseName = databaseName;
@@ -81,5 +85,16 @@ public class DatabaseSettings {
      */
     public String getUsername() {
         return username;
+    }
+
+    /**
+     * Gets whether the user has enabled database support. If not,
+     * BetterEnderChest will save to files.
+     * 
+     * @return True when BetterEnderChest saves and loads to the database, false
+     *         otherwise.
+     */
+    public boolean isEnabled() {
+        return enabled;
     }
 }
