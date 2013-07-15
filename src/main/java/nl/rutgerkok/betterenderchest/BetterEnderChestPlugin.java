@@ -35,6 +35,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -457,7 +458,10 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         // CommandHandler
         commandManager = new BetterEnderCommandManager(this);
         getCommand("betterenderchest").setExecutor(commandManager);
-        getCommand("enderchest").setExecutor(new EnderChestCommand(this));
+        PluginCommand enderChestCommand = getCommand("enderchest");
+        if (enderChestCommand != null) {
+            enderChestCommand.setExecutor(new EnderChestCommand(this));
+        }
 
         // AutoSave (adds things to the save queue
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
