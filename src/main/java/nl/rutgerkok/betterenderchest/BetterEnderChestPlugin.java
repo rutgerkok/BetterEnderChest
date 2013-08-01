@@ -487,25 +487,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             enderChestCommand.setExecutor(new EnderChestCommand(this));
         }
 
-        // AutoSave (adds things to the save queue)
-        getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-            @Override
-            public void run() {
-                if (AutoSave.showAutoSaveMessage) {
-                    log("Autosaving...");
-                }
-                enderCache.autoSave();
-            }
-        }, AutoSave.autoSaveIntervalTicks, AutoSave.autoSaveIntervalTicks);
-
-        // AutoSaveTick
-        autoSave = getServer().getScheduler().runTaskTimer(this, new Runnable() {
-            @Override
-            public void run() {
-                enderCache.autoSaveTick();
-            }
-        }, 60, AutoSave.saveTickInterval);
-
         // Safeguard message
         if (!getSaveAndLoadSystem().canSaveAndLoad()) {
             log("Cannot save and load! Outdated plugin?", Level.SEVERE);

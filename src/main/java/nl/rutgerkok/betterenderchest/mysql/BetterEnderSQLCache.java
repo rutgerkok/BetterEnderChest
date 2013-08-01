@@ -3,22 +3,39 @@ package nl.rutgerkok.betterenderchest.mysql;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.AutoSave;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.Consumer;
 
+/**
+ * SQL caches must be prepared to be used across multiple servers. They can't
+ * keep the inventory in memory for long, as that would risk the inventory
+ * getting outdated when another server updates it. The inventory also
+ * frequently needs saving, to make sure that other server get the latest
+ * version from the database.
+ * 
+ */
 public class BetterEnderSQLCache implements BetterEnderCache {
     private final Connection connection;
-    private BetterEnderChest plugin;
+    private final Queue<LoadEntry> loadQueue;
 
-    public BetterEnderSQLCache(BetterEnderChest plugin) {
-        this.plugin = plugin;
+    private final BetterEnderChest plugin;
+    private final Queue<SaveEntry> saveQueue;
+
+    public BetterEnderSQLCache(BetterEnderChest thePlugin) {
+        this.plugin = thePlugin;
         DatabaseSettings settings = plugin.getDatabaseSettings();
+        this.loadQueue = new ConcurrentLinkedQueue<LoadEntry>();
+        this.saveQueue = new ConcurrentLinkedQueue<SaveEntry>();
 
         // Set up the connection
         Connection connection = null;
@@ -34,20 +51,15 @@ public class BetterEnderSQLCache implements BetterEnderCache {
         }
         this.connection = connection;
 
-        // Set up async saving and loading tasks
-        // TODO
-    }
+        // Set up async saving and loading task
+        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin.getPlugin(), new Runnable() {
+            @Override
+            public void run() {
+                processQueues();
+            }
+        }, AutoSave.autoSaveIntervalTicks, AutoSave.autoSaveIntervalTicks);
 
-    @Override
-    public void autoSave() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void autoSaveTick() {
-        // TODO Auto-generated method stub
-
+        // TODO set up task to add chests to autosave queue
     }
 
     @Override
@@ -64,8 +76,23 @@ public class BetterEnderSQLCache implements BetterEnderCache {
 
     @Override
     public void getInventory(String inventoryName, WorldGroup worldGroup, Consumer<Inventory> callback) {
-        // TODO Auto-generated method stub
+        // TODO Get from cache
+        loadQueue.add(new LoadEntry(inventoryName, worldGroup, callback));
+    }
 
+    /**
+     * Intended to be called from another thread.
+     */
+    private void processQueues() {
+        while (!saveQueue.isEmpty()) {
+            SaveEntry entry = saveQueue.element();
+            // TODO save entry
+        }
+        while (!loadQueue.isEmpty()) {
+            LoadEntry entry = loadQueue.element();
+            // TODO load inventory and add callback
+            // entry.callback(plugin, inventory);
+        }
     }
 
     @Override

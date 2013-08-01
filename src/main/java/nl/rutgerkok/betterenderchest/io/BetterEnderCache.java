@@ -6,16 +6,6 @@ import org.bukkit.inventory.Inventory;
 
 public interface BetterEnderCache {
     /**
-     * Adds all loaded inventories to the save queue.
-     */
-    void autoSave();
-
-    /**
-     * Processes the save queue.
-     */
-    void autoSaveTick();
-
-    /**
      * Disables the cache. Called when the plugin is shutting down. The cache
      * should save and unload all inventories and break the connection with the
      * database.

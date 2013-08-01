@@ -3,12 +3,21 @@ package nl.rutgerkok.betterenderchest.mysql;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class DatabaseSettings {
-    private final boolean enabled;
     private final String databaseName;
+    private final boolean enabled;
     private final String host;
     private final String password;
     private final int port;
     private final String username;
+
+    public DatabaseSettings(boolean enabled, String host, int port, String databaseName, String username, String password) {
+        this.enabled = enabled;
+        this.host = host;
+        this.port = port;
+        this.databaseName = databaseName;
+        this.username = username;
+        this.password = password;
+    }
 
     /**
      * Reads the settings from the config, then writes them back to the config.
@@ -30,15 +39,6 @@ public class DatabaseSettings {
         config.set("Database.username", username);
         password = config.getString("Database.password", "");
         config.set("Database.password", password);
-    }
-
-    public DatabaseSettings(boolean enabled, String host, int port, String databaseName, String username, String password) {
-        this.enabled = enabled;
-        this.host = host;
-        this.port = port;
-        this.databaseName = databaseName;
-        this.username = username;
-        this.password = password;
     }
 
     /**

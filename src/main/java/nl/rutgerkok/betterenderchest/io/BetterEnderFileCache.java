@@ -14,7 +14,15 @@ import nl.rutgerkok.betterenderchest.WorldGroup;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.scheduler.BukkitTask;
 
+/**
+ * It is expensive to read from the file system, so files are usually kept in
+ * memory for a long time. Inventories are loaded when requested, they are
+ * unloaded when the owner has logged out and no one is viewing the inventory
+ * anymore.
+ * 
+ */
 public class BetterEnderFileCache implements BetterEnderCache {
     private static class SaveQueueEntry {
         private final WorldGroup group;
@@ -34,19 +42,38 @@ public class BetterEnderFileCache implements BetterEnderCache {
         }
     }
 
+    private BukkitTask autoSaveTask;
     private Map<WorldGroup, HashMap<String, Inventory>> inventories;
-    private BetterEnderChest plugin;
 
+    private BetterEnderChest plugin;
     private ArrayList<SaveQueueEntry> saveQueue;
 
-    public BetterEnderFileCache(BetterEnderChest plugin) {
+    public BetterEnderFileCache(BetterEnderChest thePlugin) {
         inventories = new HashMap<WorldGroup, HashMap<String, Inventory>>();
         saveQueue = new ArrayList<SaveQueueEntry>();
-        this.plugin = plugin;
+        this.plugin = thePlugin;
+
+        // AutoSave (adds things to the save queue)
+        Bukkit.getScheduler().runTaskTimer(plugin.getPlugin(), new Runnable() {
+            @Override
+            public void run() {
+                if (AutoSave.showAutoSaveMessage) {
+                    plugin.log("Autosaving...");
+                }
+                autoSave();
+            }
+        }, AutoSave.autoSaveIntervalTicks, AutoSave.autoSaveIntervalTicks);
+
+        // AutoSaveTick
+        autoSaveTask = Bukkit.getScheduler().runTaskTimer(plugin.getPlugin(), new Runnable() {
+            @Override
+            public void run() {
+                autoSaveTick();
+            }
+        }, 60, AutoSave.saveTickInterval);
     }
 
-    @Override
-    public void autoSave() {
+    private void autoSave() {
         if (!saveQueue.isEmpty()) {
             plugin.log("Saving is so slow, that the save queue of the previous autosave wasn't empty during the next one!", Level.WARNING);
             plugin.log("Please reconsider your autosave settings.", Level.WARNING);
@@ -64,8 +91,7 @@ public class BetterEnderFileCache implements BetterEnderCache {
         }
     }
 
-    @Override
-    public void autoSaveTick() {
+    private void autoSaveTick() {
         for (int i = 0; i < AutoSave.chestsPerSaveTick; i++) {
             while (true) {
                 if (saveQueue.isEmpty()) {
@@ -108,6 +134,7 @@ public class BetterEnderFileCache implements BetterEnderCache {
 
     @Override
     public void disable() {
+        this.autoSaveTask.cancel();
         this.saveAllInventories();
         this.unloadAllInventories();
     }
