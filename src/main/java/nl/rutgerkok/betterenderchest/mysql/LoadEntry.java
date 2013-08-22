@@ -1,12 +1,12 @@
 package nl.rutgerkok.betterenderchest.mysql;
 
-import org.apache.commons.lang.Validate;
-import org.bukkit.Bukkit;
-import org.bukkit.inventory.Inventory;
-
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.io.Consumer;
+
+import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
+import org.bukkit.inventory.Inventory;
 
 public class LoadEntry {
     private final Consumer<Inventory> callback;

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.AutoSave;
@@ -43,6 +42,7 @@ public class BetterEnderFileCache implements BetterEnderCache {
     }
 
     private BukkitTask autoSaveTask;
+    private BukkitTask autoSaveTickTask;
     private Map<WorldGroup, HashMap<String, Inventory>> inventories;
 
     private BetterEnderChest plugin;
@@ -54,7 +54,7 @@ public class BetterEnderFileCache implements BetterEnderCache {
         this.plugin = thePlugin;
 
         // AutoSave (adds things to the save queue)
-        Bukkit.getScheduler().runTaskTimer(plugin.getPlugin(), new Runnable() {
+        autoSaveTask = Bukkit.getScheduler().runTaskTimer(plugin.getPlugin(), new Runnable() {
             @Override
             public void run() {
                 if (AutoSave.showAutoSaveMessage) {
@@ -65,7 +65,7 @@ public class BetterEnderFileCache implements BetterEnderCache {
         }, AutoSave.autoSaveIntervalTicks, AutoSave.autoSaveIntervalTicks);
 
         // AutoSaveTick
-        autoSaveTask = Bukkit.getScheduler().runTaskTimer(plugin.getPlugin(), new Runnable() {
+        autoSaveTickTask = Bukkit.getScheduler().runTaskTimer(plugin.getPlugin(), new Runnable() {
             @Override
             public void run() {
                 autoSaveTick();
@@ -75,9 +75,9 @@ public class BetterEnderFileCache implements BetterEnderCache {
 
     private void autoSave() {
         if (!saveQueue.isEmpty()) {
-            plugin.log("Saving is so slow, that the save queue of the previous autosave wasn't empty during the next one!", Level.WARNING);
-            plugin.log("Please reconsider your autosave settings.", Level.WARNING);
-            plugin.log("Skipping this autosave.", Level.WARNING);
+            plugin.warning("Saving is so slow, that the save queue of the previous autosave wasn't empty during the next one!");
+            plugin.warning("Please reconsider your autosave settings.");
+            plugin.warning("Skipping this autosave.");
             return;
         }
         for (Iterator<WorldGroup> outerIterator = inventories.keySet().iterator(); outerIterator.hasNext();) {
@@ -135,6 +135,7 @@ public class BetterEnderFileCache implements BetterEnderCache {
     @Override
     public void disable() {
         this.autoSaveTask.cancel();
+        this.autoSaveTickTask.cancel();
         this.saveAllInventories();
         this.unloadAllInventories();
     }

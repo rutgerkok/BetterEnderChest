@@ -1,7 +1,6 @@
 package nl.rutgerkok.betterenderchest;
 
 import java.io.File;
-import java.util.logging.Level;
 
 import nl.rutgerkok.betterenderchest.chestprotection.ProtectionBridge;
 import nl.rutgerkok.betterenderchest.command.BaseCommand;
@@ -210,22 +209,13 @@ public interface BetterEnderChest {
     boolean isSpecialChest(String inventoryName);
 
     /**
-     * Logs a message.
+     * Logs a message with normal importance. Message will be prefixed with the
+     * plugin name between square brackets.
      * 
      * @param message
      *            The message to show.
      */
     void log(String message);
-
-    /**
-     * Logs a message with the given piority.
-     * 
-     * @param message
-     *            The message to show.
-     * @param type
-     *            One of the log levels.
-     */
-    void log(String message, Level type);
 
     /**
      * Reloads the configuration and all chests.
@@ -293,4 +283,33 @@ public interface BetterEnderChest {
      *            The save and load system that should be used.
      */
     void setSaveAndLoadSystem(BetterEnderIOLogic saveAndLoadSystem);
+
+    /**
+     * Logs an error. Message will be prefixed with the plugin name between
+     * square brackets.
+     * 
+     * @param message
+     *            The message to show.
+     */
+    void severe(String message);
+
+    /**
+     * Logs an error with the exception. Message will be prefixed with the
+     * plugin name between square brackets.
+     * 
+     * @param message
+     *            The message to show.
+     * @param thrown
+     *            The exception that caused the error.
+     */
+    void severe(String message, Throwable thrown);
+
+    /**
+     * Logs a warning. Message will be prefixed with the plugin name between
+     * square brackets.
+     * 
+     * @param message
+     *            The message to show.
+     */
+    void warning(String message);
 }

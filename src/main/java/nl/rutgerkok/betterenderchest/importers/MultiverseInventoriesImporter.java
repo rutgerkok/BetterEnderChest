@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
@@ -57,7 +56,7 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
 
         // Check if a matching group has been found
         if (group == null) {
-            plugin.log("No matching Multiverse-Inventories group found for " + groupName + ". Cannot import " + inventoryName + ".", Level.WARNING);
+            plugin.warning("No matching Multiverse-Inventories group found for " + groupName + ". Cannot import " + inventoryName + ".");
             return null;
         }
 

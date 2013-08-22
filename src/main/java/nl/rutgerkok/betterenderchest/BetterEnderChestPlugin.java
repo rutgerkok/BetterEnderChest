@@ -43,7 +43,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 
 public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChest {
     /**
@@ -61,8 +60,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         public static boolean openOnOpeningUnprotectedChest, openOnUsingCommand;
     }
 
-    private BukkitTask autoSave;
-
     private ChestDrop chestDrop, chestDropSilkTouch, chestDropCreative;
     private Material chestMaterial = Material.ENDER_CHEST;
     private File chestSaveLocation;
@@ -76,6 +73,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private Registry<BetterEnderFileHandler> fileHandlers = new Registry<BetterEnderFileHandler>();
     private BetterEnderWorldGroupManager groups;
     private Registry<InventoryImporter> importers = new Registry<InventoryImporter>();
+    private Logger log;
     private Registry<NMSHandler> nmsHandlers = new Registry<NMSHandler>();
     private Registry<ProtectionBridge> protectionBridges = new Registry<ProtectionBridge>();
     private int rankUpgrades;
@@ -84,7 +82,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public void debug(String string) {
         if (debug) {
-            this.log("[Debug] " + string, Level.INFO);
+            log("[Debug] " + string);
         }
     }
 
@@ -220,7 +218,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         String givenSaveLocation = config.getString("BetterEnderChest.saveFolderLocation", defaultSaveLocation);
         SaveLocation saveLocation = SaveLocation.getSaveLocation(givenSaveLocation);
         if (saveLocation == null) {
-            log(givenSaveLocation + " is not a valid save location. Defaulting to " + defaultSaveLocation + ".", Level.WARNING);
+            warning(givenSaveLocation + " is not a valid save location. Defaulting to " + defaultSaveLocation + ".");
             saveLocation = SaveLocation.getDefaultSaveLocation();
         }
         chestSaveLocation = saveLocation.getFolder(this);
@@ -230,7 +228,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         String chestDrop = config.getString("BetterEnderChest.drop", "OBSIDIAN");
         chestDrop = chestDrop.toUpperCase();
         if (!isValidChestDrop(chestDrop)) { // cannot understand value
-            log("Could not understand the drop " + chestDrop + ", defaulting to OBSIDIAN", Level.WARNING);
+            warning("Could not understand the drop " + chestDrop + ", defaulting to OBSIDIAN");
             chestDrop = ChestDrop.OBSIDIAN.toString();
         }
         config.set("BetterEnderChest.drop", chestDrop);
@@ -240,7 +238,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         String chestDropSilkTouch = config.getString("BetterEnderChest.dropSilkTouch", "ITSELF");
         chestDropSilkTouch = chestDropSilkTouch.toUpperCase();
         if (!isValidChestDrop(chestDropSilkTouch)) { // cannot understand value
-            log("Could not understand the Silk Touch drop " + chestDropSilkTouch + ", defaulting to ITSELF", Level.WARNING);
+            warning("Could not understand the Silk Touch drop " + chestDropSilkTouch + ", defaulting to ITSELF");
             chestDropSilkTouch = ChestDrop.ITSELF.toString();
         }
         config.set("BetterEnderChest.dropSilkTouch", chestDropSilkTouch);
@@ -250,7 +248,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         String chestDropCreative = config.getString("BetterEnderChest.dropCreative", "NOTHING");
         chestDropCreative = chestDropCreative.toUpperCase();
         if (!isValidChestDrop(chestDropCreative)) { // cannot understand value
-            log("Could not understand the drop for Creative Mode " + chestDropCreative + ", defaulting to NOTHING", Level.WARNING);
+            warning("Could not understand the drop for Creative Mode " + chestDropCreative + ", defaulting to NOTHING");
             chestDropCreative = ChestDrop.NOTHING.toString();
         }
         config.set("BetterEnderChest.dropCreative", chestDropCreative);
@@ -268,29 +266,29 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         // ticks?
         int autoSaveIntervalSeconds = config.getInt("AutoSave.autoSaveIntervalSeconds", 300);
         if (autoSaveIntervalSeconds < 1) {
-            log("You need at one second between each autosave. Changed it to one minute.", Level.WARNING);
+            warning("You need at one second between each autosave. Changed it to one minute.");
             autoSaveIntervalSeconds = 60;
         }
         if (autoSaveIntervalSeconds >= 60 * 15) {
-            log("You have set a long time between the autosaves. Remember that chest unloading is also done during the autosave.", Level.WARNING);
+            warning("You have set a long time between the autosaves. Remember that chest unloading is also done during the autosave.");
         }
         config.set("AutoSave.autoSaveIntervalSeconds", autoSaveIntervalSeconds);
         AutoSave.autoSaveIntervalTicks = autoSaveIntervalSeconds * 20;
         // saveTick every x ticks?
         AutoSave.saveTickInterval = config.getInt("AutoSave.saveTickIntervalTicks", AutoSave.saveTickInterval);
         if (AutoSave.saveTickInterval < 1) {
-            log("AutoSave.saveTickIntervalTicks was " + AutoSave.saveTickInterval + ". Changed it to 3.", Level.WARNING);
+            warning("AutoSave.saveTickIntervalTicks was " + AutoSave.saveTickInterval + ". Changed it to 3.");
             AutoSave.saveTickInterval = 3;
         }
         config.set("AutoSave.saveTickIntervalTicks", AutoSave.saveTickInterval);
         // chests per saveTick?
         AutoSave.chestsPerSaveTick = config.getInt("AutoSave.chestsPerSaveTick", 3);
         if (AutoSave.chestsPerSaveTick < 1) {
-            log("You can't save " + AutoSave.chestsPerSaveTick + " chest per saveTick! Changed it to 3.", Level.WARNING);
+            warning("You can't save " + AutoSave.chestsPerSaveTick + " chest per saveTick! Changed it to 3.");
             AutoSave.chestsPerSaveTick = 3;
         }
         if (AutoSave.chestsPerSaveTick > 10) {
-            log("You have set AutoSave.chestsPerSaveTick to " + AutoSave.chestsPerSaveTick + ". This could cause lag when it has to save a lot of chests.", Level.WARNING);
+            warning("You have set AutoSave.chestsPerSaveTick to " + AutoSave.chestsPerSaveTick + ". This could cause lag when it has to save a lot of chests.");
         }
         config.set("AutoSave.chestsPerSaveTick", AutoSave.chestsPerSaveTick);
         // enable message?
@@ -299,7 +297,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         // Private chests
         rankUpgrades = config.getInt("PrivateEnderChest.rankUpgrades", 2);
         if (rankUpgrades < 0 || rankUpgrades > 20) {
-            log("The number of rank upgrades for the private chest was " + rankUpgrades + ". Changed it to 2.", Level.WARNING);
+            warning("The number of rank upgrades for the private chest was " + rankUpgrades + ". Changed it to 2.");
             rankUpgrades = 2;
         }
         config.set("PrivateEnderChest.rankUpgrades", rankUpgrades);
@@ -312,8 +310,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             playerChestSlots[i] = config.getInt(slotSettingName, 27);
 
             if (playerChestSlots[i] < 1 || playerChestSlots[i] > 20 * 9) {
-                log("The number of slots (upgrade nr. " + i + ") in the private chest was " + playerChestSlots[i] + "...", Level.WARNING);
-                log("Changed it to 27.", Level.WARNING);
+                warning("The number of slots (upgrade nr. " + i + ") in the private chest was " + playerChestSlots[i] + "...");
+                warning("Changed it to 27.");
                 playerChestSlots[i] = 27;
             }
             config.set(slotSettingName, playerChestSlots[i]);
@@ -343,8 +341,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         // slots?
         int publicChestSlots = config.getInt("PublicEnderChest.defaultSlots", playerChestSlots[0]);
         if (publicChestSlots < 1 || publicChestSlots > 20 * 9) {
-            log("The number of slots in the public chest was " + publicChestSlots + "...", Level.WARNING);
-            log("Changed it to 27.", Level.WARNING);
+            warning("The number of slots in the public chest was " + publicChestSlots + "...");
+            warning("Changed it to 27.");
             publicChestSlots = 27;
         }
         config.set("PublicEnderChest.defaultSlots", publicChestSlots);
@@ -362,8 +360,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         try {
             translationSettings.save(translationsFile);
         } catch (IOException e) {
-            log("Cannot save translations!", Level.SEVERE);
-            e.printStackTrace();
+            severe("Cannot save translations!", e);
         }
 
         // Groups
@@ -399,13 +396,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
     @Override
     public void log(String message) {
-        log(message, Level.INFO);
-    }
-
-    @Override
-    public void log(String message, Level type) {
-        Logger log = Logger.getLogger("Minecraft");
-        log.log(type, "[" + this.getDescription().getName() + "] " + message);
+        log.info("[" + this.getName() + "] " + message);
     }
 
     @Override
@@ -413,7 +404,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         if (enderCache != null) {
             log("Disabling... Saving all chests...");
             enderCache.disable();
-            autoSave.cancel();
             enderCache = null;
             groups = null;
         }
@@ -421,6 +411,9 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
     @Override
     public void onEnable() {
+        // Logger
+        log = Logger.getLogger("Minecraft");
+
         // ProtectionBridge
         protectionBridges.register(new LocketteBridge());
         protectionBridges.register(new LWCBridge());
@@ -489,9 +482,9 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
         // Safeguard message
         if (!getSaveAndLoadSystem().canSaveAndLoad()) {
-            log("Cannot save and load! Outdated plugin?", Level.SEVERE);
-            log("Plugin will stay enabled to prevent anyone from opening Ender Chests and corrupting data.", Level.SEVERE);
-            log("Please look for a BetterEnderChest file matching your CraftBukkit version!", Level.SEVERE);
+            severe("Cannot save and load! Outdated plugin?");
+            severe("Plugin will stay enabled to prevent anyone from opening Ender Chests and corrupting data.");
+            severe("Please look for a BetterEnderChest file matching your CraftBukkit version!");
         }
 
         // Debug message
@@ -551,5 +544,20 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public void setSaveAndLoadSystem(BetterEnderIOLogic saveAndLoadSystem) {
         this.saveAndLoadSystem = saveAndLoadSystem;
+    }
+
+    @Override
+    public void severe(String message) {
+        log.severe("[" + this.getName() + "] " + message);
+    }
+
+    @Override
+    public void severe(String message, Throwable exception) {
+        log.log(Level.SEVERE, "[" + this.getName() + "] " + message, exception);
+    }
+
+    @Override
+    public void warning(String message) {
+        log.warning("[" + this.getName() + "] " + message);
     }
 }

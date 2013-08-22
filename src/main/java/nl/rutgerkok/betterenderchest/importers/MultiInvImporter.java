@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
@@ -56,7 +55,7 @@ public class MultiInvImporter extends InventoryImporter {
 
         // Check if a matching group has been found
         if (!foundMatchingGroup) {
-            plugin.log("No matching MultiInv group found for " + groupName + ". Cannot import " + inventoryName + ".", Level.WARNING);
+            plugin.warning("No matching MultiInv group found for " + groupName + ". Cannot import " + inventoryName + ".");
             return null;
         }
 

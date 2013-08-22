@@ -3,7 +3,6 @@ package nl.rutgerkok.betterenderchest.io;
 import java.io.File;
 import java.io.IOException;
 import java.util.ListIterator;
-import java.util.logging.Level;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
@@ -205,8 +204,7 @@ public class BetterEnderIOLogic {
                 return importedInventory;
             }
         } catch (IOException e) {
-            plugin.log("Could not import inventory " + inventoryName, Level.SEVERE);
-            e.printStackTrace();
+            plugin.severe("Could not import inventory " + inventoryName, e);
 
             // Return an empty inventory. Loading the default chest again
             // could cause issues when someone

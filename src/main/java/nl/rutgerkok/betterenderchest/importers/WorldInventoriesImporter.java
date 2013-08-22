@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 
 import me.drayshak.WorldInventories.Group;
 import me.drayshak.WorldInventories.WorldInventories;
@@ -55,7 +54,7 @@ public class WorldInventoriesImporter extends InventoryImporter {
 
         // Check if a matching group has been found
         if (worldInventoriesGroup == null) {
-            plugin.log("No matching WorldInventories group found for " + groupName + ". Cannot import " + inventoryName + ".", Level.WARNING);
+            plugin.warning("No matching WorldInventories group found for " + groupName + ". Cannot import " + inventoryName + ".");
             return null;
         }
 

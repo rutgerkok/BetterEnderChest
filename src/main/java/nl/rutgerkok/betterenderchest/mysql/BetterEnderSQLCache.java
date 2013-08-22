@@ -1,20 +1,17 @@
 package nl.rutgerkok.betterenderchest.mysql;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
-
-import org.bukkit.Bukkit;
-import org.bukkit.inventory.Inventory;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.AutoSave;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.Consumer;
+
+import org.bukkit.Bukkit;
+import org.bukkit.inventory.Inventory;
 
 /**
  * SQL caches must be prepared to be used across multiple servers. They can't
@@ -25,31 +22,29 @@ import nl.rutgerkok.betterenderchest.io.Consumer;
  * 
  */
 public class BetterEnderSQLCache implements BetterEnderCache {
-    private final Connection connection;
     private final Queue<LoadEntry> loadQueue;
-
     private final BetterEnderChest plugin;
     private final Queue<SaveEntry> saveQueue;
+    private final SQLHandler sqlHandler;
 
     public BetterEnderSQLCache(BetterEnderChest thePlugin) {
+        System.out.println("SQL hello");
         this.plugin = thePlugin;
         DatabaseSettings settings = plugin.getDatabaseSettings();
         this.loadQueue = new ConcurrentLinkedQueue<LoadEntry>();
         this.saveQueue = new ConcurrentLinkedQueue<SaveEntry>();
 
         // Set up the connection
-        Connection connection = null;
+        SQLHandler sqlHandler = null;
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            String connectionString = "jdbc:mysql://" + settings.getHost() + ":" + settings.getPort() + "/" + settings.getDatabaseName();
-            connection = DriverManager.getConnection(connectionString, settings.getUsername(), settings.getPassword());
-            plugin.debug("Successfully connected to database");
+            sqlHandler = new SQLHandler(settings);
+            for (WorldGroup group : plugin.getWorldGroupManager().getGroups()) {
+                sqlHandler.createGroupTable(group);
+            }
         } catch (SQLException e) {
-            plugin.log("Could not connect to MySQL server! Error: " + e.getMessage(), Level.SEVERE);
-        } catch (ClassNotFoundException e) {
-            plugin.log("JDBC Driver not found!", Level.SEVERE);
+            plugin.severe("Error communicating with database", e);
         }
-        this.connection = connection;
+        this.sqlHandler = sqlHandler;
 
         // Set up async saving and loading task
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin.getPlugin(), new Runnable() {
@@ -66,11 +61,9 @@ public class BetterEnderSQLCache implements BetterEnderCache {
     public void disable() {
         // TODO Save and unload
         try {
-            connection.close();
-            // TODO remove following line
-            plugin.log("Successfully closed database connection");
+            sqlHandler.closeConnection();
         } catch (SQLException e) {
-            e.printStackTrace();
+            plugin.severe("Failed to close database connection", e);
         }
     }
 

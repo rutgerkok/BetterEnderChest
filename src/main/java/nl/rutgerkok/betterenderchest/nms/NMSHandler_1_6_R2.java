@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.logging.Level;
 
 import net.minecraft.server.v1_6_R2.MinecraftServer;
 import net.minecraft.server.v1_6_R2.NBTCompressedStreamTools;
@@ -118,13 +117,11 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
             return null;
         } catch (IOException e) {
             // Read error
-            plugin.log("Could not load inventory " + inventoryName + ". " + "File corruption/permissions?", Level.SEVERE);
-            e.printStackTrace();
+            plugin.severe("Could not load inventory " + inventoryName + ". " + "File corruption/permissions?", e);
             return null;
         } catch (Throwable e) {
             // For errors like ClassNotFoundError
-            plugin.log("Could not load inventory " + inventoryName + ". Outdated plugin?", Level.SEVERE);
-            e.printStackTrace();
+            plugin.severe("Could not load inventory " + inventoryName + ". Outdated plugin?", e);
             return null;
         }
     }
@@ -174,13 +171,11 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
             stream.flush();
             stream.close();
         } catch (IOException e) {
-            plugin.log("Cannot save the inventory! Write error!", Level.SEVERE);
-            e.printStackTrace();
+            plugin.severe("Cannot save the inventory! Write error!", e);
             // Disable this NMS handler, it is too dangerous to save more things
             plugin.getNMSHandlers().selectRegistration(null);
         } catch (Throwable t) {
-            plugin.log("Cannot save the inventory! Outdated plugin?", Level.SEVERE);
-            t.printStackTrace();
+            plugin.severe("Cannot save the inventory! Outdated plugin?", t);
         }
     }
 

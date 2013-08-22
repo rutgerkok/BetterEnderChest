@@ -3,13 +3,14 @@ package nl.rutgerkok.betterenderchest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 import nl.rutgerkok.betterenderchest.importers.InventoryImporter;
 
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+
+import com.google.common.collect.ImmutableList;
 
 public class BetterEnderWorldGroupManager {
 
@@ -61,6 +62,15 @@ public class BetterEnderWorldGroupManager {
             }
         }
         return groups.get(BetterEnderChest.STANDARD_GROUP_NAME);
+    }
+
+    /**
+     * Gets an immutable list with all world groups.
+     * 
+     * @return All world groups.
+     */
+    public List<WorldGroup> getGroups() {
+        return ImmutableList.copyOf(groups.values());
     }
 
     protected WorldGroup getOrCreateWorldGroup(String groupName) {
@@ -133,7 +143,7 @@ public class BetterEnderWorldGroupManager {
                 String importerName = importSection.getString(groupName).toLowerCase();
                 InventoryImporter importer = plugin.getInventoryImporters().getAvailableRegistration(importerName);
                 if (importer == null) {
-                    plugin.log("The import " + importerName + " for the group " + groupName + " isn't a valid importer.", Level.WARNING);
+                    plugin.warning("The import " + importerName + " for the group " + groupName + " isn't a valid importer.");
                     continue;
                 }
 
@@ -157,7 +167,7 @@ public class BetterEnderWorldGroupManager {
                         WorldGroup group = getOrCreateWorldGroup(groupName);
                         group.addWorld(world);
                     } else {
-                        plugin.log("The world " + world + " was added to two groups. It is now only in the first group.", Level.WARNING);
+                        plugin.warning("The world " + world + " was added to two groups. It is now only in the first group.");
                     }
                 }
             }
