@@ -40,7 +40,7 @@ public class MultiInvImporter extends InventoryImporter {
         }
 
         // Soon an inventory!
-        Inventory betterInventory = plugin.getSaveAndLoadSystem().loadEmptyInventory(inventoryName);
+        Inventory betterInventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName);
 
         // Make groupName case-correct
         boolean foundMatchingGroup = false;

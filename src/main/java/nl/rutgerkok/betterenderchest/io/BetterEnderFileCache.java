@@ -43,13 +43,13 @@ public class BetterEnderFileCache implements BetterEnderCache {
 
     private BukkitTask autoSaveTask;
     private BukkitTask autoSaveTickTask;
-    private Map<WorldGroup, HashMap<String, Inventory>> inventories;
+    private Map<WorldGroup, Map<String, Inventory>> inventories;
 
     private BetterEnderChest plugin;
     private ArrayList<SaveQueueEntry> saveQueue;
 
     public BetterEnderFileCache(BetterEnderChest thePlugin) {
-        inventories = new HashMap<WorldGroup, HashMap<String, Inventory>>();
+        inventories = new HashMap<WorldGroup, Map<String, Inventory>>();
         saveQueue = new ArrayList<SaveQueueEntry>();
         this.plugin = thePlugin;
 
@@ -82,7 +82,7 @@ public class BetterEnderFileCache implements BetterEnderCache {
         }
         for (Iterator<WorldGroup> outerIterator = inventories.keySet().iterator(); outerIterator.hasNext();) {
             WorldGroup group = outerIterator.next();
-            HashMap<String, Inventory> inGroup = inventories.get(group);
+            Map<String, Inventory> inGroup = inventories.get(group);
             for (Iterator<Entry<String, Inventory>> it = inGroup.entrySet().iterator(); it.hasNext();) {
                 Entry<String, Inventory> inventoryEntry = it.next();
                 // Add to save queue, but only if there are unsaved changes
@@ -175,7 +175,7 @@ public class BetterEnderFileCache implements BetterEnderCache {
 
         for (Iterator<WorldGroup> outerIterator = inventories.keySet().iterator(); outerIterator.hasNext();) {
             WorldGroup groupName = outerIterator.next();
-            HashMap<String, Inventory> group = inventories.get(groupName);
+            Map<String, Inventory> group = inventories.get(groupName);
             for (Iterator<String> it = group.keySet().iterator(); it.hasNext();) {
                 String inventoryName = it.next();
                 Inventory inventory = group.get(inventoryName);
@@ -224,7 +224,7 @@ public class BetterEnderFileCache implements BetterEnderCache {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         for (WorldGroup group : inventories.keySet()) {
-            HashMap<String, Inventory> inGroup = inventories.get(group);
+            Map<String, Inventory> inGroup = inventories.get(group);
             if (inGroup.size() > 0) {
                 builder.append("Chests in group " + group.getGroupName() + ":");
                 for (String inventoryName : inGroup.keySet()) {

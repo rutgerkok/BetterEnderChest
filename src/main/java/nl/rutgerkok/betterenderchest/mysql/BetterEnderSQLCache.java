@@ -1,6 +1,8 @@
 package nl.rutgerkok.betterenderchest.mysql;
 
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -22,17 +24,20 @@ import org.bukkit.inventory.Inventory;
  * 
  */
 public class BetterEnderSQLCache implements BetterEnderCache {
-    private final Queue<LoadEntry> loadQueue;
-    private final BetterEnderChest plugin;
+    /**
+     * Not thread safe! Only modify this from the main thread. Thanks.
+     */
+    private Map<WorldGroup, Map<String, Inventory>> cachedInventories;
+    protected final BetterEnderChest plugin;
     private final Queue<SaveEntry> saveQueue;
     private final SQLHandler sqlHandler;
 
     public BetterEnderSQLCache(BetterEnderChest thePlugin) {
-        System.out.println("SQL hello");
+        // Set up variables
         this.plugin = thePlugin;
         DatabaseSettings settings = plugin.getDatabaseSettings();
-        this.loadQueue = new ConcurrentLinkedQueue<LoadEntry>();
         this.saveQueue = new ConcurrentLinkedQueue<SaveEntry>();
+        this.cachedInventories = new HashMap<WorldGroup, Map<String, Inventory>>();
 
         // Set up the connection
         SQLHandler sqlHandler = null;
@@ -52,7 +57,7 @@ public class BetterEnderSQLCache implements BetterEnderCache {
             public void run() {
                 processQueues();
             }
-        }, AutoSave.autoSaveIntervalTicks, AutoSave.autoSaveIntervalTicks);
+        }, AutoSave.saveTickInterval, AutoSave.saveTickInterval);
 
         // TODO set up task to add chests to autosave queue
     }
@@ -69,8 +74,33 @@ public class BetterEnderSQLCache implements BetterEnderCache {
 
     @Override
     public void getInventory(String inventoryName, WorldGroup worldGroup, Consumer<Inventory> callback) {
-        // TODO Get from cache
-        loadQueue.add(new LoadEntry(inventoryName, worldGroup, callback));
+        // Try to get from the cache first
+        Map<String, Inventory> cachedInGroup = cachedInventories.get(worldGroup);
+        if (cachedInGroup != null) {
+            Inventory inventory = cachedInGroup.get(inventoryName);
+            if (inventory != null) {
+                System.out.println("Getting from cache");
+                callback.consume(inventory);
+                return;
+            }
+        }
+
+        // Load from database
+        final LoadEntry loadEntry = new LoadEntry(inventoryName, worldGroup, callback);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin.getPlugin(), new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    // This loads the chest bytes on a random thread. The
+                    // callback method immediately goes back to the main thread
+                    // and creates the inventory and puts in in the cache
+                    loadEntry.callback(BetterEnderSQLCache.this, sqlHandler.loadChest(loadEntry.getInventoryName(), loadEntry.getWorldGroup()));
+                } catch (SQLException e) {
+                    plugin.severe("SQL error", e);
+                }
+            }
+        });
     }
 
     /**
@@ -80,11 +110,6 @@ public class BetterEnderSQLCache implements BetterEnderCache {
         while (!saveQueue.isEmpty()) {
             SaveEntry entry = saveQueue.element();
             // TODO save entry
-        }
-        while (!loadQueue.isEmpty()) {
-            LoadEntry entry = loadQueue.element();
-            // TODO load inventory and add callback
-            // entry.callback(plugin, inventory);
         }
     }
 
@@ -102,20 +127,27 @@ public class BetterEnderSQLCache implements BetterEnderCache {
 
     @Override
     public void setInventory(String inventoryName, WorldGroup group, Inventory enderInventory) {
-        // TODO Auto-generated method stub
-
+        Map<String, Inventory> inventoriesInGroup = cachedInventories.get(group);
+        if (inventoriesInGroup == null) {
+            inventoriesInGroup = new HashMap<String, Inventory>();
+            cachedInventories.put(group, inventoriesInGroup);
+        }
+        inventoriesInGroup.put(inventoryName, enderInventory);
     }
 
     @Override
     public void unloadAllInventories() {
-        // TODO Auto-generated method stub
-
+        cachedInventories.clear();
     }
 
     @Override
     public void unloadInventory(String inventoryName, WorldGroup group) {
-        // TODO Auto-generated method stub
-
+        Map<String, Inventory> inventoriesInGroup = cachedInventories.get(group);
+        if (inventoriesInGroup == null) {
+            // No chests of that group loaded, nothing to do
+            return;
+        }
+        inventoriesInGroup.remove(inventoryName);
     }
 
 }

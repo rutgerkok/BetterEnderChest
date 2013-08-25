@@ -69,6 +69,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private boolean compabilityMode;
     private DatabaseSettings databaseSettings;
     private boolean debug;
+    private EmptyInventoryProvider emptyInventoryProvider;
     private BetterEnderCache enderCache;
     private Registry<BetterEnderFileHandler> fileHandlers = new Registry<BetterEnderFileHandler>();
     private BetterEnderWorldGroupManager groups;
@@ -153,6 +154,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public DatabaseSettings getDatabaseSettings() {
         return databaseSettings;
+    }
+
+    @Override
+    public EmptyInventoryProvider getEmptyInventoryProvider() {
+        return emptyInventoryProvider;
     }
 
     @Override
@@ -436,6 +442,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         if (chestSizes == null) {
             chestSizes = new BetterEnderChestSizes();
         }
+        
+        // Empty inventory provider
+        if (emptyInventoryProvider == null) {
+            emptyInventoryProvider = new EmptyInventoryProvider(this);
+        }
 
         // NMS handlers
         try {
@@ -539,6 +550,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             throw new IllegalStateException("Database settings have already been set");
         }
         this.databaseSettings = settings;
+    }
+
+    @Override
+    public void setEmtpyInventoryProvider(EmptyInventoryProvider provider) {
+        this.emptyInventoryProvider = provider;
     }
 
     @Override

@@ -67,8 +67,8 @@ public class WorldInventoriesImporter extends InventoryImporter {
         }
 
         // Add everything from WorldInventories to betterInventory
-        int rows = plugin.getSaveAndLoadSystem().getInventoryRows(inventoryName, stacks.listIterator());
-        Inventory betterInventory = plugin.getSaveAndLoadSystem().loadEmptyInventory(inventoryName, rows, 0);
+        int rows = plugin.getEmptyInventoryProvider().getInventoryRows(inventoryName, stacks.listIterator());
+        Inventory betterInventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName, rows, 0);
         for (int i = 0; i < stacks.size(); i++) {
             ItemStack stack = stacks.get(i);
             if (stack != null) {

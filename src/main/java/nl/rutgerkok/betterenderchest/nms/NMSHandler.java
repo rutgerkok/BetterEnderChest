@@ -50,6 +50,27 @@ public abstract class NMSHandler implements Registration {
     public abstract Inventory loadNBTInventory(File nbtFile, String inventoryName, String inventoryTagName);
 
     /**
+     * Loads a BetterEnderChest inventory from the NBT byte array. The inventory
+     * will have the specified name and will be loaded from the specified child
+     * tag (vanilla uses EnderItems and BeterEnderChest uses Inventory). It will
+     * also search for size and name tags in the root of the file, but it should
+     * guess them if they are not provided.
+     * <p />
+     * It is not permitted to use another load format than NBT, as for example
+     * the vanilla importing process depends on it.
+     * 
+     * @param nbtFile
+     *            The array to load from.
+     * @param inventoryName
+     *            The name of the inventory.
+     * @param inventoryTagName
+     *            The name of the tag in the file to load the items from.
+     * @return The inventory. The holder of the inventory must be
+     *         BetterEnderInventoryHolder.
+     */
+    public abstract Inventory loadNBTInventory(byte[] bytes, String inventoryName, String inventoryTagName);
+
+    /**
      * Increments one to the player counter of the Ender Chest at the location.
      * This should play the open animation of the Ender Chest if it wasn't
      * already opened by another player.

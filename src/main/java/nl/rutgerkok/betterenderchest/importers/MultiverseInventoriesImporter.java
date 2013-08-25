@@ -108,7 +108,7 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
             }
 
             // Add everything from Multiverse-Inventories to betterInventory
-            Inventory betterInventory = plugin.getSaveAndLoadSystem().loadEmptyInventory(inventoryName);
+            Inventory betterInventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName);
             betterInventory.setContents(stacks);
             return betterInventory;
         }

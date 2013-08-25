@@ -1,10 +1,12 @@
 package nl.rutgerkok.betterenderchest.nms;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import net.minecraft.server.v1_6_R2.MinecraftServer;
 import net.minecraft.server.v1_6_R2.NBTCompressedStreamTools;
@@ -70,7 +72,7 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
 
             // Calculate the needed number of rows for the items, and return the
             // required number of rows
-            return Math.max((int) Math.ceil(highestSlot / 9.0), plugin.getSaveAndLoadSystem().getInventoryRows(inventoryName));
+            return Math.max((int) Math.ceil(highestSlot / 9.0), plugin.getEmptyInventoryProvider().getInventoryRows(inventoryName));
         }
     }
 
@@ -85,44 +87,63 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
         }
     }
 
-    @SuppressWarnings("resource")
-    // ^ NBTCompressedStreamTools already closes stream
+    @Override
+    public Inventory loadNBTInventory(byte[] bytes, String inventoryName, String inventoryTagName) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+        try {
+            return loadNBTInventory(inputStream, inventoryName, inventoryTagName);
+        } catch(IOException e) {
+            plugin.severe("Failed to load chest, chest is probably corrupted.", e);
+        } catch(Throwable t) {
+            plugin.severe("Failed to load chest, unknown error.", t);
+        }
+        return null;
+    }
+    
+    private Inventory loadNBTInventory(InputStream inputStream, String inventoryName, String inventoryTagName) throws IOException {
+        // Load the NBT tag
+        NBTTagCompound baseTag = NBTCompressedStreamTools.a(inputStream);
+        NBTTagList inventoryTag = baseTag.getList(inventoryTagName);
+
+        // Create the Bukkit inventory
+        int inventoryRows = getRows(inventoryName, baseTag, inventoryTag);
+        int disabledSlots = getDisabledSlots(baseTag);
+        Inventory inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName, inventoryRows, disabledSlots);
+
+        // Add all the items
+        for (int i = 0; i < inventoryTag.size(); i++) {
+            NBTTagCompound item = (NBTTagCompound) inventoryTag.get(i);
+            int slot = item.getByte("Slot") & 255;
+            inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_6_R2.ItemStack.createStack(item)));
+        }
+
+        // Return the inventory
+        return inventory;
+    }
+
     @Override
     public Inventory loadNBTInventory(File file, String inventoryName, String inventoryTagName) {
-        FileInputStream inputStream;
+        FileInputStream inputStream = null;
         try {
-            // Load the NBT tag
             inputStream = new FileInputStream(file);
-            NBTTagCompound baseTag = NBTCompressedStreamTools.a(inputStream);
-            inputStream.close();
-            NBTTagList inventoryTag = baseTag.getList(inventoryTagName);
-
-            // Create the Bukkit inventory
-            int inventoryRows = getRows(inventoryName, baseTag, inventoryTag);
-            int disabledSlots = getDisabledSlots(baseTag);
-            Inventory inventory = plugin.getSaveAndLoadSystem().loadEmptyInventory(inventoryName, inventoryRows, disabledSlots);
-
-            // Add all the items
-            for (int i = 0; i < inventoryTag.size(); i++) {
-                NBTTagCompound item = (NBTTagCompound) inventoryTag.get(i);
-                int slot = item.getByte("Slot") & 255;
-                inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_6_R2.ItemStack.createStack(item)));
-            }
-
-            // Return the inventory
-            return inventory;
-
-        } catch (FileNotFoundException e) {
-            // File not found, ignore
+            return loadNBTInventory(inputStream, inventoryName, inventoryTagName);
+        } catch(FileNotFoundException ignored) {
+            // Ignored
             return null;
         } catch (IOException e) {
-            // Read error
-            plugin.severe("Could not load inventory " + inventoryName + ". " + "File corruption/permissions?", e);
+            plugin.severe("Failed to read chest file. Corrupted file?", e);
             return null;
-        } catch (Throwable e) {
-            // For errors like ClassNotFoundError
-            plugin.severe("Could not load inventory " + inventoryName + ". Outdated plugin?", e);
+        } catch (Throwable t) {
+            plugin.severe("Failed to read chest file. Unknown error!", t);
             return null;
+        } finally {
+            if(inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    plugin.severe("Failed to close stream", e);
+                }
+            }
         }
     }
 

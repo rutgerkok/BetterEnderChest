@@ -2,6 +2,8 @@ package nl.rutgerkok.betterenderchest.mysql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -12,6 +14,47 @@ import nl.rutgerkok.betterenderchest.WorldGroup;
  * 
  */
 public class SQLHandler {
+    public static class InventoryResult {
+        private final byte[] chestData;
+        private final int chestId;
+
+        protected InventoryResult(int chestId, byte[] chestData) {
+            this.chestId = chestId;
+            this.chestData = chestData;
+        }
+
+        /**
+         * Returns the data of the chest in the database. Returns null if the
+         * result is empty.
+         * 
+         * @return The data of the chest, or null.
+         */
+        public byte[] getChestData() {
+            return chestData;
+        }
+
+        /**
+         * Returns the id of the chest in the database. Returns 0 if the result
+         * is empty.
+         * 
+         * @return The id of the chest in the database, or 0.
+         */
+        public int getChestId() {
+            return chestId;
+        }
+
+        /**
+         * Returns whether this result is emtpy.
+         * 
+         * @return True if empty, otherwise false.
+         */
+        public boolean isEmpty() {
+            return chestId == 0;
+        }
+    }
+
+    private static final InventoryResult NO_RESULT = new InventoryResult(0, null);
+
     private final Connection connection;
 
     public SQLHandler(DatabaseSettings settings) throws SQLException {
@@ -60,6 +103,44 @@ public class SQLHandler {
             statement.execute(query);
         } finally {
             statement.close();
+        }
+    }
+
+    /**
+     * Loads a chest from the database.
+     * 
+     * @param inventoryName
+     *            The name of the inventory.
+     * @param group
+     *            The group of the inventory.
+     * @return The chest id and data, or an empty result object if not found.
+     * @throws SQLException
+     *             If something went wrong.
+     */
+    public InventoryResult loadChest(String inventoryName, WorldGroup group) throws SQLException {
+        PreparedStatement statement = null;
+        ResultSet result = null;
+        try {
+            String query = "SELECT `chest_id`, `chest_data` FROM `bec_chests_" + group.getGroupName();
+
+            query += "` WHERE `chest_owner` = ?";
+            statement = connection.prepareStatement(query);
+            statement.setString(1, inventoryName);
+            result = statement.executeQuery();
+            if (result.first()) {
+                int chestId = result.getInt("chest_id");
+                byte[] chestData = result.getBytes("chest_data");
+                return new InventoryResult(chestId, chestData);
+            } else {
+                return NO_RESULT;
+            }
+        } finally {
+            if (statement != null) {
+                statement.close();
+            }
+            if (result != null) {
+                result.close();
+            }
         }
     }
 }

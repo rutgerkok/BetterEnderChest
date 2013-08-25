@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 
-import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
 import nl.rutgerkok.betterenderchest.io.CaseInsensitiveFileFilter;
 
 import org.bukkit.ChatColor;
@@ -220,18 +219,18 @@ public class BetterEnderUtils {
         int rows = inventory.getSize() / 9;
         int disabledSlots = ((BetterEnderInventoryHolder) inventory.getHolder()).getDisabledSlots();
         BetterEnderChestSizes chestSizes = plugin.getChestSizes();
-        BetterEnderIOLogic loader = plugin.getSaveAndLoadSystem();
+        EmptyInventoryProvider emptyChests = plugin.getEmptyInventoryProvider();
         if (inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME)) {
             // It's the public chest
             if (rows != chestSizes.getPublicChestRows() || disabledSlots != chestSizes.getPublicChestDisabledSlots()) {
                 // Resize
-                return loader.loadEmptyInventory(inventoryName, chestSizes.getPublicChestRows(), chestSizes.getPublicChestDisabledSlots());
+                return emptyChests.loadEmptyInventory(inventoryName, chestSizes.getPublicChestRows(), chestSizes.getPublicChestDisabledSlots());
             }
         } else if (inventoryName.equals(BetterEnderChest.DEFAULT_CHEST_NAME)) {
             // It's the default chest
             if (rows != chestSizes.getChestRows() || disabledSlots != chestSizes.getDisabledSlots()) {
                 // Resize
-                return loader.loadEmptyInventory(inventoryName, chestSizes.getChestRows(), chestSizes.getDisabledSlots());
+                return emptyChests.loadEmptyInventory(inventoryName, chestSizes.getChestRows(), chestSizes.getDisabledSlots());
             }
         } else {
             // It's a private chest
@@ -239,7 +238,7 @@ public class BetterEnderUtils {
                 // Player is the owner
                 if (rows != chestSizes.getChestRows(player) || disabledSlots != chestSizes.getDisabledSlots(player)) {
                     // Number of slots is incorrect
-                    return loader.loadEmptyInventory(inventoryName, chestSizes.getChestRows(player), chestSizes.getDisabledSlots(player));
+                    return emptyChests.loadEmptyInventory(inventoryName, chestSizes.getChestRows(player), chestSizes.getDisabledSlots(player));
                 }
             }
         }
