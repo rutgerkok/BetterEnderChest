@@ -4,26 +4,43 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
 public class BetterEnderInventoryHolder implements InventoryHolder {
-    private boolean correctCase; // Whether the name has been verified to be
-    private byte disabledSlots; // The number of disabled slots in the chest,
+    private boolean isNew;
+    private boolean isSetWhetherChestIsNew;
+    private boolean correctCase;
+    private byte disabledSlots;
     private boolean hasUnsavedChanges;
-    private String ownerName; // Never displayed, stores the name
+    private String ownerName;
 
     public BetterEnderInventoryHolder(String ownerName, int disabledSlots, boolean correctCase) {
         this.ownerName = ownerName;
         this.disabledSlots = (byte) disabledSlots;
         this.correctCase = correctCase;
+        this.isNew = false;
     }
 
+    /**
+     * Gets the number of disabled slots in this chest.
+     * 
+     * @return The number of disabled slots in this chest.
+     */
     public int getDisabledSlots() {
         return disabledSlots;
     }
 
+    /**
+     * @deprecated This holder doesn't keep a reference to the inventory.
+     */
     @Override
+    @Deprecated
     public Inventory getInventory() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Returns the name of this inventory.
+     * 
+     * @return The name of this inventory.
+     */
     public String getName() {
         return ownerName;
     }
@@ -37,6 +54,13 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
         return hasUnsavedChanges;
     }
 
+    /**
+     * Returns whether the name is just a guess based on what the user entered
+     * which may not have the correct letters capitalized, or if the name is
+     * case-correct.
+     * 
+     * @return True if the name is case-correct.
+     */
     public boolean isOwnerNameCaseCorrect() {
         return correctCase;
     }
@@ -53,8 +77,44 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
         this.hasUnsavedChanges = unsavedChanges;
     }
 
+    /**
+     * Updates the stored owner name.
+     * 
+     * @param newName
+     *            The new name.
+     * @param correctCase
+     *            Whether the name is case correct. See
+     *            {@link #isOwnerNameCaseCorrect()} for more information.
+     */
     public void setOwnerName(String newName, boolean correctCase) {
         ownerName = newName;
         this.correctCase = correctCase;
+    }
+
+    /**
+     * Sets whether this chest has been saved at least once in it's lifetime.
+     * 
+     * @param isNew
+     *            Whether the chest is new.
+     */
+    public void setChestIsNew(boolean isNew) {
+        this.isNew = isNew;
+        this.isSetWhetherChestIsNew = true;
+    }
+
+    /**
+     * Returns whether the chest has been saved at least once in it's lifetime.
+     * This value has to be updated before the chest is actually saved.
+     * 
+     * @return True if the chest has not been saved yet.
+     * @throws UnsupportedOperationException
+     *             If it has not been specified whether the chest has been
+     *             saved.
+     */
+    public boolean isChestNew() {
+        if (!this.isSetWhetherChestIsNew) {
+            throw new UnsupportedOperationException("Unknown whether chest is new");
+        }
+        return isNew;
     }
 }

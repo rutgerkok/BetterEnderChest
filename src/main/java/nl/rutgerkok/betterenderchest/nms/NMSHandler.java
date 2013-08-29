@@ -1,6 +1,7 @@
 package nl.rutgerkok.betterenderchest.nms;
 
 import java.io.File;
+import java.io.IOException;
 
 import nl.rutgerkok.betterenderchest.registry.Registration;
 
@@ -93,4 +94,6 @@ public abstract class NMSHandler implements Registration {
      *            BetterEnderInventoryHolder as it's holder.
      */
     public abstract void saveInventoryAsNBT(File file, Inventory inventory);
+
+    public abstract byte[] saveInventoryToByteArray(Inventory inventory) throws IOException;
 }

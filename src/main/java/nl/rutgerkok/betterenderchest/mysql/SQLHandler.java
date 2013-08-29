@@ -14,47 +14,6 @@ import nl.rutgerkok.betterenderchest.WorldGroup;
  * 
  */
 public class SQLHandler {
-    public static class InventoryResult {
-        private final byte[] chestData;
-        private final int chestId;
-
-        protected InventoryResult(int chestId, byte[] chestData) {
-            this.chestId = chestId;
-            this.chestData = chestData;
-        }
-
-        /**
-         * Returns the data of the chest in the database. Returns null if the
-         * result is empty.
-         * 
-         * @return The data of the chest, or null.
-         */
-        public byte[] getChestData() {
-            return chestData;
-        }
-
-        /**
-         * Returns the id of the chest in the database. Returns 0 if the result
-         * is empty.
-         * 
-         * @return The id of the chest in the database, or 0.
-         */
-        public int getChestId() {
-            return chestId;
-        }
-
-        /**
-         * Returns whether this result is emtpy.
-         * 
-         * @return True if empty, otherwise false.
-         */
-        public boolean isEmpty() {
-            return chestId == 0;
-        }
-    }
-
-    private static final InventoryResult NO_RESULT = new InventoryResult(0, null);
-
     private final Connection connection;
 
     public SQLHandler(DatabaseSettings settings) throws SQLException {
@@ -89,21 +48,20 @@ public class SQLHandler {
      *             If somehting went wrong.
      */
     public void createGroupTable(WorldGroup group) throws SQLException {
-        String query = "CREATE TABLE IF NOT EXISTS `bec_chests_" + group.getGroupName() + "` (";
-        query += "`chest_id` int(10) unsigned NOT NULL AUTO_INCREMENT, `chest_owner` varchar(16) NOT NULL,";
-        query += "`chest_data` blob NOT NULL, PRIMARY KEY (`chest_id`), UNIQUE KEY (`chest_owner`)";
-        query += ") ENGINE=InnoDB";
-        execute(query);
-    }
-
-    private void execute(String query) throws SQLException {
         Statement statement = connection.createStatement();
-
         try {
+            String query = "CREATE TABLE IF NOT EXISTS `" + getTableName(group) + "` (";
+            query += "`chest_id` int(10) unsigned NOT NULL AUTO_INCREMENT, `chest_owner` varchar(16) NOT NULL,";
+            query += "`chest_data` blob NOT NULL, PRIMARY KEY (`chest_id`), UNIQUE KEY (`chest_owner`)";
+            query += ") ENGINE=InnoDB";
             statement.execute(query);
         } finally {
             statement.close();
         }
+    }
+
+    protected String getTableName(WorldGroup group) {
+        return "bec_chests_" + group.getGroupName();
     }
 
     /**
@@ -113,26 +71,23 @@ public class SQLHandler {
      *            The name of the inventory.
      * @param group
      *            The group of the inventory.
-     * @return The chest id and data, or an empty result object if not found.
+     * @return The chest data, or null if not found.
      * @throws SQLException
      *             If something went wrong.
      */
-    public InventoryResult loadChest(String inventoryName, WorldGroup group) throws SQLException {
+    public byte[] loadChest(String inventoryName, WorldGroup group) throws SQLException {
         PreparedStatement statement = null;
         ResultSet result = null;
         try {
-            String query = "SELECT `chest_id`, `chest_data` FROM `bec_chests_" + group.getGroupName();
-
+            String query = "SELECT `chest_data` FROM `" + getTableName(group);
             query += "` WHERE `chest_owner` = ?";
             statement = connection.prepareStatement(query);
             statement.setString(1, inventoryName);
             result = statement.executeQuery();
             if (result.first()) {
-                int chestId = result.getInt("chest_id");
-                byte[] chestData = result.getBytes("chest_data");
-                return new InventoryResult(chestId, chestData);
+                return result.getBytes("chest_data");
             } else {
-                return NO_RESULT;
+                return null;
             }
         } finally {
             if (statement != null) {
@@ -140,6 +95,51 @@ public class SQLHandler {
             }
             if (result != null) {
                 result.close();
+            }
+        }
+    }
+
+    /**
+     * Saves a chest to the database.
+     * 
+     * @param inventoryName
+     *            The name of the chest.
+     * @param group
+     *            The group the chest belongs to.
+     * @param chestData
+     *            The raw data of the chest.
+     * @throws SQLException
+     *             If something went wrong.
+     */
+    public void updateChest(String inventoryName, WorldGroup group, byte[] chestData) throws SQLException {
+        PreparedStatement statement = null;
+        try {
+            // Existing chest, update row
+            String query = "UPDATE `" + getTableName(group) + "` SET `chest_data` = ? WHERE `chest_owner` = ?";
+            statement = connection.prepareStatement(query);
+            statement.setBytes(1, chestData);
+            statement.setString(2, inventoryName);
+            statement.executeUpdate();
+        } finally {
+            if (statement != null) {
+                statement.close();
+            }
+        }
+    }
+
+    public void addChest(String inventoryName, WorldGroup group, byte[] chestData) throws SQLException {
+        PreparedStatement statement = null;
+        try {
+            // New chest, insert in database
+            String query = "INSERT INTO `" + getTableName(group) + "` (`chest_owner`, `chest_data`) ";
+            query += "VALUES (?, ?)";
+            statement = connection.prepareStatement(query);
+            statement.setString(1, inventoryName);
+            statement.setBytes(2, chestData);
+            statement.executeUpdate();
+        } finally {
+            if (statement != null) {
+                statement.close();
             }
         }
     }

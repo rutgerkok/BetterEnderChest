@@ -1,19 +1,23 @@
 package nl.rutgerkok.betterenderchest.mysql;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.AutoSave;
+import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.Consumer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.scheduler.BukkitTask;
 
 /**
  * SQL caches must be prepared to be used across multiple servers. They can't
@@ -31,6 +35,9 @@ public class BetterEnderSQLCache implements BetterEnderCache {
     protected final BetterEnderChest plugin;
     private final Queue<SaveEntry> saveQueue;
     private final SQLHandler sqlHandler;
+
+    private final BukkitTask saveTickTask;
+    private final BukkitTask autoSaveTask;
 
     public BetterEnderSQLCache(BetterEnderChest thePlugin) {
         // Set up variables
@@ -51,15 +58,52 @@ public class BetterEnderSQLCache implements BetterEnderCache {
         }
         this.sqlHandler = sqlHandler;
 
-        // Set up async saving and loading task
-        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin.getPlugin(), new Runnable() {
+        // Set up async saving task
+        saveTickTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin.getPlugin(), new Runnable() {
             @Override
             public void run() {
                 processQueues();
             }
         }, AutoSave.saveTickInterval, AutoSave.saveTickInterval);
 
-        // TODO set up task to add chests to autosave queue
+        autoSaveTask = Bukkit.getScheduler().runTaskTimer(plugin.getPlugin(), new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    addToAutoSave();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, AutoSave.autoSaveIntervalTicks, AutoSave.autoSaveIntervalTicks);
+    }
+
+    protected void addToAutoSave() throws IOException {
+        // TODO
+        // Checks all chests
+        // Changed -> add to save queue
+        // Unused and unchanged -> unload
+        for(Entry<WorldGroup, Map<String, Inventory>> groupEntry : this.cachedInventories.entrySet()) {
+            for(Entry<String, Inventory> inventoryEntry: groupEntry.getValue().entrySet()) {
+                Inventory inventory = inventoryEntry.getValue();
+                BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
+                if(holder.hasUnsavedChanges()) {
+                    // Add to save queue
+                    if(holder.isChestNew()) {
+                        saveQueue.add(new SaveEntry(true, this, groupEntry.getKey(), inventory));
+                        holder.setChestIsNew(false);
+                    } else {
+                        saveQueue.add(new SaveEntry(false, this, groupEntry.getKey(), inventory));
+                    }
+                    // Chest in its current state will be saved
+                    holder.setHasUnsavedChanges(false);
+                } else {
+                    // if (canUnload) {
+                    // unload
+                    // }
+                }
+            }
+        }
     }
 
     @Override
@@ -70,6 +114,10 @@ public class BetterEnderSQLCache implements BetterEnderCache {
         } catch (SQLException e) {
             plugin.severe("Failed to close database connection", e);
         }
+        
+        // Cancel the tasks
+        autoSaveTask.cancel();
+        saveTickTask.cancel();
     }
 
     @Override
@@ -106,10 +154,19 @@ public class BetterEnderSQLCache implements BetterEnderCache {
     /**
      * Intended to be called from another thread.
      */
-    private void processQueues() {
-        while (!saveQueue.isEmpty()) {
-            SaveEntry entry = saveQueue.element();
-            // TODO save entry
+    protected void processQueues() {
+        try {
+            while (!saveQueue.isEmpty()) {
+                SaveEntry entry = saveQueue.poll();
+                System.out.println("Saving chest...");
+                if (entry.isNew()) {
+                    sqlHandler.addChest(entry.getInventoryName(), entry.getWorldGroup(), entry.getChestData());
+                } else {
+                    sqlHandler.updateChest(entry.getInventoryName(), entry.getWorldGroup(), entry.getChestData());
+                }
+            }
+        } catch (SQLException e) {
+            plugin.severe("Failed to save chest", e);
         }
     }
 

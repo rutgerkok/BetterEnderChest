@@ -1,12 +1,14 @@
 package nl.rutgerkok.betterenderchest.nms;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import net.minecraft.server.v1_6_R2.MinecraftServer;
 import net.minecraft.server.v1_6_R2.NBTCompressedStreamTools;
@@ -92,14 +94,14 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
         try {
             return loadNBTInventory(inputStream, inventoryName, inventoryTagName);
-        } catch(IOException e) {
+        } catch (IOException e) {
             plugin.severe("Failed to load chest, chest is probably corrupted.", e);
-        } catch(Throwable t) {
+        } catch (Throwable t) {
             plugin.severe("Failed to load chest, unknown error.", t);
         }
         return null;
     }
-    
+
     private Inventory loadNBTInventory(InputStream inputStream, String inventoryName, String inventoryTagName) throws IOException {
         // Load the NBT tag
         NBTTagCompound baseTag = NBTCompressedStreamTools.a(inputStream);
@@ -127,7 +129,7 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
         try {
             inputStream = new FileInputStream(file);
             return loadNBTInventory(inputStream, inventoryName, inventoryTagName);
-        } catch(FileNotFoundException ignored) {
+        } catch (FileNotFoundException ignored) {
             // Ignored
             return null;
         } catch (IOException e) {
@@ -137,7 +139,7 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
             plugin.severe("Failed to read chest file. Unknown error!", t);
             return null;
         } finally {
-            if(inputStream != null) {
+            if (inputStream != null) {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
@@ -155,40 +157,42 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
         }
     }
 
+    private void saveInventoryToStream(OutputStream stream, Inventory inventory) throws IOException {
+        BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
+        NBTTagCompound baseTag = new NBTTagCompound();
+        NBTTagList inventoryTag = new NBTTagList();
+
+        // Chest metadata
+        baseTag.setByte("Rows", (byte) (inventory.getSize() / 9));
+        baseTag.setByte("DisabledSlots", (byte) holder.getDisabledSlots());
+        baseTag.setString("OwnerName", holder.getName());
+        baseTag.setByte("NameCaseCorrect", (byte) (holder.isOwnerNameCaseCorrect() ? 1 : 0));
+
+        // Add all items to the inventory tag
+        for (int i = 0; i < inventory.getSize(); i++) {
+            ItemStack stack = inventory.getItem(i);
+            if (stack != null && stack.getType() != Material.AIR) {
+                NBTTagCompound item = new NBTTagCompound();
+                item.setByte("Slot", (byte) i);
+                inventoryTag.add(CraftItemStack.asNMSCopy(stack).save(item));
+            }
+        }
+
+        // Add the inventory tag to the base tag
+        baseTag.set("Inventory", inventoryTag);
+
+        // Write inventory to it
+        NBTCompressedStreamTools.a(baseTag, stream);
+    }
+
     @Override
     public void saveInventoryAsNBT(File file, Inventory inventory) {
         try {
-            BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
-            NBTTagCompound baseTag = new NBTTagCompound();
-            NBTTagList inventoryTag = new NBTTagList();
-
-            // Chest metadata
-            baseTag.setByte("Rows", (byte) (inventory.getSize() / 9));
-            baseTag.setByte("DisabledSlots", (byte) holder.getDisabledSlots());
-            baseTag.setString("OwnerName", holder.getName());
-            baseTag.setByte("NameCaseCorrect", (byte) (holder.isOwnerNameCaseCorrect() ? 1 : 0));
-
-            // Add all items to the inventory tag
-            for (int i = 0; i < inventory.getSize(); i++) {
-                ItemStack stack = inventory.getItem(i);
-                if (stack != null && stack.getType() != Material.AIR) {
-                    NBTTagCompound item = new NBTTagCompound();
-                    item.setByte("Slot", (byte) i);
-                    inventoryTag.add(CraftItemStack.asNMSCopy(stack).save(item));
-                }
-            }
-
-            // Add the inventory tag to the base tag
-            baseTag.set("Inventory", inventoryTag);
-
-            // Create the file and directories
-            file.getParentFile().mkdirs();
-
             // Write inventory to it
             FileOutputStream stream;
             file.createNewFile();
             stream = new FileOutputStream(file);
-            NBTCompressedStreamTools.a(baseTag, stream);
+            saveInventoryToStream(stream, inventory);
             stream.flush();
             stream.close();
         } catch (IOException e) {
@@ -198,6 +202,13 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
         } catch (Throwable t) {
             plugin.severe("Cannot save the inventory! Outdated plugin?", t);
         }
+    }
+
+    @Override
+    public byte[] saveInventoryToByteArray(Inventory inventory) throws IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        saveInventoryToStream(stream, inventory);
+        return stream.toByteArray();
     }
 
 }
