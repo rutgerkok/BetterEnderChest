@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -90,40 +89,20 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
     }
 
     @Override
-    public Inventory loadNBTInventory(byte[] bytes, String inventoryName, String inventoryTagName) {
+    public Inventory loadNBTInventory(byte[] bytes, String inventoryName, String inventoryTagName) throws IOException {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
-        try {
-            return loadNBTInventory(inputStream, inventoryName, inventoryTagName);
-        } catch (IOException e) {
-            plugin.severe("Failed to load chest, chest is probably corrupted.", e);
-        } catch (Throwable t) {
-            plugin.severe("Failed to load chest, unknown error.", t);
-        }
-        return null;
+        return loadNBTInventory(inputStream, inventoryName, inventoryTagName);
     }
 
     @Override
-    public Inventory loadNBTInventory(File file, String inventoryName, String inventoryTagName) {
+    public Inventory loadNBTInventory(File file, String inventoryName, String inventoryTagName) throws IOException {
         FileInputStream inputStream = null;
         try {
             inputStream = new FileInputStream(file);
             return loadNBTInventory(inputStream, inventoryName, inventoryTagName);
-        } catch (FileNotFoundException ignored) {
-            // Ignored
-            return null;
-        } catch (IOException e) {
-            plugin.severe("Failed to read chest file. Corrupted file?", e);
-            return null;
-        } catch (Throwable t) {
-            plugin.severe("Failed to read chest file. Unknown error!", t);
-            return null;
         } finally {
             if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    plugin.severe("Failed to close stream", e);
-                }
+                inputStream.close();
             }
         }
     }

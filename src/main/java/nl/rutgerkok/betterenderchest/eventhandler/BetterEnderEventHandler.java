@@ -191,7 +191,7 @@ public class BetterEnderEventHandler implements Listener {
 
         // Are the chests enabled?
 
-        if (!plugin.getSaveAndLoadSystem().canSaveAndLoad()) {
+        if (!plugin.canSaveAndLoad()) {
             // Incompatible BetterEnderChest version installed
             player.sendMessage(ChatColor.RED + Translations.ENDER_CHESTS_DISABLED.toString());
             return;

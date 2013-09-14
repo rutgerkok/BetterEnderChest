@@ -1,10 +1,11 @@
 package nl.rutgerkok.betterenderchest.io;
 
 import java.io.File;
+import java.io.IOException;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
-import nl.rutgerkok.betterenderchest.registry.Registration;
+import nl.rutgerkok.betterenderchest.WorldGroup;
 
 import org.bukkit.inventory.Inventory;
 
@@ -13,51 +14,76 @@ import org.bukkit.inventory.Inventory;
  * override {@link BetterEnderIOLogic} and/or {@link BetterEnderFileCache}.
  * 
  */
-public abstract class BetterEnderFileHandler implements Registration {
+public class BetterEnderFileHandler {
     protected final BetterEnderChest plugin;
+    private static final String EXTENSION = ".dat";
 
     public BetterEnderFileHandler(BetterEnderChest plugin) {
         this.plugin = plugin;
+
+        // Disable saving and loading when NMS is unavailable
+        if (plugin.getNMSHandlers().getSelectedRegistration() == null) {
+            plugin.setCanSaveAndLoad(false);
+        }
+    }
+
+    public File getChestFile(String inventoryName, WorldGroup worldGroup) {
+        if (worldGroup.getGroupName().equals(BetterEnderChest.STANDARD_GROUP_NAME)) {
+            // Default group? File isn't in a subdirectory.
+            return new File(plugin.getChestSaveLocation().getPath() + "/" + inventoryName + EXTENSION);
+        } else {
+            // Another group? Save in subdirectory.
+            return new File(plugin.getChestSaveLocation().getPath() + "/" + worldGroup.getGroupName() + "/" + inventoryName + EXTENSION);
+        }
     }
 
     /**
-     * Gets the extension of this file format, like "dat" or "yml".
+     * Returns whether the specified inventory exists on disk.
      * 
-     * @return The extension of this file format.
-     */
-    public abstract String getExtension();
-
-    @Override
-    public Priority getPriority() {
-        return Priority.NORMAL;
-    }
-
-    /**
-     * Loads an inventory from a file in a certain format. It should read or
-     * guess the number of rows and disabled slots. The returned inventory must
-     * have {@link BetterEnderInventoryHolder} as the holder. You only need to
-     * use
-     * 
-     * @param file
-     *            The file to read from.
      * @param inventoryName
-     *            The name that the inventory should have. Use
-     *            {@link BetterEnderIOLogic#getInventoryTitle(String)} to
-     *            convert it to a title.
-     * @return An inventory.
+     *            The inventory to search for.
+     * @param group
+     *            The group to search in.
+     * @return Whether the inventory exists.
      */
-    public abstract Inventory load(File file, String inventoryName);
+    public boolean exists(String inventoryName, WorldGroup group) {
+        return getChestFile(inventoryName, group).exists();
+    }
+
+    /**
+     * Loads the specified inventory from disk. Things like the number of rows
+     * and the number of disabled slots shyould be loaded, but guessed if not
+     * found in the file.
+     * 
+     * @param inventoryName
+     *            The name of the inventory.
+     * @param group
+     *            The group of the inventory.
+     * @return The inventory.
+     * @throws IOException
+     *             If the inventory doesn't exist (see
+     *             {@link #exists(String, WorldGroup)}) or if the file is
+     *             corrupted/unreadable.
+     */
+    public Inventory load(String inventoryName, WorldGroup group) throws IOException {
+        File file = getChestFile(inventoryName, group);
+        return plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(file, inventoryName, "Inventory");
+    }
 
     /**
      * Saves an inventory to a file. It should cache things like the number of
      * rows, the number of disabled slots and the inventory name. The holder of
      * this inventory name is always a {@link BetterEnderInventoryHolder}.
      * 
-     * 
-     * @param file
-     *            The file to save to.
      * @param inventory
      *            The inventory to save.
+     * @param inventoryName
+     *            The name of the inventory.
+     * @param group
+     *            The group the inventory is in.
      */
-    public abstract void save(File file, Inventory inventory);
+    public void save(Inventory inventory, String inventoryName, WorldGroup group) {
+        File file = getChestFile(inventoryName, group);
+        plugin.getNMSHandlers().getSelectedRegistration().saveInventoryAsNBT(file, inventory);
+    }
 }

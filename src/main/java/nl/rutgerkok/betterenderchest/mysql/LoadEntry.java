@@ -1,5 +1,7 @@
 package nl.rutgerkok.betterenderchest.mysql;
 
+import java.io.IOException;
+
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.io.Consumer;
@@ -47,14 +49,19 @@ public class LoadEntry {
     }
 
     private void callbackOnMainThread(BetterEnderChest plugin, BetterEnderSQLCache cache, byte[] inventoryData) {
-        Inventory inventory;
+        Inventory inventory = null;
 
         // Load inventory
         if (inventoryData == null) {
             // TODO import
             inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName);
         } else {
-            inventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(inventoryData, inventoryName, "Inventory");
+            try {
+                inventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(inventoryData, inventoryName, "Inventory");
+            } catch (IOException e) {
+                plugin.severe("Failed to decode inventory in database", e);
+                inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName);
+            }
         }
 
         // Add to loaded inventories

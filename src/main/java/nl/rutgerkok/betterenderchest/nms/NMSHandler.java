@@ -45,10 +45,12 @@ public abstract class NMSHandler implements Registration {
      *            The name of the inventory.
      * @param inventoryTagName
      *            The name of the tag in the file to load the items from.
+     * @throws IOException
+     *             If the byte array is corrupted.
      * @return The inventory. The holder of the inventory must be
      *         BetterEnderInventoryHolder.
      */
-    public abstract Inventory loadNBTInventory(byte[] bytes, String inventoryName, String inventoryTagName);
+    public abstract Inventory loadNBTInventory(byte[] bytes, String inventoryName, String inventoryTagName) throws IOException;
 
     /**
      * Loads a BetterEnderChest inventory from the NBT file. The inventory will
@@ -66,10 +68,13 @@ public abstract class NMSHandler implements Registration {
      *            The name of the inventory.
      * @param inventoryTagName
      *            The name of the tag in the file to load the items from.
+     * @throws IOException
+     *             If the file is not found or if the file is
+     *             unreadable/corrupted.
      * @return The inventory. The holder of the inventory must be
      *         BetterEnderInventoryHolder.
      */
-    public abstract Inventory loadNBTInventory(File nbtFile, String inventoryName, String inventoryTagName);
+    public abstract Inventory loadNBTInventory(File nbtFile, String inventoryName, String inventoryTagName) throws IOException;
 
     /**
      * Increments one to the player counter of the Ender Chest at the location.

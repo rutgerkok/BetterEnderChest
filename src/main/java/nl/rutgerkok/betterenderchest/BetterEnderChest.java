@@ -35,6 +35,14 @@ public interface BetterEnderChest {
     public static final String STANDARD_GROUP_NAME = "default";
 
     /**
+     * Gets whether the plugin can save and load. If this is false, no chests
+     * can be opened.
+     * 
+     * @return True if the plugin can save and load.
+     */
+    boolean canSaveAndLoad();
+
+    /**
      * Logs a debug message.
      * 
      * @param string
@@ -148,11 +156,11 @@ public interface BetterEnderChest {
     EmptyInventoryProvider getEmptyInventoryProvider();
 
     /**
-     * Returns the file handlers, which save and load to files.
+     * Returns the file handler, which saves to and loads from files.
      * 
-     * @return The file handlers.
+     * @return The file handler.
      */
-    Registry<BetterEnderFileHandler> getFileHandlers();
+    BetterEnderFileHandler getFileHandler();
 
     /**
      * Gets the importers which can import Ender Chest inventories from and to
@@ -231,6 +239,15 @@ public interface BetterEnderChest {
     void reload();
 
     /**
+     * Sets whether the plugin can save and load.
+     * 
+     * @param canSaveAndLoad
+     *            True if the plugin can save and load.
+     * @see #canSaveAndLoad()
+     */
+    void setCanSaveAndLoad(boolean canSaveAndLoad);
+
+    /**
      * Sets the cache system that should be used.
      * 
      * @param cache
@@ -292,6 +309,14 @@ public interface BetterEnderChest {
      *            The emtpy inventory provider.
      */
     void setEmtpyInventoryProvider(EmptyInventoryProvider provider);
+
+    /**
+     * Sets the file handler, which saves to and loads from files.
+     * 
+     * @param newHandler
+     *            The new file handler.
+     */
+    void setFileHandler(BetterEnderFileHandler newHandler);
 
     /**
      * Sets the save and load system that should be used.

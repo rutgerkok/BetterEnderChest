@@ -36,7 +36,7 @@ public class ViewInvCommand extends BaseCommand {
             return true;
         }
 
-        if (!plugin.getSaveAndLoadSystem().canSaveAndLoad()) {
+        if (!plugin.canSaveAndLoad()) {
             sender.sendMessage(ChatColor.RED + Translations.ENDER_CHESTS_DISABLED.toString());
             return true;
         }

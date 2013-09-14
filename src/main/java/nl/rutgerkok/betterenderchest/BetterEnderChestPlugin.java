@@ -24,7 +24,6 @@ import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.BetterEnderFileCache;
 import nl.rutgerkok.betterenderchest.io.BetterEnderFileHandler;
 import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
-import nl.rutgerkok.betterenderchest.io.BetterEnderNBTFileHandler;
 import nl.rutgerkok.betterenderchest.io.SaveLocation;
 import nl.rutgerkok.betterenderchest.mysql.BetterEnderSQLCache;
 import nl.rutgerkok.betterenderchest.mysql.DatabaseSettings;
@@ -60,6 +59,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         public static boolean openOnOpeningUnprotectedChest, openOnUsingCommand;
     }
 
+    private boolean canSaveAndLoad = true;
     private ChestDrop chestDrop, chestDropSilkTouch, chestDropCreative;
     private Material chestMaterial = Material.ENDER_CHEST;
     private File chestSaveLocation;
@@ -71,7 +71,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private boolean debug;
     private EmptyInventoryProvider emptyInventoryProvider;
     private BetterEnderCache enderCache;
-    private Registry<BetterEnderFileHandler> fileHandlers = new Registry<BetterEnderFileHandler>();
+    private BetterEnderFileHandler fileHandler;
     private BetterEnderWorldGroupManager groups;
     private Registry<InventoryImporter> importers = new Registry<InventoryImporter>();
     private Logger log;
@@ -79,6 +79,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private Registry<ProtectionBridge> protectionBridges = new Registry<ProtectionBridge>();
     private int rankUpgrades;
     private BetterEnderIOLogic saveAndLoadSystem;
+
+    @Override
+    public boolean canSaveAndLoad() {
+        return canSaveAndLoad;
+    }
 
     @Override
     public void debug(String string) {
@@ -162,8 +167,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     }
 
     @Override
-    public Registry<BetterEnderFileHandler> getFileHandlers() {
-        return fileHandlers;
+    public BetterEnderFileHandler getFileHandler() {
+        return fileHandler;
     }
 
     @Override
@@ -458,8 +463,9 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         nmsHandlers.selectAvailableRegistration();
 
         // File handlers
-        fileHandlers.register(new BetterEnderNBTFileHandler(this));
-        fileHandlers.selectAvailableRegistration();
+        if (fileHandler == null) {
+            fileHandler = new BetterEnderFileHandler(this);
+        }
 
         // Configuration
         groups = new BetterEnderWorldGroupManager(this);
@@ -492,7 +498,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         }
 
         // Safeguard message
-        if (!getSaveAndLoadSystem().canSaveAndLoad()) {
+        if (!canSaveAndLoad()) {
             severe("Cannot save and load! Outdated plugin?");
             severe("Plugin will stay enabled to prevent anyone from opening Ender Chests and corrupting data.");
             severe("Please look for a BetterEnderChest file matching your CraftBukkit version!");
@@ -517,6 +523,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
         // Reload the config
         initConfig();
+    }
+
+    @Override
+    public void setCanSaveAndLoad(boolean canSaveAndLoad) {
+        this.canSaveAndLoad = canSaveAndLoad;
     }
 
     @Override
@@ -555,6 +566,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public void setEmtpyInventoryProvider(EmptyInventoryProvider provider) {
         this.emptyInventoryProvider = provider;
+    }
+
+    @Override
+    public void setFileHandler(BetterEnderFileHandler newHandler) {
+        fileHandler = newHandler;
     }
 
     @Override
