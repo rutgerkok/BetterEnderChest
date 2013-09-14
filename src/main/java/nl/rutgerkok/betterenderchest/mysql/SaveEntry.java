@@ -2,22 +2,43 @@ package nl.rutgerkok.betterenderchest.mysql;
 
 import java.io.IOException;
 
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 
 import org.bukkit.inventory.Inventory;
 
 public class SaveEntry {
-    private final String ownerName;
-    private final WorldGroup group;
+    /**
+     * Converts an inventory to bytes.
+     * 
+     * @param plugin
+     *            The BetterEnderChest plugin.
+     * @param inventory
+     *            The inventory to convert.
+     * @return The byte array.
+     * @throws IOException
+     *             If something went wrong.
+     */
+    public static byte[] toByteArray(BetterEnderChest plugin, Inventory inventory) throws IOException {
+        return plugin.getNMSHandlers().selectAvailableRegistration().saveInventoryToByteArray(inventory);
+    }
+
     private final byte[] chestData;
+    private final WorldGroup group;
     private final boolean isNewChest;
 
-    public SaveEntry(boolean isNewChest, BetterEnderSQLCache cache, WorldGroup group, Inventory inventory) throws IOException {
+    private final String ownerName;
+
+    public SaveEntry(boolean isNewChest, BetterEnderChest plugin, WorldGroup group, Inventory inventory) throws IOException {
         this.isNewChest = isNewChest;
         this.ownerName = ((BetterEnderInventoryHolder) inventory.getHolder()).getName();
         this.group = group;
-        this.chestData = cache.plugin.getNMSHandlers().selectAvailableRegistration().saveInventoryToByteArray(inventory);
+        this.chestData = toByteArray(plugin, inventory);
+    }
+
+    public byte[] getChestData() {
+        return chestData;
     }
 
     public String getInventoryName() {
@@ -26,10 +47,6 @@ public class SaveEntry {
 
     public WorldGroup getWorldGroup() {
         return group;
-    }
-
-    public byte[] getChestData() {
-        return chestData;
     }
 
     public boolean isNew() {

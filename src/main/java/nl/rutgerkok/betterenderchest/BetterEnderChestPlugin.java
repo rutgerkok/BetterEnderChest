@@ -442,7 +442,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         if (chestSizes == null) {
             chestSizes = new BetterEnderChestSizes();
         }
-        
+
         // Empty inventory provider
         if (emptyInventoryProvider == null) {
             emptyInventoryProvider = new EmptyInventoryProvider(this);

@@ -9,15 +9,15 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  * Class that has the logic for creating all kinds of empty inventories.
- *
+ * 
  */
 public class EmptyInventoryProvider {
     private final BetterEnderChest plugin;
-    
+
     public EmptyInventoryProvider(BetterEnderChest plugin) {
         this.plugin = plugin;
     }
-    
+
     /**
      * Guesses the number of chest rows based on the inventory name. It will
      * either return the number of rows in the public chest of the number of
@@ -140,7 +140,7 @@ public class EmptyInventoryProvider {
         // Return the inventory
         return Bukkit.createInventory(new BetterEnderInventoryHolder(inventoryName, disabledSlots, caseCorrect), inventoryRows * 9, getInventoryTitle(inventoryName));
     }
-    
+
     /**
      * Titles can be up to 32 characters. If the given title is too long, this
      * function trims the title to the max allowed length. If the title isn't

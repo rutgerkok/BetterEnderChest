@@ -138,14 +138,15 @@ public interface BetterEnderChest {
      * @return The database settings.
      */
     DatabaseSettings getDatabaseSettings();
-    
+
     /**
      * Gets the empty inventory provider, which contains methods to create Ender
      * inventories without loading information from disk/the database.
+     * 
      * @return The emtpy inventory provider.
      */
     EmptyInventoryProvider getEmptyInventoryProvider();
-    
+
     /**
      * Returns the file handlers, which save and load to files.
      * 
@@ -286,7 +287,9 @@ public interface BetterEnderChest {
     /**
      * Sets the empty inventory provider, which contains methods to create Ender
      * inventories without loading information from disk/the database.
-     * @param provider The emtpy inventory provider.
+     * 
+     * @param provider
+     *            The emtpy inventory provider.
      */
     void setEmtpyInventoryProvider(EmptyInventoryProvider provider);
 

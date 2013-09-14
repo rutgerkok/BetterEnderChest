@@ -4,8 +4,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
 public class BetterEnderInventoryHolder implements InventoryHolder {
-    private boolean isNew;
-    private boolean isSetWhetherChestIsNew;
     private boolean correctCase;
     private byte disabledSlots;
     private boolean hasUnsavedChanges;
@@ -15,7 +13,6 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
         this.ownerName = ownerName;
         this.disabledSlots = (byte) disabledSlots;
         this.correctCase = correctCase;
-        this.isNew = false;
     }
 
     /**
@@ -89,32 +86,5 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
     public void setOwnerName(String newName, boolean correctCase) {
         ownerName = newName;
         this.correctCase = correctCase;
-    }
-
-    /**
-     * Sets whether this chest has been saved at least once in it's lifetime.
-     * 
-     * @param isNew
-     *            Whether the chest is new.
-     */
-    public void setChestIsNew(boolean isNew) {
-        this.isNew = isNew;
-        this.isSetWhetherChestIsNew = true;
-    }
-
-    /**
-     * Returns whether the chest has been saved at least once in it's lifetime.
-     * This value has to be updated before the chest is actually saved.
-     * 
-     * @return True if the chest has not been saved yet.
-     * @throws UnsupportedOperationException
-     *             If it has not been specified whether the chest has been
-     *             saved.
-     */
-    public boolean isChestNew() {
-        if (!this.isSetWhetherChestIsNew) {
-            throw new UnsupportedOperationException("Unknown whether chest is new");
-        }
-        return isNew;
     }
 }

@@ -29,6 +29,36 @@ public class SQLHandler {
     }
 
     /**
+     * Adds a chest to the database.
+     * 
+     * @param inventoryName
+     *            The name of the inventory.
+     * @param group
+     *            The group of the inventory.
+     * @param chestData
+     *            The raw bytes of the chest.
+     * @throws SQLException
+     *             If something went wrong.
+     */
+    private void addChest(String inventoryName, WorldGroup group, byte[] chestData) throws SQLException {
+        PreparedStatement statement = null;
+        try {
+            // New chest, insert in database
+            String query = "INSERT INTO `" + getTableName(group) + "` (`chest_owner`, `chest_data`) ";
+            query += "VALUES (?, ?)";
+            statement = connection.prepareStatement(query);
+            statement.setString(1, inventoryName);
+            statement.setBytes(2, chestData);
+            System.out.println(query + ", 1=" + inventoryName);
+            statement.executeUpdate();
+        } finally {
+            if (statement != null) {
+                statement.close();
+            }
+        }
+    }
+
+    /**
      * Closes the connection.
      * 
      * @throws SQLException
@@ -100,7 +130,8 @@ public class SQLHandler {
     }
 
     /**
-     * Saves a chest to the database.
+     * Saves a chest to the database. First the UPDATE query is tried, if
+     * nothing has been updated, the INSERT query is tried.
      * 
      * @param inventoryName
      *            The name of the chest.
@@ -113,34 +144,26 @@ public class SQLHandler {
      */
     public void updateChest(String inventoryName, WorldGroup group, byte[] chestData) throws SQLException {
         PreparedStatement statement = null;
+        boolean performInsert = false;
         try {
             // Existing chest, update row
             String query = "UPDATE `" + getTableName(group) + "` SET `chest_data` = ? WHERE `chest_owner` = ?";
             statement = connection.prepareStatement(query);
             statement.setBytes(1, chestData);
             statement.setString(2, inventoryName);
-            statement.executeUpdate();
+            int changedRows = statement.executeUpdate();
+            if (changedRows == 0) {
+                // Chest doesn't exist yet
+                performInsert = true;
+            }
         } finally {
             if (statement != null) {
                 statement.close();
             }
         }
-    }
 
-    public void addChest(String inventoryName, WorldGroup group, byte[] chestData) throws SQLException {
-        PreparedStatement statement = null;
-        try {
-            // New chest, insert in database
-            String query = "INSERT INTO `" + getTableName(group) + "` (`chest_owner`, `chest_data`) ";
-            query += "VALUES (?, ?)";
-            statement = connection.prepareStatement(query);
-            statement.setString(1, inventoryName);
-            statement.setBytes(2, chestData);
-            statement.executeUpdate();
-        } finally {
-            if (statement != null) {
-                statement.close();
-            }
+        if (performInsert) {
+            addChest(inventoryName, group, chestData);
         }
     }
 }

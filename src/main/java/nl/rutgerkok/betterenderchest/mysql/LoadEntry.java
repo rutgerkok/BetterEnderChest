@@ -1,6 +1,6 @@
 package nl.rutgerkok.betterenderchest.mysql;
 
-import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.io.Consumer;
 
@@ -31,35 +31,31 @@ public class LoadEntry {
      * @param inventoryData
      *            The raw bytes of the inventory that was just loaded.
      */
-    public void callback(final BetterEnderSQLCache cache, final byte[] inventoryData) {
+    public void callback(final BetterEnderChest plugin, final BetterEnderSQLCache cache, final byte[] inventoryData) {
         if (Bukkit.isPrimaryThread()) {
             // On main thread for whatever reason, no need to schedule task
-            callbackOnMainThread(cache, inventoryData);
+            callbackOnMainThread(plugin, cache, inventoryData);
         } else {
             // Schedule task to run on the main thread.
-            Bukkit.getScheduler().runTask(cache.plugin.getPlugin(), new Runnable() {
+            Bukkit.getScheduler().runTask(plugin.getPlugin(), new Runnable() {
                 @Override
                 public void run() {
-                    callbackOnMainThread(cache, inventoryData);
+                    callbackOnMainThread(plugin, cache, inventoryData);
                 }
             });
         }
     }
 
-    private void callbackOnMainThread(BetterEnderSQLCache cache, byte[] inventoryData) {
+    private void callbackOnMainThread(BetterEnderChest plugin, BetterEnderSQLCache cache, byte[] inventoryData) {
         Inventory inventory;
-        boolean isNew = false;
 
         // Load inventory
         if (inventoryData == null) {
-            inventory = cache.plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName);
-            isNew = true;
+            // TODO import
+            inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName);
         } else {
-            inventory = cache.plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(inventoryData, inventoryName, "Inventory");
+            inventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(inventoryData, inventoryName, "Inventory");
         }
-
-        // Update whether inventory is new
-        ((BetterEnderInventoryHolder) inventory.getHolder()).setChestIsNew(isNew);
 
         // Add to loaded inventories
         cache.setInventory(inventoryName, worldGroup, inventory);

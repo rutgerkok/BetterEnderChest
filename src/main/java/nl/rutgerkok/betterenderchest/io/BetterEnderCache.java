@@ -28,7 +28,7 @@ public interface BetterEnderCache {
     void saveAllInventories();
 
     /**
-     * Save an inventory, but keep it in memory
+     * Save an inventory, but keep it in memory.
      * 
      * @param inventoryName
      */

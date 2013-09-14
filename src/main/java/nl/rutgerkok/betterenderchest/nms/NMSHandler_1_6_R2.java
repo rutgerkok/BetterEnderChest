@@ -102,27 +102,6 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
         return null;
     }
 
-    private Inventory loadNBTInventory(InputStream inputStream, String inventoryName, String inventoryTagName) throws IOException {
-        // Load the NBT tag
-        NBTTagCompound baseTag = NBTCompressedStreamTools.a(inputStream);
-        NBTTagList inventoryTag = baseTag.getList(inventoryTagName);
-
-        // Create the Bukkit inventory
-        int inventoryRows = getRows(inventoryName, baseTag, inventoryTag);
-        int disabledSlots = getDisabledSlots(baseTag);
-        Inventory inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName, inventoryRows, disabledSlots);
-
-        // Add all the items
-        for (int i = 0; i < inventoryTag.size(); i++) {
-            NBTTagCompound item = (NBTTagCompound) inventoryTag.get(i);
-            int slot = item.getByte("Slot") & 255;
-            inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_6_R2.ItemStack.createStack(item)));
-        }
-
-        // Return the inventory
-        return inventory;
-    }
-
     @Override
     public Inventory loadNBTInventory(File file, String inventoryName, String inventoryTagName) {
         FileInputStream inputStream = null;
@@ -149,12 +128,59 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
         }
     }
 
+    private Inventory loadNBTInventory(InputStream inputStream, String inventoryName, String inventoryTagName) throws IOException {
+        // Load the NBT tag
+        NBTTagCompound baseTag = NBTCompressedStreamTools.a(inputStream);
+        NBTTagList inventoryTag = baseTag.getList(inventoryTagName);
+
+        // Create the Bukkit inventory
+        int inventoryRows = getRows(inventoryName, baseTag, inventoryTag);
+        int disabledSlots = getDisabledSlots(baseTag);
+        Inventory inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName, inventoryRows, disabledSlots);
+
+        // Add all the items
+        for (int i = 0; i < inventoryTag.size(); i++) {
+            NBTTagCompound item = (NBTTagCompound) inventoryTag.get(i);
+            int slot = item.getByte("Slot") & 255;
+            inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_6_R2.ItemStack.createStack(item)));
+        }
+
+        // Return the inventory
+        return inventory;
+    }
+
     @Override
     public void openEnderChest(Location loc) {
         TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
         if (tileEntity instanceof TileEntityEnderChest) {
             ((TileEntityEnderChest) tileEntity).a(); // .open()
         }
+    }
+
+    @Override
+    public void saveInventoryAsNBT(File file, Inventory inventory) {
+        try {
+            // Write inventory to it
+            FileOutputStream stream;
+            file.createNewFile();
+            stream = new FileOutputStream(file);
+            saveInventoryToStream(stream, inventory);
+            stream.flush();
+            stream.close();
+        } catch (IOException e) {
+            plugin.severe("Cannot save the inventory! Write error!", e);
+            // Disable this NMS handler, it is too dangerous to save more things
+            plugin.getNMSHandlers().selectRegistration(null);
+        } catch (Throwable t) {
+            plugin.severe("Cannot save the inventory! Outdated plugin?", t);
+        }
+    }
+
+    @Override
+    public byte[] saveInventoryToByteArray(Inventory inventory) throws IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        saveInventoryToStream(stream, inventory);
+        return stream.toByteArray();
     }
 
     private void saveInventoryToStream(OutputStream stream, Inventory inventory) throws IOException {
@@ -183,32 +209,6 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
 
         // Write inventory to it
         NBTCompressedStreamTools.a(baseTag, stream);
-    }
-
-    @Override
-    public void saveInventoryAsNBT(File file, Inventory inventory) {
-        try {
-            // Write inventory to it
-            FileOutputStream stream;
-            file.createNewFile();
-            stream = new FileOutputStream(file);
-            saveInventoryToStream(stream, inventory);
-            stream.flush();
-            stream.close();
-        } catch (IOException e) {
-            plugin.severe("Cannot save the inventory! Write error!", e);
-            // Disable this NMS handler, it is too dangerous to save more things
-            plugin.getNMSHandlers().selectRegistration(null);
-        } catch (Throwable t) {
-            plugin.severe("Cannot save the inventory! Outdated plugin?", t);
-        }
-    }
-
-    @Override
-    public byte[] saveInventoryToByteArray(Inventory inventory) throws IOException {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        saveInventoryToStream(stream, inventory);
-        return stream.toByteArray();
     }
 
 }
