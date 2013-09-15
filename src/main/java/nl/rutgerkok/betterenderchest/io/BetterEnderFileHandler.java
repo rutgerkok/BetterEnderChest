@@ -15,8 +15,8 @@ import org.bukkit.inventory.Inventory;
  * 
  */
 public class BetterEnderFileHandler {
-    protected final BetterEnderChest plugin;
     private static final String EXTENSION = ".dat";
+    protected final BetterEnderChest plugin;
 
     public BetterEnderFileHandler(BetterEnderChest plugin) {
         this.plugin = plugin;
@@ -24,16 +24,6 @@ public class BetterEnderFileHandler {
         // Disable saving and loading when NMS is unavailable
         if (plugin.getNMSHandlers().getSelectedRegistration() == null) {
             plugin.setCanSaveAndLoad(false);
-        }
-    }
-
-    public File getChestFile(String inventoryName, WorldGroup worldGroup) {
-        if (worldGroup.getGroupName().equals(BetterEnderChest.STANDARD_GROUP_NAME)) {
-            // Default group? File isn't in a subdirectory.
-            return new File(plugin.getChestSaveLocation().getPath() + "/" + inventoryName + EXTENSION);
-        } else {
-            // Another group? Save in subdirectory.
-            return new File(plugin.getChestSaveLocation().getPath() + "/" + worldGroup.getGroupName() + "/" + inventoryName + EXTENSION);
         }
     }
 
@@ -48,6 +38,16 @@ public class BetterEnderFileHandler {
      */
     public boolean exists(String inventoryName, WorldGroup group) {
         return getChestFile(inventoryName, group).exists();
+    }
+
+    public File getChestFile(String inventoryName, WorldGroup worldGroup) {
+        if (worldGroup.getGroupName().equals(BetterEnderChest.STANDARD_GROUP_NAME)) {
+            // Default group? File isn't in a subdirectory.
+            return new File(plugin.getChestSaveLocation().getPath() + "/" + inventoryName + EXTENSION);
+        } else {
+            // Another group? Save in subdirectory.
+            return new File(plugin.getChestSaveLocation().getPath() + "/" + worldGroup.getGroupName() + "/" + inventoryName + EXTENSION);
+        }
     }
 
     /**

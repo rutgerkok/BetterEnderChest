@@ -49,7 +49,6 @@ public class SQLHandler {
             statement = connection.prepareStatement(query);
             statement.setString(1, inventoryName);
             statement.setBytes(2, chestData);
-            System.out.println(query + ", 1=" + inventoryName);
             statement.executeUpdate();
         } finally {
             if (statement != null) {

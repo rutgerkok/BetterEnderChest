@@ -18,7 +18,7 @@ public interface Registration {
      * 
      * @return The name of the registration.
      */
-    public String getName();
+    String getName();
 
     /**
      * Gets the priority of this registration. When using
@@ -27,7 +27,7 @@ public interface Registration {
      * 
      * @return The priority of this registration.
      */
-    public Priority getPriority();
+    Priority getPriority();
 
     /**
      * Gets whether this registration can be used at the moment. It can check
@@ -35,5 +35,5 @@ public interface Registration {
      * 
      * @return Whether this registration can be used at the moment.
      */
-    public boolean isAvailable();
+    boolean isAvailable();
 }

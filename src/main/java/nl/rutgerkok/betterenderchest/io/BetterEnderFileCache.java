@@ -74,6 +74,9 @@ public class BetterEnderFileCache implements BetterEnderCache {
     }
 
     private void autoSave() {
+        if (!plugin.canSaveAndLoad()) {
+            return;
+        }
         if (!saveQueue.isEmpty()) {
             plugin.warning("Saving is so slow, that the save queue of the previous autosave wasn't empty during the next one!");
             plugin.warning("Please reconsider your autosave settings.");
@@ -144,13 +147,18 @@ public class BetterEnderFileCache implements BetterEnderCache {
         // Always lowercase
         inventoryName = inventoryName.toLowerCase();
 
+        // Don't try to load when it is disabled
+        if (!plugin.canSaveAndLoad()) {
+            return plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName);
+        }
+
         // Check if loaded
         if (inventories.containsKey(worldGroup) && inventories.get(worldGroup).containsKey(inventoryName)) {
             // Already loaded, return it
             return inventories.get(worldGroup).get(inventoryName);
         } else {
             // Inventory has to be loaded
-            Inventory enderInventory = plugin.getSaveAndLoadSystem().loadInventory(inventoryName, worldGroup);
+            Inventory enderInventory = plugin.getLoadAndImportSystem().loadInventory(inventoryName, worldGroup);
             // Check if something from that group has been loaded
             if (!inventories.containsKey(worldGroup)) {
                 // If not, create the group first
@@ -170,30 +178,32 @@ public class BetterEnderFileCache implements BetterEnderCache {
 
     @Override
     public void saveAllInventories() {
+        if (!plugin.canSaveAndLoad()) {
+            // Can't do anything
+            return;
+        }
+
         // Clear the save queue. We are saving ALL chests!
         saveQueue.clear();
 
         for (Iterator<WorldGroup> outerIterator = inventories.keySet().iterator(); outerIterator.hasNext();) {
-            WorldGroup groupName = outerIterator.next();
-            Map<String, Inventory> group = inventories.get(groupName);
-            for (Iterator<String> it = group.keySet().iterator(); it.hasNext();) {
-                String inventoryName = it.next();
-                Inventory inventory = group.get(inventoryName);
+            WorldGroup group = outerIterator.next();
+            Map<String, Inventory> chestsInGroup = inventories.get(group);
+            for (Entry<String, Inventory> entryInGroup : chestsInGroup.entrySet()) {
+                String inventoryName = entryInGroup.getKey();
+                Inventory inventory = entryInGroup.getValue();
 
-                plugin.getSaveAndLoadSystem().saveInventory(inventory, inventoryName, groupName);
-
-                if (!inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME) && !Bukkit.getOfflinePlayer(inventoryName).isOnline() && inventory.getViewers().size() == 0) {
-                    // This inventory is NOT the public chest, the owner is NOT
-                    // online and NO ONE is viewing it
-                    // So unload it
-                    inventories.remove(inventoryName);
-                }
+                plugin.getFileHandler().save(inventory, inventoryName, group);
             }
         }
     }
 
     @Override
     public void saveInventory(String inventoryName, WorldGroup group) {
+        if (!plugin.canSaveAndLoad()) {
+            return;
+        }
+
         // Always lowercase
         inventoryName = inventoryName.toLowerCase();
 
@@ -203,7 +213,7 @@ public class BetterEnderFileCache implements BetterEnderCache {
         }
         // Save the inventory to disk and mark as saved
         Inventory inventory = inventories.get(group).get(inventoryName);
-        plugin.getSaveAndLoadSystem().saveInventory(inventory, inventoryName, group);
+        plugin.getFileHandler().save(inventory, inventoryName, group);
         ((BetterEnderInventoryHolder) inventory.getHolder()).setHasUnsavedChanges(false);
     }
 

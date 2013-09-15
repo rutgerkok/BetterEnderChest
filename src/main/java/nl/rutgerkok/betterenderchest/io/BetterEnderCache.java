@@ -1,5 +1,6 @@
 package nl.rutgerkok.betterenderchest.io;
 
+import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 
 import org.bukkit.inventory.Inventory;
@@ -28,9 +29,17 @@ public interface BetterEnderCache {
     void saveAllInventories();
 
     /**
-     * Save an inventory, but keep it in memory.
+     * Saves an inventory, but keep it in memory. The inventory is saved
+     * immediately on the main thread. The chest is saved even if there are no
+     * unsaved changes as indicated by the
+     * {@link BetterEnderInventoryHolder#hasUnsavedChanges()} method. If there
+     * is no cached inventory with this name and group, this method does
+     * nothing.
      * 
      * @param inventoryName
+     *            The name of the inventory, case insensitive.
+     * @param group
+     *            The world group the inventory is in.
      */
     void saveInventory(String inventoryName, WorldGroup group);
 

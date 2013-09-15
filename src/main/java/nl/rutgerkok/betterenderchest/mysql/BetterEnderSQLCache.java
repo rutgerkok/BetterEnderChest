@@ -52,6 +52,7 @@ public class BetterEnderSQLCache implements BetterEnderCache {
             }
         } catch (SQLException e) {
             plugin.severe("Error communicating with database", e);
+            plugin.setCanSaveAndLoad(false);
         }
         this.sqlHandler = sqlHandler;
 
@@ -59,7 +60,7 @@ public class BetterEnderSQLCache implements BetterEnderCache {
         saveTickTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin.getPlugin(), new Runnable() {
             @Override
             public void run() {
-                processQueues();
+                processSaveQueue();
             }
         }, AutoSave.saveTickInterval, AutoSave.saveTickInterval);
 
@@ -83,6 +84,17 @@ public class BetterEnderSQLCache implements BetterEnderCache {
      *             If a chest cannot be added to the save queue.
      */
     protected void addChestsToAutoSave() throws IOException {
+        if (!plugin.canSaveAndLoad()) {
+            return;
+        }
+
+        if (!saveQueue.isEmpty()) {
+            plugin.warning("Saving is so slow, that the save queue of the previous autosave wasn't empty during the next one!");
+            plugin.warning("Please reconsider your autosave settings.");
+            plugin.warning("Skipping this autosave.");
+            return;
+        }
+
         for (Entry<WorldGroup, Map<String, Inventory>> groupEntry : this.cachedInventories.entrySet()) {
             for (Entry<String, Inventory> inventoryEntry : groupEntry.getValue().entrySet()) {
                 Inventory inventory = inventoryEntry.getValue();
@@ -92,12 +104,12 @@ public class BetterEnderSQLCache implements BetterEnderCache {
                     saveQueue.add(new SaveEntry(false, plugin, groupEntry.getKey(), inventory));
                     // Chest in its current state will be saved
                     holder.setHasUnsavedChanges(false);
+                    // Check if more chests can be saved
                 } else {
                     String inventoryName = inventory.getName();
                     if (!inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME) && !Bukkit.getOfflinePlayer(inventoryName).isOnline() && inventory.getViewers().size() == 0) {
                         // This inventory is NOT the public chest, the owner is
-                        // NOT
-                        // online and NO ONE is viewing it
+                        // NOT online and NO ONE is viewing it
                         // So unload it
                         unloadInventory(inventoryName, groupEntry.getKey());
                     }
@@ -116,10 +128,12 @@ public class BetterEnderSQLCache implements BetterEnderCache {
         saveAllInventories();
 
         // Close connection
-        try {
-            sqlHandler.closeConnection();
-        } catch (SQLException e) {
-            plugin.severe("Failed to close database connection", e);
+        if (sqlHandler != null) {
+            try {
+                sqlHandler.closeConnection();
+            } catch (SQLException e) {
+                plugin.severe("Failed to close database connection", e);
+            }
         }
 
     }
@@ -127,6 +141,11 @@ public class BetterEnderSQLCache implements BetterEnderCache {
     @Override
     public void getInventory(String inventoryName, WorldGroup worldGroup, Consumer<Inventory> callback) {
         inventoryName = inventoryName.toLowerCase();
+
+        // Don't try to load when it is disabled
+        if (!plugin.canSaveAndLoad()) {
+            callback.consume(plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName));
+        }
 
         // Try to get from the cache first
         Map<String, Inventory> cachedInGroup = cachedInventories.get(worldGroup);
@@ -160,15 +179,27 @@ public class BetterEnderSQLCache implements BetterEnderCache {
     /**
      * Intended to be called from another thread.
      */
-    protected void processQueues() {
+    protected void processSaveQueue() {
+        // Check whether chests can be saved
+        if (!plugin.canSaveAndLoad()) {
+            return;
+        }
+
         synchronized (savingLock) {
             try {
+                int savedCount = 0;
                 while (!saveQueue.isEmpty()) {
                     SaveEntry entry = saveQueue.poll();
                     sqlHandler.updateChest(entry.getInventoryName(), entry.getWorldGroup(), entry.getChestData());
+                    savedCount++;
+                    if (savedCount >= AutoSave.chestsPerSaveTick) {
+                        // Done enough work for now
+                        return;
+                    }
                 }
             } catch (SQLException e) {
                 plugin.severe("Failed to save chest", e);
+                plugin.setCanSaveAndLoad(false);
             }
         }
     }
@@ -179,6 +210,11 @@ public class BetterEnderSQLCache implements BetterEnderCache {
      */
     @Override
     public void saveAllInventories() {
+        // Check whether chests can be saved
+        if (!plugin.canSaveAndLoad()) {
+            return;
+        }
+
         synchronized (savingLock) {
             saveQueue.clear();
             for (Entry<WorldGroup, Map<String, Inventory>> chestGroup : cachedInventories.entrySet()) {
@@ -208,7 +244,13 @@ public class BetterEnderSQLCache implements BetterEnderCache {
     }
 
     @Override
+    // Synchronous saving method - try to avoid this one
     public void saveInventory(String inventoryName, WorldGroup group) {
+        // Check whether chests can be saved
+        if (!plugin.canSaveAndLoad()) {
+            return;
+        }
+
         inventoryName = inventoryName.toLowerCase();
 
         Map<String, Inventory> inventories = cachedInventories.get(group);
@@ -226,7 +268,6 @@ public class BetterEnderSQLCache implements BetterEnderCache {
                     } catch (IOException e) {
                         plugin.severe("Failed to save chest", e);
                     }
-
                 }
             }
         }
@@ -243,6 +284,26 @@ public class BetterEnderSQLCache implements BetterEnderCache {
             cachedInventories.put(group, inventoriesInGroup);
         }
         inventoriesInGroup.put(inventoryName, enderInventory);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        for (WorldGroup group : cachedInventories.keySet()) {
+            Map<String, Inventory> inGroup = cachedInventories.get(group);
+            if (inGroup.size() > 0) {
+                builder.append("Chests in group " + group.getGroupName() + ":");
+                for (String inventoryName : inGroup.keySet()) {
+                    builder.append(((BetterEnderInventoryHolder) inGroup.get(inventoryName).getHolder()).getName());
+                    builder.append(',');
+                }
+            }
+        }
+
+        if (builder.length() == 0) {
+            builder.append("No inventories loaded.");
+        }
+        return builder.toString();
     }
 
     @Override

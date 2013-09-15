@@ -141,6 +141,7 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
         try {
             // Write inventory to it
             FileOutputStream stream;
+            file.getAbsoluteFile().getParentFile().mkdirs();
             file.createNewFile();
             stream = new FileOutputStream(file);
             saveInventoryToStream(stream, inventory);

@@ -53,8 +53,8 @@ public class LoadEntry {
 
         // Load inventory
         if (inventoryData == null) {
-            // TODO import
-            inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName);
+            // Import or get the default chest, or get an empty chest
+            inventory = plugin.getLoadAndImportSystem().getFallbackInventory(inventoryName, worldGroup);
         } else {
             try {
                 inventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(inventoryData, inventoryName, "Inventory");

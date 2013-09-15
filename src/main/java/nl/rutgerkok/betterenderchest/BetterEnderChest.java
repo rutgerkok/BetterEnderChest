@@ -36,7 +36,7 @@ public interface BetterEnderChest {
 
     /**
      * Gets whether the plugin can save and load. If this is false, no chests
-     * can be opened.
+     * can be opened. Can be called from any thread.
      * 
      * @return True if the plugin can save and load.
      */
@@ -171,6 +171,13 @@ public interface BetterEnderChest {
     Registry<InventoryImporter> getInventoryImporters();
 
     /**
+     * Get the save and load system.
+     * 
+     * @return The save and load system.
+     */
+    BetterEnderIOLogic getLoadAndImportSystem();
+
+    /**
      * Gets the NMS handlers where all things that bypass Bukkit are done.
      * Register your own NMS handlers here.
      * 
@@ -199,13 +206,6 @@ public interface BetterEnderChest {
      * @return The protection bridges.
      */
     Registry<ProtectionBridge> getProtectionBridges();
-
-    /**
-     * Get the save and load system.
-     * 
-     * @return The save and load system.
-     */
-    BetterEnderIOLogic getSaveAndLoadSystem();
 
     /**
      * Gets the world group manager. You can ask it in which world group a world
@@ -239,7 +239,7 @@ public interface BetterEnderChest {
     void reload();
 
     /**
-     * Sets whether the plugin can save and load.
+     * Sets whether the plugin can save and load. Can be called from any thread.
      * 
      * @param canSaveAndLoad
      *            True if the plugin can save and load.

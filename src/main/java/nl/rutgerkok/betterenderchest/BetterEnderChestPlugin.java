@@ -14,6 +14,8 @@ import nl.rutgerkok.betterenderchest.command.BetterEnderCommandManager;
 import nl.rutgerkok.betterenderchest.command.EnderChestCommand;
 import nl.rutgerkok.betterenderchest.eventhandler.BetterEnderEventHandler;
 import nl.rutgerkok.betterenderchest.eventhandler.BetterEnderSlotsHandler;
+import nl.rutgerkok.betterenderchest.importers.BetterEnderFlatFileImporter;
+import nl.rutgerkok.betterenderchest.importers.BetterEnderMySQLImporter;
 import nl.rutgerkok.betterenderchest.importers.InventoryImporter;
 import nl.rutgerkok.betterenderchest.importers.MultiInvImporter;
 import nl.rutgerkok.betterenderchest.importers.MultiverseInventoriesImporter;
@@ -59,7 +61,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         public static boolean openOnOpeningUnprotectedChest, openOnUsingCommand;
     }
 
-    private boolean canSaveAndLoad = true;
+    private volatile boolean canSaveAndLoad = true;
     private ChestDrop chestDrop, chestDropSilkTouch, chestDropCreative;
     private Material chestMaterial = Material.ENDER_CHEST;
     private File chestSaveLocation;
@@ -177,6 +179,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     }
 
     @Override
+    public BetterEnderIOLogic getLoadAndImportSystem() {
+        return saveAndLoadSystem;
+    }
+
+    @Override
     public Registry<NMSHandler> getNMSHandlers() {
         return nmsHandlers;
     }
@@ -194,11 +201,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public Registry<ProtectionBridge> getProtectionBridges() {
         return protectionBridges;
-    }
-
-    @Override
-    public BetterEnderIOLogic getSaveAndLoadSystem() {
-        return saveAndLoadSystem;
     }
 
     @Override
@@ -440,6 +442,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         importers.register(new MultiInvImporter());
         importers.register(new MultiverseInventoriesImporter());
         importers.register(new WorldInventoriesImporter());
+        importers.register(new BetterEnderFlatFileImporter());
+        importers.register(new BetterEnderMySQLImporter());
         importers.register(new NoneImporter());
         importers.selectRegistration(new VanillaImporter());
 
@@ -458,7 +462,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             nmsHandlers.register(new NMSHandler_1_6_R2(this));
         } catch (Throwable t) {
             // Ignored, it is possible that another save system has been
-            // installed. See message shown at the end of this method.
+            // installed. See message shown near the end of this method.
         }
         nmsHandlers.selectAvailableRegistration();
 
@@ -497,11 +501,13 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             enderChestCommand.setExecutor(new EnderChestCommand(this));
         }
 
-        // Safeguard message
-        if (!canSaveAndLoad()) {
+        // Safeguard message, displayed if there is no NMS-class implementation
+        // and saving and loading doesn't work
+        if (!canSaveAndLoad() && getNMSHandlers().getSelectedRegistration() == null) {
             severe("Cannot save and load! Outdated plugin?");
             severe("Plugin will stay enabled to prevent anyone from opening Ender Chests and corrupting data.");
             severe("Please look for a BetterEnderChest file matching your CraftBukkit version!");
+            severe("Stack trace to grab your attention, please don't report to BukkitDev:", new RuntimeException("Please use the CraftBukkit build this plugin was designed for."));
         }
 
         // Debug message
