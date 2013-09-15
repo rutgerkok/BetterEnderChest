@@ -51,7 +51,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
      */
     public static class AutoSave {
         public static int autoSaveIntervalTicks = 5 * 60 * 20, saveTickInterval = 10, chestsPerSaveTick = 3;
-        public static boolean showAutoSaveMessage = true;
     }
 
     /**
@@ -76,6 +75,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private BetterEnderFileHandler fileHandler;
     private BetterEnderWorldGroupManager groups;
     private Registry<InventoryImporter> importers = new Registry<InventoryImporter>();
+    private boolean lockChestsOnError = true;
     private Logger log;
     private Registry<NMSHandler> nmsHandlers = new Registry<NMSHandler>();
     private Registry<ProtectionBridge> protectionBridges = new Registry<ProtectionBridge>();
@@ -275,6 +275,10 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         debug = config.getBoolean("BetterEnderChest.showDebugMessages", false);
         config.set("BetterEnderChest.showDebugMessages", debug);
 
+        // Disable on error
+        lockChestsOnError = config.getBoolean("BetterEnderChest.lockChestsOnError", true);
+        config.set("BetterEnderChest.lockChestsOnError", lockChestsOnError);
+
         // Autosave
         // ticks?
         int autoSaveIntervalSeconds = config.getInt("AutoSave.autoSaveIntervalSeconds", 300);
@@ -304,9 +308,9 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             warning("You have set AutoSave.chestsPerSaveTick to " + AutoSave.chestsPerSaveTick + ". This could cause lag when it has to save a lot of chests.");
         }
         config.set("AutoSave.chestsPerSaveTick", AutoSave.chestsPerSaveTick);
-        // enable message?
-        AutoSave.showAutoSaveMessage = config.getBoolean("AutoSave.showAutoSaveMessage", false);
-        config.set("AutoSave.showAutoSaveMessage", AutoSave.showAutoSaveMessage);
+        // Remove old showAutoSaveMessage setting
+        config.set("AutoSave.showAutoSaveMessage", null);
+
         // Private chests
         rankUpgrades = config.getInt("PrivateEnderChest.rankUpgrades", 2);
         if (rankUpgrades < 0 || rankUpgrades > 20) {
@@ -466,14 +470,14 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         }
         nmsHandlers.selectAvailableRegistration();
 
+        // Configuration
+        groups = new BetterEnderWorldGroupManager(this);
+        initConfig();
+
         // File handlers
         if (fileHandler == null) {
             fileHandler = new BetterEnderFileHandler(this);
         }
-
-        // Configuration
-        groups = new BetterEnderWorldGroupManager(this);
-        initConfig();
 
         // Save and load system
         if (saveAndLoadSystem == null) {
@@ -501,15 +505,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             enderChestCommand.setExecutor(new EnderChestCommand(this));
         }
 
-        // Safeguard message, displayed if there is no NMS-class implementation
-        // and saving and loading doesn't work
-        if (!canSaveAndLoad() && getNMSHandlers().getSelectedRegistration() == null) {
-            severe("Cannot save and load! Outdated plugin?");
-            severe("Plugin will stay enabled to prevent anyone from opening Ender Chests and corrupting data.");
-            severe("Please look for a BetterEnderChest file matching your CraftBukkit version!");
-            severe("Stack trace to grab your attention, please don't report to BukkitDev:", new RuntimeException("Please use the CraftBukkit build this plugin was designed for."));
-        }
-
         // Debug message
         debug("Debug mode enabled. Thanks for helping to debug an issue! BetterEnderChest depends on people like you.");
     }
@@ -533,7 +528,19 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
     @Override
     public void setCanSaveAndLoad(boolean canSaveAndLoad) {
-        this.canSaveAndLoad = canSaveAndLoad;
+        if (canSaveAndLoad == false) {
+            if (this.lockChestsOnError) {
+                severe("All Ender Chests are now locked to prevent potentially lost and duplicated items.");
+                severe("If you really want to disable chest locking, see the config.yml:");
+                severe("set the BetterEnderChest.lockChestsOnError setting to false.");
+                this.canSaveAndLoad = false;
+            } else {
+                severe("Although a critical error occured, the plugin will keep trying to save and load as requested in the config.yml.");
+            }
+        } else {
+            log("Re-enabled saving and loading.");
+            this.canSaveAndLoad = true;
+        }
     }
 
     @Override

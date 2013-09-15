@@ -1,5 +1,6 @@
 package nl.rutgerkok.betterenderchest.io;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -57,9 +58,7 @@ public class BetterEnderFileCache implements BetterEnderCache {
         autoSaveTask = Bukkit.getScheduler().runTaskTimer(plugin.getPlugin(), new Runnable() {
             @Override
             public void run() {
-                if (AutoSave.showAutoSaveMessage) {
-                    plugin.log("Autosaving...");
-                }
+                plugin.debug("Autosaving...");
                 autoSave();
             }
         }, AutoSave.autoSaveIntervalTicks, AutoSave.autoSaveIntervalTicks);
@@ -186,15 +185,19 @@ public class BetterEnderFileCache implements BetterEnderCache {
         // Clear the save queue. We are saving ALL chests!
         saveQueue.clear();
 
-        for (Iterator<WorldGroup> outerIterator = inventories.keySet().iterator(); outerIterator.hasNext();) {
-            WorldGroup group = outerIterator.next();
-            Map<String, Inventory> chestsInGroup = inventories.get(group);
-            for (Entry<String, Inventory> entryInGroup : chestsInGroup.entrySet()) {
-                String inventoryName = entryInGroup.getKey();
-                Inventory inventory = entryInGroup.getValue();
-
-                plugin.getFileHandler().save(inventory, inventoryName, group);
+        try {
+            for (Iterator<WorldGroup> outerIterator = inventories.keySet().iterator(); outerIterator.hasNext();) {
+                WorldGroup group = outerIterator.next();
+                Map<String, Inventory> chestsInGroup = inventories.get(group);
+                for (Entry<String, Inventory> entryInGroup : chestsInGroup.entrySet()) {
+                    String inventoryName = entryInGroup.getKey();
+                    Inventory inventory = entryInGroup.getValue();
+                    plugin.getFileHandler().save(inventory, inventoryName, group);
+                }
             }
+        } catch (IOException e) {
+            plugin.severe("Failed to save a chest", e);
+            plugin.setCanSaveAndLoad(false);
         }
     }
 
@@ -213,8 +216,14 @@ public class BetterEnderFileCache implements BetterEnderCache {
         }
         // Save the inventory to disk and mark as saved
         Inventory inventory = inventories.get(group).get(inventoryName);
-        plugin.getFileHandler().save(inventory, inventoryName, group);
-        ((BetterEnderInventoryHolder) inventory.getHolder()).setHasUnsavedChanges(false);
+        try {
+            plugin.getFileHandler().save(inventory, inventoryName, group);
+            ((BetterEnderInventoryHolder) inventory.getHolder()).setHasUnsavedChanges(false);
+        } catch (IOException e) {
+            plugin.severe("Failed to save chest of " + inventoryName, e);
+            plugin.setCanSaveAndLoad(false);
+        }
+
     }
 
     @Override

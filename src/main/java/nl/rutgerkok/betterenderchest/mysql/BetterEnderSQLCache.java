@@ -171,6 +171,7 @@ public class BetterEnderSQLCache implements BetterEnderCache {
                     loadEntry.callback(plugin, BetterEnderSQLCache.this, dataFromDatabase);
                 } catch (SQLException e) {
                     plugin.severe("Error loading chest " + loadEntry.getInventoryName(), e);
+                    plugin.setCanSaveAndLoad(false);
                 }
             }
         });
@@ -234,9 +235,11 @@ public class BetterEnderSQLCache implements BetterEnderCache {
                         // Chest in its current state was just saved
                         holder.setHasUnsavedChanges(false);
                     } catch (IOException e) {
-                        plugin.severe("Failed to save chest " + inventory.getName(), e);
+                        plugin.severe("Failed to encode chest " + inventory.getName() + " for saving", e);
+                        plugin.setCanSaveAndLoad(false);
                     } catch (SQLException e) {
-                        plugin.severe("Failed to save chest " + inventory.getName(), e);
+                        plugin.severe("Failed to save chest " + inventory.getName() + " to the database", e);
+                        plugin.setCanSaveAndLoad(false);
                     }
                 }
             }

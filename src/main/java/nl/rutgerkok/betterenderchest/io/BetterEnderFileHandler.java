@@ -19,10 +19,21 @@ public class BetterEnderFileHandler {
     protected final BetterEnderChest plugin;
 
     public BetterEnderFileHandler(BetterEnderChest plugin) {
+        this(plugin, true);
+    }
+
+    protected BetterEnderFileHandler(BetterEnderChest plugin, boolean checkNMS) {
         this.plugin = plugin;
 
         // Disable saving and loading when NMS is unavailable
-        if (plugin.getNMSHandlers().getSelectedRegistration() == null) {
+        if (checkNMS && plugin.getNMSHandlers().getSelectedRegistration() == null) {
+            // Safeguard message, displayed if there is no NMS-class
+            // implementation and saving and loading doesn't work
+            // Message is continued from the message in setCanSafeAndLoad
+            plugin.severe("No access to net.minecraft.server, saving and loading won't work.");
+            plugin.severe("This is most likely caused by the plugin being run on an unknown Minecraft version.");
+            plugin.severe("Please look for a BetterEnderChest file matching your CraftBukkit version!");
+            plugin.severe("Stack trace to grab your attention, please don't report to BukkitDev:", new RuntimeException("Please use the CraftBukkit build this plugin was designed for."));
             plugin.setCanSaveAndLoad(false);
         }
     }
@@ -82,7 +93,7 @@ public class BetterEnderFileHandler {
      * @param group
      *            The group the inventory is in.
      */
-    public void save(Inventory inventory, String inventoryName, WorldGroup group) {
+    public void save(Inventory inventory, String inventoryName, WorldGroup group) throws IOException {
         File file = getChestFile(inventoryName, group);
         plugin.getNMSHandlers().getSelectedRegistration().saveInventoryAsNBT(file, inventory);
     }

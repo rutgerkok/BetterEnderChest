@@ -137,22 +137,19 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
     }
 
     @Override
-    public void saveInventoryAsNBT(File file, Inventory inventory) {
+    public void saveInventoryAsNBT(File file, Inventory inventory) throws IOException {
+        FileOutputStream stream = null;
         try {
             // Write inventory to it
-            FileOutputStream stream;
             file.getAbsoluteFile().getParentFile().mkdirs();
             file.createNewFile();
             stream = new FileOutputStream(file);
             saveInventoryToStream(stream, inventory);
-            stream.flush();
-            stream.close();
-        } catch (IOException e) {
-            plugin.severe("Cannot save the inventory! Write error!", e);
-            // Disable this NMS handler, it is too dangerous to save more things
-            plugin.getNMSHandlers().selectRegistration(null);
-        } catch (Throwable t) {
-            plugin.severe("Cannot save the inventory! Outdated plugin?", t);
+        } finally {
+            if (stream != null) {
+                stream.flush();
+                stream.close();
+            }
         }
     }
 

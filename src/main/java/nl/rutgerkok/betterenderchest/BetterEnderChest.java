@@ -240,6 +240,10 @@ public interface BetterEnderChest {
 
     /**
      * Sets whether the plugin can save and load. Can be called from any thread.
+     * <p />
+     * If this is set to false, a message will be shown that saving and loading
+     * has been disabled. Please note that the admin can disable this method
+     * from doing anything.
      * 
      * @param canSaveAndLoad
      *            True if the plugin can save and load.

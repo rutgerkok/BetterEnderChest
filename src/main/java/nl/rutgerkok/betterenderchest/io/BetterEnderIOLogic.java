@@ -93,6 +93,7 @@ public class BetterEnderIOLogic {
                 return fileHandler.load(inventoryName, worldGroup);
             } catch (IOException e) {
                 plugin.severe("Failed to load chest of " + inventoryName, e);
+                plugin.setCanSaveAndLoad(false);
                 return plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName);
             }
         }

@@ -98,7 +98,7 @@ public abstract class NMSHandler implements Registration {
      *            The inventory to save to. It must have
      *            BetterEnderInventoryHolder as it's holder.
      */
-    public abstract void saveInventoryAsNBT(File file, Inventory inventory);
+    public abstract void saveInventoryAsNBT(File file, Inventory inventory) throws IOException;
 
     public abstract byte[] saveInventoryToByteArray(Inventory inventory) throws IOException;
 }
