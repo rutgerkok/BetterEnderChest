@@ -436,11 +436,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         protectionBridges.register(new LWCBridge());
         protectionBridges.register(new NoBridge());
         ProtectionBridge protectionBridge = protectionBridges.selectAvailableRegistration();
-        if (!protectionBridge.getPriority().equals(Registration.Priority.FALLBACK)) {
-            log("Linked to " + protectionBridge.getName());
-        } else {
-            log("Not linked to a block protection plugin like Lockette or LWC.");
-        }
 
         // Converter
         importers.register(new MultiInvImporter());
