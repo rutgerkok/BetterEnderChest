@@ -31,7 +31,6 @@ import nl.rutgerkok.betterenderchest.mysql.BetterEnderSQLCache;
 import nl.rutgerkok.betterenderchest.mysql.DatabaseSettings;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler_1_6_R2;
-import nl.rutgerkok.betterenderchest.registry.Registration;
 import nl.rutgerkok.betterenderchest.registry.Registry;
 
 import org.bukkit.Bukkit;
@@ -435,7 +434,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         protectionBridges.register(new LocketteBridge());
         protectionBridges.register(new LWCBridge());
         protectionBridges.register(new NoBridge());
-        ProtectionBridge protectionBridge = protectionBridges.selectAvailableRegistration();
+        protectionBridges.selectAvailableRegistration();
 
         // Converter
         importers.register(new MultiInvImporter());
@@ -523,7 +522,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
     @Override
     public void setCanSaveAndLoad(boolean canSaveAndLoad) {
-        if (canSaveAndLoad == false) {
+        if (canSaveAndLoad == false && this.canSaveAndLoad == true) {
             if (this.lockChestsOnError) {
                 severe("All Ender Chests are now locked to prevent potentially lost and duplicated items.");
                 severe("If you really want to disable chest locking, see the config.yml:");
@@ -532,7 +531,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             } else {
                 severe("Although a critical error occured, the plugin will keep trying to save and load as requested in the config.yml.");
             }
-        } else {
+        } else if (this.canSaveAndLoad == false) {
             log("Re-enabled saving and loading.");
             this.canSaveAndLoad = true;
         }
