@@ -194,18 +194,13 @@ public class BetterEnderFileCache implements BetterEnderCache {
         inventories.clear();
     }
 
-    private void unloadInventory(String inventoryName, String groupName) {
-        inventoryName = inventoryName.toLowerCase();
-        groupName = groupName.toLowerCase();
-
-        // Remove it from the list
-        if (inventories.containsKey(groupName)) {
-            inventories.get(groupName).remove(inventoryName);
-        }
-    }
-
     @Override
     public void unloadInventory(String inventoryName, WorldGroup group) {
-        unloadInventory(inventoryName, group.getGroupName());
+        inventoryName = inventoryName.toLowerCase();
+
+        // Remove it from the list
+        if (inventories.containsKey(group)) {
+            inventories.get(group).remove(inventoryName);
+        }
     }
 }
