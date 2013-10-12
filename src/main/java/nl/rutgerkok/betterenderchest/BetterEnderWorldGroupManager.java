@@ -20,6 +20,7 @@ public class BetterEnderWorldGroupManager {
     public BetterEnderWorldGroupManager(BetterEnderChestPlugin plugin) {
         this.plugin = plugin;
         groups = new HashMap<String, WorldGroup>();
+        groups.put(BetterEnderChest.STANDARD_GROUP_NAME, new WorldGroup(BetterEnderChest.STANDARD_GROUP_NAME));
     }
 
     /**
