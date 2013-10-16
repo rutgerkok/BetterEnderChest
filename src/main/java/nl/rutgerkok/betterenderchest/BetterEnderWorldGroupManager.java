@@ -133,7 +133,7 @@ public class BetterEnderWorldGroupManager {
         ConfigurationSection importSection = plugin.getConfig().getConfigurationSection("Imports");
         if (importSection == null) {
             // No Imports section found, use defaults
-            InventoryImporter importer = plugin.getInventoryImporters().selectAvailableRegistration();
+            InventoryImporter importer = plugin.getInventoryImporters().getSelectedRegistration();
             for (WorldGroup group : importer.importWorldGroups(plugin)) {
                 groups.put(group.getGroupName(), group);
             }
