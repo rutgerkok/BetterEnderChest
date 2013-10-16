@@ -23,8 +23,6 @@ BetterEnderChest is a plugin for CraftBukkit (Minecraft server mod) that adds fu
 
 `getInventory` always gives an inventory back, even if no player with that name exists. So make sure to check the player name!
 
-There are some other methods available in the same class to save and unload inventories. If you don't call them, BetterEnderChest will automatically save your changes and unload the inventory during the next autosave.
-
 ## Get the world group
 
 The group name should always be lowercase (only important if the player entered the group name).
@@ -47,6 +45,15 @@ There is a static BetterEnderChest.STANDARD_GROUP_NAME, but it is just the group
 
     World mainWorld = Bukkit.getServer().getWorlds().get(0);
     WorldGroup mainGroup = betterEnderChest.getGroups().getGroupByWorld(mainWorld);
+    
+## Making changes to the inventory
+If your plugin is directly making changes to the inventory (for example using `inventory.addItem(...)`),
+be sure to set its internal `hasUnsavedChanges` flag to `true`.
+If you don't do this, the chest won't get saved. If you do, BetterEnderChest will automatically save and unload the chest after a while.
+
+    ((BetterEnderInventoryHolder) inventory.getHolder()).setHasUnsavedChanges(true);
+
+When a player clicks on a slot in the chest, BetterEnderChest will automatically set this flag to `true`.
 
 ## Get public/default chest
 The public and default chest aren't that different from standard chests, they just have a special name.
