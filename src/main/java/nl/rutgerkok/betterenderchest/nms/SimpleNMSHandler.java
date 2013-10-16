@@ -9,26 +9,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import net.minecraft.server.v1_6_R2.MinecraftServer;
-import net.minecraft.server.v1_6_R2.NBTCompressedStreamTools;
-import net.minecraft.server.v1_6_R2.NBTTagCompound;
-import net.minecraft.server.v1_6_R2.NBTTagList;
-import net.minecraft.server.v1_6_R2.TileEntity;
-import net.minecraft.server.v1_6_R2.TileEntityEnderChest;
+import net.minecraft.server.v1_6_R3.MinecraftServer;
+import net.minecraft.server.v1_6_R3.NBTCompressedStreamTools;
+import net.minecraft.server.v1_6_R3.NBTTagCompound;
+import net.minecraft.server.v1_6_R3.NBTTagList;
+import net.minecraft.server.v1_6_R3.TileEntity;
+import net.minecraft.server.v1_6_R3.TileEntityEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_6_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_6_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_6_R3.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class NMSHandler_1_6_R2 extends NMSHandler {
+public class SimpleNMSHandler extends NMSHandler {
     private BetterEnderChest plugin;
 
-    public NMSHandler_1_6_R2(BetterEnderChest plugin) {
+    public SimpleNMSHandler(BetterEnderChest plugin) {
         this.plugin = plugin;
     }
 
@@ -53,8 +53,7 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
 
     @Override
     public String getName() {
-        // Dynamic, otherwise I will forget to update it :)
-        return getClass().getSimpleName().replace("NMSHandler_", "v");
+        return getClass().getSimpleName();
     }
 
     private int getRows(String inventoryName, NBTTagCompound baseTag, NBTTagList inventoryListTag) {
@@ -121,7 +120,7 @@ public class NMSHandler_1_6_R2 extends NMSHandler {
         for (int i = 0; i < inventoryTag.size(); i++) {
             NBTTagCompound item = (NBTTagCompound) inventoryTag.get(i);
             int slot = item.getByte("Slot") & 255;
-            inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_6_R2.ItemStack.createStack(item)));
+            inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_6_R3.ItemStack.createStack(item)));
         }
 
         // Return the inventory
