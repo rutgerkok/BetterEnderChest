@@ -42,7 +42,7 @@ public class BetterEnderEventHandler implements Listener {
     }
 
     // Change the drop and check if the chest can be broken
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         Block block = event.getBlock();
         Player player = event.getPlayer();
