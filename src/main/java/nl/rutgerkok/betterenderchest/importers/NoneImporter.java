@@ -21,7 +21,8 @@ public class NoneImporter extends InventoryImporter {
 
     @Override
     public Priority getPriority() {
-        return Priority.FALLBACK;
+        // Low priority so that more functional importers are preferred
+        return Priority.LOW;
     }
 
     @Override

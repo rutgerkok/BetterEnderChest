@@ -26,7 +26,7 @@ public class NoBridge implements ProtectionBridge {
 
     @Override
     public Priority getPriority() {
-        return Priority.FALLBACK;
+        return Priority.LOWEST;
     }
 
     @Override

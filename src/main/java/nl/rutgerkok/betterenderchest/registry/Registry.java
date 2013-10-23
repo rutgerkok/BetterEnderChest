@@ -121,7 +121,7 @@ public class Registry<T extends Registration> {
         for (T registration : registered.values()) {
             if (registration.isAvailable()) {
                 switch (registration.getPriority()) {
-                    case FALLBACK:
+                    case LOWEST:
                         selectedFallback = registration;
                         break;
                     case HIGH:

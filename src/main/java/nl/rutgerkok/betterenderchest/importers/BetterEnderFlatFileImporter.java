@@ -19,7 +19,8 @@ public class BetterEnderFlatFileImporter extends InventoryImporter {
 
     @Override
     public Priority getPriority() {
-        return Priority.NORMAL;
+        // This class should never be selected as the default importer
+        return Priority.LOWEST;
     }
 
     @Override
