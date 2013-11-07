@@ -19,6 +19,7 @@ import nl.rutgerkok.betterenderchest.importers.BetterEnderMySQLImporter;
 import nl.rutgerkok.betterenderchest.importers.InventoryImporter;
 import nl.rutgerkok.betterenderchest.importers.MultiInvImporter;
 import nl.rutgerkok.betterenderchest.importers.MultiverseInventoriesImporter;
+import nl.rutgerkok.betterenderchest.importers.MyWorldsImporter;
 import nl.rutgerkok.betterenderchest.importers.NoneImporter;
 import nl.rutgerkok.betterenderchest.importers.VanillaImporter;
 import nl.rutgerkok.betterenderchest.importers.WorldInventoriesImporter;
@@ -440,10 +441,12 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         importers.register(new MultiInvImporter());
         importers.register(new MultiverseInventoriesImporter());
         importers.register(new WorldInventoriesImporter());
+        importers.register(new MyWorldsImporter());
         importers.register(new BetterEnderFlatFileImporter());
         importers.register(new BetterEnderMySQLImporter());
         importers.register(new NoneImporter());
-        importers.selectRegistration(new VanillaImporter());
+        importers.register(new VanillaImporter());
+        importers.selectAvailableRegistration();
 
         // Slots
         if (chestSizes == null) {

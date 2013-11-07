@@ -8,6 +8,7 @@ softdepend:
 - 'LWC'
 - 'Multiverse-Inventories'
 - 'MultiInv'
+- 'My Worlds'
 - 'WorldInventories'
 commands:
   betterenderchest:

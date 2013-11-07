@@ -247,6 +247,26 @@ public class BetterEnderUtils {
     }
 
     /**
+     * Gets whether the given inventory is empty.
+     * 
+     * @param inventory
+     *            The inventory.
+     * @return True if the inventory is empty, otherwise false.
+     */
+    public static boolean isInventoryEmpty(Inventory inventory) {
+        boolean empty = true;
+        ListIterator<ItemStack> iterator = inventory.iterator();
+        while (iterator.hasNext()) {
+            ItemStack stack = iterator.next();
+            if (stack != null && stack.getType() != Material.AIR) {
+                // Found an item
+                empty = false;
+            }
+        }
+        return empty;
+    }
+
+    /**
      * Sets the location of the player where he/she last opened an Ender Chest.
      * Use null as the location to clear the stored chest location.
      * 

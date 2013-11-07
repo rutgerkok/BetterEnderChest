@@ -21,7 +21,7 @@ public class SaveEntry {
      *             If something went wrong.
      */
     public static byte[] toByteArray(BetterEnderChest plugin, Inventory inventory) throws IOException {
-        return plugin.getNMSHandlers().selectAvailableRegistration().saveInventoryToByteArray(inventory);
+        return plugin.getNMSHandlers().getSelectedRegistration().saveInventoryToByteArray(inventory);
     }
 
     private final byte[] chestData;

@@ -86,7 +86,7 @@ public class Registry<T extends Registration> {
      */
     public T getSelectedRegistration() {
         if (!selectedIsInited) {
-            throw new RuntimeException("Cannot retrieve selected registration: not registration has been selected!");
+            throw new RuntimeException("Cannot retrieve selected registration: no registration has been selected!");
         }
         return selected;
     }

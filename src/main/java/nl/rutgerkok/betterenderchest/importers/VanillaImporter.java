@@ -72,14 +72,7 @@ public class VanillaImporter extends InventoryImporter {
         }
 
         // Check if the inventory is empty
-        boolean empty = true;
-        ListIterator<ItemStack> iterator = betterEnderInventory.iterator();
-        while (iterator.hasNext()) {
-            if (iterator.next() != null) {
-                empty = false;
-            }
-        }
-        if (empty) {
+        if (BetterEnderUtils.isInventoryEmpty(betterEnderInventory)) {
             // Empty inventory, return null
             return null;
         } else {
