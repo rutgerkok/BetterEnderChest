@@ -20,6 +20,7 @@ commands:
     description: Open/view the Ender Chest
     usage: /enderchest [playername]
     permission: bec.internal.autocomplete_ec
+    aliases: [ec]
 permissions:
   betterenderchest:
     description: Use all BetterEnderChest features. Only for administrators!
