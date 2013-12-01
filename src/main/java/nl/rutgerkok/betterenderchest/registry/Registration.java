@@ -2,12 +2,12 @@ package nl.rutgerkok.betterenderchest.registry;
 
 public interface Registration {
     public enum Priority {
-        /** Used only if nothing else is available */
-        LOWEST,
         /** Used to give higher priority than most registrations */
         HIGH,
         /** Used to give lower priority than most registrations */
         LOW,
+        /** Used only if nothing else is available */
+        LOWEST,
         /** Most registrations should use this */
         NORMAL;
     }

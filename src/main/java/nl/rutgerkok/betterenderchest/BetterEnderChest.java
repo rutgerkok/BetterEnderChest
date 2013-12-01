@@ -216,6 +216,14 @@ public interface BetterEnderChest {
     BetterEnderWorldGroupManager getWorldGroupManager();
 
     /**
+     * Gets whether groups and imports are managed automatically.
+     * 
+     * @return True if groups and imports are managed automatically, false
+     *         otherwise.
+     */
+    boolean hasManualGroupManagement();
+
+    /**
      * Returns whether the inventoryName is a special inventory (public chest,
      * default chest, etc.).
      * 
@@ -358,4 +366,5 @@ public interface BetterEnderChest {
      *            The message to show.
      */
     void warning(String message);
+
 }

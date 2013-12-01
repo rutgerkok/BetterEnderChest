@@ -20,7 +20,6 @@ public class BetterEnderWorldGroupManager {
     public BetterEnderWorldGroupManager(BetterEnderChestPlugin plugin) {
         this.plugin = plugin;
         groups = new HashMap<String, WorldGroup>();
-        groups.put(BetterEnderChest.STANDARD_GROUP_NAME, new WorldGroup(BetterEnderChest.STANDARD_GROUP_NAME));
     }
 
     /**
@@ -62,7 +61,7 @@ public class BetterEnderWorldGroupManager {
                 return worldGroup;
             }
         }
-        return groups.get(BetterEnderChest.STANDARD_GROUP_NAME);
+        return getOrCreateWorldGroup(BetterEnderChest.STANDARD_GROUP_NAME);
     }
 
     /**
@@ -91,7 +90,7 @@ public class BetterEnderWorldGroupManager {
      * @return The group that won't be saved into a sub-folder.
      */
     public WorldGroup getStandardWorldGroup() {
-        return groups.get(BetterEnderChest.STANDARD_GROUP_NAME);
+        return getOrCreateWorldGroup(BetterEnderChest.STANDARD_GROUP_NAME);
     }
 
     public boolean groupExists(String name) {
@@ -131,7 +130,7 @@ public class BetterEnderWorldGroupManager {
     public void readConfig() {
         // Read the imports
         ConfigurationSection importSection = plugin.getConfig().getConfigurationSection("Imports");
-        if (importSection == null) {
+        if (importSection == null || !plugin.hasManualGroupManagement()) {
             // No Imports section found, use defaults
             InventoryImporter importer = plugin.getInventoryImporters().getSelectedRegistration();
             for (WorldGroup group : importer.importWorldGroups(plugin)) {
@@ -184,10 +183,13 @@ public class BetterEnderWorldGroupManager {
         config.set("Groups", null);
         config.set("Imports", null);
 
-        for (WorldGroup group : groups.values()) {
-            if (group.hasWorlds()) {
-                config.set("Groups." + group.getGroupName(), group.getWorldNames());
-                config.set("Imports." + group.getGroupName(), group.getInventoryImporter().getName());
+        if (plugin.hasManualGroupManagement()) {
+            // Only write when groups are configured manually
+            for (WorldGroup group : groups.values()) {
+                if (group.hasWorlds()) {
+                    config.set("Groups." + group.getGroupName(), group.getWorldNames());
+                    config.set("Imports." + group.getGroupName(), group.getInventoryImporter().getName());
+                }
             }
         }
     }

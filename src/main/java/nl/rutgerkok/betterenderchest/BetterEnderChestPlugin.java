@@ -77,6 +77,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private Registry<InventoryImporter> importers = new Registry<InventoryImporter>();
     private boolean lockChestsOnError = true;
     private Logger log;
+    private boolean manualGroupManagement;
     private Registry<NMSHandler> nmsHandlers = new Registry<NMSHandler>();
     private Registry<ProtectionBridge> protectionBridges = new Registry<ProtectionBridge>();
     private int rankUpgrades;
@@ -208,6 +209,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         return groups;
     }
 
+    @Override
+    public boolean hasManualGroupManagement() {
+        return this.manualGroupManagement;
+    }
+
     // Configuration - saves and loads everything
     public void initConfig() {
         // Reading config
@@ -268,7 +274,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         this.chestDropCreative = ChestDrop.valueOf(chestDropCreative);
 
         // CompabilityMode
-        compabilityMode = config.getBoolean("BetterEnderChest.enderChestCompabilityMode");
+        compabilityMode = config.getBoolean("BetterEnderChest.enderChestCompabilityMode", true);
         config.set("BetterEnderChest.enderChestCompabilityMode", compabilityMode);
 
         // Debugging
@@ -279,11 +285,18 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         lockChestsOnError = config.getBoolean("BetterEnderChest.lockChestsOnError", true);
         config.set("BetterEnderChest.lockChestsOnError", lockChestsOnError);
 
+        // Automatic group management
+        // (Setting should be set to true by default if there is a Groups
+        // section for compability with old configs)
+        boolean defaultManualGroupManagement = config.isConfigurationSection("Groups");
+        manualGroupManagement = config.getBoolean("BetterEnderChest.manualWorldgroupManagement", defaultManualGroupManagement);
+        config.set("BetterEnderChest.manualWorldgroupManagement", manualGroupManagement);
+
         // Autosave
         // ticks?
         int autoSaveIntervalSeconds = config.getInt("AutoSave.autoSaveIntervalSeconds", 300);
         if (autoSaveIntervalSeconds < 1) {
-            warning("You need at one second between each autosave. Changed it to one minute.");
+            warning("You need at least one second between each autosave. Changed it to one minute.");
             autoSaveIntervalSeconds = 60;
         }
         if (autoSaveIntervalSeconds >= 60 * 15) {
