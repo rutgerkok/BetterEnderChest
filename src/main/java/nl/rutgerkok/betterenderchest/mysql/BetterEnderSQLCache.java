@@ -88,6 +88,8 @@ public class BetterEnderSQLCache implements BetterEnderCache {
             return;
         }
 
+        plugin.debug("Considering chests for autosave...");
+
         if (!saveQueue.isEmpty()) {
             plugin.warning("Saving is so slow, that the save queue of the previous autosave wasn't empty during the next one!");
             plugin.warning("Please reconsider your autosave settings.");
@@ -100,17 +102,22 @@ public class BetterEnderSQLCache implements BetterEnderCache {
                 Inventory inventory = inventoryEntry.getValue();
                 BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
                 if (holder.hasUnsavedChanges()) {
+                    plugin.debug("Adding chest of " + holder.getName() + " to save queue");
                     // Add to save queue
                     saveQueue.add(new SaveEntry(false, plugin, groupEntry.getKey(), inventory));
                     // Chest in its current state will be saved
                     holder.setHasUnsavedChanges(false);
                     // Check if more chests can be saved
                 } else {
-                    String inventoryName = inventory.getName();
-                    if (!inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME) && !Bukkit.getOfflinePlayer(inventoryName).isOnline() && inventory.getViewers().size() == 0) {
+                    plugin.debug("Chest of " + holder.getName() + " has no changes, skipping autosave");
+                    String inventoryName = holder.getName();
+                    if ((!inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME))
+                            && (!Bukkit.getOfflinePlayer(inventoryName).isOnline())
+                            && (inventory.getViewers().size() == 0)) {
                         // This inventory is NOT the public chest, the owner is
                         // NOT online and NO ONE is viewing it
                         // So unload it
+                        plugin.debug("Unloading chest of " + holder.getName());
                         unloadInventory(inventoryName, groupEntry.getKey());
                     }
                 }
@@ -235,10 +242,10 @@ public class BetterEnderSQLCache implements BetterEnderCache {
                         // Chest in its current state was just saved
                         holder.setHasUnsavedChanges(false);
                     } catch (IOException e) {
-                        plugin.severe("Failed to encode chest " + inventory.getName() + " for saving", e);
+                        plugin.severe("Failed to encode chest " + holder.getName() + " for saving", e);
                         plugin.setCanSaveAndLoad(false);
                     } catch (SQLException e) {
-                        plugin.severe("Failed to save chest " + inventory.getName() + " to the database", e);
+                        plugin.severe("Failed to save chest " + holder.getName() + " to the database", e);
                         plugin.setCanSaveAndLoad(false);
                     }
                 }
@@ -262,9 +269,10 @@ public class BetterEnderSQLCache implements BetterEnderCache {
             if (inventory != null) {
                 synchronized (savingLock) {
                     try {
-                        sqlHandler.updateChest(inventory.getName(), group, SaveEntry.toByteArray(plugin, inventory));
-                        // Chest in its current state was just saved
                         BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
+                        sqlHandler.updateChest(holder.getName(), group, SaveEntry.toByteArray(plugin, inventory));
+
+                        // Chest in its current state was just saved
                         holder.setHasUnsavedChanges(false);
                     } catch (SQLException e) {
                         plugin.severe("Failed to save chest", e);
@@ -323,7 +331,10 @@ public class BetterEnderSQLCache implements BetterEnderCache {
             // No chests of that group loaded, nothing to do
             return;
         }
-        inventoriesInGroup.remove(inventoryName);
+
+        if (inventoriesInGroup.remove(inventoryName) == null) {
+            plugin.debug("Failed to unload chest of " + inventoryName + " in group " + group.getGroupName());
+        }
     }
 
 }

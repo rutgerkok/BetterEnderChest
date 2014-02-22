@@ -99,7 +99,7 @@ public class BetterEnderUtils {
      */
     public static void dropItemsInDisabledSlots(Inventory inventory, Player player, BetterEnderChest plugin) {
         BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
-        String inventoryName = inventory.getName();
+        String inventoryName = holder.getName();
         int disabledSlots = -1;
 
         // Get the correct number of disabled slots
