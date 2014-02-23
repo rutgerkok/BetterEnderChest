@@ -127,7 +127,7 @@ public class BetterEnderEventHandler implements Listener {
         final Player player = (Player) event.getPlayer();
 
         // Check for vanilla Ender Chests
-        if (plugin.getCompabilityMode() && event.getInventory().getType().equals(InventoryType.ENDER_CHEST)) {
+        if (plugin.getCompatibilityMode() && event.getInventory().getType().equals(InventoryType.ENDER_CHEST)) {
             // Plugin opened the vanilla Ender Chest, take it over
 
             String inventoryName = "";

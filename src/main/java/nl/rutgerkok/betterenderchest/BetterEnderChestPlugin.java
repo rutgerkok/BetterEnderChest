@@ -67,7 +67,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private BetterEnderChestSizes chestSizes;
     private BetterEnderCommandManager commandManager;
     private Registry<BaseCommand> commands = new Registry<BaseCommand>();
-    private boolean compabilityMode;
+    private boolean compatibilityMode;
     private DatabaseSettings databaseSettings;
     private boolean debug;
     private EmptyInventoryProvider emptyInventoryProvider;
@@ -155,8 +155,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     }
 
     @Override
-    public boolean getCompabilityMode() {
-        return compabilityMode;
+    public boolean getCompatibilityMode() {
+        return compatibilityMode;
     }
 
     @Override
@@ -273,9 +273,10 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         config.set("BetterEnderChest.dropCreative", chestDropCreative);
         this.chestDropCreative = ChestDrop.valueOf(chestDropCreative);
 
-        // CompabilityMode
-        compabilityMode = config.getBoolean("BetterEnderChest.enderChestCompabilityMode", true);
-        config.set("BetterEnderChest.enderChestCompabilityMode", compabilityMode);
+        // CompatibilityMode
+        compatibilityMode = config.getBoolean("BetterEnderChest.enderChestCompatibilityMode", config.getBoolean("BetterEnderChest.enderChestCompabilityMode", true));
+        config.set("BetterEnderChest.enderChestCompatibilityMode", compatibilityMode);
+        config.set("BetterEnderChest.enderChestCompabilityMode", null);
 
         // Debugging
         debug = config.getBoolean("BetterEnderChest.showDebugMessages", false);
@@ -574,8 +575,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     }
 
     @Override
-    public void setCompabilityMode(boolean newCompabilityMode) {
-        compabilityMode = newCompabilityMode;
+    public void setCompatibilityMode(boolean newCompatibilityMode) {
+        compatibilityMode = newCompatibilityMode;
     }
 
     @Override

@@ -137,7 +137,7 @@ public interface BetterEnderChest {
      * @return true If the plugin should take over other plugins opening the
      *         vanilla Ender Chest.
      */
-    boolean getCompabilityMode();
+    boolean getCompatibilityMode();
 
     /**
      * Gets the database settings to user. Returns null if the settings have not
@@ -300,7 +300,7 @@ public interface BetterEnderChest {
      * @param newCompabilityMode
      *            Whether compability mode should be enabled.
      */
-    void setCompabilityMode(boolean newCompabilityMode);
+    void setCompatibilityMode(boolean newCompabilityMode);
 
     /**
      * Sets the database settings to use when using MySQL. You need to call this
