@@ -423,6 +423,40 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         }
     }
 
+    /**
+     * Loads all IO services that were not yet loaded.
+     */
+    private void loadIOServices() {
+        // File handlers
+        if (fileHandler == null) {
+            fileHandler = new BetterEnderFileHandler(this);
+        }
+
+        // Save and load system
+        if (saveAndLoadSystem == null) {
+            saveAndLoadSystem = new BetterEnderIOLogic(this);
+        }
+
+        // Chests storage
+        if (enderCache == null) {
+            if (databaseSettings.isEnabled()) {
+                enderCache = new BetterEnderSQLCache(this);
+            } else {
+                enderCache = new BetterEnderFileCache(this);
+            }
+        }
+    }
+
+    /**
+     * Unloads all IO services.
+     */
+    private void unloadIOServices() {
+        enderCache.disable();
+        fileHandler = null;
+        saveAndLoadSystem = null;
+        enderCache = null;
+    }
+
     @Override
     public void log(String message) {
         getLogger().info(message);
@@ -432,8 +466,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     public void onDisable() {
         if (enderCache != null) {
             log("Disabling... Saving all chests...");
-            enderCache.disable();
-            enderCache = null;
+            unloadIOServices();
             groups = null;
         }
     }
@@ -480,24 +513,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         groups = new BetterEnderWorldGroupManager(this);
         initConfig();
 
-        // File handlers
-        if (fileHandler == null) {
-            fileHandler = new BetterEnderFileHandler(this);
-        }
-
-        // Save and load system
-        if (saveAndLoadSystem == null) {
-            saveAndLoadSystem = new BetterEnderIOLogic(this);
-        }
-
-        // Chests storage
-        if (enderCache == null) {
-            if (databaseSettings.isEnabled()) {
-                enderCache = new BetterEnderSQLCache(this);
-            } else {
-                enderCache = new BetterEnderFileCache(this);
-            }
-        }
+        // IO services
+        loadIOServices();
 
         // EventHandler
         getServer().getPluginManager().registerEvents(new BetterEnderEventHandler(this), this);
@@ -517,7 +534,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
     @Override
     public void reload() {
-        // Unload all chests
+        // Close all chests
         for (Player player : Bukkit.getOnlinePlayers()) {
             // Close all player inventories
             if (player.getOpenInventory().getTopInventory().getHolder() instanceof BetterEnderInventoryHolder) {
@@ -525,11 +542,15 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
                 player.sendMessage(ChatColor.YELLOW + "An admin reloaded all Ender Chests!");
             }
         }
-        getChestCache().saveAllInventories();
-        getChestCache().unloadAllInventories();
+
+        // Unload everything (chests, handlers, etc.)
+        unloadIOServices();
 
         // Reload the config
         initConfig();
+
+        // Reload IO services
+        loadIOServices();
     }
 
     @Override
