@@ -3,7 +3,6 @@ package nl.rutgerkok.betterenderchest;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import nl.rutgerkok.betterenderchest.chestprotection.LWCBridge;
 import nl.rutgerkok.betterenderchest.chestprotection.LocketteBridge;
@@ -76,7 +75,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private BetterEnderWorldGroupManager groups;
     private Registry<InventoryImporter> importers = new Registry<InventoryImporter>();
     private boolean lockChestsOnError = true;
-    private Logger log;
     private boolean manualGroupManagement;
     private Registry<NMSHandler> nmsHandlers = new Registry<NMSHandler>();
     private Registry<ProtectionBridge> protectionBridges = new Registry<ProtectionBridge>();
@@ -427,7 +425,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
     @Override
     public void log(String message) {
-        log.info("[" + this.getName() + "] " + message);
+        getLogger().info(message);
     }
 
     @Override
@@ -442,9 +440,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
     @Override
     public void onEnable() {
-        // Logger
-        log = Logger.getLogger("Minecraft");
-
         // ProtectionBridge
         protectionBridges.register(new LocketteBridge());
         protectionBridges.register(new LWCBridge());
@@ -604,16 +599,16 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
     @Override
     public void severe(String message) {
-        log.severe("[" + this.getName() + "] " + message);
+        getLogger().severe(message);
     }
 
     @Override
     public void severe(String message, Throwable exception) {
-        log.log(Level.SEVERE, "[" + this.getName() + "] " + message, exception);
+        getLogger().log(Level.SEVERE, message, exception);
     }
 
     @Override
     public void warning(String message) {
-        log.warning("[" + this.getName() + "] " + message);
+        getLogger().warning(message);
     }
 }
