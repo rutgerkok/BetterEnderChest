@@ -112,7 +112,7 @@ public class BetterEnderSQLCache implements BetterEnderCache {
                     plugin.debug("Chest of " + holder.getName() + " has no changes, skipping autosave");
                     String inventoryName = holder.getName();
                     if ((!inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME))
-                            && (!Bukkit.getOfflinePlayer(inventoryName).isOnline())
+                            && (Bukkit.getPlayerExact(inventoryName) == null)
                             && (inventory.getViewers().size() == 0)) {
                         // This inventory is NOT the public chest, the owner is
                         // NOT online and NO ONE is viewing it
