@@ -51,8 +51,8 @@ public class BetterEnderSQLCache implements BetterEnderCache {
                 sqlHandler.createGroupTable(group);
             }
         } catch (SQLException e) {
-            plugin.severe("Error communicating with database", e);
-            plugin.setCanSaveAndLoad(false);
+            plugin.severe("Error creating a connection with database", e);
+            plugin.disableSaveAndLoad("Error creating a connection with database", e);
         }
         this.sqlHandler = sqlHandler;
 
@@ -178,7 +178,7 @@ public class BetterEnderSQLCache implements BetterEnderCache {
                     loadEntry.callback(plugin, BetterEnderSQLCache.this, dataFromDatabase);
                 } catch (SQLException e) {
                     plugin.severe("Error loading chest " + loadEntry.getInventoryName(), e);
-                    plugin.setCanSaveAndLoad(false);
+                    plugin.disableSaveAndLoad("Error loading chest from database of " + loadEntry.getInventoryName(), e);
                 }
             }
         });
@@ -194,21 +194,23 @@ public class BetterEnderSQLCache implements BetterEnderCache {
         }
 
         synchronized (savingLock) {
-            try {
-                int savedCount = 0;
-                while (!saveQueue.isEmpty()) {
-                    SaveEntry entry = saveQueue.poll();
+            int savedCount = 0;
+            while (!saveQueue.isEmpty()) {
+                SaveEntry entry = saveQueue.poll();
+                try {
                     sqlHandler.updateChest(entry.getInventoryName(), entry.getWorldGroup(), entry.getChestData());
-                    savedCount++;
-                    if (savedCount >= AutoSave.chestsPerSaveTick) {
-                        // Done enough work for now
-                        return;
-                    }
+                } catch (SQLException e) {
+                    plugin.severe("Failed to save chest", e);
+                    plugin.disableSaveAndLoad("Failed to save the chest of " + entry.getInventoryName() + " to the database", e);
+                    return;
                 }
-            } catch (SQLException e) {
-                plugin.severe("Failed to save chest", e);
-                plugin.setCanSaveAndLoad(false);
+                savedCount++;
+                if (savedCount >= AutoSave.chestsPerSaveTick) {
+                    // Done enough work for now
+                    return;
+                }
             }
+
         }
     }
 
@@ -243,10 +245,10 @@ public class BetterEnderSQLCache implements BetterEnderCache {
                         holder.setHasUnsavedChanges(false);
                     } catch (IOException e) {
                         plugin.severe("Failed to encode chest " + holder.getName() + " for saving", e);
-                        plugin.setCanSaveAndLoad(false);
+                        plugin.disableSaveAndLoad("Failed to encode chest of " + holder.getName() + " for saving when saving all chests", e);
                     } catch (SQLException e) {
                         plugin.severe("Failed to save chest " + holder.getName() + " to the database", e);
-                        plugin.setCanSaveAndLoad(false);
+                        plugin.disableSaveAndLoad("Failed to save chest " + holder.getName() + " to the database when saving all chests", e);
                     }
                 }
             }

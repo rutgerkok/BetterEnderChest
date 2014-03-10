@@ -197,7 +197,7 @@ public class BetterEnderFileCache implements BetterEnderCache {
             }
         } catch (IOException e) {
             plugin.severe("Failed to save a chest", e);
-            plugin.setCanSaveAndLoad(false);
+            plugin.disableSaveAndLoad("Failed to save a chest when trying to save all chests", e);
         }
     }
 
@@ -221,7 +221,7 @@ public class BetterEnderFileCache implements BetterEnderCache {
             ((BetterEnderInventoryHolder) inventory.getHolder()).setHasUnsavedChanges(false);
         } catch (IOException e) {
             plugin.severe("Failed to save chest of " + inventoryName, e);
-            plugin.setCanSaveAndLoad(false);
+            plugin.disableSaveAndLoad("Failed to save chest of " + inventoryName, e);
         }
 
     }

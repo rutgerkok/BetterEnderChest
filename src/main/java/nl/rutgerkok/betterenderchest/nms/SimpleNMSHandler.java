@@ -109,7 +109,9 @@ public class SimpleNMSHandler extends NMSHandler {
     private Inventory loadNBTInventory(InputStream inputStream, String inventoryName, String inventoryTagName) throws IOException {
         // Load the NBT tag
         NBTTagCompound baseTag = NBTCompressedStreamTools.a(inputStream);
-        NBTTagList inventoryTag = baseTag.getList(inventoryTagName, 10); // 10 == TAG_Compound
+        NBTTagList inventoryTag = baseTag.getList(inventoryTagName, 10); // 10
+                                                                         // ==
+                                                                         // TAG_Compound
 
         // Create the Bukkit inventory
         int inventoryRows = getRows(inventoryName, baseTag, inventoryTag);

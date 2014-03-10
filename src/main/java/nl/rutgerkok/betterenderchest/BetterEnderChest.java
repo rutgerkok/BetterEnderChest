@@ -9,6 +9,7 @@ import nl.rutgerkok.betterenderchest.importers.InventoryImporter;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.BetterEnderFileHandler;
 import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
+import nl.rutgerkok.betterenderchest.io.SaveAndLoadError;
 import nl.rutgerkok.betterenderchest.mysql.DatabaseSettings;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.registry.Registry;
@@ -41,6 +42,14 @@ public interface BetterEnderChest {
      * @return True if the plugin can save and load.
      */
     boolean canSaveAndLoad();
+
+    /**
+     * Gets the latest error that occurred during saving and loading. Will be
+     * null if there were no errors yet.
+     * 
+     * @return The latest error.
+     */
+    SaveAndLoadError getSaveAndLoadError();
 
     /**
      * Logs a debug message.
@@ -247,17 +256,18 @@ public interface BetterEnderChest {
     void reload();
 
     /**
-     * Sets whether the plugin can save and load. Can be called from any thread.
+     * Disables saving and loading. Can be called from any thread.
      * <p />
-     * If this is set to false, a message will be shown that saving and loading
-     * has been disabled. Please note that the admin can disable this method
-     * from doing anything.
+     * A message will be shown that saving and loading has been disabled. Please
+     * note that the admin can disable this method from doing anything.
      * 
-     * @param canSaveAndLoad
-     *            True if the plugin can save and load.
+     * @param reason
+     *            The reason why saving and loading had to be disabled.
+     * @param stacktrace
+     *            Stacktrace, for debugging.
      * @see #canSaveAndLoad()
      */
-    void setCanSaveAndLoad(boolean canSaveAndLoad);
+    void disableSaveAndLoad(String reason, Throwable stacktrace);
 
     /**
      * Sets the cache system that should be used.

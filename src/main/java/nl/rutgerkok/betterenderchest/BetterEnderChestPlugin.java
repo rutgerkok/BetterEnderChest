@@ -26,6 +26,7 @@ import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.BetterEnderFileCache;
 import nl.rutgerkok.betterenderchest.io.BetterEnderFileHandler;
 import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
+import nl.rutgerkok.betterenderchest.io.SaveAndLoadError;
 import nl.rutgerkok.betterenderchest.io.SaveLocation;
 import nl.rutgerkok.betterenderchest.mysql.BetterEnderSQLCache;
 import nl.rutgerkok.betterenderchest.mysql.DatabaseSettings;
@@ -59,7 +60,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         public static boolean openOnOpeningUnprotectedChest, openOnUsingCommand;
     }
 
-    private volatile boolean canSaveAndLoad = true;
     private ChestDrop chestDrop, chestDropSilkTouch, chestDropCreative;
     private Material chestMaterial = Material.ENDER_CHEST;
     private File chestSaveLocation;
@@ -79,17 +79,32 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private Registry<NMSHandler> nmsHandlers = new Registry<NMSHandler>();
     private Registry<ProtectionBridge> protectionBridges = new Registry<ProtectionBridge>();
     private int rankUpgrades;
+    private SaveAndLoadError saveAndLoadError;
     private BetterEnderIOLogic saveAndLoadSystem;
 
     @Override
-    public boolean canSaveAndLoad() {
-        return canSaveAndLoad;
+    public synchronized boolean canSaveAndLoad() {
+        return saveAndLoadError == null;
     }
 
     @Override
     public void debug(String string) {
         if (debug) {
             log("[Debug] " + string);
+        }
+    }
+
+    @Override
+    public synchronized void disableSaveAndLoad(String reason, Throwable throwable) {
+        if (this.saveAndLoadError == null) {
+            if (this.lockChestsOnError) {
+                severe("All Ender Chests are now locked to prevent potentially lost and duplicated items.");
+                severe("If you really want to disable chest locking, see the config.yml:");
+                severe("set the BetterEnderChest.lockChestsOnError setting to false.");
+                this.saveAndLoadError = new SaveAndLoadError(reason, throwable);
+            } else {
+                severe("Although a critical error occured, the plugin will keep trying to save and load as requested in the config.yml.");
+            }
         }
     }
 
@@ -200,6 +215,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public Registry<ProtectionBridge> getProtectionBridges() {
         return protectionBridges;
+    }
+
+    @Override
+    public synchronized SaveAndLoadError getSaveAndLoadError() {
+        return saveAndLoadError;
     }
 
     @Override
@@ -447,16 +467,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         }
     }
 
-    /**
-     * Unloads all IO services.
-     */
-    private void unloadIOServices() {
-        enderCache.disable();
-        fileHandler = null;
-        saveAndLoadSystem = null;
-        enderCache = null;
-    }
-
     @Override
     public void log(String message) {
         getLogger().info(message);
@@ -554,23 +564,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     }
 
     @Override
-    public void setCanSaveAndLoad(boolean canSaveAndLoad) {
-        if (canSaveAndLoad == false && this.canSaveAndLoad == true) {
-            if (this.lockChestsOnError) {
-                severe("All Ender Chests are now locked to prevent potentially lost and duplicated items.");
-                severe("If you really want to disable chest locking, see the config.yml:");
-                severe("set the BetterEnderChest.lockChestsOnError setting to false.");
-                this.canSaveAndLoad = false;
-            } else {
-                severe("Although a critical error occured, the plugin will keep trying to save and load as requested in the config.yml.");
-            }
-        } else if (this.canSaveAndLoad == false) {
-            log("Re-enabled saving and loading.");
-            this.canSaveAndLoad = true;
-        }
-    }
-
-    @Override
     public void setChestCache(BetterEnderCache cache) {
         enderCache = cache;
     }
@@ -626,6 +619,16 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public void severe(String message, Throwable exception) {
         getLogger().log(Level.SEVERE, message, exception);
+    }
+
+    /**
+     * Unloads all IO services.
+     */
+    private void unloadIOServices() {
+        enderCache.disable();
+        fileHandler = null;
+        saveAndLoadSystem = null;
+        enderCache = null;
     }
 
     @Override

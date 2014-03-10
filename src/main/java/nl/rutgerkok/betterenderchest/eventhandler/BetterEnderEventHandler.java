@@ -11,6 +11,7 @@ import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestprotection.ProtectionBridge;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.Consumer;
+import nl.rutgerkok.betterenderchest.io.SaveAndLoadError;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 
 import org.bukkit.ChatColor;
@@ -194,6 +195,11 @@ public class BetterEnderEventHandler implements Listener {
         if (!plugin.canSaveAndLoad()) {
             // Incompatible BetterEnderChest version installed
             player.sendMessage(ChatColor.RED + Translations.ENDER_CHESTS_DISABLED.toString());
+            plugin.severe("- ---------------------------------------------------------- -");
+            plugin.severe("Saving and loading had to be disabled. Here's the error again:");
+            SaveAndLoadError error = plugin.getSaveAndLoadError();
+            plugin.severe(error.getMessage(), error.getCause());
+            plugin.severe("- ---------------------------------------------------------- -");
             return;
         }
 

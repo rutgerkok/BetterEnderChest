@@ -56,7 +56,7 @@ public class MyWorldsImporter extends InventoryImporter {
                 worldToGrabInventoryFrom = WorldConfigStore.get(worldGroup.getGroupName());
             }
         }
-        
+
         // Check if world was found
         if (worldToGrabInventoryFrom == null) {
             plugin.warning("Found no group with the name " + worldGroup.getGroupName() + " in MyWorlds, cannot import the Ender Chest of " + inventoryName);

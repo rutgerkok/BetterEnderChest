@@ -30,11 +30,12 @@ public class BetterEnderFileHandler {
             // Safeguard message, displayed if there is no NMS-class
             // implementation and saving and loading doesn't work
             // Message is continued from the message in setCanSafeAndLoad
+            RuntimeException e = new RuntimeException("Please use the Minecraft version this plugin was designed for.");
             plugin.severe("No access to net.minecraft.server, saving and loading won't work.");
             plugin.severe("This is most likely caused by the plugin being run on an unknown Minecraft version.");
-            plugin.severe("Please look for a BetterEnderChest file matching your CraftBukkit version!");
-            plugin.severe("Stack trace to grab your attention, please don't report to BukkitDev:", new RuntimeException("Please use the CraftBukkit build this plugin was designed for."));
-            plugin.setCanSaveAndLoad(false);
+            plugin.severe("Please look for a BetterEnderChest file matching your Minecraft version!");
+            plugin.severe("Stack trace to grab your attention, no need to report this to BukkitDev:", e);
+            plugin.disableSaveAndLoad("BetterEnderChest doesn't work on this version of Minecraft", e);
         }
     }
 
