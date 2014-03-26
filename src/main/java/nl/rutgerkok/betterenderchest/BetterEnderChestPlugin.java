@@ -555,6 +555,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
         // Unload everything (chests, handlers, etc.)
         unloadIOServices();
+        
+        // Re-enable chest saving
+        synchronized (this) {
+            this.saveAndLoadError = null;
+        }
 
         // Reload the config
         initConfig();
