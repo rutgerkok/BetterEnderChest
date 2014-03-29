@@ -119,7 +119,7 @@ public class BetterEnderUtils {
             for (int i = 1; i <= disabledSlots; i++) {
                 ItemStack stackInDisabledSlot = inventory.getItem(inventory.getSize() - i);
                 if (stackInDisabledSlot != null && !stackInDisabledSlot.getType().equals(Material.AIR)) {
-                    inventory.setItem(inventory.getSize() - i, null);
+                    inventory.setItem(inventory.getSize() - i, new ItemStack(Material.AIR));
                     player.getWorld().dropItemNaturally(playerLocation, stackInDisabledSlot);
                     droppedCount++;
                 }
