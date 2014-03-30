@@ -17,6 +17,8 @@ import net.minecraft.server.v1_7_R2.TileEntity;
 import net.minecraft.server.v1_7_R2.TileEntityEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
+import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -56,7 +58,7 @@ public class SimpleNMSHandler extends NMSHandler {
         return getClass().getSimpleName();
     }
 
-    private int getRows(String inventoryName, NBTTagCompound baseTag, NBTTagList inventoryListTag) {
+    private int getRows(ChestOwner chestOwner, NBTTagCompound baseTag, NBTTagList inventoryListTag) {
         if (baseTag.hasKey("Rows")) {
             // Load the number of rows
             return baseTag.getByte("Rows");
@@ -72,7 +74,7 @@ public class SimpleNMSHandler extends NMSHandler {
 
             // Calculate the needed number of rows for the items, and return the
             // required number of rows
-            return Math.max((int) Math.ceil(highestSlot / 9.0), plugin.getEmptyInventoryProvider().getInventoryRows(inventoryName));
+            return Math.max((int) Math.ceil(highestSlot / 9.0), plugin.getEmptyInventoryProvider().getInventoryRows(chestOwner));
         }
     }
 
@@ -88,17 +90,17 @@ public class SimpleNMSHandler extends NMSHandler {
     }
 
     @Override
-    public Inventory loadNBTInventory(byte[] bytes, String inventoryName, String inventoryTagName) throws IOException {
+    public Inventory loadNBTInventory(byte[] bytes, ChestOwner chestOwner, WorldGroup worldGroup, String inventoryTagName) throws IOException {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
-        return loadNBTInventory(inputStream, inventoryName, inventoryTagName);
+        return loadNBTInventory(inputStream, chestOwner, worldGroup, inventoryTagName);
     }
 
     @Override
-    public Inventory loadNBTInventory(File file, String inventoryName, String inventoryTagName) throws IOException {
+    public Inventory loadNBTInventory(File file, ChestOwner chestOwner, WorldGroup worldGroup, String inventoryTagName) throws IOException {
         FileInputStream inputStream = null;
         try {
             inputStream = new FileInputStream(file);
-            return loadNBTInventory(inputStream, inventoryName, inventoryTagName);
+            return loadNBTInventory(inputStream, chestOwner, worldGroup, inventoryTagName);
         } finally {
             if (inputStream != null) {
                 inputStream.close();
@@ -106,17 +108,16 @@ public class SimpleNMSHandler extends NMSHandler {
         }
     }
 
-    private Inventory loadNBTInventory(InputStream inputStream, String inventoryName, String inventoryTagName) throws IOException {
+    private Inventory loadNBTInventory(InputStream inputStream, ChestOwner chestOwner, WorldGroup worldGroup, String inventoryTagName) throws IOException {
         // Load the NBT tag
         NBTTagCompound baseTag = NBTCompressedStreamTools.a(inputStream);
-        NBTTagList inventoryTag = baseTag.getList(inventoryTagName, 10); // 10
-                                                                         // ==
-                                                                         // TAG_Compound
+        // Tag 10 == TAG_Compound
+        NBTTagList inventoryTag = baseTag.getList(inventoryTagName, 10);
 
         // Create the Bukkit inventory
-        int inventoryRows = getRows(inventoryName, baseTag, inventoryTag);
+        int inventoryRows = getRows(chestOwner, baseTag, inventoryTag);
         int disabledSlots = getDisabledSlots(baseTag);
-        Inventory inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName, inventoryRows, disabledSlots);
+        Inventory inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup, inventoryRows, disabledSlots);
 
         // Add all the items
         for (int i = 0; i < inventoryTag.size(); i++) {
@@ -169,8 +170,6 @@ public class SimpleNMSHandler extends NMSHandler {
         // Chest metadata
         baseTag.setByte("Rows", (byte) (inventory.getSize() / 9));
         baseTag.setByte("DisabledSlots", (byte) holder.getDisabledSlots());
-        baseTag.setString("OwnerName", holder.getName());
-        baseTag.setByte("NameCaseCorrect", (byte) (holder.isOwnerNameCaseCorrect() ? 1 : 0));
 
         // Add all items to the inventory tag
         for (int i = 0; i < inventory.getSize(); i++) {

@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 
 import com.griefcraft.lwc.LWC;
 
-public class LWCBridge implements ProtectionBridge {
+public class LWCBridge extends ProtectionBridge {
 
     @Override
     public boolean canAccess(Player player, Block block) {

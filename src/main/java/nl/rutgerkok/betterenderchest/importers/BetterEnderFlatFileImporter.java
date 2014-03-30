@@ -6,6 +6,7 @@ import java.util.Set;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
@@ -24,8 +25,8 @@ public class BetterEnderFlatFileImporter extends InventoryImporter {
     }
 
     @Override
-    public Inventory importInventory(String inventoryName, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
-        return plugin.getFileHandler().load(inventoryName, worldGroup);
+    public Inventory importInventory(ChestOwner chestOwner, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
+        return plugin.getFileHandler().load(chestOwner, worldGroup);
     }
 
     @Override

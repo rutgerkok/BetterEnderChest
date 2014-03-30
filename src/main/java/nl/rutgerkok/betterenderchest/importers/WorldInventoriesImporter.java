@@ -10,6 +10,7 @@ import me.drayshak.WorldInventories.Group;
 import me.drayshak.WorldInventories.WorldInventories;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -30,10 +31,10 @@ public class WorldInventoriesImporter extends InventoryImporter {
     }
 
     @Override
-    public Inventory importInventory(final String inventoryName, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
+    public Inventory importInventory(ChestOwner chestOwner, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
         String groupName = worldGroup.getGroupName();
 
-        if (plugin.isSpecialChest(inventoryName)) {
+        if (chestOwner.isSpecialChest()) {
             // Public chests and default chests cannot be imported.
             return null;
         }
@@ -54,12 +55,12 @@ public class WorldInventoriesImporter extends InventoryImporter {
 
         // Check if a matching group has been found
         if (worldInventoriesGroup == null) {
-            plugin.warning("No matching WorldInventories group found for " + groupName + ". Cannot import " + inventoryName + ".");
+            plugin.warning("No matching WorldInventories group found for " + groupName + ". Cannot import " + chestOwner.getDisplayName() + ".");
             return null;
         }
 
         // Get the stacks
-        List<ItemStack> stacks = loadPlayerInventory(worldInventories, inventoryName, worldInventoriesGroup);
+        List<ItemStack> stacks = loadPlayerInventory(worldInventories, chestOwner, worldInventoriesGroup);
 
         // Return nothing if there is nothing
         if (stacks == null || stacks.size() == 0) {
@@ -67,8 +68,8 @@ public class WorldInventoriesImporter extends InventoryImporter {
         }
 
         // Add everything from WorldInventories to betterInventory
-        int rows = plugin.getEmptyInventoryProvider().getInventoryRows(inventoryName, stacks.listIterator());
-        Inventory betterInventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName, rows, 0);
+        int rows = plugin.getEmptyInventoryProvider().getInventoryRows(chestOwner, stacks.listIterator());
+        Inventory betterInventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup, rows, 0);
         for (int i = 0; i < stacks.size(); i++) {
             ItemStack stack = stacks.get(i);
             if (stack != null) {
@@ -98,10 +99,10 @@ public class WorldInventoriesImporter extends InventoryImporter {
     }
 
     @SuppressWarnings("unchecked")
-    private List<ItemStack> loadPlayerInventory(WorldInventories plugin, String player, Group group) {
+    private List<ItemStack> loadPlayerInventory(WorldInventories plugin, ChestOwner chestOwner, Group group) {
         // Get the file
         File inventoriesFolder = new File(plugin.getDataFolder(), group.getName());
-        File inventoryFile = new File(inventoriesFolder, player + ".enderchest." + WorldInventories.inventoryFileVersion + ".yml");
+        File inventoryFile = new File(inventoriesFolder, chestOwner.getDisplayName() + ".enderchest." + WorldInventories.inventoryFileVersion + ".yml");
 
         // Read the file
         if (inventoryFile.exists()) {

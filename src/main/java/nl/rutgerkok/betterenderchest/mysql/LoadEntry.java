@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.io.Consumer;
 
 import org.apache.commons.lang.Validate;
@@ -12,14 +13,14 @@ import org.bukkit.inventory.Inventory;
 
 public class LoadEntry {
     private final Consumer<Inventory> callback;
-    private final String inventoryName;
+    private final ChestOwner chestOwner;
     private final WorldGroup worldGroup;
 
-    public LoadEntry(String inventoryName, WorldGroup worldGroup, Consumer<Inventory> callback) {
-        Validate.notNull(inventoryName, "inventoryName cannot be null");
+    public LoadEntry(ChestOwner chestOwner, WorldGroup worldGroup, Consumer<Inventory> callback) {
+        Validate.notNull(chestOwner, "chestOwner cannot be null");
         Validate.notNull(worldGroup, "worldGroup cannot be null");
         Validate.notNull(callback, "callback cannot be null");
-        this.inventoryName = inventoryName;
+        this.chestOwner = chestOwner;
         this.worldGroup = worldGroup;
         this.callback = callback;
     }
@@ -54,18 +55,18 @@ public class LoadEntry {
         // Load inventory
         if (inventoryData == null) {
             // Import or get the default chest, or get an empty chest
-            inventory = plugin.getLoadAndImportSystem().getFallbackInventory(inventoryName, worldGroup);
+            inventory = plugin.getLoadAndImportSystem().getFallbackInventory(chestOwner, worldGroup);
         } else {
             try {
-                inventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(inventoryData, inventoryName, "Inventory");
+                inventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(inventoryData, chestOwner, worldGroup, "Inventory");
             } catch (IOException e) {
                 plugin.severe("Failed to decode inventory in database", e);
-                inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName);
+                inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup);
             }
         }
 
         // Add to loaded inventories
-        cache.setInventory(inventoryName, worldGroup, inventory);
+        cache.setInventory(inventory);
 
         // Call callback
         callback.consume(inventory);
@@ -83,7 +84,7 @@ public class LoadEntry {
         if (!callback.equals(other.callback)) {
             return false;
         }
-        if (!inventoryName.equals(other.inventoryName)) {
+        if (!chestOwner.equals(other.chestOwner)) {
             return false;
         }
         if (!worldGroup.equals(other.worldGroup)) {
@@ -93,12 +94,12 @@ public class LoadEntry {
     }
 
     /**
-     * Gets the name of the inventory that should be loaded.
+     * Gets the owner of the inventory that should be loaded.
      * 
-     * @return The name of the inventory.
+     * @return The owner of the inventory.
      */
-    public String getInventoryName() {
-        return inventoryName;
+    public ChestOwner getChestOwner() {
+        return chestOwner;
     }
 
     /**
@@ -115,7 +116,7 @@ public class LoadEntry {
         final int prime = 31;
         int result = 1;
         result = prime * result + callback.hashCode();
-        result = prime * result + inventoryName.hashCode();
+        result = prime * result + chestOwner.hashCode();
         result = prime * result + worldGroup.hashCode();
         return result;
     }

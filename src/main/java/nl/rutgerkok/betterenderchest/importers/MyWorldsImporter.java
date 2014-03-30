@@ -11,6 +11,7 @@ import java.util.Set;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -34,8 +35,8 @@ public class MyWorldsImporter extends InventoryImporter {
     }
 
     @Override
-    public Inventory importInventory(String inventoryName, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
-        if (plugin.isSpecialChest(inventoryName)) {
+    public Inventory importInventory(ChestOwner chestOwner, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
+        if (chestOwner.isSpecialChest()) {
             // Unsupported, sorry
             return null;
         }
@@ -59,20 +60,20 @@ public class MyWorldsImporter extends InventoryImporter {
 
         // Check if world was found
         if (worldToGrabInventoryFrom == null) {
-            plugin.warning("Found no group with the name " + worldGroup.getGroupName() + " in MyWorlds, cannot import the Ender Chest of " + inventoryName);
+            plugin.warning("Found no group with the name " + worldGroup.getGroupName() + " in MyWorlds, cannot import the Ender Chest of " + chestOwner.getDisplayName());
             return null;
         }
 
         // Search for player file
         File playerFolder = worldToGrabInventoryFrom.getPlayerFolder();
-        File playerFile = BetterEnderUtils.getCaseInsensitiveFile(playerFolder, inventoryName + ".dat");
+        File playerFile = BetterEnderUtils.getCaseInsensitiveFile(playerFolder, chestOwner.getSaveFileName() + ".dat");
         if (playerFile == null) {
             // No player file
             return null;
         }
 
         // Load from file
-        Inventory inventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(playerFile, inventoryName, "EnderItems");
+        Inventory inventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(playerFile, chestOwner, worldGroup, "EnderItems");
         if (BetterEnderUtils.isInventoryEmpty(inventory)) {
             return null;
         }

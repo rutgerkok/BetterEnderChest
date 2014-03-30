@@ -2,9 +2,20 @@ package nl.rutgerkok.betterenderchest.io;
 
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.inventory.Inventory;
 
+/**
+ * Represents the chest cache, used to retrieve inventories.
+ * 
+ * All methods using the name of a chest have been deprecated. You should use
+ * the {@link ChestOwner}-equivalents.
+ * 
+ * Passing null to any method is not allowed and may cause a
+ * {@link NullPointerException}.
+ *
+ */
 public interface BetterEnderCache {
     /**
      * Disables the cache. Called when the plugin is shutting down. The cache
@@ -16,10 +27,19 @@ public interface BetterEnderCache {
     /**
      * Loads an inventory.
      * 
-     * @param inventoryName
+     * @param chestOwner
+     *            Owner of the inventory.
      * @param worldGroup
+     *            Group the inventory is in.
      * @param callback
+     *            Called when the chest is retrieved.
      */
+    void getInventory(ChestOwner chestOwner, WorldGroup worldGroup, Consumer<Inventory> callback);
+
+    /**
+     * @deprecated Use {@link #getInventory(ChestOwner, WorldGroup, Consumer)}.
+     */
+    @Deprecated
     void getInventory(String inventoryName, WorldGroup worldGroup, Consumer<Inventory> callback);
 
     /**
@@ -36,23 +56,32 @@ public interface BetterEnderCache {
      * is no cached inventory with this name and group, this method does
      * nothing.
      * 
-     * @param inventoryName
-     *            The name of the inventory, case insensitive.
+     * @param chestOwner
+     *            The owner of the chest.
      * @param group
      *            The world group the inventory is in.
      */
+    void saveInventory(ChestOwner chestOwner, WorldGroup group);
+
+    /**
+     * @deprecated Use {@link #saveInventory(ChestOwner, WorldGroup)}.
+     */
+    @Deprecated
     void saveInventory(String inventoryName, WorldGroup group);
 
     /**
-     * Set a inventory. Make sure the name of the inventory
-     * (((EnderHolder)inventory.getHolder()).getOwnerName()) matches the
-     * inventoryName.
+     * Sets the inventory in the cache, replacing the old inventory that may
+     * have been in the cache.
      * 
-     * @param inventoryName
-     *            Name to save the inventory in the list AND the filename
      * @param inventory
      *            The new inventory
      */
+    void setInventory(Inventory enderInventory);
+
+    /**
+     * @deprecated Use {@link #setInventory(Inventory)}.
+     */
+    @Deprecated
     void setInventory(String inventoryName, WorldGroup group, Inventory enderInventory);
 
     /**
@@ -65,11 +94,17 @@ public interface BetterEnderCache {
      * Unloads the inventory from memory. Doesn't save! Also, make sure that
      * no-one is viewing the inventory!
      * 
-     * @param inventoryName
-     *            The name of the inventory.
+     * @param chestOwner
+     *            The owner of the chest.
      * @param group
      *            The group of the inventory.
      */
+    void unloadInventory(ChestOwner chestOwner, WorldGroup group);
+
+    /**
+     * @deprecated Use {@link #unloadInventory(ChestOwner, WorldGroup)}.
+     */
+    @Deprecated
     void unloadInventory(String inventoryName, WorldGroup group);
 
 }

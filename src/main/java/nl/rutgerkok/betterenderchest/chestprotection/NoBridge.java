@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
  * If there is no Lockette or LWC present, the plugin will use this class.
  * 
  */
-public class NoBridge implements ProtectionBridge {
+public class NoBridge extends ProtectionBridge {
 
     @Override
     public boolean canAccess(Player player, Block block) {

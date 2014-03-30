@@ -6,6 +6,7 @@ import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.EmptyInventoryProvider;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.inventory.Inventory;
 
@@ -29,76 +30,76 @@ public class BetterEnderIOLogic {
      * default chest will be returned. When there is no default chest, an empty
      * chest will be returned. When an error occurs, an emtpy chest is returned.
      * 
-     * @param inventoryName
+     * @param chestOwner
      *            The name of the inventory, must be lowercase.
      * @param worldGroup
      *            The group the inventory is in.
      * @return The inventory. {@link BetterEnderInventoryHolder} will be the
      *         holder of the inventory.
      */
-    public Inventory getFallbackInventory(String inventoryName, WorldGroup worldGroup) {
+    public Inventory getFallbackInventory(ChestOwner chestOwner, WorldGroup worldGroup) {
         EmptyInventoryProvider emptyChests = plugin.getEmptyInventoryProvider();
         BetterEnderFileHandler fileHandler = plugin.getFileHandler();
 
         // Try to import it from vanilla/some other plugin
         try {
-            Inventory importedInventory = worldGroup.getInventoryImporter().importInventory(inventoryName, worldGroup, plugin);
+            Inventory importedInventory = worldGroup.getInventoryImporter().importInventory(chestOwner, worldGroup, plugin);
             if (importedInventory != null) {
                 // Make sure that the inventory is saved
                 ((BetterEnderInventoryHolder) importedInventory.getHolder()).setHasUnsavedChanges(true);
                 return importedInventory;
             }
         } catch (IOException e) {
-            plugin.severe("Could not import inventory " + inventoryName, e);
+            plugin.severe("Could not import inventory " + chestOwner, e);
 
             // Return an empty inventory. Loading the default chest again
             // could cause issues when someone
             // finds a way to constantly break this plugin.
-            return emptyChests.loadEmptyInventory(inventoryName);
+            return emptyChests.loadEmptyInventory(chestOwner, worldGroup);
         }
 
         // Try to load the default inventory
-        if (fileHandler.exists(BetterEnderChest.DEFAULT_CHEST_NAME, worldGroup)) {
+        if (fileHandler.exists(plugin.getChestOwners().defaultChest(), worldGroup)) {
             try {
-                Inventory inventory = fileHandler.load(BetterEnderChest.DEFAULT_CHEST_NAME, worldGroup);
+                Inventory inventory = fileHandler.load(plugin.getChestOwners().defaultChest(), worldGroup);
                 // Make sure that the inventory is saved
                 ((BetterEnderInventoryHolder) inventory.getHolder()).setHasUnsavedChanges(true);
                 return inventory;
             } catch (IOException e) {
-                plugin.severe("Failed to load default chest for " + inventoryName, e);
-                return emptyChests.loadEmptyInventory(inventoryName);
+                plugin.severe("Failed to load default chest for " + chestOwner, e);
+                return emptyChests.loadEmptyInventory(chestOwner, worldGroup);
             }
         }
 
         // Just return an empty chest
-        return emptyChests.loadEmptyInventory(inventoryName);
+        return emptyChests.loadEmptyInventory(chestOwner, worldGroup);
     }
 
     /**
      * Load the inventory. It will automatically try to load it from a file, or
      * import it from another plugin, or use the default chest.
      * 
-     * @param inventoryName
-     *            Name of the inventory, must be lowercase.
+     * @param chestOwner
+     *            Owner of the inventory.
      * @param worldGroup
      *            Name of the world group the inventory is in.
      * @return The Inventory. {@link BetterEnderInventoryHolder} will be the
      *         holder of the inventory.
      */
-    public Inventory loadInventory(String inventoryName, WorldGroup worldGroup) {
+    public Inventory loadInventory(ChestOwner chestOwner, WorldGroup worldGroup) {
         BetterEnderFileHandler fileHandler = plugin.getFileHandler();
         // Try to load it from a file
-        if (fileHandler.exists(inventoryName, worldGroup)) {
+        if (fileHandler.exists(chestOwner, worldGroup)) {
             try {
-                return fileHandler.load(inventoryName, worldGroup);
+                return fileHandler.load(chestOwner, worldGroup);
             } catch (IOException e) {
-                plugin.severe("Failed to load chest of " + inventoryName, e);
-                plugin.disableSaveAndLoad("Failed to load chest of " + inventoryName, e);
-                return plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName);
+                plugin.severe("Failed to load chest of " + chestOwner.getDisplayName(), e);
+                plugin.disableSaveAndLoad("Failed to load chest of " + chestOwner.getDisplayName(), e);
+                return plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup);
             }
         }
 
         // Use various fallback methods
-        return getFallbackInventory(inventoryName, worldGroup);
+        return getFallbackInventory(chestOwner, worldGroup);
     }
 }

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
@@ -33,10 +34,10 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
     }
 
     @Override
-    public Inventory importInventory(final String inventoryName, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
+    public Inventory importInventory(ChestOwner chestOwner, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
         String groupName = worldGroup.getGroupName();
 
-        if (plugin.isSpecialChest(inventoryName)) {
+        if (chestOwner.isSpecialChest()) {
             // Public chests and default chests cannot be imported.
             return null;
         }
@@ -56,18 +57,18 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
 
         // Check if a matching group has been found
         if (group == null) {
-            plugin.warning("No matching Multiverse-Inventories group found for " + groupName + ". Cannot import " + inventoryName + ".");
+            plugin.warning("No matching Multiverse-Inventories group found for " + groupName + ". Cannot import " + chestOwner.getDisplayName() + ".");
             return null;
         }
 
         // Get the global profile of the player
-        GlobalProfile globalProfile = multiverseInventories.getData().getGlobalProfile(inventoryName);
+        GlobalProfile globalProfile = multiverseInventories.getData().getGlobalProfile(chestOwner.getSaveFileName());
         if (globalProfile == null) {
-            plugin.debug("It seems that there is no data for " + inventoryName + ", so nothing can be imported.");
+            plugin.debug("It seems that there is no data for " + chestOwner.getDisplayName() + ", so nothing can be imported.");
             return null;
         }
         if (globalProfile.getWorld() == null) {
-            plugin.debug("It seems that the world of " + inventoryName + " is null, so nothing can be imported.");
+            plugin.debug("It seems that the world of " + chestOwner.getDisplayName() + " is null, so nothing can be imported.");
             return null;
         }
 
@@ -77,7 +78,7 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
         // Multiverse-Inventories.
         if (group.containsWorld(globalProfile.getWorld())) {
             // Player is in the current group, load from vanilla
-            return plugin.getInventoryImporters().getRegistration("vanilla").importInventory(inventoryName, worldGroup, plugin);
+            return plugin.getInventoryImporters().getRegistration("vanilla").importInventory(chestOwner, worldGroup, plugin);
         } else {
             // Get the correct gamemode
             ProfileType profileType;
@@ -92,7 +93,7 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
             }
 
             // Get the data
-            PlayerProfile playerData = multiverseInventories.getGroupManager().getGroup(groupName).getPlayerData(profileType, Bukkit.getOfflinePlayer(inventoryName));
+            PlayerProfile playerData = multiverseInventories.getGroupManager().getGroup(groupName).getPlayerData(profileType, Bukkit.getOfflinePlayer(chestOwner.getDisplayName()));
 
             // Return nothing if there is nothing
             if (playerData == null) {
@@ -108,7 +109,7 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
             }
 
             // Add everything from Multiverse-Inventories to betterInventory
-            Inventory betterInventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName);
+            Inventory betterInventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup);
             betterInventory.setContents(stacks);
             return betterInventory;
         }

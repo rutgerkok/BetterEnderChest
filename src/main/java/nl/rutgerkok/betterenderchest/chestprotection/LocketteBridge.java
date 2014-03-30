@@ -5,7 +5,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.yi.acru.bukkit.Lockette.Lockette;
 
-public class LocketteBridge implements ProtectionBridge {
+public class LocketteBridge extends ProtectionBridge {
 
     @Override
     public boolean canAccess(Player player, Block block) {

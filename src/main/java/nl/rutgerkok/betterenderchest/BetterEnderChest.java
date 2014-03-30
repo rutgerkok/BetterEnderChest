@@ -2,6 +2,7 @@ package nl.rutgerkok.betterenderchest;
 
 import java.io.File;
 
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwners;
 import nl.rutgerkok.betterenderchest.chestprotection.ProtectionBridge;
 import nl.rutgerkok.betterenderchest.command.BaseCommand;
 import nl.rutgerkok.betterenderchest.command.BetterEnderCommandManager;
@@ -20,13 +21,15 @@ import org.bukkit.plugin.Plugin;
 
 public interface BetterEnderChest {
     /**
-     * Name of the default chest that new players will get.
+     * @deprecated Use <code>plugin.getChestOwners().publicChest()</code>
      */
+    @Deprecated
     public static final String DEFAULT_CHEST_NAME = "--defaultchest";
 
     /**
-     * Name of the public chest.
+     * @deprecated Use <code>plugin.getChestOwners().defaultChest()</code>
      */
+    @Deprecated
     public static final String PUBLIC_CHEST_NAME = "--publicchest";
 
     /**
@@ -44,20 +47,26 @@ public interface BetterEnderChest {
     boolean canSaveAndLoad();
 
     /**
-     * Gets the latest error that occurred during saving and loading. Will be
-     * null if there were no errors yet.
-     * 
-     * @return The latest error.
-     */
-    SaveAndLoadError getSaveAndLoadError();
-
-    /**
      * Logs a debug message.
      * 
      * @param string
      *            The string to print.
      */
     void debug(String string);
+
+    /**
+     * Disables saving and loading. Can be called from any thread.
+     * <p />
+     * A message will be shown that saving and loading has been disabled. Please
+     * note that the admin can disable this method from doing anything.
+     * 
+     * @param reason
+     *            The reason why saving and loading had to be disabled.
+     * @param stacktrace
+     *            Stacktrace, for debugging.
+     * @see #canSaveAndLoad()
+     */
+    void disableSaveAndLoad(String reason, Throwable stacktrace);
 
     /**
      * Returns the cache of the plugin. Use this to load files from disk and to
@@ -104,6 +113,21 @@ public interface BetterEnderChest {
      * @return The current chest material.
      */
     Material getChestMaterial();
+
+    /**
+     * Gets the chest opener, which contains logic for opening the correct
+     * inventory.
+     * 
+     * @return The chest opener.
+     */
+    ChestOpener getChestOpener();
+
+    /**
+     * Gets access to the owners of all chests.
+     * 
+     * @return Access to the owners of all chests.
+     */
+    ChestOwners getChestOwners();
 
     /**
      * Gets the save directory of the Ender Chests.
@@ -217,6 +241,14 @@ public interface BetterEnderChest {
     Registry<ProtectionBridge> getProtectionBridges();
 
     /**
+     * Gets the latest error that occurred during saving and loading. Will be
+     * null if there were no errors yet.
+     * 
+     * @return The latest error.
+     */
+    SaveAndLoadError getSaveAndLoadError();
+
+    /**
      * Gets the world group manager. You can ask it in which world group a world
      * is.
      * 
@@ -233,15 +265,6 @@ public interface BetterEnderChest {
     boolean hasManualGroupManagement();
 
     /**
-     * Returns whether the inventoryName is a special inventory (public chest,
-     * default chest, etc.).
-     * 
-     * @param inventoryName
-     * @return
-     */
-    boolean isSpecialChest(String inventoryName);
-
-    /**
      * Logs a message with normal importance. Message will be prefixed with the
      * plugin name between square brackets.
      * 
@@ -254,20 +277,6 @@ public interface BetterEnderChest {
      * Reloads the configuration and all chests.
      */
     void reload();
-
-    /**
-     * Disables saving and loading. Can be called from any thread.
-     * <p />
-     * A message will be shown that saving and loading has been disabled. Please
-     * note that the admin can disable this method from doing anything.
-     * 
-     * @param reason
-     *            The reason why saving and loading had to be disabled.
-     * @param stacktrace
-     *            Stacktrace, for debugging.
-     * @see #canSaveAndLoad()
-     */
-    void disableSaveAndLoad(String reason, Throwable stacktrace);
 
     /**
      * Sets the cache system that should be used.
@@ -284,6 +293,16 @@ public interface BetterEnderChest {
      *            The new chest material.
      */
     void setChestMaterial(Material newMaterial);
+
+    /**
+     * Replaces the chest opener, which contains logic for opening chests.
+     * 
+     * @param chestOpener
+     *            The chest opener.
+     * @throws IllegalArgumentException
+     *             If the parameter is null.
+     */
+    void setChestOpener(ChestOpener chestOpener) throws IllegalArgumentException;
 
     /**
      * Sets the chest size calculator. If you want to have your own calculator

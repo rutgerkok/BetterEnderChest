@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.registry.Registration;
 
 import org.bukkit.inventory.Inventory;
@@ -17,8 +18,8 @@ public abstract class InventoryImporter implements Registration {
      * isAvailable() returns true. Will return null if there was nothing to
      * import.
      * 
-     * @param inventoryName
-     *            The name of the inventory.
+     * @param chestOwner
+     *            The owner of the inventory.
      * @param worldGroup
      *            The group the inventory is in.
      * @param plugin
@@ -27,7 +28,7 @@ public abstract class InventoryImporter implements Registration {
      * @throws IOException
      *             When something went wrong.
      */
-    public abstract Inventory importInventory(String inventoryName, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException;
+    public abstract Inventory importInventory(ChestOwner chestOwner, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException;
 
     /**
      * Imports all the groups from the other plugin, so that the group structure

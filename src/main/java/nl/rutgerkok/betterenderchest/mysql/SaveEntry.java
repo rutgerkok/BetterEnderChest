@@ -5,6 +5,7 @@ import java.io.IOException;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.inventory.Inventory;
 
@@ -25,14 +26,14 @@ public class SaveEntry {
     }
 
     private final byte[] chestData;
+    private final ChestOwner chestOwner;
     private final WorldGroup group;
-    private final boolean isNewChest;
 
-    private final String ownerName;
+    private final boolean isNewChest;
 
     public SaveEntry(boolean isNewChest, BetterEnderChest plugin, WorldGroup group, Inventory inventory) throws IOException {
         this.isNewChest = isNewChest;
-        this.ownerName = ((BetterEnderInventoryHolder) inventory.getHolder()).getName();
+        this.chestOwner = ((BetterEnderInventoryHolder) inventory.getHolder()).getChestOwner();
         this.group = group;
         this.chestData = toByteArray(plugin, inventory);
     }
@@ -41,8 +42,8 @@ public class SaveEntry {
         return chestData;
     }
 
-    public String getInventoryName() {
-        return ownerName;
+    public ChestOwner getChestOwner() {
+        return chestOwner;
     }
 
     public WorldGroup getWorldGroup() {

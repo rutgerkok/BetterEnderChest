@@ -3,6 +3,8 @@ package nl.rutgerkok.betterenderchest.nms;
 import java.io.File;
 import java.io.IOException;
 
+import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.registry.Registration;
 
 import org.bukkit.Location;
@@ -41,8 +43,10 @@ public abstract class NMSHandler implements Registration {
      * 
      * @param nbtFile
      *            The array to load from.
-     * @param inventoryName
-     *            The name of the inventory.
+     * @param chestOwner
+     *            The owner of the inventory.
+     * @param worldGroup
+     *            The world group the inventory is in.
      * @param inventoryTagName
      *            The name of the tag in the file to load the items from.
      * @throws IOException
@@ -50,7 +54,7 @@ public abstract class NMSHandler implements Registration {
      * @return The inventory. The holder of the inventory must be
      *         BetterEnderInventoryHolder.
      */
-    public abstract Inventory loadNBTInventory(byte[] bytes, String inventoryName, String inventoryTagName) throws IOException;
+    public abstract Inventory loadNBTInventory(byte[] nbtFile, ChestOwner chestOwner, WorldGroup worldGroup, String inventoryTagName) throws IOException;
 
     /**
      * Loads a BetterEnderChest inventory from the NBT file. The inventory will
@@ -64,8 +68,10 @@ public abstract class NMSHandler implements Registration {
      * 
      * @param nbtFile
      *            The file to load from.
-     * @param inventoryName
-     *            The name of the inventory.
+     * @param chestOwner
+     *            The owner of the inventory.
+     * @param worldGroup
+     *            The group the inventory is in.
      * @param inventoryTagName
      *            The name of the tag in the file to load the items from.
      * @throws IOException
@@ -74,7 +80,7 @@ public abstract class NMSHandler implements Registration {
      * @return The inventory. The holder of the inventory must be
      *         BetterEnderInventoryHolder.
      */
-    public abstract Inventory loadNBTInventory(File nbtFile, String inventoryName, String inventoryTagName) throws IOException;
+    public abstract Inventory loadNBTInventory(File nbtFile, ChestOwner chestOwner, WorldGroup worldGroup, String inventoryTagName) throws IOException;
 
     /**
      * Increments one to the player counter of the Ender Chest at the location.

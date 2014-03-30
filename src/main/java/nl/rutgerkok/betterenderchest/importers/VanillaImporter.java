@@ -9,6 +9,7 @@ import java.util.Set;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -28,19 +29,19 @@ public class VanillaImporter extends InventoryImporter {
     }
 
     @Override
-    public Inventory importInventory(final String inventoryName, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
-        Player player = Bukkit.getPlayerExact(inventoryName);
+    public Inventory importInventory(ChestOwner chestOwner, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
+        Player player = Bukkit.getPlayerExact(chestOwner.getDisplayName());
         Inventory betterEnderInventory;
         if (player == null) {
 
             // Offline, load from file
             File playerDirectory = new File(Bukkit.getWorlds().get(0).getWorldFolder().getAbsolutePath() + "/players");
 
-            File playerFile = new File(playerDirectory.getAbsolutePath() + "/" + inventoryName + ".dat");
+            File playerFile = new File(playerDirectory.getAbsolutePath() + "/" + chestOwner.getSaveFileName() + ".dat");
             if (!playerFile.exists()) {
                 // File doesn't exist. Maybe there is a problem with those
                 // case-sensitive file systems?
-                playerFile = BetterEnderUtils.getCaseInsensitiveFile(playerDirectory, inventoryName + ".dat");
+                playerFile = BetterEnderUtils.getCaseInsensitiveFile(playerDirectory, chestOwner.getSaveFileName() + ".dat");
                 if (playerFile == null) {
                     // Nope, the file really doesn't exist. Return nothing.
                     return null;
@@ -48,7 +49,7 @@ public class VanillaImporter extends InventoryImporter {
             }
 
             // Load it from the file (mainworld/players/playername.dat)
-            betterEnderInventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(playerFile, inventoryName, "EnderItems");
+            betterEnderInventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(playerFile, chestOwner, worldGroup, "EnderItems");
             if (betterEnderInventory == null) {
                 // Cannot load the inventory from that file, most likely because
                 // it is empty
@@ -57,8 +58,8 @@ public class VanillaImporter extends InventoryImporter {
         } else {
             // Online, load now
             Inventory vanillaInventory = player.getEnderChest();
-            int inventoryRows = plugin.getEmptyInventoryProvider().getInventoryRows(inventoryName, vanillaInventory);
-            betterEnderInventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName, inventoryRows, plugin.getChestSizes().getDisabledSlots(player));
+            int inventoryRows = plugin.getEmptyInventoryProvider().getInventoryRows(chestOwner, vanillaInventory);
+            betterEnderInventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup, inventoryRows, plugin.getChestSizes().getDisabledSlots(player));
 
             // Copy all items
             ListIterator<ItemStack> copyIterator = vanillaInventory.iterator();

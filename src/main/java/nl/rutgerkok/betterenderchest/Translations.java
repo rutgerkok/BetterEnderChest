@@ -8,6 +8,7 @@ public class Translations {
     public static Translation CAN_ONLY_OPEN_OWN_CHEST = new Translation("You can only open your own Ender Chest.");
     public static Translation DEFAULT_CHEST_TITLE = new Translation("Editing the default Ender Chest");
     public static Translation ENDER_CHESTS_DISABLED = new Translation("Ender Chests have been disabled, because chests cannot be saved or loaded. Ask the admin of this server to look in the console.");
+    public static Translation GROUP_NOT_FOUND = new Translation("The group in which the inventory %s should be was not found.");
     public static Translation NO_PERMISSION = new Translation("You don't have permission to do this.");
     public static Translation OVERFLOWING_CHEST_CLOSE = new Translation("Some slots in this Ender Chest were disabled, but somehow there were items in those slots. Dropping them on the ground.");
     public static Translation PLAYER_NOT_SEEN_ON_SERVER = new Translation("The player %s was never seen on this server.");

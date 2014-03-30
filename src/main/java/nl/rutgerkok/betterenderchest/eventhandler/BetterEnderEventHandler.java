@@ -6,9 +6,11 @@ import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.PublicChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
+import nl.rutgerkok.betterenderchest.ChestOpener;
 import nl.rutgerkok.betterenderchest.Translations;
-import nl.rutgerkok.betterenderchest.WorldGroup;
-import nl.rutgerkok.betterenderchest.chestprotection.ProtectionBridge;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.betterenderchest.exception.ChestProtectedException;
+import nl.rutgerkok.betterenderchest.exception.NoPermissionException;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.Consumer;
 import nl.rutgerkok.betterenderchest.io.SaveAndLoadError;
@@ -106,11 +108,11 @@ public class BetterEnderEventHandler implements Listener {
 
             // If it's a special chest, show a message about that
             BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) event.getInventory().getHolder();
-            if (holder.getName().equals(BetterEnderChest.PUBLIC_CHEST_NAME)) {
+            if (holder.getChestOwner().isPublicChest()) {
                 if (!Translations.PUBLIC_CHEST_CLOSE_MESSAGE.isEmpty()) {
                     player.sendMessage(Translations.PUBLIC_CHEST_CLOSE_MESSAGE.toString());
                 }
-            } else if (holder.getName().equals(BetterEnderChest.DEFAULT_CHEST_NAME)) {
+            } else if (holder.getChestOwner().isDefaultChest()) {
                 player.sendMessage("Default chest is edited. After this chest is (auto)saved, new players will find those items in their Ender Chest.");
             }
         }
@@ -131,33 +133,30 @@ public class BetterEnderEventHandler implements Listener {
         if (plugin.getCompatibilityMode() && event.getInventory().getType().equals(InventoryType.ENDER_CHEST)) {
             // Plugin opened the vanilla Ender Chest, take it over
 
-            String inventoryName = "";
+            ChestOwner chestOwner = null;
 
             event.setCancelled(true);
 
             if (PublicChest.openOnOpeningUnprotectedChest) {
                 // Get public chest
                 if (player.hasPermission("betterenderchest.user.open.publicchest")) {
-                    inventoryName = BetterEnderChest.PUBLIC_CHEST_NAME;
+                    chestOwner = plugin.getChestOwners().publicChest();
                 } else {
                     player.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
+                    return;
                 }
             } else {
                 // Get player's name
                 if (player.hasPermission("betterenderchest.user.open.privatechest")) {
-                    inventoryName = player.getName();
+                    chestOwner = plugin.getChestOwners().playerChest(player);
                 } else {
                     player.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
+                    return;
                 }
             }
 
-            // Stop if no name has been found
-            if (inventoryName.isEmpty()) {
-                return;
-            }
-
             // Get and show the inventory
-            chests.getInventory(inventoryName, plugin.getWorldGroupManager().getGroupByWorld(player.getWorld()), new Consumer<Inventory>() {
+            chests.getInventory(chestOwner, plugin.getWorldGroupManager().getGroupByWorld(player.getWorld()), new Consumer<Inventory>() {
                 @Override
                 public void consume(Inventory inventory) {
                     player.openInventory(inventory);
@@ -170,14 +169,20 @@ public class BetterEnderEventHandler implements Listener {
     // Priority: High so that others can cancel the event
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
-        // Check for the right action and block
-        if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || !event.getClickedBlock().getType().equals(plugin.getChestMaterial())) {
+        // Check for the right action
+        if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
             return;
         }
 
-        final Player player = event.getPlayer();
+        Block block = event.getClickedBlock();
+        Player player = event.getPlayer();
 
-        // Ignore shift-clicking with a block
+        // Check material
+        if (block.getType() != plugin.getChestMaterial()) {
+            return;
+        }
+
+        // Ignore shift-clicking to place something
         if (player.isSneaking() && player.getItemInHand() != null && !player.getItemInHand().getType().equals(Material.AIR)) {
             return;
         }
@@ -185,16 +190,11 @@ public class BetterEnderEventHandler implements Listener {
         // Cancel the event
         event.setCancelled(true);
 
-        // Some objects
-        final Block clickedBlock = event.getClickedBlock();
-        final WorldGroup group = plugin.getWorldGroupManager().getGroupByWorld(player.getWorld());
-        String inventoryName = "";
-
         // Are the chests enabled?
-
         if (!plugin.canSaveAndLoad()) {
             // Incompatible BetterEnderChest version installed
             player.sendMessage(ChatColor.RED + Translations.ENDER_CHESTS_DISABLED.toString());
+
             plugin.severe("- ---------------------------------------------------------- -");
             plugin.severe("Saving and loading had to be disabled. Here's the error again:");
             SaveAndLoadError error = plugin.getSaveAndLoadError();
@@ -203,66 +203,14 @@ public class BetterEnderEventHandler implements Listener {
             return;
         }
 
-        // Find out the inventory that should be opened
-        ProtectionBridge protectionBridge = plugin.getProtectionBridges().getSelectedRegistration();
-        if (protectionBridge.isProtected(clickedBlock)) {
-            // Protected Ender Chest
-            if (protectionBridge.canAccess(player, clickedBlock)) {
-                // player can access the chest
-                if (player.hasPermission("betterenderchest.user.open.privatechest")) {
-                    // and has the correct permission node
-
-                    // Get the owner's name
-                    inventoryName = protectionBridge.getOwnerName(clickedBlock);
-                } else {
-                    // Show an error
-                    player.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
-                }
-            }
-        } else {
-            // Unprotected Ender chest
-            if (!player.getItemInHand().getType().equals(Material.SIGN) || !protectionBridge.getName().equals("Lockette")) {
-                // Don't cancel Lockette's sign placement
-                if (PublicChest.openOnOpeningUnprotectedChest) {
-                    // Get public chest
-                    if (player.hasPermission("betterenderchest.user.open.publicchest")) {
-                        inventoryName = BetterEnderChest.PUBLIC_CHEST_NAME;
-                    } else {
-                        player.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
-                    }
-                } else {
-                    // Get player's name
-                    if (player.hasPermission("betterenderchest.user.open.privatechest")) {
-                        inventoryName = player.getName();
-                    } else {
-                        player.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
-                    }
-                }
-            }
-        }
-
-        // Stop if no name has been found
-        if (inventoryName.isEmpty()) {
+        ChestOpener chestOpener = plugin.getChestOpener();
+        try {
+            chestOpener.getBlockInventory(player, block, chestOpener.showAnimatedInventory(player, block));
+        } catch (NoPermissionException e) {
+            player.sendMessage(ChatColor.RED + Translations.NO_PERMISSION.toString());
+        } catch (ChestProtectedException e) {
             return;
         }
-
-        // Get the inventory object
-        chests.getInventory(inventoryName, group, new Consumer<Inventory>() {
-            @Override
-            public void consume(Inventory inventory) {
-                inventory = BetterEnderUtils.getCorrectlyResizedInventory(player, inventory, group, plugin);
-
-                // Show the inventory
-                player.openInventory(inventory);
-
-                // Play animation, store location
-                NMSHandler nmsHandler = plugin.getNMSHandlers().getSelectedRegistration();
-                if (nmsHandler != null) {
-                    nmsHandler.openEnderChest(clickedBlock.getLocation());
-                }
-                BetterEnderUtils.setLastEnderChestOpeningLocation(player, clickedBlock.getLocation(), plugin);
-            }
-        });
     }
 
     /*

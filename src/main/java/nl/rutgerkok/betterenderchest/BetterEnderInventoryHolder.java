@@ -1,18 +1,49 @@
 package nl.rutgerkok.betterenderchest;
 
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+
+import org.apache.commons.lang.Validate;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
 public class BetterEnderInventoryHolder implements InventoryHolder {
-    private boolean correctCase;
-    private byte disabledSlots;
-    private boolean hasUnsavedChanges;
-    private String ownerName;
+    /**
+     * Gets the <code>BetterEnderInventoryHolder</code> of the given inventory.
+     * This method is equivalent to calling
+     * <code>(BetterEnderInventoryHolder) inventory.getHolder()</code>.
+     * 
+     * @param inventory
+     *            The inventory to get the holder of.
+     * @return The holder.
+     * @throws ClassCastException
+     *             If the inventory doesn't have a
+     *             <code>BetterEnderInventoryHolder</code> as holder.
+     */
+    public static BetterEnderInventoryHolder of(Inventory inventory) throws ClassCastException {
+        return (BetterEnderInventoryHolder) inventory.getHolder();
+    }
 
-    public BetterEnderInventoryHolder(String ownerName, int disabledSlots, boolean correctCase) {
-        this.ownerName = ownerName;
+    private final ChestOwner chestOwner;
+    private final byte disabledSlots;
+    private boolean hasUnsavedChanges;
+
+    private final WorldGroup worldGroup;
+
+    public BetterEnderInventoryHolder(ChestOwner chestOwner, WorldGroup worldGroup, int disabledSlots) throws IllegalArgumentException {
+        Validate.notNull(chestOwner, "chestOwner may not be null");
+        Validate.notNull(worldGroup, "worldGroup may not be null");
+        this.chestOwner = chestOwner;
         this.disabledSlots = (byte) disabledSlots;
-        this.correctCase = correctCase;
+        this.worldGroup = worldGroup;
+    }
+
+    /**
+     * Returns the owner of this inventory.
+     * 
+     * @return The owner of this inventory.
+     */
+    public ChestOwner getChestOwner() {
+        return chestOwner;
     }
 
     /**
@@ -34,12 +65,23 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
     }
 
     /**
-     * Returns the name of this inventory.
-     * 
-     * @return The name of this inventory.
+     * @deprecated Use {@link #getChestOwner() getChestOwner()}
+     *             {@link ChestOwner#getDisplayName() .getDisplayName()} or
+     *             {@link #getChestOwner() getChestOwner()}
+     *             {@link ChestOwner#getSaveFileName() .getSaveFileName()}.
      */
+    @Deprecated
     public String getName() {
-        return ownerName;
+        return chestOwner.getSaveFileName();
+    }
+
+    /**
+     * Gets the world group this inventory is in.
+     * 
+     * @return The world group.
+     */
+    public WorldGroup getWorldGroup() {
+        return worldGroup;
     }
 
     /**
@@ -52,14 +94,13 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
     }
 
     /**
-     * Returns whether the name is just a guess based on what the user entered
-     * which may not have the correct letters capitalized, or if the name is
-     * case-correct.
+     * UUIDs don't care whether the name has the correct case.
      * 
-     * @return True if the name is case-correct.
+     * @return false
      */
+    @Deprecated
     public boolean isOwnerNameCaseCorrect() {
-        return correctCase;
+        return false;
     }
 
     /**
@@ -72,19 +113,5 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
      */
     public void setHasUnsavedChanges(boolean unsavedChanges) {
         this.hasUnsavedChanges = unsavedChanges;
-    }
-
-    /**
-     * Updates the stored owner name.
-     * 
-     * @param newName
-     *            The new name.
-     * @param correctCase
-     *            Whether the name is case correct. See
-     *            {@link #isOwnerNameCaseCorrect()} for more information.
-     */
-    public void setOwnerName(String newName, boolean correctCase) {
-        ownerName = newName;
-        this.correctCase = correctCase;
     }
 }

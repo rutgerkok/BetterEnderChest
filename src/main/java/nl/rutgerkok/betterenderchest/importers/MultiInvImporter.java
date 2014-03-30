@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderUtils;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -31,16 +32,16 @@ public class MultiInvImporter extends InventoryImporter {
     }
 
     @Override
-    public Inventory importInventory(final String inventoryName, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
+    public Inventory importInventory(ChestOwner chestOwner, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
         String groupName = worldGroup.getGroupName();
 
-        if (plugin.isSpecialChest(inventoryName)) {
+        if (chestOwner.isSpecialChest()) {
             // Public chests and default chests cannot be imported.
             return null;
         }
 
         // Soon an inventory!
-        Inventory betterInventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName);
+        Inventory betterInventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup);
 
         // Make groupName case-correct
         boolean foundMatchingGroup = false;
@@ -55,7 +56,7 @@ public class MultiInvImporter extends InventoryImporter {
 
         // Check if a matching group has been found
         if (!foundMatchingGroup) {
-            plugin.warning("No matching MultiInv group found for " + groupName + ". Cannot import " + inventoryName + ".");
+            plugin.warning("No matching MultiInv group found for " + groupName + ". Cannot import " + chestOwner.getDisplayName() + ".");
             return null;
         }
 
@@ -77,7 +78,7 @@ public class MultiInvImporter extends InventoryImporter {
         MIEnderchestInventory multiInvEnderInventory = null;
         if (MIYamlFiles.config.getBoolean("useSQL")) {
             // Using SQL
-            multiInvEnderInventory = MIYamlFiles.con.getEnderchestInventory(inventoryName, groupName, gameModeName);
+            multiInvEnderInventory = MIYamlFiles.con.getEnderchestInventory(chestOwner.getSaveFileName(), groupName, gameModeName);
         } else {
             // From a file
 
@@ -86,11 +87,11 @@ public class MultiInvImporter extends InventoryImporter {
             File multiInvWorldsFolder = new File(multiInvDataFolder, "Groups");
 
             // Get the save file
-            File multiInvFile = new File(multiInvWorldsFolder, groupName + "/" + inventoryName + ".ec.yml");
+            File multiInvFile = new File(multiInvWorldsFolder, groupName + "/" + chestOwner.getSaveFileName() + ".ec.yml");
             if (!multiInvFile.exists()) {
                 // File doesn't exist. Maybe there is a problem with those
                 // case-sensitive file systems?
-                multiInvFile = BetterEnderUtils.getCaseInsensitiveFile(new File(multiInvWorldsFolder, groupName), inventoryName + ".ec.yml");
+                multiInvFile = BetterEnderUtils.getCaseInsensitiveFile(new File(multiInvWorldsFolder, groupName), chestOwner.getSaveFileName() + ".ec.yml");
                 if (multiInvFile == null) {
                     // Nope. File really doesn't exist. Return nothing.
                     return null;
@@ -104,7 +105,7 @@ public class MultiInvImporter extends InventoryImporter {
                 playerFile.load(multiInvFile);
             } catch (InvalidConfigurationException e) {
                 // Rethrow as IOException
-                throw new IOException("Cannot import from MultiINV: invalid chest file! (inventoryName: " + inventoryName + ", groupName:" + groupName + "");
+                throw new IOException("Cannot import from MultiINV: invalid chest file! (inventoryName: " + chestOwner.getDisplayName() + ", groupName:" + groupName + "");
             }
             String inventoryString = playerFile.getString(gameModeName, null);
             if (inventoryString == null || inventoryString == "") {

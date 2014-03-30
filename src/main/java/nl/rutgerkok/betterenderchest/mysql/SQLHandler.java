@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 /**
  * Class that executes all queries. This should be the only class with SQL code.
@@ -31,8 +32,8 @@ public class SQLHandler {
     /**
      * Adds a chest to the database.
      * 
-     * @param inventoryName
-     *            The name of the inventory.
+     * @param chestOwner
+     *            The owner of the inventory.
      * @param group
      *            The group of the inventory.
      * @param chestData
@@ -40,14 +41,14 @@ public class SQLHandler {
      * @throws SQLException
      *             If something went wrong.
      */
-    private void addChest(String inventoryName, WorldGroup group, byte[] chestData) throws SQLException {
+    private void addChest(ChestOwner chestOwner, WorldGroup group, byte[] chestData) throws SQLException {
         PreparedStatement statement = null;
         try {
             // New chest, insert in database
             String query = "INSERT INTO `" + getTableName(group) + "` (`chest_owner`, `chest_data`) ";
             query += "VALUES (?, ?)";
             statement = connection.prepareStatement(query);
-            statement.setString(1, inventoryName);
+            statement.setString(1, chestOwner.getSaveFileName());
             statement.setBytes(2, chestData);
             statement.executeUpdate();
         } finally {
@@ -96,7 +97,7 @@ public class SQLHandler {
     /**
      * Loads a chest from the database.
      * 
-     * @param inventoryName
+     * @param chestOwner
      *            The name of the inventory.
      * @param group
      *            The group of the inventory.
@@ -104,14 +105,14 @@ public class SQLHandler {
      * @throws SQLException
      *             If something went wrong.
      */
-    public byte[] loadChest(String inventoryName, WorldGroup group) throws SQLException {
+    public byte[] loadChest(ChestOwner chestOwner, WorldGroup group) throws SQLException {
         PreparedStatement statement = null;
         ResultSet result = null;
         try {
             String query = "SELECT `chest_data` FROM `" + getTableName(group);
             query += "` WHERE `chest_owner` = ?";
             statement = connection.prepareStatement(query);
-            statement.setString(1, inventoryName);
+            statement.setString(1, chestOwner.getSaveFileName());
             result = statement.executeQuery();
             if (result.first()) {
                 return result.getBytes("chest_data");
@@ -132,8 +133,8 @@ public class SQLHandler {
      * Saves a chest to the database. First the UPDATE query is tried, if
      * nothing has been updated, the INSERT query is tried.
      * 
-     * @param inventoryName
-     *            The name of the chest.
+     * @param chestOwner
+     *            The owner of the chest.
      * @param group
      *            The group the chest belongs to.
      * @param chestData
@@ -141,7 +142,7 @@ public class SQLHandler {
      * @throws SQLException
      *             If something went wrong.
      */
-    public void updateChest(String inventoryName, WorldGroup group, byte[] chestData) throws SQLException {
+    public void updateChest(ChestOwner chestOwner, WorldGroup group, byte[] chestData) throws SQLException {
         PreparedStatement statement = null;
         boolean performInsert = false;
         try {
@@ -149,7 +150,7 @@ public class SQLHandler {
             String query = "UPDATE `" + getTableName(group) + "` SET `chest_data` = ? WHERE `chest_owner` = ?";
             statement = connection.prepareStatement(query);
             statement.setBytes(1, chestData);
-            statement.setString(2, inventoryName);
+            statement.setString(2, chestOwner.getSaveFileName());
             int changedRows = statement.executeUpdate();
             if (changedRows == 0) {
                 // Chest doesn't exist yet
@@ -162,7 +163,7 @@ public class SQLHandler {
         }
 
         if (performInsert) {
-            addChest(inventoryName, group, chestData);
+            addChest(chestOwner, group, chestData);
         }
     }
 }

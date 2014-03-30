@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwners;
 import nl.rutgerkok.betterenderchest.chestprotection.LWCBridge;
 import nl.rutgerkok.betterenderchest.chestprotection.LocketteBridge;
 import nl.rutgerkok.betterenderchest.chestprotection.NoBridge;
@@ -34,6 +35,7 @@ import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.nms.SimpleNMSHandler;
 import nl.rutgerkok.betterenderchest.registry.Registry;
 
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -62,6 +64,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
     private ChestDrop chestDrop, chestDropSilkTouch, chestDropCreative;
     private Material chestMaterial = Material.ENDER_CHEST;
+    private ChestOpener chestOpener;
+    private ChestOwners chestOwners;
     private File chestSaveLocation;
     private BetterEnderChestSizes chestSizes;
     private BetterEnderCommandManager commandManager;
@@ -145,6 +149,16 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public Material getChestMaterial() {
         return chestMaterial;
+    }
+
+    @Override
+    public ChestOpener getChestOpener() {
+        return chestOpener;
+    }
+
+    @Override
+    public ChestOwners getChestOwners() {
+        return chestOwners;
     }
 
     @Override
@@ -419,15 +433,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         saveConfig();
     }
 
-    @Override
-    public boolean isSpecialChest(String inventoryName) {
-        if (inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME))
-            return true;
-        if (inventoryName.equals(BetterEnderChest.DEFAULT_CHEST_NAME))
-            return true;
-        return false;
-    }
-
     /**
      * Gets whether the string is a valid chest drop
      * 
@@ -510,6 +515,14 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             emptyInventoryProvider = new EmptyInventoryProvider(this);
         }
 
+        // Inventory owners
+        chestOwners = new ChestOwners();
+
+        // Inventory opener
+        if (chestOpener == null) {
+            chestOpener = new ChestOpener(this);
+        }
+
         // NMS handlers
         try {
             nmsHandlers.register(new SimpleNMSHandler(this));
@@ -555,7 +568,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
         // Unload everything (chests, handlers, etc.)
         unloadIOServices();
-        
+
         // Re-enable chest saving
         synchronized (this) {
             this.saveAndLoadError = null;
@@ -576,6 +589,12 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public void setChestMaterial(Material material) {
         this.chestMaterial = material;
+    }
+
+    @Override
+    public void setChestOpener(ChestOpener chestOpener) throws IllegalArgumentException {
+        Validate.notNull(chestOpener, "chestOpener is null");
+        this.chestOpener = chestOpener;
     }
 
     @Override
@@ -640,4 +659,5 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     public void warning(String message) {
         getLogger().warning(message);
     }
+
 }

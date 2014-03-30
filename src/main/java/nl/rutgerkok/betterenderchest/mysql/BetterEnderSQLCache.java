@@ -12,7 +12,8 @@ import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.AutoSave;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
-import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.betterenderchest.io.AbstractEnderCache;
 import nl.rutgerkok.betterenderchest.io.Consumer;
 
 import org.bukkit.Bukkit;
@@ -27,21 +28,20 @@ import org.bukkit.scheduler.BukkitTask;
  * version from the database.
  * 
  */
-public class BetterEnderSQLCache implements BetterEnderCache {
+public class BetterEnderSQLCache extends AbstractEnderCache {
     private final BukkitTask autoSaveTask;
-    private final Map<WorldGroup, Map<String, Inventory>> cachedInventories;
-    private final BetterEnderChest plugin;
+    private final Map<WorldGroup, Map<ChestOwner, Inventory>> cachedInventories;
     private final Queue<SaveEntry> saveQueue; // Thread-safe
     private final BukkitTask saveTickTask;
     private final Object savingLock = new Object();
     private final SQLHandler sqlHandler;
 
     public BetterEnderSQLCache(BetterEnderChest thePlugin) {
+        super(thePlugin);
         // Set up variables
-        this.plugin = thePlugin;
         DatabaseSettings settings = plugin.getDatabaseSettings();
         this.saveQueue = new ConcurrentLinkedQueue<SaveEntry>();
-        this.cachedInventories = new HashMap<WorldGroup, Map<String, Inventory>>();
+        this.cachedInventories = new HashMap<WorldGroup, Map<ChestOwner, Inventory>>();
 
         // Set up the connection
         SQLHandler sqlHandler = null;
@@ -97,28 +97,27 @@ public class BetterEnderSQLCache implements BetterEnderCache {
             return;
         }
 
-        for (Entry<WorldGroup, Map<String, Inventory>> groupEntry : this.cachedInventories.entrySet()) {
-            for (Entry<String, Inventory> inventoryEntry : groupEntry.getValue().entrySet()) {
+        for (Entry<WorldGroup, Map<ChestOwner, Inventory>> groupEntry : this.cachedInventories.entrySet()) {
+            for (Entry<ChestOwner, Inventory> inventoryEntry : groupEntry.getValue().entrySet()) {
                 Inventory inventory = inventoryEntry.getValue();
                 BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
                 if (holder.hasUnsavedChanges()) {
-                    plugin.debug("Adding chest of " + holder.getName() + " to save queue");
+                    plugin.debug("Adding chest of " + holder.getChestOwner().getDisplayName() + " to save queue");
                     // Add to save queue
                     saveQueue.add(new SaveEntry(false, plugin, groupEntry.getKey(), inventory));
                     // Chest in its current state will be saved
                     holder.setHasUnsavedChanges(false);
                     // Check if more chests can be saved
                 } else {
-                    plugin.debug("Chest of " + holder.getName() + " has no changes, skipping autosave");
-                    String inventoryName = holder.getName();
-                    if ((!inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME))
-                            && (Bukkit.getPlayerExact(inventoryName) == null)
+                    plugin.debug("Chest of " + holder.getChestOwner().getDisplayName() + " has no changes, skipping autosave");
+                    ChestOwner chestOwner = holder.getChestOwner();
+                    if (!chestOwner.isOwnerOnline()
                             && (inventory.getViewers().size() == 0)) {
                         // This inventory is NOT the public chest, the owner is
                         // NOT online and NO ONE is viewing it
                         // So unload it
-                        plugin.debug("Unloading chest of " + holder.getName());
-                        unloadInventory(inventoryName, groupEntry.getKey());
+                        plugin.debug("Unloading chest of " + chestOwner.getDisplayName());
+                        unloadInventory(chestOwner, groupEntry.getKey());
                     }
                 }
             }
@@ -146,18 +145,16 @@ public class BetterEnderSQLCache implements BetterEnderCache {
     }
 
     @Override
-    public void getInventory(String inventoryName, WorldGroup worldGroup, Consumer<Inventory> callback) {
-        inventoryName = inventoryName.toLowerCase();
-
+    public void getInventory(ChestOwner chestOwner, WorldGroup worldGroup, Consumer<Inventory> callback) {
         // Don't try to load when it is disabled
         if (!plugin.canSaveAndLoad()) {
-            callback.consume(plugin.getEmptyInventoryProvider().loadEmptyInventory(inventoryName));
+            callback.consume(plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup));
         }
 
         // Try to get from the cache first
-        Map<String, Inventory> cachedInGroup = cachedInventories.get(worldGroup);
+        Map<ChestOwner, Inventory> cachedInGroup = cachedInventories.get(worldGroup);
         if (cachedInGroup != null) {
-            Inventory inventory = cachedInGroup.get(inventoryName);
+            Inventory inventory = cachedInGroup.get(chestOwner);
             if (inventory != null) {
                 callback.consume(inventory);
                 return;
@@ -165,7 +162,7 @@ public class BetterEnderSQLCache implements BetterEnderCache {
         }
 
         // Load from database
-        final LoadEntry loadEntry = new LoadEntry(inventoryName, worldGroup, callback);
+        final LoadEntry loadEntry = new LoadEntry(chestOwner, worldGroup, callback);
         Bukkit.getScheduler().runTaskAsynchronously(plugin.getPlugin(), new Runnable() {
 
             @Override
@@ -174,11 +171,11 @@ public class BetterEnderSQLCache implements BetterEnderCache {
                     // This loads the chest bytes on a random thread. The
                     // callback method immediately goes back to the main thread
                     // and creates the inventory and puts in in the cache
-                    byte[] dataFromDatabase = sqlHandler.loadChest(loadEntry.getInventoryName(), loadEntry.getWorldGroup());
+                    byte[] dataFromDatabase = sqlHandler.loadChest(loadEntry.getChestOwner(), loadEntry.getWorldGroup());
                     loadEntry.callback(plugin, BetterEnderSQLCache.this, dataFromDatabase);
                 } catch (SQLException e) {
-                    plugin.severe("Error loading chest " + loadEntry.getInventoryName(), e);
-                    plugin.disableSaveAndLoad("Error loading chest from database of " + loadEntry.getInventoryName(), e);
+                    plugin.severe("Error loading chest " + loadEntry.getChestOwner().getDisplayName(), e);
+                    plugin.disableSaveAndLoad("Error loading chest from database of " + loadEntry.getChestOwner().getDisplayName(), e);
                 }
             }
         });
@@ -198,10 +195,10 @@ public class BetterEnderSQLCache implements BetterEnderCache {
             while (!saveQueue.isEmpty()) {
                 SaveEntry entry = saveQueue.poll();
                 try {
-                    sqlHandler.updateChest(entry.getInventoryName(), entry.getWorldGroup(), entry.getChestData());
+                    sqlHandler.updateChest(entry.getChestOwner(), entry.getWorldGroup(), entry.getChestData());
                 } catch (SQLException e) {
                     plugin.severe("Failed to save chest", e);
-                    plugin.disableSaveAndLoad("Failed to save the chest of " + entry.getInventoryName() + " to the database", e);
+                    plugin.disableSaveAndLoad("Failed to save the chest of " + entry.getChestOwner().getDisplayName() + " to the database", e);
                     return;
                 }
                 savedCount++;
@@ -227,9 +224,9 @@ public class BetterEnderSQLCache implements BetterEnderCache {
 
         synchronized (savingLock) {
             saveQueue.clear();
-            for (Entry<WorldGroup, Map<String, Inventory>> chestGroup : cachedInventories.entrySet()) {
+            for (Entry<WorldGroup, Map<ChestOwner, Inventory>> chestGroup : cachedInventories.entrySet()) {
                 WorldGroup currentGroup = chestGroup.getKey();
-                for (Entry<String, Inventory> entry : chestGroup.getValue().entrySet()) {
+                for (Entry<ChestOwner, Inventory> entry : chestGroup.getValue().entrySet()) {
                     // This is executed for each chest
 
                     Inventory inventory = entry.getValue();
@@ -244,11 +241,11 @@ public class BetterEnderSQLCache implements BetterEnderCache {
                         // Chest in its current state was just saved
                         holder.setHasUnsavedChanges(false);
                     } catch (IOException e) {
-                        plugin.severe("Failed to encode chest " + holder.getName() + " for saving", e);
-                        plugin.disableSaveAndLoad("Failed to encode chest of " + holder.getName() + " for saving when saving all chests", e);
+                        plugin.severe("Failed to encode chest " + holder.getChestOwner().getDisplayName() + " for saving", e);
+                        plugin.disableSaveAndLoad("Failed to encode chest of " + holder.getChestOwner().getDisplayName() + " for saving when saving all chests", e);
                     } catch (SQLException e) {
-                        plugin.severe("Failed to save chest " + holder.getName() + " to the database", e);
-                        plugin.disableSaveAndLoad("Failed to save chest " + holder.getName() + " to the database when saving all chests", e);
+                        plugin.severe("Failed to save chest " + holder.getChestOwner().getDisplayName() + " to the database", e);
+                        plugin.disableSaveAndLoad("Failed to save chest " + holder.getChestOwner().getDisplayName() + " to the database when saving all chests", e);
                     }
                 }
             }
@@ -257,24 +254,22 @@ public class BetterEnderSQLCache implements BetterEnderCache {
 
     @Override
     // Synchronous saving method - try to avoid this one
-    public void saveInventory(String inventoryName, WorldGroup group) {
+    public void saveInventory(ChestOwner chestOwner, WorldGroup group) {
         // Check whether chests can be saved
         if (!plugin.canSaveAndLoad()) {
             return;
         }
 
-        inventoryName = inventoryName.toLowerCase();
-
-        Map<String, Inventory> inventories = cachedInventories.get(group);
+        Map<ChestOwner, Inventory> inventories = cachedInventories.get(group);
         if (inventories != null) {
-            Inventory inventory = inventories.get(inventoryName);
+            Inventory inventory = inventories.get(chestOwner);
             if (inventory != null) {
                 synchronized (savingLock) {
                     try {
-                        BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
-                        sqlHandler.updateChest(holder.getName(), group, SaveEntry.toByteArray(plugin, inventory));
+                        sqlHandler.updateChest(chestOwner, group, SaveEntry.toByteArray(plugin, inventory));
 
                         // Chest in its current state was just saved
+                        BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
                         holder.setHasUnsavedChanges(false);
                     } catch (SQLException e) {
                         plugin.severe("Failed to save chest", e);
@@ -288,26 +283,28 @@ public class BetterEnderSQLCache implements BetterEnderCache {
     }
 
     @Override
-    public void setInventory(String inventoryName, WorldGroup group, Inventory enderInventory) {
-        inventoryName = inventoryName.toLowerCase();
+    public void setInventory(Inventory enderInventory) {
+        BetterEnderInventoryHolder holder = BetterEnderInventoryHolder.of(enderInventory);
+        ChestOwner chestOwner = holder.getChestOwner();
+        WorldGroup group = holder.getWorldGroup();
 
-        Map<String, Inventory> inventoriesInGroup = cachedInventories.get(group);
+        Map<ChestOwner, Inventory> inventoriesInGroup = cachedInventories.get(group);
         if (inventoriesInGroup == null) {
-            inventoriesInGroup = new HashMap<String, Inventory>();
+            inventoriesInGroup = new HashMap<ChestOwner, Inventory>();
             cachedInventories.put(group, inventoriesInGroup);
         }
-        inventoriesInGroup.put(inventoryName, enderInventory);
+        inventoriesInGroup.put(chestOwner, enderInventory);
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        for (WorldGroup group : cachedInventories.keySet()) {
-            Map<String, Inventory> inGroup = cachedInventories.get(group);
+        for (Entry<WorldGroup, Map<ChestOwner, Inventory>> worldGroup : cachedInventories.entrySet()) {
+            Map<ChestOwner, Inventory> inGroup = worldGroup.getValue();
             if (inGroup.size() > 0) {
-                builder.append("Chests in group " + group.getGroupName() + ":");
-                for (String inventoryName : inGroup.keySet()) {
-                    builder.append(((BetterEnderInventoryHolder) inGroup.get(inventoryName).getHolder()).getName());
+                builder.append("Chests in group " + worldGroup.getKey().getGroupName() + ":");
+                for (Entry<ChestOwner, Inventory> inventoryEntry : inGroup.entrySet()) {
+                    builder.append(inventoryEntry.getKey().getDisplayName());
                     builder.append(',');
                 }
             }
@@ -325,17 +322,15 @@ public class BetterEnderSQLCache implements BetterEnderCache {
     }
 
     @Override
-    public void unloadInventory(String inventoryName, WorldGroup group) {
-        inventoryName = inventoryName.toLowerCase();
-
-        Map<String, Inventory> inventoriesInGroup = cachedInventories.get(group);
+    public void unloadInventory(ChestOwner chestOwner, WorldGroup group) {
+        Map<ChestOwner, Inventory> inventoriesInGroup = cachedInventories.get(group);
         if (inventoriesInGroup == null) {
             // No chests of that group loaded, nothing to do
             return;
         }
 
-        if (inventoriesInGroup.remove(inventoryName) == null) {
-            plugin.debug("Failed to unload chest of " + inventoryName + " in group " + group.getGroupName());
+        if (inventoriesInGroup.remove(chestOwner) == null) {
+            plugin.debug("Failed to unload chest of " + chestOwner.getDisplayName() + " in group " + group.getGroupName());
         }
     }
 

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.mysql.SQLHandler;
 
 import org.bukkit.Bukkit;
@@ -28,10 +29,10 @@ public class BetterEnderMySQLImporter extends InventoryImporter {
     }
 
     @Override
-    public Inventory importInventory(String inventoryName, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
+    public Inventory importInventory(ChestOwner chestOwner, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
         // Don't do anything if the previous connection attempt failed
         if (connectionFailed) {
-            plugin.severe("Still cannot import inventories, check previous error messages. Conversion of " + inventoryName + " failed.");
+            plugin.severe("Still cannot import inventories, check previous error messages. Conversion of " + chestOwner.getDisplayName() + " failed.");
             throw new IOException();
         }
 
@@ -41,9 +42,9 @@ public class BetterEnderMySQLImporter extends InventoryImporter {
                 handler = new SQLHandler(plugin.getDatabaseSettings());
             }
             // Load the chest
-            byte[] rawBytes = handler.loadChest(inventoryName, worldGroup);
+            byte[] rawBytes = handler.loadChest(chestOwner, worldGroup);
             if (rawBytes != null) {
-                return plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(rawBytes, inventoryName, "Inventory");
+                return plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(rawBytes, chestOwner, worldGroup, "Inventory");
             } else {
                 // Nothing to import
                 return null;

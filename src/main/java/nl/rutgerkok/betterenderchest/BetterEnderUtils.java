@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.io.CaseInsensitiveFileFilter;
 
 import org.bukkit.ChatColor;
@@ -99,17 +100,17 @@ public class BetterEnderUtils {
      */
     public static void dropItemsInDisabledSlots(Inventory inventory, Player player, BetterEnderChest plugin) {
         BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
-        String inventoryName = holder.getName();
+        ChestOwner chestOwner = holder.getChestOwner();
         int disabledSlots = -1;
 
         // Get the correct number of disabled slots
-        if (inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME)) {
+        if (chestOwner.isPublicChest()) {
             disabledSlots = plugin.getChestSizes().getPublicChestDisabledSlots();
         }
-        if (inventoryName.equals(BetterEnderChest.DEFAULT_CHEST_NAME)) {
+        if (chestOwner.isDefaultChest()) {
             disabledSlots = plugin.getChestSizes().getDisabledSlots();
         }
-        if (holder.getName().equalsIgnoreCase(player.getName())) {
+        if (chestOwner.isPlayer(player)) {
             disabledSlots = plugin.getChestSizes().getDisabledSlots(player);
         }
 
@@ -126,7 +127,7 @@ public class BetterEnderUtils {
             }
             if (droppedCount > 0) {
                 player.sendMessage(ChatColor.YELLOW + Translations.OVERFLOWING_CHEST_CLOSE.toString());
-                plugin.log("There were items in disabled slots in the Ender Chest of " + holder.getName() + ". Demoted? Glitch? Hacking? " + droppedCount + " stacks are ejected.");
+                plugin.log("There were items in disabled slots in the Ender Chest of " + chestOwner.getDisplayName() + ". Demoted? Glitch? Hacking? " + droppedCount + " stacks are ejected.");
 
                 // Make sure that chest gets saved
                 holder.setHasUnsavedChanges(true);
@@ -156,9 +157,8 @@ public class BetterEnderUtils {
         return new File(directory.getAbsolutePath(), files[0]);
     }
 
-    public static Inventory getCorrectlyResizedInventory(Player player, Inventory inventory, WorldGroup group, BetterEnderChest plugin) {
-        String inventoryName = ((BetterEnderInventoryHolder) inventory.getHolder()).getName();
-        Inventory resizedInventory = getResizedEmptyInventory(player, inventory, inventoryName, plugin);
+    public static Inventory getCorrectlyResizedInventory(Player player, Inventory inventory, BetterEnderChest plugin) {
+        Inventory resizedInventory = getResizedEmptyInventory(player, inventory, plugin);
         if (resizedInventory != null) {
             // It has resized
 
@@ -169,7 +169,7 @@ public class BetterEnderUtils {
             copyContents(inventory, resizedInventory, player.getLocation());
 
             // Goodbye to old inventory!
-            plugin.getChestCache().setInventory(inventoryName, group, resizedInventory);
+            plugin.getChestCache().setInventory(resizedInventory);
             inventory = resizedInventory;
         }
         return inventory;
@@ -211,34 +211,38 @@ public class BetterEnderUtils {
      *            Player currently opening the inventory.
      * @param inventory
      *            Inventory. BetterEnderInventoryHolder must be the holder.
-     * @param inventoryName
+     * @param chestOwner
      * @param plugin
      * @return
      */
-    private static Inventory getResizedEmptyInventory(Player player, Inventory inventory, String inventoryName, BetterEnderChest plugin) {
+    private static Inventory getResizedEmptyInventory(Player player, Inventory inventory, BetterEnderChest plugin) {
+        BetterEnderInventoryHolder inventoryHolder = BetterEnderInventoryHolder.of(inventory);
+        ChestOwner chestOwner = inventoryHolder.getChestOwner();
+        WorldGroup worldGroup = inventoryHolder.getWorldGroup();
         int rows = inventory.getSize() / 9;
-        int disabledSlots = ((BetterEnderInventoryHolder) inventory.getHolder()).getDisabledSlots();
+        int disabledSlots = inventoryHolder.getDisabledSlots();
         BetterEnderChestSizes chestSizes = plugin.getChestSizes();
         EmptyInventoryProvider emptyChests = plugin.getEmptyInventoryProvider();
-        if (inventoryName.equals(BetterEnderChest.PUBLIC_CHEST_NAME)) {
+
+        if (chestOwner.isPublicChest()) {
             // It's the public chest
             if (rows != chestSizes.getPublicChestRows() || disabledSlots != chestSizes.getPublicChestDisabledSlots()) {
                 // Resize
-                return emptyChests.loadEmptyInventory(inventoryName, chestSizes.getPublicChestRows(), chestSizes.getPublicChestDisabledSlots());
+                return emptyChests.loadEmptyInventory(chestOwner, worldGroup, chestSizes.getPublicChestRows(), chestSizes.getPublicChestDisabledSlots());
             }
-        } else if (inventoryName.equals(BetterEnderChest.DEFAULT_CHEST_NAME)) {
+        } else if (chestOwner.isDefaultChest()) {
             // It's the default chest
             if (rows != chestSizes.getChestRows() || disabledSlots != chestSizes.getDisabledSlots()) {
                 // Resize
-                return emptyChests.loadEmptyInventory(inventoryName, chestSizes.getChestRows(), chestSizes.getDisabledSlots());
+                return emptyChests.loadEmptyInventory(chestOwner, worldGroup, chestSizes.getChestRows(), chestSizes.getDisabledSlots());
             }
         } else {
             // It's a private chest
-            if (inventoryName.equalsIgnoreCase(player.getName())) {
+            if (chestOwner.isPlayer(player)) {
                 // Player is the owner
                 if (rows != chestSizes.getChestRows(player) || disabledSlots != chestSizes.getDisabledSlots(player)) {
                     // Number of slots is incorrect
-                    return emptyChests.loadEmptyInventory(inventoryName, chestSizes.getChestRows(player), chestSizes.getDisabledSlots(player));
+                    return emptyChests.loadEmptyInventory(chestOwner, worldGroup, chestSizes.getChestRows(player), chestSizes.getDisabledSlots(player));
                 }
             }
         }
