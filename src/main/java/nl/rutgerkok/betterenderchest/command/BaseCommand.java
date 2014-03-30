@@ -4,14 +4,20 @@ import java.util.Collections;
 import java.util.List;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.Translations;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.betterenderchest.exception.InvalidOwnerException;
+import nl.rutgerkok.betterenderchest.io.Consumer;
 import nl.rutgerkok.betterenderchest.registry.Registration;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
 public abstract class BaseCommand implements Registration {
 
@@ -112,6 +118,33 @@ public abstract class BaseCommand implements Registration {
     public abstract String getHelpText();
 
     /**
+     * Gets the inventory with the given name. If the inventory is not found, an
+     * error is shown to the sender.
+     * 
+     * @param sender
+     *            The person who sent the command. Used for sending back errors.
+     * @param inventoryName
+     *            Name of the inventory.
+     * @param worldGroup
+     *            World group of the inventory.
+     * @param callback
+     *            Method to call when the inventory is found.
+     */
+    protected void getInventory(final CommandSender sender, final String inventoryName, final WorldGroup worldGroup, final Consumer<Inventory> callback) {
+        plugin.getChestOwners().fromInput(inventoryName, new Consumer<ChestOwner>() {
+            @Override
+            public void consume(ChestOwner chestOwner) {
+                plugin.getChestCache().getInventory(chestOwner, worldGroup, callback);
+            }
+        }, new Consumer<InvalidOwnerException>() {
+            @Override
+            public void consume(InvalidOwnerException t) {
+                sender.sendMessage(ChatColor.RED + Translations.PLAYER_NOT_SEEN_ON_SERVER.toString(inventoryName));
+            }
+        });
+    }
+
+    /**
      * Parses a command inventoryName and returns the inventoryName. If the
      * inventoryName is world_nether/Notch it will return Notch, if it's Notch
      * it will return Notch.
@@ -163,13 +196,10 @@ public abstract class BaseCommand implements Registration {
     }
 
     /**
-     * Returns whether the name given is a valid player name. Returns false if
-     * the player has never played on this server.
-     * 
-     * @param name
-     *            The name to check.
-     * @return Whether the name given is a valid player name.
+     * @deprecated Player name lookup. This will be very inefficient from
+     *             Minecraft 1.7.6 onwards.
      */
+    @Deprecated
     protected boolean isValidPlayer(String name) {
         if (name.equals(BetterEnderChest.PUBLIC_CHEST_NAME))
             return true;

@@ -32,28 +32,26 @@ public class DeleteInvCommand extends BaseCommand {
             return false; // Wrong argument count!
 
         String inventoryName = getInventoryName(args[0]);
+
+        // Get group
         WorldGroup group = getGroup(args[0], sender);
-
-        if (isValidPlayer(inventoryName)) {
-            if (group != null) {
-                // Get the inventory
-                plugin.getChestCache().getInventory(inventoryName, group, new Consumer<Inventory>() {
-                    @Override
-                    public void consume(Inventory inventory) {
-                        // Remove all the viewers
-                        BetterEnderUtils.closeInventory(inventory, ChatColor.YELLOW + "An admin just deleted this inventory.");
-
-                        // Clear it.
-                        inventory.clear();
-                        sender.sendMessage(ChatColor.GREEN + "Succesfully removed inventory!");
-                    }
-                });
-            } else {
-                sender.sendMessage(ChatColor.RED + "The group in which the inventory should be was not found.");
-            }
-        } else {
-            sender.sendMessage(ChatColor.RED + Translations.PLAYER_NOT_SEEN_ON_SERVER.toString(inventoryName));
+        if (group == null) {
+            sender.sendMessage(ChatColor.RED + Translations.GROUP_NOT_FOUND.toString(args[0]));
+            return true;
         }
+
+        // Clear inventory
+        this.getInventory(sender, inventoryName, group, new Consumer<Inventory>() {
+            @Override
+            public void consume(Inventory inventory) {
+                // Remove all the viewers
+                BetterEnderUtils.closeInventory(inventory, ChatColor.YELLOW + "An admin just deleted this inventory.");
+
+                // Clear it.
+                inventory.clear();
+                sender.sendMessage(ChatColor.GREEN + "Succesfully removed inventory!");
+            }
+        });
         return true;
     }
 

@@ -4,15 +4,13 @@ import java.util.List;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.PublicChest;
-import nl.rutgerkok.betterenderchest.BetterEnderUtils;
 import nl.rutgerkok.betterenderchest.Translations;
 import nl.rutgerkok.betterenderchest.WorldGroup;
-import nl.rutgerkok.betterenderchest.io.Consumer;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 
 public class OpenInvCommand extends BaseCommand {
 
@@ -38,7 +36,6 @@ public class OpenInvCommand extends BaseCommand {
 
         if (!plugin.canSaveAndLoad()) {
             sender.sendMessage(ChatColor.RED + Translations.ENDER_CHESTS_DISABLED.toString());
-            plugin.severe("Still cannot ");
             return true;
         }
 
@@ -48,51 +45,36 @@ public class OpenInvCommand extends BaseCommand {
 
         if (args.length == 0) {
             // Player wants to open his own Ender Chest
+            ChestOwner chestOwner;
             if (PublicChest.openOnUsingCommand) {
-                // That's the public chest
-                inventoryName = BetterEnderChest.PUBLIC_CHEST_NAME;
+                chestOwner = plugin.getChestOwners().publicChest();
             } else {
-                // That's the private chest
-                inventoryName = player.getName();
+                chestOwner = plugin.getChestOwners().playerChest(player);
             }
+
+            plugin.getChestCache().getInventory(chestOwner, group, plugin.getChestOpener().showInventory(player));
         } else {
             // Player wants to open someone else's Ender Chest
 
             // Check for permissions
             if (!player.hasPermission("betterenderchest.command.openinv")) {
-                player.sendMessage(ChatColor.RED + Translations.CAN_ONLY_OPEN_OWN_CHEST.toString());
+                sender.sendMessage(ChatColor.RED + Translations.CAN_ONLY_OPEN_OWN_CHEST.toString());
                 return true;
             }
 
             // Execute the command
             inventoryName = getInventoryName(args[0]);
             group = getGroup(args[0], sender);
-            if (isValidPlayer(inventoryName)) {
-                if (group == null) {
-                    // Show error
-                    sender.sendMessage(ChatColor.RED + "That group doesn't exist.");
-                    return true;
-                }
-            } else {
+
+            if (group == null) {
                 // Show error
-                sender.sendMessage(ChatColor.RED + Translations.PLAYER_NOT_SEEN_ON_SERVER.toString(inventoryName));
+                sender.sendMessage(ChatColor.RED + Translations.GROUP_NOT_FOUND.toString());
                 return true;
             }
+
+            // Show the inventory
+            getInventory(sender, inventoryName, group, plugin.getChestOpener().showInventory(player));
         }
-
-        // Get the inventory object
-        final WorldGroup finalGroup = group;
-        plugin.getChestCache().getInventory(inventoryName, group, new Consumer<Inventory>() {
-
-            @Override
-            public void consume(Inventory inventory) {
-                // Check if the inventory should resize (up/downgrades)
-                inventory = BetterEnderUtils.getCorrectlyResizedInventory(player, inventory, finalGroup, plugin);
-
-                // Show the inventory
-                player.openInventory(inventory);
-            }
-        });
 
         return true;
     }

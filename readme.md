@@ -1,82 +1,182 @@
-[Home](http://dev.bukkit.org/bukkit-mods/ender-chest/) |
-**Source** | 
-[Configuration](http://dev.bukkit.org/bukkit-mods/ender-chest/pages/reference/config-file/) | 
-[Permissions](http://dev.bukkit.org/bukkit-mods/ender-chest/pages/reference/permissions/) |
-[Converter](http://dev.bukkit.org/bukkit-mods/ender-chest/pages/reference/converter/) |
-[FAQ](http://dev.bukkit.org/bukkit-mods/ender-chest/pages/reference/frequently-asked-questions/) | 
-[Changelog](http://dev.bukkit.org/bukkit-mods/ender-chest/pages/reference/changelog/)
+BetterEnderChest is a plugin for CraftBukkit (Minecraft server mod) that adds functionality to the Ender Chest. 
+The documentation of the plugin itself can be found on the home page. On this page there is some information 
+about how to interact with this plugin.
 
-BetterEnderChest is a plugin for CraftBukkit (Minecraft server mod) that adds functionality to the Ender Chest. The documentation of the plugin itself can be found on the home page. On this page there is some information about how to interact with this plugin.
+# Get the plugin instance
 
-## Get the plugin instance
+This is easy, just call the appropriate method in the plugin manager and cast it to `BetterEnderChest`.
 
-    BetterEnderChest betterEnderChest = (BetterEnderChest) Bukkit.getServer().getPluginManager().getPlugin("BetterEnderChest");
+```java
+BetterEnderChest betterEnderChest = (BetterEnderChest) Bukkit.getPluginManager().getPlugin("BetterEnderChest");
+```
 
-## Get someone's inventory
+# Getting someone's inventory
 
-    betterEnderChest.getChestsCache().getInventory(inventoryName, group, new Consumer<Inventory>() {
-            @Override
-            public void consume(Inventory inventory) {
-                // Do your stuff here, like editing, counting items, etc.
-            }
-        });
+You first need to get the appropriate `ChestOwner` and `WorldGroup` instances.
 
-`getInventory` always gives an inventory back, even if no player with that name exists. So make sure to check the player name!
+## Getting a `ChestOwner` instance
 
-## Get the world group
+For a chest of a player, you can simply do:
 
-The group name should always be lowercase (only important if the player entered the group name).
+```java
+ChestOwner chestOwner = plugin.getChestOwners().playerChest(OfflinePlayer player);
+```
 
-You can get the group a world is in with the following method:
+(Keep in mind that all `Player`s are also `OfflinePlayer`s,
+so passing a normal `Player` instance to this method will work.)
 
-    WorldGroup group = betterEnderChest.getWorldGroupManager().getGroupByWorld(World world);
+## Getting a `WorldGroup` instance
+
+You can get the group containing a given world with the following method:
+
+```java
+WorldGroup group = betterEnderChest.getWorldGroupManager().getGroupByWorld(World world);
+```
     
-or, if you just have the world name (name is case-insensitive):
+This method will always return a valid group. If the server admin hasn't setup world groups, this
+method will just return the standard group.
 
-    WorldGroup group = betterEnderChest.getWorldGroupManager().getGroupByWorldName(String worldName);
-    
-Both will always return a group. It will return the standard group if the world is not placed in a group.
+You can use the above method to get the current group of a player:
+
+```java
+WorldGroup group = betterEnderChest.getWorldGroupManager().getGroupByWorld(player.getWorld());
+```
 
 You can also get the group by the group name. This method will return null if the group doesn't exist. Group name is case-insensitve.
 
     WorldGroup group = betterEnderChest.getWorldGroupManager().getGroupByGroupName(String groupName);
 
-There is a static BetterEnderChest.STANDARD_GROUP_NAME, but it is just the group name that saves directly in the /chests, instead of in some subfolder. The server owner may have removed the default group. To get the group of te main world you can better do:
+There is a constant BetterEnderChest.STANDARD_GROUP_NAME, but it is just the group name that saves directly in
+the `/chests` folder, instead of in some subfolder. The server owner may have removed the default group.
+To get the group of the main world you can better do:
 
     World mainWorld = Bukkit.getServer().getWorlds().get(0);
     WorldGroup mainGroup = betterEnderChest.getGroups().getGroupByWorld(mainWorld);
-    
-## Making changes to the inventory
+
+## Getting the actual Inventory instance
+
+Now that you have the `ChestOwner` and `WorldGroup` instances, you can get the `Inventory` instance.
+
+```java
+plugin.getChestCache().getInventory(chestOwner, worldGroup, new Consumer<Inventory>() {
+    @Override
+    public void consume(Inventory inventory) {
+        // Do your things here
+    }
+});
+```
+
+BetterEnderChest will try to get the chest, which it may do on any thread. When it has found the chest, it
+goes back to the main thread to deliver the chest for the `consume` method. This means that the
+block of code in the `consume` method is always called on the main thread and that you don't need to worry
+about thread safety yourself.
+
+## Example
+If you feel a bit lost, this is everything you need to get the Ender Chest of an online player:
+
+```java
+// Get the plugin
+BetterEnderChest plugin = (BetterEnderChest) Bukkit.getPluginManager().getPlugin("BetterEnderChest");
+// Get a ChestOwner instance for the player
+ChestOwner chestOwner = plugin.getChestOwners().playerChest(player);
+// Get the current group of the player
+WorldGroup worldGroup = plugin.getWorldGroupManager().getGroupByWorld(player.getWorld());
+// Get the chest
+plugin.getChestCache().getInventory(chestOwner, worldGroup, new Consumer<Inventory>() {
+    @Override
+    public void consume(Inventory inventory) {
+        // Do your things here
+
+    }
+});
+```
+
+# Making changes to the inventory
 If your plugin is directly making changes to the inventory (for example using `inventory.addItem(...)`),
 be sure to set its internal `hasUnsavedChanges` flag to `true`.
-If you don't do this, the chest won't get saved. If you do, BetterEnderChest will automatically save and unload the chest after a while.
+If you don't do this, the chest won't get saved. If you do, BetterEnderChest will automatically save
+and unload the chest after a while.
 
-    ((BetterEnderInventoryHolder) inventory.getHolder()).setHasUnsavedChanges(true);
+    BetterEnderInventoryHolder.of(inventory).setHasUnsavedChanges(true);
 
 When a player clicks on a slot in the chest, BetterEnderChest will automatically set this flag to `true`.
 
-## Get public/default chest
-The public and default chest aren't that different from standard chests, they just have a special name.
+# Public and default chests
+BetterEnderChest includes a public chest and a default chest. The public chest is a chest shared by everyone;
+there is only one for each world group. The server admin can disable the normal private chests, and use the
+public chest instead.
 
-    Inventory publicEnderInventory = betterEnderChest.getEnderChests().getInventory(BetterEnderChest.PUBLIC_CHEST_NAME, WorldGroup group);
-    Inventory defaultEnderInventory = betterEnderChest.getEnderChests().getInventory(BetterEnderChest.DEFAULT_CHEST_NAME, WorldGroup group);
+Getting the public chest works in the same way as getting a private chest, you just need a different `ChestOwner`.
 
-## Add a /betterenderchest subcommand
+```java
+ChestOwner chestOwner = plugin.getChestOwners().publicChest();
+```
+
+Same for the default chest:
+
+```java
+ChestOwner chestOwner = plugin.getChestOwners().defaultChest();
+```
+
+# Getting the inventory of an Ender Chest placed in the world
+Sometimes, you just want to know what Ender inventory would show up if a player clicked on that block. There's a method
+for that:
+
+```
+BetterEnderChest plugin = (BetterEnderChest) Bukkit.getPluginManager().getPlugin("BetterEnderChest");
+try {
+    plugin.getChestOpener().getBlockInventory(Player player, Block block, new Consumer<Inventory>() {
+        @Override
+        public void consume(Inventory inventory) {
+            // Do something
+        }
+    });
+} catch (IllegalArgumentException e) {
+    // Happens if you passed something else than an Ender Chest for the
+    // block parameter. No need to catch this if you have checked the block.
+} catch (NoPermissionException e) {
+    // Player is missing the required permission node
+} catch (ChestProtectedException e) {
+    // Chest is protected by Lockette or LWC, and the player cannot
+    // access it
+}
+```
+
+# Premade `Consumer<Inventory>`s
+For common tasks like showing an inventory, some premade consumers are available.
+
+* `plugin.getChestOpener().showInventory(Player player)` to show an inventory to a player.
+* `plugin.getChestOpener().showAnimatedInventory(Player player, Block block)`: same as above, 
+  but also plays the chest opening animation. If the block parameter is not
+  an Ender Chest block, the method fails silently.
+* `plugin.getChestOpener().showUnchangeableInventory(Player player)` shows an inventory that
+  the player cannot edit. This allows you to let the player view the chest, but not edit it.
+
+You can use the consumers like this:
+
+```java
+plugin.getChestCache().getInventory(chestOwner, worldGroup, plugin.getChestOpener().showInventory(player));
+```
+
+# Adding a /betterenderchest subcommand
 Create a new class that inherits [BaseCommand](https://github.com/rutgerkok/BetterEnderChest/blob/master/src/nl/rutgerkok/betterenderchest/command/BaseCommand.java). Then you can add your command using 
 
-    betterEnderChest.getCommands().register(BaseCommand command);
+    plugin.getCommands().register(BaseCommand command);
 
-Don't forget to look at the utility methods in BaseCommand, which can parse the [groupName/]inventoryName syntax. There is also a method available that checks whether the player name can be used.
+Don't forget to look at the utility methods in BaseCommand, which can parse the [groupName/]inventoryName syntax.
 
-## Compiling BetterEnderChest
-BetterEnderChest uses [Maven](http://maven.apache.org/download.cgi), so you can build it using `mvn clean install`.
+# Compiling BetterEnderChest
+BetterEnderChest uses [Maven](http://maven.apache.org/download.cgi), so you can build it using `mvn install`.
 
-## Pull requests
-Pull requests are greatly appreciated. Just try to follow my formatting (spaces, not tabs and opening brackets on the same line) but don't worry too much if you mess up the style: I'll fix it after the request is pulled. If you are about to implement something big, please send me a PM on BukkitDev, so that we can discuss it first.
+# Pull requests
+Pull requests are greatly appreciated. Just try to follow my formatting (spaces, not tabs and opening brackets
+on the same line) but don't worry too much if you mess up the style: I'll fix it after the request is pulled.
+If you are about to implement something big, please send me a PM on BukkitDev, so that we can discuss it first.
 
-## License
+# License
 The BSD License
 
+```
 Copyright (c) 2013, Rutger Kok
 
 All rights reserved.
@@ -87,3 +187,4 @@ Redistribution and use in source and binary forms, with or without modification,
 * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. Neither the name of the owner nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+```

@@ -26,29 +26,28 @@ public class SwapInvCommand extends BaseCommand {
         final String inventoryName2 = getInventoryName(args[1]);
         final WorldGroup group2 = getGroup(args[1], sender);
 
-        // Check if both players exist (separate conditions for separate error
-        // messages)
-        if (isValidPlayer(inventoryName1) && isValidPlayer(inventoryName2)) {
-            if (group1 != null && group2 != null) {
-                // Get the inventories
-                plugin.getChestCache().getInventory(inventoryName1, group1, new Consumer<Inventory>() {
+        // Check groups
+        if (group1 == null) {
+            sender.sendMessage(ChatColor.RED + "Group of first inventory not found.");
+            return true;
+        }
+        if (group2 == null) {
+            sender.sendMessage(ChatColor.RED + "Group of second inventory not found.");
+            return true;
+        }
+
+        // Get both inventories
+        getInventory(sender, inventoryName1, group1, new Consumer<Inventory>() {
+            @Override
+            public void consume(final Inventory inventory1) {
+                getInventory(sender, inventoryName2, group2, new Consumer<Inventory>() {
                     @Override
-                    public void consume(final Inventory firstInventory) {
-                        plugin.getChestCache().getInventory(inventoryName2, group2, new Consumer<Inventory>() {
-                            @Override
-                            public void consume(Inventory secondInventory) {
-                                swap(sender, group1, group2, firstInventory, secondInventory);
-                            }
-                        });
+                    public void consume(Inventory inventory2) {
+                        swap(sender, inventory1, inventory2);
                     }
                 });
-
-            } else {
-                sender.sendMessage(ChatColor.RED + "One of the groups is invalid.");
             }
-        } else {
-            sender.sendMessage(ChatColor.RED + "One of the players (" + inventoryName1 + " or " + inventoryName2 + ") was never seen on this server.");
-        }
+        });
         return true;
     }
 
@@ -67,33 +66,27 @@ public class SwapInvCommand extends BaseCommand {
         return "<player1> <player2>";
     }
 
-    private void swap(CommandSender sender, WorldGroup group1, WorldGroup group2, Inventory firstInventory, Inventory secondInventory) {
-        // Get the names
-        String inventoryName1 = ((BetterEnderInventoryHolder) firstInventory.getHolder()).getName();
-        String inventoryName2 = ((BetterEnderInventoryHolder) secondInventory.getHolder()).getName();
+    private void swap(CommandSender sender, Inventory inventory1, Inventory inventory2) {
+        BetterEnderInventoryHolder holder1 = BetterEnderInventoryHolder.of(inventory1);
+        BetterEnderInventoryHolder holder2 = BetterEnderInventoryHolder.of(inventory2);
 
         // Get rid of the viewers
-        BetterEnderUtils.closeInventory(firstInventory, ChatColor.YELLOW + "An admin just swapped this inventory with another.");
-        BetterEnderUtils.closeInventory(secondInventory, ChatColor.YELLOW + "An admin just swapped this inventory with another.");
+        BetterEnderUtils.closeInventory(inventory1, ChatColor.YELLOW + "An admin just swapped this inventory with another.");
+        BetterEnderUtils.closeInventory(inventory2, ChatColor.YELLOW + "An admin just swapped this inventory with another.");
 
-        // Swap the owner names (and whether they are case-correct)
-        String firstOwnerName = ((BetterEnderInventoryHolder) firstInventory.getHolder()).getName();
-        boolean firstOwnerNameCaseCorrect = ((BetterEnderInventoryHolder) firstInventory.getHolder()).isOwnerNameCaseCorrect();
+        // Create new inventory 1 with size and contents of inventory 2
+        Inventory newInv1 = plugin.getEmptyInventoryProvider().loadEmptyInventory(
+                holder1.getChestOwner(), holder1.getWorldGroup(), inventory2.getSize() / 9, holder2.getDisabledSlots());
+        BetterEnderUtils.copyContents(inventory2, newInv1, null);
 
-        ((BetterEnderInventoryHolder) firstInventory.getHolder()).setOwnerName(((BetterEnderInventoryHolder) secondInventory.getHolder()).getName(),
-                ((BetterEnderInventoryHolder) secondInventory.getHolder()).isOwnerNameCaseCorrect());
+        // Create new inventory 2 with size and contents of inventory 1
+        Inventory newInv2 = plugin.getEmptyInventoryProvider().loadEmptyInventory(
+                holder2.getChestOwner(), holder2.getWorldGroup(), inventory1.getSize() / 9, holder1.getDisabledSlots());
+        BetterEnderUtils.copyContents(inventory1, newInv2, null);
 
-        ((BetterEnderInventoryHolder) secondInventory.getHolder()).setOwnerName(firstOwnerName, firstOwnerNameCaseCorrect);
-
-        // Now swap them in the list
-        plugin.getChestCache().setInventory(inventoryName1, group1, secondInventory);
-        plugin.getChestCache().setInventory(inventoryName2, group2, firstInventory);
-
-        // Unload them (so that they will get reloaded with correct titles)
-        plugin.getChestCache().saveInventory(inventoryName1, group1);
-        plugin.getChestCache().unloadInventory(inventoryName1, group1);
-        plugin.getChestCache().saveInventory(inventoryName2, group2);
-        plugin.getChestCache().unloadInventory(inventoryName2, group2);
+        // Let new inventories replace old ones
+        plugin.getChestCache().setInventory(newInv1);
+        plugin.getChestCache().setInventory(newInv2);
 
         // Show a message
         sender.sendMessage(ChatColor.GREEN + "Succesfully swapped inventories!");
