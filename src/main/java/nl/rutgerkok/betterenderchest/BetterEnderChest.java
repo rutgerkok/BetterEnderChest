@@ -21,13 +21,17 @@ import org.bukkit.plugin.Plugin;
 
 public interface BetterEnderChest {
     /**
-     * @deprecated Use <code>plugin.getChestOwners().publicChest()</code>
+     * @deprecated Use <code>plugin.getChestOwners().defaultChest()</code> and
+     *             <code>chestOwner.isDefaultChest()</code>. This constant will
+     *             eventually be removed from public view.
      */
     @Deprecated
     public static final String DEFAULT_CHEST_NAME = "--defaultchest";
 
     /**
-     * @deprecated Use <code>plugin.getChestOwners().defaultChest()</code>
+     * @deprecated Use <code>plugin.getChestOwners().publicChest()</code> and
+     *             <code>chestOwner.isPublicChest()</code>. This constant will
+     *             eventually be removed from public view.
      */
     @Deprecated
     public static final String PUBLIC_CHEST_NAME = "--publicchest";

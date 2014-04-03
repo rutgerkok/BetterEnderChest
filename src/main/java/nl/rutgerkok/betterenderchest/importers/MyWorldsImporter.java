@@ -73,7 +73,7 @@ public class MyWorldsImporter extends InventoryImporter {
         }
 
         // Load from file
-        Inventory inventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(playerFile, chestOwner, worldGroup, "EnderItems");
+        Inventory inventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventoryFromFile(playerFile, chestOwner, worldGroup, "EnderItems");
         if (BetterEnderUtils.isInventoryEmpty(inventory)) {
             return null;
         }

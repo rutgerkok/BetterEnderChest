@@ -4,6 +4,7 @@ import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.Translations;
 
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 /**
  * Implementation of {@link ChestOwner} that represents a public or default
@@ -20,12 +21,9 @@ final class SpecialChestOwner implements ChestOwner {
      * hiding them from public view
      */
     @SuppressWarnings("deprecation")
-    static final String PUBLIC_CHEST_NAME = BetterEnderChest.PUBLIC_CHEST_NAME;
+    static final ChestOwner DEFAULT_CHEST = new SpecialChestOwner(BetterEnderChest.DEFAULT_CHEST_NAME);
     @SuppressWarnings("deprecation")
-    static final String DEFAULT_CHEST_NAME = BetterEnderChest.DEFAULT_CHEST_NAME;
-
-    static final ChestOwner DEFAULT_CHEST = new SpecialChestOwner(DEFAULT_CHEST_NAME);
-    static final ChestOwner PUBLIC_CHEST = new SpecialChestOwner(PUBLIC_CHEST_NAME);
+    static final ChestOwner PUBLIC_CHEST = new SpecialChestOwner(BetterEnderChest.PUBLIC_CHEST_NAME);
 
     private final String ownerName;
 
@@ -48,13 +46,14 @@ final class SpecialChestOwner implements ChestOwner {
     }
 
     @Override
-    public String getSaveFileName() {
-        return ownerName;
+    public Player getPlayer() {
+        // Will never represent a player
+        return null;
     }
 
     @Override
-    public boolean isSpecialChest() {
-        return true;
+    public String getSaveFileName() {
+        return ownerName;
     }
 
     @Override
@@ -77,6 +76,11 @@ final class SpecialChestOwner implements ChestOwner {
     @Override
     public boolean isPublicChest() {
         return this == PUBLIC_CHEST;
+    }
+
+    @Override
+    public boolean isSpecialChest() {
+        return true;
     }
 
 }

@@ -31,34 +31,34 @@ public class LoadEntry {
      * 
      * @param plugin
      *            The plugin, needed for Bukkit's scheduler.
-     * @param inventoryData
+     * @param jsonData
      *            The raw bytes of the inventory that was just loaded.
      */
-    public void callback(final BetterEnderChest plugin, final BetterEnderSQLCache cache, final byte[] inventoryData) {
+    public void callback(final BetterEnderChest plugin, final BetterEnderSQLCache cache, final String jsonData) {
         if (Bukkit.isPrimaryThread()) {
             // On main thread for whatever reason, no need to schedule task
-            callbackOnMainThread(plugin, cache, inventoryData);
+            callbackOnMainThread(plugin, cache, jsonData);
         } else {
             // Schedule task to run on the main thread.
             Bukkit.getScheduler().runTask(plugin.getPlugin(), new Runnable() {
                 @Override
                 public void run() {
-                    callbackOnMainThread(plugin, cache, inventoryData);
+                    callbackOnMainThread(plugin, cache, jsonData);
                 }
             });
         }
     }
 
-    private void callbackOnMainThread(BetterEnderChest plugin, BetterEnderSQLCache cache, byte[] inventoryData) {
+    private void callbackOnMainThread(BetterEnderChest plugin, BetterEnderSQLCache cache, String jsonData) {
         Inventory inventory = null;
 
         // Load inventory
-        if (inventoryData == null) {
+        if (jsonData == null) {
             // Import or get the default chest, or get an empty chest
             inventory = plugin.getLoadAndImportSystem().getFallbackInventory(chestOwner, worldGroup);
         } else {
             try {
-                inventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(inventoryData, chestOwner, worldGroup, "Inventory");
+                inventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventoryFromJson(jsonData, chestOwner, worldGroup);
             } catch (IOException e) {
                 plugin.severe("Failed to decode inventory in database", e);
                 inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup);

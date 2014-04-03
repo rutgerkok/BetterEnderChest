@@ -5,7 +5,6 @@ import nl.rutgerkok.betterenderchest.registry.Registration;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.Permissible;
 
 public abstract class ProtectionBridge implements Registration {
     /**

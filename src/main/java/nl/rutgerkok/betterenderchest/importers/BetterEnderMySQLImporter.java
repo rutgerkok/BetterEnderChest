@@ -42,9 +42,9 @@ public class BetterEnderMySQLImporter extends InventoryImporter {
                 handler = new SQLHandler(plugin.getDatabaseSettings());
             }
             // Load the chest
-            byte[] rawBytes = handler.loadChest(chestOwner, worldGroup);
-            if (rawBytes != null) {
-                return plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(rawBytes, chestOwner, worldGroup, "Inventory");
+            String rawJson = handler.loadChest(chestOwner, worldGroup);
+            if (rawJson != null) {
+                return plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventoryFromJson(rawJson, chestOwner, worldGroup);
             } else {
                 // Nothing to import
                 return null;

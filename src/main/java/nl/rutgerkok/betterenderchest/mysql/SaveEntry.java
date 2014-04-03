@@ -11,21 +11,21 @@ import org.bukkit.inventory.Inventory;
 
 public class SaveEntry {
     /**
-     * Converts an inventory to bytes.
+     * Converts an inventory to a JSON-formatted string.
      * 
      * @param plugin
      *            The BetterEnderChest plugin.
      * @param inventory
      *            The inventory to convert.
-     * @return The byte array.
+     * @return The JSON-formatted string.
      * @throws IOException
      *             If something went wrong.
      */
-    public static byte[] toByteArray(BetterEnderChest plugin, Inventory inventory) throws IOException {
-        return plugin.getNMSHandlers().getSelectedRegistration().saveInventoryToByteArray(inventory);
+    public static String toJsonString(BetterEnderChest plugin, Inventory inventory) throws IOException {
+        return plugin.getNMSHandlers().getSelectedRegistration().saveInventoryToJson(inventory);
     }
 
-    private final byte[] chestData;
+    private final String chestJson;
     private final ChestOwner chestOwner;
     private final WorldGroup group;
 
@@ -35,11 +35,11 @@ public class SaveEntry {
         this.isNewChest = isNewChest;
         this.chestOwner = ((BetterEnderInventoryHolder) inventory.getHolder()).getChestOwner();
         this.group = group;
-        this.chestData = toByteArray(plugin, inventory);
+        this.chestJson = toJsonString(plugin, inventory);
     }
 
-    public byte[] getChestData() {
-        return chestData;
+    public String getChestJson() {
+        return chestJson;
     }
 
     public ChestOwner getChestOwner() {

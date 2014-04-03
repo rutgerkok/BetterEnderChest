@@ -36,12 +36,12 @@ public class SQLHandler {
      *            The owner of the inventory.
      * @param group
      *            The group of the inventory.
-     * @param chestData
+     * @param jsonString
      *            The raw bytes of the chest.
      * @throws SQLException
      *             If something went wrong.
      */
-    private void addChest(ChestOwner chestOwner, WorldGroup group, byte[] chestData) throws SQLException {
+    private void addChest(ChestOwner chestOwner, WorldGroup group, String jsonString) throws SQLException {
         PreparedStatement statement = null;
         try {
             // New chest, insert in database
@@ -49,7 +49,7 @@ public class SQLHandler {
             query += "VALUES (?, ?)";
             statement = connection.prepareStatement(query);
             statement.setString(1, chestOwner.getSaveFileName());
-            statement.setBytes(2, chestData);
+            statement.setString(2, jsonString);
             statement.executeUpdate();
         } finally {
             if (statement != null) {
@@ -80,10 +80,10 @@ public class SQLHandler {
     public void createGroupTable(WorldGroup group) throws SQLException {
         Statement statement = connection.createStatement();
         try {
-            String query = "CREATE TABLE IF NOT EXISTS `" + getTableName(group) + "` (";
-            query += "`chest_id` int(10) unsigned NOT NULL AUTO_INCREMENT, `chest_owner` varchar(16) NOT NULL,";
-            query += "`chest_data` blob NOT NULL, PRIMARY KEY (`chest_id`), UNIQUE KEY (`chest_owner`)";
-            query += ") ENGINE=InnoDB";
+            String query = "CREATE TABLE IF NOT EXISTS `" + getTableName(group) + "` ("
+                    + " `chest_id` int(10) unsigned NOT NULL AUTO_INCREMENT, `chest_owner` char(36) NOT NULL,"
+                    + " `chest_data` text NOT NULL, PRIMARY KEY (`chest_id`), UNIQUE KEY (`chest_owner`)"
+                    + ") ENGINE=InnoDB";
             statement.execute(query);
         } finally {
             statement.close();
@@ -91,7 +91,7 @@ public class SQLHandler {
     }
 
     protected String getTableName(WorldGroup group) {
-        return "bec_chests_" + group.getGroupName();
+        return "bec_chestdata_" + group.getGroupName();
     }
 
     /**
@@ -105,7 +105,7 @@ public class SQLHandler {
      * @throws SQLException
      *             If something went wrong.
      */
-    public byte[] loadChest(ChestOwner chestOwner, WorldGroup group) throws SQLException {
+    public String loadChest(ChestOwner chestOwner, WorldGroup group) throws SQLException {
         PreparedStatement statement = null;
         ResultSet result = null;
         try {
@@ -115,7 +115,7 @@ public class SQLHandler {
             statement.setString(1, chestOwner.getSaveFileName());
             result = statement.executeQuery();
             if (result.first()) {
-                return result.getBytes("chest_data");
+                return result.getString("chest_data");
             } else {
                 return null;
             }
@@ -137,19 +137,19 @@ public class SQLHandler {
      *            The owner of the chest.
      * @param group
      *            The group the chest belongs to.
-     * @param chestData
+     * @param jsonString
      *            The raw data of the chest.
      * @throws SQLException
      *             If something went wrong.
      */
-    public void updateChest(ChestOwner chestOwner, WorldGroup group, byte[] chestData) throws SQLException {
+    public void updateChest(ChestOwner chestOwner, WorldGroup group, String jsonString) throws SQLException {
         PreparedStatement statement = null;
         boolean performInsert = false;
         try {
             // Existing chest, update row
             String query = "UPDATE `" + getTableName(group) + "` SET `chest_data` = ? WHERE `chest_owner` = ?";
             statement = connection.prepareStatement(query);
-            statement.setBytes(1, chestData);
+            statement.setString(1, jsonString);
             statement.setString(2, chestOwner.getSaveFileName());
             int changedRows = statement.executeUpdate();
             if (changedRows == 0) {
@@ -163,7 +163,7 @@ public class SQLHandler {
         }
 
         if (performInsert) {
-            addChest(chestOwner, group, chestData);
+            addChest(chestOwner, group, jsonString);
         }
     }
 }

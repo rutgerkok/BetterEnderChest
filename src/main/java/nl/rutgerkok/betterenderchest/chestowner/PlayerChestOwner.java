@@ -1,10 +1,13 @@
 package nl.rutgerkok.betterenderchest.chestowner;
 
+import java.util.UUID;
+
 import nl.rutgerkok.betterenderchest.Translations;
 
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 /**
  * Implementation of {@link ChestOwner} that represents a normal player.
@@ -13,12 +16,13 @@ import org.bukkit.OfflinePlayer;
 final class PlayerChestOwner implements ChestOwner {
 
     private final String displayName;
-    private final String name;
+    private final UUID uuid;
 
-    PlayerChestOwner(String name) {
-        Validate.notNull(name, "Name may not be null");
-        this.displayName = name;
-        this.name = name.toLowerCase();
+    PlayerChestOwner(String displayName, UUID uuid) {
+        Validate.notNull(displayName, "Name may not be null");
+        Validate.notNull(uuid, "UUID may not be null");
+        this.displayName = displayName;
+        this.uuid = uuid;
     }
 
     @Override
@@ -26,7 +30,7 @@ final class PlayerChestOwner implements ChestOwner {
         if (!(other instanceof PlayerChestOwner)) {
             return false;
         }
-        return ((PlayerChestOwner) other).name.equals(this.name);
+        return ((PlayerChestOwner) other).uuid.equals(this.uuid);
     }
 
     @Override
@@ -40,19 +44,18 @@ final class PlayerChestOwner implements ChestOwner {
     }
 
     @Override
+    public Player getPlayer() {
+        return Bukkit.getPlayer(uuid);
+    }
+
+    @Override
     public String getSaveFileName() {
-        return this.name.toLowerCase();
+        return uuid.toString();
     }
 
     @Override
     public int hashCode() {
-        return name.hashCode() * 31;
-    }
-
-    @Override
-    public boolean isSpecialChest() {
-        // Nope, a player owns this chest
-        return false;
+        return uuid.hashCode() * 31;
     }
 
     @Override
@@ -63,17 +66,23 @@ final class PlayerChestOwner implements ChestOwner {
 
     @Override
     public boolean isOwnerOnline() {
-        return Bukkit.getPlayerExact(name) != null;
+        return Bukkit.getPlayer(uuid) != null;
     }
 
     @Override
     public boolean isPlayer(OfflinePlayer player) {
-        return player.getName().equalsIgnoreCase(name);
+        return player.getUniqueId().equals(uuid);
     }
 
     @Override
     public boolean isPublicChest() {
         // No, this is a player-owned chest
+        return false;
+    }
+
+    @Override
+    public boolean isSpecialChest() {
+        // Nope, a player owns this chest
         return false;
     }
 

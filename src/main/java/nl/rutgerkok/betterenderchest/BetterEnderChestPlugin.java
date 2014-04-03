@@ -78,6 +78,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private BetterEnderFileHandler fileHandler;
     private BetterEnderWorldGroupManager groups;
     private Registry<InventoryImporter> importers = new Registry<InventoryImporter>();
+    private File legacyChestSaveLocation;
     private boolean lockChestsOnError = true;
     private boolean manualGroupManagement;
     private Registry<NMSHandler> nmsHandlers = new Registry<NMSHandler>();
@@ -272,7 +273,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             warning(givenSaveLocation + " is not a valid save location. Defaulting to " + defaultSaveLocation + ".");
             saveLocation = SaveLocation.getDefaultSaveLocation();
         }
-        chestSaveLocation = saveLocation.getFolder(this);
+        legacyChestSaveLocation = saveLocation.getLegacyFolder(this);
         config.set("BetterEnderChest.saveFolderLocation", saveLocation.toString());
 
         // ChestDrop
@@ -488,6 +489,9 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
     @Override
     public void onEnable() {
+        // Folder
+        chestSaveLocation = new File(getDataFolder(), "chestData");
+
         // ProtectionBridge
         protectionBridges.register(new LocketteBridge());
         protectionBridges.register(new LWCBridge());

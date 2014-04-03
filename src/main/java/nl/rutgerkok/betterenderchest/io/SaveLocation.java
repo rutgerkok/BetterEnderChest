@@ -45,7 +45,7 @@ public enum SaveLocation {
      * @param plugin
      * @return
      */
-    public File getFolder(BetterEnderChest plugin) {
+    public File getLegacyFolder(BetterEnderChest plugin) {
         if (this == SERVER_ROOT) {
             return new File("chests");
         } else {

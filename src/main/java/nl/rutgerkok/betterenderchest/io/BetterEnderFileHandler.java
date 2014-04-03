@@ -80,7 +80,7 @@ public class BetterEnderFileHandler {
      */
     public Inventory load(ChestOwner chestOwner, WorldGroup group) throws IOException {
         File file = getChestFile(chestOwner, group);
-        return plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(file, chestOwner, group, "Inventory");
+        return plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventoryFromFile(file, chestOwner, group, "Inventory");
     }
 
     /**
@@ -97,6 +97,6 @@ public class BetterEnderFileHandler {
      */
     public void save(Inventory inventory, ChestOwner chestOwner, WorldGroup group) throws IOException {
         File file = getChestFile(chestOwner, group);
-        plugin.getNMSHandlers().getSelectedRegistration().saveInventoryAsNBT(file, inventory);
+        plugin.getNMSHandlers().getSelectedRegistration().saveInventoryToFile(file, inventory);
     }
 }

@@ -30,7 +30,12 @@ public class VanillaImporter extends InventoryImporter {
 
     @Override
     public Inventory importInventory(ChestOwner chestOwner, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
-        Player player = Bukkit.getPlayerExact(chestOwner.getDisplayName());
+        // Cannot import vanilla chests
+        if (chestOwner.isSpecialChest()) {
+            return null;
+        }
+
+        Player player = chestOwner.getPlayer();
         Inventory betterEnderInventory;
         if (player == null) {
 
@@ -49,7 +54,7 @@ public class VanillaImporter extends InventoryImporter {
             }
 
             // Load it from the file (mainworld/players/playername.dat)
-            betterEnderInventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventory(playerFile, chestOwner, worldGroup, "EnderItems");
+            betterEnderInventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventoryFromFile(playerFile, chestOwner, worldGroup, "EnderItems");
             if (betterEnderInventory == null) {
                 // Cannot load the inventory from that file, most likely because
                 // it is empty

@@ -1,13 +1,24 @@
 package nl.rutgerkok.betterenderchest.chestowner;
 
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.exception.InvalidOwnerException;
 import nl.rutgerkok.betterenderchest.io.Consumer;
 
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
 public class ChestOwners {
 
-    
+    /**
+     * Gets the "owner" of the default chest. Since the default chest doesn't
+     * have a real owner, you need to use this method.
+     * 
+     * @return The "owner" of the public chest.
+     */
+    public ChestOwner defaultChest() {
+        return SpecialChestOwner.DEFAULT_CHEST;
+    }
+
     /**
      * Retrieves the {@link ChestOwner} with the given name. In the future, this
      * method might need to contact Mojang's auth service to look up the UUID
@@ -29,23 +40,15 @@ public class ChestOwners {
      *            which usually happens because no player exists with that name.
      */
     public void fromInput(String name, Consumer<ChestOwner> onSuccess, Consumer<InvalidOwnerException> onFailure) {
-        if (name.equalsIgnoreCase(SpecialChestOwner.PUBLIC_CHEST_NAME)) {
+        if (name.equalsIgnoreCase(BetterEnderChest.PUBLIC_CHEST_NAME)) {
             onSuccess.consume(publicChest());
         }
-        if (name.equalsIgnoreCase(SpecialChestOwner.DEFAULT_CHEST_NAME)) {
+        if (name.equalsIgnoreCase(BetterEnderChest.DEFAULT_CHEST_NAME)) {
             onSuccess.consume(defaultChest());
         }
-        onSuccess.consume(new PlayerChestOwner(name));
-    }
-
-    /**
-     * Gets the "owner" of the default chest. Since the default chest doesn't
-     * have a real owner, you need to use this method.
-     * 
-     * @return The "owner" of the public chest.
-     */
-    public ChestOwner defaultChest() {
-        return SpecialChestOwner.DEFAULT_CHEST;
+        // TODO Replace this logic in 1.7.6 with new lookup
+        OfflinePlayer player = Bukkit.getOfflinePlayer(name);
+        onSuccess.consume(playerChest(player));
     }
 
     /**
@@ -55,8 +58,10 @@ public class ChestOwners {
      *            The player.
      * @return The <code>ChestOwner</code> belonging to the player.
      */
+    @SuppressWarnings("deprecation")
+    // ^ It's just a display name, not actually used for saving
     public ChestOwner playerChest(OfflinePlayer player) {
-        return new PlayerChestOwner(player.getName());
+        return new PlayerChestOwner(player.getName(), player.getUniqueId());
     }
 
     /**

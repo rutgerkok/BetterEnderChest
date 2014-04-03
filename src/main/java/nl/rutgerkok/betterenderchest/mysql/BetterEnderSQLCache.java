@@ -171,7 +171,7 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
                     // This loads the chest bytes on a random thread. The
                     // callback method immediately goes back to the main thread
                     // and creates the inventory and puts in in the cache
-                    byte[] dataFromDatabase = sqlHandler.loadChest(loadEntry.getChestOwner(), loadEntry.getWorldGroup());
+                    String dataFromDatabase = sqlHandler.loadChest(loadEntry.getChestOwner(), loadEntry.getWorldGroup());
                     loadEntry.callback(plugin, BetterEnderSQLCache.this, dataFromDatabase);
                 } catch (SQLException e) {
                     plugin.severe("Error loading chest " + loadEntry.getChestOwner().getDisplayName(), e);
@@ -195,7 +195,7 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
             while (!saveQueue.isEmpty()) {
                 SaveEntry entry = saveQueue.poll();
                 try {
-                    sqlHandler.updateChest(entry.getChestOwner(), entry.getWorldGroup(), entry.getChestData());
+                    sqlHandler.updateChest(entry.getChestOwner(), entry.getWorldGroup(), entry.getChestJson());
                 } catch (SQLException e) {
                     plugin.severe("Failed to save chest", e);
                     plugin.disableSaveAndLoad("Failed to save the chest of " + entry.getChestOwner().getDisplayName() + " to the database", e);
@@ -237,7 +237,7 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
                     }
 
                     try {
-                        sqlHandler.updateChest(entry.getKey(), currentGroup, SaveEntry.toByteArray(plugin, inventory));
+                        sqlHandler.updateChest(entry.getKey(), currentGroup, SaveEntry.toJsonString(plugin, inventory));
                         // Chest in its current state was just saved
                         holder.setHasUnsavedChanges(false);
                     } catch (IOException e) {
@@ -266,7 +266,7 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
             if (inventory != null) {
                 synchronized (savingLock) {
                     try {
-                        sqlHandler.updateChest(chestOwner, group, SaveEntry.toByteArray(plugin, inventory));
+                        sqlHandler.updateChest(chestOwner, group, SaveEntry.toJsonString(plugin, inventory));
 
                         // Chest in its current state was just saved
                         BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
