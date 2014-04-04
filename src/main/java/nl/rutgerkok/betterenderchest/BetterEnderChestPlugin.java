@@ -33,6 +33,7 @@ import nl.rutgerkok.betterenderchest.mysql.DatabaseSettings;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.nms.SimpleNMSHandler;
 import nl.rutgerkok.betterenderchest.registry.Registry;
+import nl.rutgerkok.betterenderchest.uuidconversion.FileUUIDConverter;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -74,6 +75,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private EmptyInventoryProvider emptyInventoryProvider;
     private BetterEnderCache enderCache;
     private BetterEnderFileHandler fileHandler;
+    private FileUUIDConverter fileUuidConverter;
     private BetterEnderWorldGroupManager groups;
     private Registry<InventoryImporter> importers = new Registry<InventoryImporter>();
     private File legacyChestSaveLocation;
@@ -108,6 +110,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
                 severe("Although a critical error occured, the plugin will keep trying to save and load as requested in the config.yml.");
             }
         }
+    }
+
+    @Override
+    public synchronized void enableSaveAndLoad() {
+        this.saveAndLoadError = null;
     }
 
     @Override
@@ -455,6 +462,9 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             enderCache = new BetterEnderFileCache(this);
         }
 
+        // Converter
+        fileUuidConverter = new FileUUIDConverter(this, legacyChestSaveLocation);
+        fileUuidConverter.startConversion();
     }
 
     @Override
@@ -558,9 +568,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         unloadIOServices();
 
         // Re-enable chest saving
-        synchronized (this) {
-            this.saveAndLoadError = null;
-        }
+        enableSaveAndLoad();
 
         // Reload the config
         initConfig();
@@ -586,6 +594,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         enderCache.disable();
         fileHandler = null;
         enderCache = null;
+        fileUuidConverter.stopConversion();
+        fileUuidConverter = null;
     }
 
     @Override

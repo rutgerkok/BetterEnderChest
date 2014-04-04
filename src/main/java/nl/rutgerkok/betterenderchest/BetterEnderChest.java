@@ -72,6 +72,12 @@ public interface BetterEnderChest {
     void disableSaveAndLoad(String reason, Throwable stacktrace);
 
     /**
+     * (Re-)enables saving and loading. Does nothing if saving and loading was
+     * already enabled. Can be called from any thread.
+     */
+    void enableSaveAndLoad();
+
+    /**
      * Returns the cache of the plugin. Use this to load files from disk and to
      * save them.
      * 

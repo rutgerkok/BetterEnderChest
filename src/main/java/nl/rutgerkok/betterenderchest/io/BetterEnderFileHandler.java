@@ -16,8 +16,8 @@ import org.bukkit.inventory.Inventory;
  * 
  */
 public class BetterEnderFileHandler {
-    private final BetterEnderChest plugin;
     public static final String EXTENSION = ".dat";
+    private final BetterEnderChest plugin;
 
     public BetterEnderFileHandler(BetterEnderChest plugin) {
         this(plugin, true);
@@ -38,6 +38,39 @@ public class BetterEnderFileHandler {
             plugin.severe("Stack trace to grab your attention, no need to report this to BukkitDev:", e);
             plugin.disableSaveAndLoad("BetterEnderChest doesn't work on this version of Minecraft", e);
         }
+    }
+
+    /**
+     * Gets the directory where all files of a group will be saved in.
+     * 
+     * @param baseDir
+     *            The base directory, usually
+     *            {@link BetterEnderChest#getChestSaveLocation()}.
+     * @param worldGroup
+     *            The world group.
+     * @return The directory where all files of a group will be saved in.
+     */
+    public File getChestDirectory(File baseDir, WorldGroup worldGroup) {
+        if (worldGroup.getGroupName().equals(BetterEnderChest.STANDARD_GROUP_NAME)) {
+            return baseDir;
+        } else {
+            return new File(baseDir, worldGroup.getGroupName());
+        }
+    }
+
+    /**
+     * Gets the file where the chest of the given owner in the given group will
+     * be saved.
+     * 
+     * @param chestOwner
+     *            The owner of the chest.
+     * @param worldGroup
+     *            The group the chest is in.
+     * @return The file.
+     */
+    public File getChestFile(ChestOwner chestOwner, WorldGroup worldGroup) {
+        File directory = getChestDirectory(plugin.getChestSaveLocation(), worldGroup);
+        return new File(directory, chestOwner.getSaveFileName() + EXTENSION);
     }
 
     /**
@@ -94,6 +127,19 @@ public class BetterEnderFileHandler {
     }
 
     /**
+     * Returns whether the specified inventory exists on disk.
+     * 
+     * @param chestOwner
+     *            The inventory to search for.
+     * @param group
+     *            The group to search in.
+     * @return Whether the inventory exists.
+     */
+    public boolean inventoryFileExists(ChestOwner chestOwner, WorldGroup group) {
+        return getChestFile(chestOwner, group).exists();
+    }
+
+    /**
      * Load the inventory. It will automatically try to load it from a file, or
      * import it from another plugin, or use the default chest.
      * 
@@ -119,40 +165,22 @@ public class BetterEnderFileHandler {
         // Use various fallback methods
         return getFallbackInventory(chestOwner, worldGroup);
     }
-    
+
     /**
-     * Tries to load an inventory from the file. Doesn't use fallback methods. Assumes that the file exists.
-     * @param chestOwner Owner of the chest.
-     * @param worldGroup Group the chest is in.
+     * Tries to load an inventory from the file. Doesn't use fallback methods.
+     * Assumes that the file exists.
+     * 
+     * @param chestOwner
+     *            Owner of the chest.
+     * @param worldGroup
+     *            Group the chest is in.
      * @return The invenotory.
-     * @throws IOException If the inventory doesn't exist on disk, or is corrupted.
+     * @throws IOException
+     *             If the inventory doesn't exist on disk, or is corrupted.
      */
     private Inventory loadInventory0(ChestOwner chestOwner, WorldGroup worldGroup) throws IOException {
         File file = getChestFile(chestOwner, worldGroup);
         return plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventoryFromFile(file, chestOwner, worldGroup, "Inventory");
-    }
-
-    /**
-     * Returns whether the specified inventory exists on disk.
-     * 
-     * @param chestOwner
-     *            The inventory to search for.
-     * @param group
-     *            The group to search in.
-     * @return Whether the inventory exists.
-     */
-    public boolean inventoryFileExists(ChestOwner chestOwner, WorldGroup group) {
-        return getChestFile(chestOwner, group).exists();
-    }
-
-    public File getChestFile(ChestOwner chestOwner, WorldGroup worldGroup) {
-        if (worldGroup.getGroupName().equals(BetterEnderChest.STANDARD_GROUP_NAME)) {
-            // Default group? File isn't in a subdirectory.
-            return new File(plugin.getChestSaveLocation().getPath() + "/" + chestOwner.getSaveFileName() + EXTENSION);
-        } else {
-            // Another group? Save in subdirectory.
-            return new File(plugin.getChestSaveLocation().getPath() + "/" + worldGroup.getGroupName() + "/" + chestOwner.getSaveFileName() + EXTENSION);
-        }
     }
 
     /**
