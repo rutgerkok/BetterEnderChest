@@ -1,19 +1,21 @@
 package nl.rutgerkok.betterenderchest.exception;
 
-import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
-
 import org.apache.commons.lang.Validate;
 
+/**
+ * Thrown when the owner of a chest is not found.
+ *
+ */
 public class InvalidOwnerException extends Exception {
-    private final ChestOwner chestOwner;
+    private final String ownerName;
 
     /**
-     * 
-     * @param chestOwner
+     * Creates a new InvalidOwnerException.
+     * @param ownerName Name of the person that was not found.
      */
-    public InvalidOwnerException(ChestOwner chestOwner) {
-        Validate.notNull(chestOwner, "chestOwner may not be null");
-        this.chestOwner = chestOwner;
+    public InvalidOwnerException(String ownerName) {
+        Validate.notNull(ownerName, "chestOwner may not be null");
+        this.ownerName = ownerName;
     }
 
     /**
@@ -21,7 +23,7 @@ public class InvalidOwnerException extends Exception {
      * 
      * @return The owner of the chest.
      */
-    public ChestOwner getChestOwner() {
-        return chestOwner;
+    public String getOwnerName() {
+        return ownerName;
     }
 }

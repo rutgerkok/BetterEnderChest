@@ -42,12 +42,19 @@ public class ChestOwners {
     public void fromInput(String name, Consumer<ChestOwner> onSuccess, Consumer<InvalidOwnerException> onFailure) {
         if (name.equalsIgnoreCase(BetterEnderChest.PUBLIC_CHEST_NAME)) {
             onSuccess.consume(publicChest());
+            return;
         }
         if (name.equalsIgnoreCase(BetterEnderChest.DEFAULT_CHEST_NAME)) {
             onSuccess.consume(defaultChest());
+            return;
         }
-        // TODO Replace this logic in 1.7.6 with new lookup
+        
+        // TODO Replace this with async lookup
         OfflinePlayer player = Bukkit.getOfflinePlayer(name);
+        if (player.getUniqueId() == null) {
+            onFailure.consume(new InvalidOwnerException(name));
+            return;
+        }
         onSuccess.consume(playerChest(player));
     }
 
