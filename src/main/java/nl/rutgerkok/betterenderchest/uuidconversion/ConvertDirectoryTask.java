@@ -80,43 +80,7 @@ class ConvertDirectoryTask extends ConvertTask {
     }
 
     @Override
-    void cleanup() {
-        // Unused world groups might have no folder
-        if (!oldChestsDir.exists()) {
-            return;
-        }
-
-        // Check if directory is empty
-        if (!deleteEmptyDirectory(oldChestsDir)) {
-            // This means that there were files left in the old directory
-            plugin.warning("Some (chest) files could not be converted to UUIDs.");
-            File notConvertedDirectory = new File(oldChestsDir.getParentFile(), "chests_NOT_CONVERTED");
-            if (oldChestsDir.renameTo(notConvertedDirectory)) {
-                plugin.log("You can find those files in the " + notConvertedDirectory.getAbsolutePath() + " directory.");
-            } else {
-                plugin.warning("Those files are still in " + oldChestsDir.getAbsolutePath());
-            }
-        }
-    }
-
-    private boolean deleteEmptyDirectory(File directory) {
-        // Scan for subfiles
-        for (File file : directory.listFiles()) {
-            if (file.isFile()) {
-                return false;
-            }
-            if (file.isDirectory()) {
-                if (!deleteEmptyDirectory(file)) {
-                    return false;
-                }
-            }
-        }
-        // If we have reached this point, the directory is empty
-        return directory.delete();
-    }
-
-    @Override
-    void startup() throws IOException {
+    protected void startup() throws IOException {
         // Unused world groups might have no folder
         if (!oldChestsDir.exists()) {
             return;

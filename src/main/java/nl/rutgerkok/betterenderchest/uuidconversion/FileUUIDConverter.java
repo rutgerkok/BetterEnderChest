@@ -7,94 +7,72 @@ import java.util.List;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 
-import org.bukkit.Bukkit;
 import org.json.simple.parser.ParseException;
 
-public class FileUUIDConverter {
-    private static final int BATCH_SIZE = 1000;
-    private ConvertTask currentTask;
+public class FileUUIDConverter extends BetterEnderUUIDConverter {
     private final File oldSaveLocation;
 
-    private final BetterEnderChest plugin;
-    private boolean stopRequested;
-
     public FileUUIDConverter(BetterEnderChest plugin, File oldSaveLocation) {
-        this.plugin = plugin;
+        super(plugin);
         this.oldSaveLocation = oldSaveLocation;
     }
 
+    void cleanupFolders(File oldChestsDir) {
+        // Check if directory is empty
+        if (!deleteEmptyDirectory(oldChestsDir)) {
+            // This means that there were files left in the old directory
+            plugin.warning("Some (chest) files could not be converted to UUIDs.");
+            File notConvertedDirectory = new File(oldChestsDir.getParentFile(), "chests_NOT_CONVERTED");
+            if (oldChestsDir.renameTo(notConvertedDirectory)) {
+                plugin.log("You can find those files in the " + notConvertedDirectory.getAbsolutePath() + " directory.");
+            } else {
+                plugin.warning("Those files are still in " + oldChestsDir.getAbsolutePath());
+            }
+        }
+    }
+
     /**
-     * The conversion process for all world groups. Must not be called on the
-     * main thread.
+     * Deletes a directory. If the directory contains files, the direcory will
+     * not be deleted. Empty subdirectories are ignored.
      * 
-     * @param groups
-     *            The groups to convert.
-     * @return True if the process was successful, false if crashed or not yet
-     *         finished.
+     * @param directory
+     *            The directory to delete.
+     * @return True if the directory was deleted, false otherwise (happens when
+     *         there are still files in the directory).
      */
-    private boolean convertWorldGroups(List<WorldGroup> groups) {
-        try {
-            for (WorldGroup worldGroup : groups) {
-                ConvertTask task = new ConvertDirectoryTask(plugin, oldSaveLocation, worldGroup);
-                synchronized (this) {
-                    if (stopRequested) {
-                        throw new InterruptedException();
-                    }
-                    currentTask = task;
-                }
-                task.convertAllBatches(BATCH_SIZE);
+    private boolean deleteEmptyDirectory(File directory) {
+        // Scan for subfiles
+        for (File file : directory.listFiles()) {
+            if (file.isFile()) {
+                return false;
             }
-            return true;
-        } catch (InterruptedException e) {
-            plugin.log("Paused name->UUID conversion");
-        } catch (ParseException e) {
-            plugin.severe("Failed to parse JSON", e);
-            plugin.disableSaveAndLoad("Failed to parse JSON during UUID conversion", e);
-        } catch (IOException e) {
-            plugin.severe("Error during name->UUID conversion process", e);
-            plugin.disableSaveAndLoad("Error during name->UUID conversion process", e);
-        } catch (Throwable t) {
-            plugin.severe("Unexpected error during name->UUID conversion process", t);
-            plugin.disableSaveAndLoad("Unexpected error during name->UUID conversion process", t);
-        }
-        return false;
-    }
-
-    /**
-     * Tries to start the conversion process. If there old folder doesn't exist,
-     * nothing is converted.
-     */
-    public void startConversion() {
-        if (!oldSaveLocation.exists()) {
-            // Nothing to convert :)
-            return;
-        }
-
-        Exception convertingException = new Exception("Converting to UUID files, may take a while");
-        convertingException.setStackTrace(new StackTraceElement[0]);
-        plugin.log("Converting everything from name to UUID. This process may take a while.");
-        plugin.log("The server will still be usable while the Ender Chests are converted, Ender Chests just won't open.");
-        plugin.disableSaveAndLoad("Converting to UUID files, may take a while", convertingException);
-
-        final List<WorldGroup> groups = plugin.getWorldGroupManager().getGroups();
-        Bukkit.getScheduler().runTaskAsynchronously(plugin.getPlugin(), new Runnable() {
-            @Override
-            public void run() {
-                if (convertWorldGroups(groups)) {
-                    plugin.enableSaveAndLoad();
-                    plugin.log("Successfully converted all Ender Chests.");
+            if (file.isDirectory()) {
+                if (!deleteEmptyDirectory(file)) {
+                    return false;
                 }
             }
-        });
+        }
+        // If we have reached this point, the directory is empty
+        return directory.delete();
     }
 
-    public synchronized void stopConversion() {
-        stopRequested = true;
-
-        // This may or may not succeed, depending on when the stop method was
-        // called
-        if (currentTask != null) {
-            currentTask.requestStop();
+    @Override
+    protected void convertWorldGroup(List<WorldGroup> groups) throws InterruptedException, ParseException, IOException {
+        for (WorldGroup worldGroup : groups) {
+            ConvertTask task = new ConvertDirectoryTask(plugin, oldSaveLocation, worldGroup);
+            synchronized (this) {
+                if (stopRequested) {
+                    throw new InterruptedException();
+                }
+                currentTask = task;
+            }
+            task.convertAllBatches(BATCH_SIZE);
         }
+        cleanupFolders(oldSaveLocation);
+    }
+
+    @Override
+    protected boolean needsConversion() {
+        return oldSaveLocation.exists();
     }
 }

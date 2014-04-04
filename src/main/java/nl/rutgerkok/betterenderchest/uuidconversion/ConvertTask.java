@@ -53,10 +53,13 @@ abstract class ConvertTask {
     }
 
     /**
-     * After all files were successfully moved, this method should be called to
-     * cleanup any
+     * After all files were successfully moved, this method wull be called to
+     * cleanup any database tables/folders/etc. and check for unconverted
+     * entries.
      */
-    abstract void cleanup();
+    protected void cleanup() {
+        // Empty!
+    }
 
     /**
      * Does tasks that are needed before the conversion, like creating
@@ -65,7 +68,7 @@ abstract class ConvertTask {
      * @throws IOException
      *             If an IO error occurred.
      */
-    abstract void startup() throws IOException;
+    protected abstract void startup() throws IOException;
 
     /**
      * Converts a batch of users.
