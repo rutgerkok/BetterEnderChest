@@ -55,7 +55,7 @@ public class LoadEntry {
         // Load inventory
         if (jsonData == null) {
             // Import or get the default chest, or get an empty chest
-            inventory = plugin.getLoadAndImportSystem().getFallbackInventory(chestOwner, worldGroup);
+            inventory = plugin.getFileHandler().getFallbackInventory(chestOwner, worldGroup);
         } else {
             try {
                 inventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventoryFromJson(jsonData, chestOwner, worldGroup);

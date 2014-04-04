@@ -153,7 +153,7 @@ public class BetterEnderFileCache extends AbstractEnderCache {
             return inventories.get(worldGroup).get(chestOwner);
         } else {
             // Inventory has to be loaded
-            Inventory enderInventory = plugin.getLoadAndImportSystem().loadInventory(chestOwner, worldGroup);
+            Inventory enderInventory = plugin.getFileHandler().loadInventory(chestOwner, worldGroup);
             // Check if something from that group has been loaded
             if (!inventories.containsKey(worldGroup)) {
                 // If not, create the group first
@@ -188,7 +188,7 @@ public class BetterEnderFileCache extends AbstractEnderCache {
                 for (Entry<ChestOwner, Inventory> entryInGroup : chestsInGroup.entrySet()) {
                     ChestOwner chestOwner = entryInGroup.getKey();
                     Inventory inventory = entryInGroup.getValue();
-                    plugin.getFileHandler().save(inventory, chestOwner, group);
+                    plugin.getFileHandler().saveInventory(inventory, chestOwner, group);
                 }
             }
         } catch (IOException e) {
@@ -210,7 +210,7 @@ public class BetterEnderFileCache extends AbstractEnderCache {
         // Save the inventory to disk and mark as saved
         Inventory inventory = inventories.get(group).get(chestOwner);
         try {
-            plugin.getFileHandler().save(inventory, chestOwner, group);
+            plugin.getFileHandler().saveInventory(inventory, chestOwner, group);
             ((BetterEnderInventoryHolder) inventory.getHolder()).setHasUnsavedChanges(false);
         } catch (IOException e) {
             plugin.severe("Failed to save chest of " + chestOwner.getDisplayName(), e);

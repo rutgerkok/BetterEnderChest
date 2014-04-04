@@ -9,7 +9,6 @@ import nl.rutgerkok.betterenderchest.command.BetterEnderCommandManager;
 import nl.rutgerkok.betterenderchest.importers.InventoryImporter;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.BetterEnderFileHandler;
-import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
 import nl.rutgerkok.betterenderchest.io.SaveAndLoadError;
 import nl.rutgerkok.betterenderchest.mysql.DatabaseSettings;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
@@ -193,9 +192,9 @@ public interface BetterEnderChest {
     EmptyInventoryProvider getEmptyInventoryProvider();
 
     /**
-     * Returns the file handler, which saves to and loads from files.
+     * Get the save and load system used for flat files.
      * 
-     * @return The file handler.
+     * @return The save and load system.
      */
     BetterEnderFileHandler getFileHandler();
 
@@ -206,13 +205,6 @@ public interface BetterEnderChest {
      * @return The converter.
      */
     Registry<InventoryImporter> getInventoryImporters();
-
-    /**
-     * Get the save and load system.
-     * 
-     * @return The save and load system.
-     */
-    BetterEnderIOLogic getLoadAndImportSystem();
 
     /**
      * Gets the NMS handlers where all things that bypass Bukkit are done.
@@ -281,95 +273,6 @@ public interface BetterEnderChest {
      * Reloads the configuration and all chests.
      */
     void reload();
-
-    /**
-     * Sets the cache system that should be used.
-     * 
-     * @param cache
-     *            The cache system to use.
-     */
-    void setChestCache(BetterEnderCache cache);
-
-    /**
-     * Sets the current chest material.
-     * 
-     * @param newMaterial
-     *            The new chest material.
-     */
-    void setChestMaterial(Material newMaterial);
-
-    /**
-     * Replaces the chest opener, which contains logic for opening chests.
-     * 
-     * @param chestOpener
-     *            The chest opener.
-     * @throws IllegalArgumentException
-     *             If the parameter is null.
-     */
-    void setChestOpener(ChestOpener chestOpener) throws IllegalArgumentException;
-
-    /**
-     * Sets the chest size calculator. If you want to have your own calculator
-     * for the chest sizes, you can register it here. This is not always needed,
-     * most of the time you can just give the number of slots for each upgrade
-     * to the current size calculator.
-     * 
-     * @param sizes
-     *            The new calculator.
-     */
-    void setChestSizes(BetterEnderChestSizes newCalculator);
-
-    /**
-     * Sets the command manager.
-     * 
-     * @param newCommandHandler
-     *            The new command handler.
-     */
-    void setCommandHandler(BetterEnderCommandManager newCommandHandler);
-
-    /**
-     * Sets the new compabilityMode. See also getCompabilityMode.
-     * 
-     * @param newCompabilityMode
-     *            Whether compability mode should be enabled.
-     */
-    void setCompatibilityMode(boolean newCompabilityMode);
-
-    /**
-     * Sets the database settings to use when using MySQL. You need to call this
-     * in {@link org.bukkit.plugin.java.JavaPlugin#onLoad()}.
-     * 
-     * @param settings
-     *            The database settings.
-     * @throws IllegalStateException
-     *             When the settings are already set.
-     */
-    void setDatabaseSettings(DatabaseSettings settings) throws IllegalStateException;
-
-    /**
-     * Sets the empty inventory provider, which contains methods to create Ender
-     * inventories without loading information from disk/the database.
-     * 
-     * @param provider
-     *            The emtpy inventory provider.
-     */
-    void setEmtpyInventoryProvider(EmptyInventoryProvider provider);
-
-    /**
-     * Sets the file handler, which saves to and loads from files.
-     * 
-     * @param newHandler
-     *            The new file handler.
-     */
-    void setFileHandler(BetterEnderFileHandler newHandler);
-
-    /**
-     * Sets the save and load system that should be used.
-     * 
-     * @param saveAndLoadSystem
-     *            The save and load system that should be used.
-     */
-    void setSaveAndLoadSystem(BetterEnderIOLogic saveAndLoadSystem);
 
     /**
      * Logs an error. Message will be prefixed with the plugin name between

@@ -26,7 +26,6 @@ import nl.rutgerkok.betterenderchest.importers.WorldInventoriesImporter;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.BetterEnderFileCache;
 import nl.rutgerkok.betterenderchest.io.BetterEnderFileHandler;
-import nl.rutgerkok.betterenderchest.io.BetterEnderIOLogic;
 import nl.rutgerkok.betterenderchest.io.SaveAndLoadError;
 import nl.rutgerkok.betterenderchest.io.SaveLocation;
 import nl.rutgerkok.betterenderchest.mysql.BetterEnderSQLCache;
@@ -35,7 +34,6 @@ import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.nms.SimpleNMSHandler;
 import nl.rutgerkok.betterenderchest.registry.Registry;
 
-import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -85,7 +83,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private Registry<ProtectionBridge> protectionBridges = new Registry<ProtectionBridge>();
     private int rankUpgrades;
     private SaveAndLoadError saveAndLoadError;
-    private BetterEnderIOLogic saveAndLoadSystem;
 
     @Override
     public synchronized boolean canSaveAndLoad() {
@@ -205,11 +202,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public Registry<InventoryImporter> getInventoryImporters() {
         return importers;
-    }
-
-    @Override
-    public BetterEnderIOLogic getLoadAndImportSystem() {
-        return saveAndLoadSystem;
     }
 
     @Override
@@ -454,23 +446,15 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
      */
     private void loadIOServices() {
         // File handlers
-        if (fileHandler == null) {
-            fileHandler = new BetterEnderFileHandler(this);
-        }
-
-        // Save and load system
-        if (saveAndLoadSystem == null) {
-            saveAndLoadSystem = new BetterEnderIOLogic(this);
-        }
+        fileHandler = new BetterEnderFileHandler(this);
 
         // Chests storage
-        if (enderCache == null) {
-            if (databaseSettings.isEnabled()) {
-                enderCache = new BetterEnderSQLCache(this);
-            } else {
-                enderCache = new BetterEnderFileCache(this);
-            }
+        if (databaseSettings.isEnabled()) {
+            enderCache = new BetterEnderSQLCache(this);
+        } else {
+            enderCache = new BetterEnderFileCache(this);
         }
+
     }
 
     @Override
@@ -586,60 +570,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     }
 
     @Override
-    public void setChestCache(BetterEnderCache cache) {
-        enderCache = cache;
-    }
-
-    @Override
-    public void setChestMaterial(Material material) {
-        this.chestMaterial = material;
-    }
-
-    @Override
-    public void setChestOpener(ChestOpener chestOpener) throws IllegalArgumentException {
-        Validate.notNull(chestOpener, "chestOpener is null");
-        this.chestOpener = chestOpener;
-    }
-
-    @Override
-    public void setChestSizes(BetterEnderChestSizes sizes) {
-        chestSizes = sizes;
-    }
-
-    @Override
-    public void setCommandHandler(BetterEnderCommandManager commandManager) {
-        this.commandManager = commandManager;
-    }
-
-    @Override
-    public void setCompatibilityMode(boolean newCompatibilityMode) {
-        compatibilityMode = newCompatibilityMode;
-    }
-
-    @Override
-    public void setDatabaseSettings(DatabaseSettings settings) throws IllegalStateException {
-        if (this.databaseSettings != null) {
-            throw new IllegalStateException("Database settings have already been set");
-        }
-        this.databaseSettings = settings;
-    }
-
-    @Override
-    public void setEmtpyInventoryProvider(EmptyInventoryProvider provider) {
-        this.emptyInventoryProvider = provider;
-    }
-
-    @Override
-    public void setFileHandler(BetterEnderFileHandler newHandler) {
-        fileHandler = newHandler;
-    }
-
-    @Override
-    public void setSaveAndLoadSystem(BetterEnderIOLogic saveAndLoadSystem) {
-        this.saveAndLoadSystem = saveAndLoadSystem;
-    }
-
-    @Override
     public void severe(String message) {
         getLogger().severe(message);
     }
@@ -655,7 +585,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private void unloadIOServices() {
         enderCache.disable();
         fileHandler = null;
-        saveAndLoadSystem = null;
         enderCache = null;
     }
 

@@ -5,19 +5,19 @@ import java.io.IOException;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
+import nl.rutgerkok.betterenderchest.EmptyInventoryProvider;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.inventory.Inventory;
 
 /**
- * Represents a file format. If you aren't saving to a file, you can better
- * override {@link BetterEnderIOLogic} and/or {@link BetterEnderFileCache}.
+ * Various logic methods to load an Ender Chest from a file.
  * 
  */
 public class BetterEnderFileHandler {
-    private static final String EXTENSION = ".dat";
-    protected final BetterEnderChest plugin;
+    private final BetterEnderChest plugin;
+    public static final String EXTENSION = ".dat";
 
     public BetterEnderFileHandler(BetterEnderChest plugin) {
         this(plugin, true);
@@ -41,6 +41,98 @@ public class BetterEnderFileHandler {
     }
 
     /**
+     * Loads the inventory from various fallbacks. Use this when the inventory
+     * is not found where it should normally be (either the database or on
+     * disk).
+     * <p />
+     * The inventory will be imported. When there is nothing to be imported, the
+     * default chest will be returned. When there is no default chest, an empty
+     * chest will be returned. When an error occurs, an emtpy chest is returned.
+     * 
+     * @param chestOwner
+     *            The name of the inventory, must be lowercase.
+     * @param worldGroup
+     *            The group the inventory is in.
+     * @return The inventory. {@link BetterEnderInventoryHolder} will be the
+     *         holder of the inventory.
+     */
+    public Inventory getFallbackInventory(ChestOwner chestOwner, WorldGroup worldGroup) {
+        EmptyInventoryProvider emptyChests = plugin.getEmptyInventoryProvider();
+
+        // Try to import it from vanilla/some other plugin
+        try {
+            Inventory importedInventory = worldGroup.getInventoryImporter().importInventory(chestOwner, worldGroup, plugin);
+            if (importedInventory != null) {
+                // Make sure that the inventory is saved
+                ((BetterEnderInventoryHolder) importedInventory.getHolder()).setHasUnsavedChanges(true);
+                return importedInventory;
+            }
+        } catch (IOException e) {
+            plugin.severe("Could not import inventory " + chestOwner, e);
+
+            // Return an empty inventory. Loading the default chest again
+            // could cause issues when someone
+            // finds a way to constantly break this plugin.
+            return emptyChests.loadEmptyInventory(chestOwner, worldGroup);
+        }
+
+        // Try to load the default inventory
+        if (inventoryFileExists(plugin.getChestOwners().defaultChest(), worldGroup)) {
+            try {
+                Inventory inventory = loadInventory0(plugin.getChestOwners().defaultChest(), worldGroup);
+                // Make sure that the inventory is saved
+                BetterEnderInventoryHolder.of(inventory).setHasUnsavedChanges(true);
+                return inventory;
+            } catch (IOException e) {
+                plugin.severe("Failed to load default chest for " + chestOwner, e);
+                return emptyChests.loadEmptyInventory(chestOwner, worldGroup);
+            }
+        }
+
+        // Just return an empty chest
+        return emptyChests.loadEmptyInventory(chestOwner, worldGroup);
+    }
+
+    /**
+     * Load the inventory. It will automatically try to load it from a file, or
+     * import it from another plugin, or use the default chest.
+     * 
+     * @param chestOwner
+     *            Owner of the inventory.
+     * @param worldGroup
+     *            Name of the world group the inventory is in.
+     * @return The Inventory. {@link BetterEnderInventoryHolder} will be the
+     *         holder of the inventory.
+     */
+    public Inventory loadInventory(ChestOwner chestOwner, WorldGroup worldGroup) {
+        // Try to load it from a file
+        if (inventoryFileExists(chestOwner, worldGroup)) {
+            try {
+                return loadInventory0(chestOwner, worldGroup);
+            } catch (IOException e) {
+                plugin.severe("Failed to load chest of " + chestOwner.getDisplayName(), e);
+                plugin.disableSaveAndLoad("Failed to load chest of " + chestOwner.getDisplayName(), e);
+                return plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup);
+            }
+        }
+
+        // Use various fallback methods
+        return getFallbackInventory(chestOwner, worldGroup);
+    }
+    
+    /**
+     * Tries to load an inventory from the file. Doesn't use fallback methods. Assumes that the file exists.
+     * @param chestOwner Owner of the chest.
+     * @param worldGroup Group the chest is in.
+     * @return The invenotory.
+     * @throws IOException If the inventory doesn't exist on disk, or is corrupted.
+     */
+    private Inventory loadInventory0(ChestOwner chestOwner, WorldGroup worldGroup) throws IOException {
+        File file = getChestFile(chestOwner, worldGroup);
+        return plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventoryFromFile(file, chestOwner, worldGroup, "Inventory");
+    }
+
+    /**
      * Returns whether the specified inventory exists on disk.
      * 
      * @param chestOwner
@@ -49,7 +141,7 @@ public class BetterEnderFileHandler {
      *            The group to search in.
      * @return Whether the inventory exists.
      */
-    public boolean exists(ChestOwner chestOwner, WorldGroup group) {
+    public boolean inventoryFileExists(ChestOwner chestOwner, WorldGroup group) {
         return getChestFile(chestOwner, group).exists();
     }
 
@@ -64,26 +156,6 @@ public class BetterEnderFileHandler {
     }
 
     /**
-     * Loads the specified inventory from disk. Things like the number of rows
-     * and the number of disabled slots shyould be loaded, but guessed if not
-     * found in the file.
-     * 
-     * @param chestOwner
-     *            The owner of the inventory.
-     * @param group
-     *            The group of the inventory.
-     * @return The inventory.
-     * @throws IOException
-     *             If the inventory doesn't exist (see
-     *             {@link #exists(String, WorldGroup)}) or if the file is
-     *             corrupted/unreadable.
-     */
-    public Inventory load(ChestOwner chestOwner, WorldGroup group) throws IOException {
-        File file = getChestFile(chestOwner, group);
-        return plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventoryFromFile(file, chestOwner, group, "Inventory");
-    }
-
-    /**
      * Saves an inventory to a file. It should cache things like the number of
      * rows, the number of disabled slots and the inventory name. The holder of
      * this inventory name is always a {@link BetterEnderInventoryHolder}.
@@ -95,7 +167,7 @@ public class BetterEnderFileHandler {
      * @param group
      *            The group the inventory is in.
      */
-    public void save(Inventory inventory, ChestOwner chestOwner, WorldGroup group) throws IOException {
+    public void saveInventory(Inventory inventory, ChestOwner chestOwner, WorldGroup group) throws IOException {
         File file = getChestFile(chestOwner, group);
         plugin.getNMSHandlers().getSelectedRegistration().saveInventoryToFile(file, inventory);
     }

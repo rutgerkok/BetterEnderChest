@@ -26,7 +26,7 @@ public class BetterEnderFlatFileImporter extends InventoryImporter {
 
     @Override
     public Inventory importInventory(ChestOwner chestOwner, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
-        return plugin.getFileHandler().load(chestOwner, worldGroup);
+        return plugin.getFileHandler().loadInventory(chestOwner, worldGroup);
     }
 
     @Override
