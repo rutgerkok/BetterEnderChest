@@ -33,7 +33,7 @@ import nl.rutgerkok.betterenderchest.mysql.DatabaseSettings;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.nms.SimpleNMSHandler;
 import nl.rutgerkok.betterenderchest.registry.Registry;
-import nl.rutgerkok.betterenderchest.uuidconversion.FileUUIDConverter;
+import nl.rutgerkok.betterenderchest.uuidconversion.BetterEnderUUIDConverter;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -75,7 +75,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private EmptyInventoryProvider emptyInventoryProvider;
     private BetterEnderCache enderCache;
     private BetterEnderFileHandler fileHandler;
-    private FileUUIDConverter fileUuidConverter;
     private BetterEnderWorldGroupManager groups;
     private Registry<InventoryImporter> importers = new Registry<InventoryImporter>();
     private File legacyChestSaveLocation;
@@ -85,6 +84,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private Registry<ProtectionBridge> protectionBridges = new Registry<ProtectionBridge>();
     private int rankUpgrades;
     private SaveAndLoadError saveAndLoadError;
+    private BetterEnderUUIDConverter uuidConverter;
 
     @Override
     public synchronized boolean canSaveAndLoad() {
@@ -209,6 +209,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public Registry<InventoryImporter> getInventoryImporters() {
         return importers;
+    }
+
+    @Override
+    public File getLegacyChestSaveLocation() {
+        return legacyChestSaveLocation;
     }
 
     @Override
@@ -463,8 +468,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         }
 
         // Converter
-        fileUuidConverter = new FileUUIDConverter(this, legacyChestSaveLocation);
-        fileUuidConverter.startConversion();
+        uuidConverter = enderCache.getUUIDConverter();
+        uuidConverter.startConversion();
     }
 
     @Override
@@ -594,8 +599,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         enderCache.disable();
         fileHandler = null;
         enderCache = null;
-        fileUuidConverter.stopConversion();
-        fileUuidConverter = null;
+        uuidConverter.stopConversion();
+        uuidConverter = null;
     }
 
     @Override

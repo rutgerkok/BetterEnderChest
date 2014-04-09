@@ -3,6 +3,7 @@ package nl.rutgerkok.betterenderchest.io;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.betterenderchest.uuidconversion.BetterEnderUUIDConverter;
 
 import org.bukkit.inventory.Inventory;
 
@@ -41,6 +42,13 @@ public interface BetterEnderCache {
      */
     @Deprecated
     void getInventory(String inventoryName, WorldGroup worldGroup, Consumer<Inventory> callback);
+
+    /**
+     * Gets the converter that will convert everything from names to UUIDs.
+     * 
+     * @return The converter.
+     */
+    BetterEnderUUIDConverter getUUIDConverter();
 
     /**
      * Saves all inventories (causing some lag), and unloads the ones that are

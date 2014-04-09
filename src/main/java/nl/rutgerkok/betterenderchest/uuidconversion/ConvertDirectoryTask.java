@@ -20,10 +20,10 @@ class ConvertDirectoryTask extends ConvertTask {
     private final File newChestsDir;
     private final File oldChestsDir;
 
-    ConvertDirectoryTask(BetterEnderChest plugin, File legacyChestSaveLocation, WorldGroup worldGroup) {
-        super(plugin);
+    ConvertDirectoryTask(BetterEnderChest plugin, WorldGroup worldGroup) {
+        super(plugin, worldGroup);
         this.extension = BetterEnderFileHandler.EXTENSION;
-        this.oldChestsDir = plugin.getFileHandler().getChestDirectory(legacyChestSaveLocation, worldGroup);
+        this.oldChestsDir = plugin.getFileHandler().getChestDirectory(plugin.getLegacyChestSaveLocation(), worldGroup);
         this.newChestsDir = plugin.getFileHandler().getChestDirectory(plugin.getChestSaveLocation(), worldGroup);
     }
 
@@ -38,22 +38,6 @@ class ConvertDirectoryTask extends ConvertTask {
             File newFile = new File(newChestsDir, uuid + extension);
 
             moveFile(oldFile, newFile);
-        }
-    }
-
-    /**
-     * Moves a single file. Keeps the last modified date the same.
-     * 
-     * @param oldFile
-     *            The old file.
-     * @param newFile
-     *            New location of the file.
-     * @throws IOException
-     *             If renaming failed.
-     */
-    private void moveFile(File oldFile, File newFile) throws IOException {
-        if (!oldFile.renameTo(newFile)) {
-            throw new IOException("Failed to move " + oldFile.getAbsolutePath() + " to " + newFile.getAbsolutePath());
         }
     }
 
@@ -79,18 +63,20 @@ class ConvertDirectoryTask extends ConvertTask {
         return playerNames;
     }
 
-    @Override
-    protected void startup() throws IOException {
-        // Unused world groups might have no folder
-        if (!oldChestsDir.exists()) {
-            return;
+    /**
+     * Moves a single file. Keeps the last modified date the same.
+     * 
+     * @param oldFile
+     *            The old file.
+     * @param newFile
+     *            New location of the file.
+     * @throws IOException
+     *             If renaming failed.
+     */
+    private void moveFile(File oldFile, File newFile) throws IOException {
+        if (!oldFile.renameTo(newFile)) {
+            throw new IOException("Failed to move " + oldFile.getAbsolutePath() + " to " + newFile.getAbsolutePath());
         }
-
-        newChestsDir.mkdirs();
-
-        // Move over the public and default chests
-        moveSpecialChest(plugin.getChestOwners().publicChest());
-        moveSpecialChest(plugin.getChestOwners().defaultChest());
     }
 
     /**
@@ -112,6 +98,20 @@ class ConvertDirectoryTask extends ConvertTask {
         if (oldChestFile.exists()) {
             moveFile(oldChestFile, new File(newChestsDir, chestOwner.getSaveFileName() + extension));
         }
+    }
+
+    @Override
+    protected void startup() throws IOException {
+        // Unused world groups might have no folder
+        if (!oldChestsDir.exists()) {
+            return;
+        }
+
+        newChestsDir.mkdirs();
+
+        // Move over the public and default chests
+        moveSpecialChest(plugin.getChestOwners().publicChest());
+        moveSpecialChest(plugin.getChestOwners().defaultChest());
     }
 
 }

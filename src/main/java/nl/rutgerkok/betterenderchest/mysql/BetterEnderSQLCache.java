@@ -15,6 +15,8 @@ import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.io.AbstractEnderCache;
 import nl.rutgerkok.betterenderchest.io.Consumer;
+import nl.rutgerkok.betterenderchest.uuidconversion.BetterEnderUUIDConverter;
+import nl.rutgerkok.betterenderchest.uuidconversion.MySQLUUIDConverter;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
@@ -104,7 +106,7 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
                 if (holder.hasUnsavedChanges()) {
                     plugin.debug("Adding chest of " + holder.getChestOwner().getDisplayName() + " to save queue");
                     // Add to save queue
-                    saveQueue.add(new SaveEntry(false, plugin, groupEntry.getKey(), inventory));
+                    saveQueue.add(new SaveEntry(plugin, inventory));
                     // Chest in its current state will be saved
                     holder.setHasUnsavedChanges(false);
                     // Check if more chests can be saved
@@ -181,6 +183,11 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
         });
     }
 
+    @Override
+    public BetterEnderUUIDConverter getUUIDConverter() {
+        return new MySQLUUIDConverter(plugin, sqlHandler);
+    }
+
     /**
      * Intended to be called from another thread.
      */
@@ -195,7 +202,7 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
             while (!saveQueue.isEmpty()) {
                 SaveEntry entry = saveQueue.poll();
                 try {
-                    sqlHandler.updateChest(entry.getChestOwner(), entry.getWorldGroup(), entry.getChestJson());
+                    sqlHandler.updateChest(entry);
                 } catch (SQLException e) {
                     plugin.severe("Failed to save chest", e);
                     plugin.disableSaveAndLoad("Failed to save the chest of " + entry.getChestOwner().getDisplayName() + " to the database", e);
@@ -224,12 +231,10 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
 
         synchronized (savingLock) {
             saveQueue.clear();
-            for (Entry<WorldGroup, Map<ChestOwner, Inventory>> chestGroup : cachedInventories.entrySet()) {
-                WorldGroup currentGroup = chestGroup.getKey();
-                for (Entry<ChestOwner, Inventory> entry : chestGroup.getValue().entrySet()) {
+            for (Map<ChestOwner, Inventory> chestGroup : cachedInventories.values()) {
+                for (Inventory inventory : chestGroup.values()) {
                     // This is executed for each chest
 
-                    Inventory inventory = entry.getValue();
                     BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
                     // Ignore chests with no unsaved changes
                     if (!holder.hasUnsavedChanges()) {
@@ -237,7 +242,7 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
                     }
 
                     try {
-                        sqlHandler.updateChest(entry.getKey(), currentGroup, SaveEntry.toJsonString(plugin, inventory));
+                        sqlHandler.updateChest(new SaveEntry(plugin, inventory));
                         // Chest in its current state was just saved
                         holder.setHasUnsavedChanges(false);
                     } catch (IOException e) {
@@ -266,7 +271,7 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
             if (inventory != null) {
                 synchronized (savingLock) {
                     try {
-                        sqlHandler.updateChest(chestOwner, group, SaveEntry.toJsonString(plugin, inventory));
+                        sqlHandler.updateChest(new SaveEntry(plugin, inventory));
 
                         // Chest in its current state was just saved
                         BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
@@ -279,7 +284,6 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
                 }
             }
         }
-
     }
 
     @Override

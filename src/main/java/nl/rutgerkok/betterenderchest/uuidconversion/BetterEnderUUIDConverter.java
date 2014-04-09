@@ -11,14 +11,77 @@ import org.json.simple.parser.ParseException;
 
 public abstract class BetterEnderUUIDConverter {
     protected static final int BATCH_SIZE = 1000;
-    protected ConvertTask currentTask;
 
+    // Access must be synchronized
+    private ConvertTask currentTask;
     protected final BetterEnderChest plugin;
-    protected boolean stopRequested;
+    // Access must be synchronized
+    private boolean stopRequested;
 
     public BetterEnderUUIDConverter(BetterEnderChest plugin) {
         this.plugin = plugin;
     }
+
+    /**
+     * Called after all groups have been converted. The method will be called on
+     * the same thread as {@link #getConvertTask(WorldGroup)}. No more calls to
+     * {@link #getConvertTask(WorldGroup)} will be made after calling this
+     * method.
+     */
+    protected void cleanup() {
+        // Empty!
+    }
+
+    /**
+     * Converts all given worlds groups to the UUID format. Must not be called
+     * on the main server thread.
+     * 
+     * @param groups
+     *            The groups to convert.
+     * @throws InterruptedException
+     *             When {@link #stopConversion()} is called.
+     * @throws ParseException
+     *             When the received JSON is invalild.
+     * @throws IOException
+     *             When an IO error occurs.
+     */
+    private void convertWorldGroup(List<WorldGroup> groups) throws InterruptedException, ParseException, IOException {
+        for (WorldGroup worldGroup : groups) {
+            ConvertTask task = getConvertTask(worldGroup);
+            synchronized (this) {
+                if (stopRequested) {
+                    throw new InterruptedException();
+                }
+                currentTask = task;
+            }
+            task.convertAllBatches(BATCH_SIZE);
+        }
+        cleanup();
+    }
+
+    /**
+     * Gets the {@link ConvertTask} for the given {@link WorldGroup}. This task
+     * will be asked to convert everything for the given world group.
+     * 
+     * <p>
+     * This method will be called on any thread other than the main server
+     * thread. This method will be called some time after
+     * {@link #needsConversion()} was called.
+     * 
+     * @param worldGroup
+     *            The world group to convert. This group must be in the list
+     *            provided by {@link #needsConversion()}.
+     * @return A <code>ConvertTask</code> for the given world group.
+     */
+    protected abstract ConvertTask getConvertTask(WorldGroup worldGroup);
+
+    /**
+     * Gets all groups where chests need to be converted. This method will be
+     * called on the main server thread.
+     * 
+     * @return The list, which may be empty.
+     */
+    protected abstract List<WorldGroup> needsConversion();
 
     /**
      * The conversion process for all world groups. Must not be called on the
@@ -52,21 +115,22 @@ public abstract class BetterEnderUUIDConverter {
      * Tries to start the conversion process. If there old folder doesn't exist,
      * nothing is converted.
      */
-    public void startConversion() {
-        if (!needsConversion()) {
+    public final void startConversion() {
+        final List<WorldGroup> groups = needsConversion();
+        if (groups.isEmpty()) {
             // Nothing to convert :)
             return;
         }
 
+        // Disable saving and loading for now
         plugin.log("Converting everything from name to UUID. This process may take a while.");
         plugin.log("The server will still be usable while the Ender Chests are converted, Ender Chests just won't open.");
         Exception convertingException = new Exception("Converting to UUID files, may take a while");
-        convertingException.setStackTrace(new StackTraceElement[0]); // No
-                                                                     // stacktrace
-                                                                     // needed
+        // No stack trace needed
+        convertingException.setStackTrace(new StackTraceElement[0]);
         plugin.disableSaveAndLoad("Converting to UUID files, may take a while", convertingException);
 
-        final List<WorldGroup> groups = plugin.getWorldGroupManager().getGroups();
+        // Run conversion on another thread
         Bukkit.getScheduler().runTaskAsynchronously(plugin.getPlugin(), new Runnable() {
             @Override
             public void run() {
@@ -81,7 +145,7 @@ public abstract class BetterEnderUUIDConverter {
     /**
      * Tries to stop the chest conversion process.
      */
-    public synchronized void stopConversion() {
+    public final synchronized void stopConversion() {
         stopRequested = true;
 
         // This may or may not succeed, depending on when the stop method was
@@ -90,25 +154,4 @@ public abstract class BetterEnderUUIDConverter {
             currentTask.requestStop();
         }
     }
-
-    /**
-     * Gets whether chests need to be converted.
-     * 
-     * @return True if chests need to be converted, false otherwise.
-     */
-    protected abstract boolean needsConversion();
-
-    /**
-     * Converts all given worlds groups to the UUID format.
-     * 
-     * @param groups
-     *            The groups to convert.
-     * @throws InterruptedException
-     *             When {@link #stopConversion()} is called.
-     * @throws ParseException
-     *             When the received JSON is invalild.
-     * @throws IOException
-     *             When an IO error occurs.
-     */
-    protected abstract void convertWorldGroup(List<WorldGroup> groups) throws InterruptedException, ParseException, IOException;
 }

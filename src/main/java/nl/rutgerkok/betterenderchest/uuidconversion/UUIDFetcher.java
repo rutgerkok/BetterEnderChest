@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,8 +66,8 @@ public class UUIDFetcher implements Callable<Map<String, UUID>> {
 
     private final List<String> names;
 
-    public UUIDFetcher(List<String> names) {
-        this.names = ImmutableList.copyOf(names);
+    public UUIDFetcher(Collection<String> batch) {
+        this.names = ImmutableList.copyOf(batch);
     }
 
     public Map<String, UUID> call() throws IOException, ParseException {

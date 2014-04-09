@@ -1,32 +1,30 @@
 package nl.rutgerkok.betterenderchest.uuidconversion;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 
-import org.json.simple.parser.ParseException;
-
 public class FileUUIDConverter extends BetterEnderUUIDConverter {
-    private final File oldSaveLocation;
 
-    public FileUUIDConverter(BetterEnderChest plugin, File oldSaveLocation) {
+    public FileUUIDConverter(BetterEnderChest plugin) {
         super(plugin);
-        this.oldSaveLocation = oldSaveLocation;
     }
 
-    void cleanupFolders(File oldChestsDir) {
+    @Override
+    protected void cleanup() {
         // Check if directory is empty
-        if (!deleteEmptyDirectory(oldChestsDir)) {
+        File oldSaveLocation = plugin.getLegacyChestSaveLocation();
+        if (!deleteEmptyDirectory(oldSaveLocation)) {
             // This means that there were files left in the old directory
             plugin.warning("Some (chest) files could not be converted to UUIDs.");
-            File notConvertedDirectory = new File(oldChestsDir.getParentFile(), "chests_NOT_CONVERTED");
-            if (oldChestsDir.renameTo(notConvertedDirectory)) {
+            File notConvertedDirectory = new File(oldSaveLocation.getParentFile(), "chests_NOT_CONVERTED");
+            if (oldSaveLocation.renameTo(notConvertedDirectory)) {
                 plugin.log("You can find those files in the " + notConvertedDirectory.getAbsolutePath() + " directory.");
             } else {
-                plugin.warning("Those files are still in " + oldChestsDir.getAbsolutePath());
+                plugin.warning("Those files are still in " + oldSaveLocation.getAbsolutePath());
             }
         }
     }
@@ -57,22 +55,15 @@ public class FileUUIDConverter extends BetterEnderUUIDConverter {
     }
 
     @Override
-    protected void convertWorldGroup(List<WorldGroup> groups) throws InterruptedException, ParseException, IOException {
-        for (WorldGroup worldGroup : groups) {
-            ConvertTask task = new ConvertDirectoryTask(plugin, oldSaveLocation, worldGroup);
-            synchronized (this) {
-                if (stopRequested) {
-                    throw new InterruptedException();
-                }
-                currentTask = task;
-            }
-            task.convertAllBatches(BATCH_SIZE);
-        }
-        cleanupFolders(oldSaveLocation);
+    protected ConvertTask getConvertTask(WorldGroup worldGroup) {
+        return new ConvertDirectoryTask(plugin, worldGroup);
     }
 
     @Override
-    protected boolean needsConversion() {
-        return oldSaveLocation.exists();
+    protected List<WorldGroup> needsConversion() {
+        if (plugin.getLegacyChestSaveLocation().exists()) {
+            return plugin.getWorldGroupManager().getGroups();
+        }
+        return Collections.emptyList();
     }
 }

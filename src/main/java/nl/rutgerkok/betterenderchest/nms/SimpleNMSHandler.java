@@ -207,6 +207,13 @@ public class SimpleNMSHandler extends NMSHandler {
         }
     }
 
+    @Override
+    public String convertNBTBytesToJson(byte[] bytes) throws IOException {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+        NBTTagCompound baseTag = NBTCompressedStreamTools.a(inputStream);
+        return JSONObject.toJSONString(JSONSimpleTypes.toMap(baseTag));
+    }
+
     private int getDisabledSlots(NBTTagCompound baseTag) {
         if (baseTag.hasKey("DisabledSlots")) {
             // Load the number of disabled slots
@@ -252,13 +259,6 @@ public class SimpleNMSHandler extends NMSHandler {
         } catch (Throwable t) {
             return false;
         }
-    }
-
-    @Override
-    public Inventory loadNBTInventoryFromBytes(byte[] bytes, ChestOwner chestOwner, WorldGroup worldGroup) throws IOException {
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
-        NBTTagCompound baseTag = NBTCompressedStreamTools.a(inputStream);
-        return loadNBTInventoryFromTag(baseTag, chestOwner, worldGroup, "Inventory");
     }
 
     @Override

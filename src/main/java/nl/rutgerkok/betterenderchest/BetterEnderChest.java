@@ -213,6 +213,15 @@ public interface BetterEnderChest {
     Registry<InventoryImporter> getInventoryImporters();
 
     /**
+     * Gets the old save directory of the Ender Chests, from before the UUIDs
+     * were introduced. This method will cease to exist when conversion from
+     * names is removed.
+     * 
+     * @return The old save directory.
+     */
+    File getLegacyChestSaveLocation();
+
+    /**
      * Gets the NMS handlers where all things that bypass Bukkit are done.
      * Register your own NMS handlers here.
      * 

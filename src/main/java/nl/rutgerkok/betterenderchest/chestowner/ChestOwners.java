@@ -1,5 +1,7 @@
 package nl.rutgerkok.betterenderchest.chestowner;
 
+import java.util.UUID;
+
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.exception.InvalidOwnerException;
 import nl.rutgerkok.betterenderchest.io.Consumer;
@@ -48,7 +50,7 @@ public class ChestOwners {
             onSuccess.consume(defaultChest());
             return;
         }
-        
+
         // TODO Replace this with async lookup
         OfflinePlayer player = Bukkit.getOfflinePlayer(name);
         if (player.getUniqueId() == null) {
@@ -69,6 +71,20 @@ public class ChestOwners {
     // ^ It's just a display name, not actually used for saving
     public ChestOwner playerChest(OfflinePlayer player) {
         return new PlayerChestOwner(player.getName(), player.getUniqueId());
+    }
+
+    /**
+     * 
+     * Gets the {@link ChestOwner} belonging to the player.
+     * 
+     * @param playerName
+     *            Name of the player, for display purposes.
+     * @param uuid
+     *            UUID of the player, for storage purposes.
+     * @return The <code>ChestOwner</code> belonging to the player.
+     */
+    public ChestOwner playerChest(String playerName, UUID uuid) {
+        return new PlayerChestOwner(playerName, uuid);
     }
 
     /**

@@ -1,11 +1,12 @@
 package nl.rutgerkok.betterenderchest.uuidconversion;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.WorldGroup;
 
 import org.json.simple.parser.ParseException;
 
@@ -13,9 +14,11 @@ abstract class ConvertTask {
 
     protected final BetterEnderChest plugin;
     private volatile boolean stopRequested = false;
+    protected final WorldGroup worldGroup;
 
-    ConvertTask(BetterEnderChest plugin) {
+    ConvertTask(BetterEnderChest plugin, WorldGroup worldGroup) {
         this.plugin = plugin;
+        this.worldGroup = worldGroup;
     }
 
     /**
@@ -26,6 +29,18 @@ abstract class ConvertTask {
         if (stopRequested) {
             throw new InterruptedException();
         }
+    }
+
+    /**
+     * After all files were successfully moved, this method wull be called to
+     * cleanup any database tables/folders/etc. and check for unconverted
+     * entries.
+     * 
+     * @throws IOException
+     *             If an IO error occured.
+     */
+    protected void cleanup() throws IOException {
+        // Empty!
     }
 
     /**
@@ -53,24 +68,6 @@ abstract class ConvertTask {
     }
 
     /**
-     * After all files were successfully moved, this method wull be called to
-     * cleanup any database tables/folders/etc. and check for unconverted
-     * entries.
-     */
-    protected void cleanup() {
-        // Empty!
-    }
-
-    /**
-     * Does tasks that are needed before the conversion, like creating
-     * directories and moving over the public and default chest.
-     * 
-     * @throws IOException
-     *             If an IO error occurred.
-     */
-    protected abstract void startup() throws IOException;
-
-    /**
      * Converts a batch of users.
      * 
      * @param maxBatchSize
@@ -88,7 +85,7 @@ abstract class ConvertTask {
         // After each step, we check whether we have to stop
         checkStopRequested();
 
-        List<String> batch = getBatch(maxBatchSize);
+        Collection<String> batch = getBatch(maxBatchSize);
 
         checkStopRequested();
 
@@ -118,8 +115,10 @@ abstract class ConvertTask {
      *            Maximum amount of files to look up. The returned set must not
      *            be larger than this size.
      * @return The batch.
+     * @throws IOException
+     *             if something went wrong.
      */
-    protected abstract List<String> getBatch(int maxEntries);
+    protected abstract Collection<String> getBatch(int maxEntries) throws IOException;
 
     /**
      * Requests a stop.
@@ -127,5 +126,14 @@ abstract class ConvertTask {
     public void requestStop() {
         this.stopRequested = true;
     }
+
+    /**
+     * Does tasks that are needed before the conversion, like creating
+     * directories and moving over the public and default chest.
+     * 
+     * @throws IOException
+     *             If an IO error occurred.
+     */
+    protected abstract void startup() throws IOException;
 
 }

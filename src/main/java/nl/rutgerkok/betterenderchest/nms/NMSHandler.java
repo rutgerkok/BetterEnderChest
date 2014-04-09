@@ -26,33 +26,21 @@ public abstract class NMSHandler implements Registration {
      */
     public abstract void closeEnderChest(Location location);
 
+    /**
+     * Converts the given NBT bytes to a JSON-formatted string.
+     * 
+     * @param bytes
+     *            The bytes to convert.
+     * @throws IOException
+     *             If the byte array is corrupted.
+     * @return The JSON representation of the bytes.
+     */
+    public abstract String convertNBTBytesToJson(byte[] bytes) throws IOException;
+
     @Override
     public Priority getPriority() {
         return Priority.NORMAL;
     }
-
-    /**
-     * Loads a BetterEnderChest inventory from the NBT byte array. The inventory
-     * will have the specified name and will be loaded from the specified child
-     * tag (vanilla uses EnderItems and BeterEnderChest uses Inventory). It will
-     * also search for the chest size tag in the root of the file, but it should
-     * guess them if they are not provided.
-     * <p />
-     * It is not permitted to use another load format than NBT, as for example
-     * the vanilla importing process depends on it.
-     * 
-     * @param nbtFile
-     *            The array to load from.
-     * @param chestOwner
-     *            The owner of the inventory.
-     * @param worldGroup
-     *            The world group the inventory is in.
-     * @throws IOException
-     *             If the byte array is corrupted.
-     * @return The inventory. The holder of the inventory must be
-     *         BetterEnderInventoryHolder.
-     */
-    public abstract Inventory loadNBTInventoryFromBytes(byte[] nbtFile, ChestOwner chestOwner, WorldGroup worldGroup) throws IOException;
 
     /**
      * Loads a BetterEnderChest inventory from the NBT file. The inventory will

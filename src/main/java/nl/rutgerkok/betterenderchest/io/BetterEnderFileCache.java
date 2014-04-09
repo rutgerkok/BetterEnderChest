@@ -12,6 +12,8 @@ import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.AutoSave;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.betterenderchest.uuidconversion.BetterEnderUUIDConverter;
+import nl.rutgerkok.betterenderchest.uuidconversion.FileUUIDConverter;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
@@ -169,6 +171,11 @@ public class BetterEnderFileCache extends AbstractEnderCache {
     public void getInventory(ChestOwner chestOwner, WorldGroup worldGroup, Consumer<Inventory> callback) {
         // We're not async, so return immediatly.
         callback.consume(getInventory(chestOwner, worldGroup));
+    }
+
+    @Override
+    public BetterEnderUUIDConverter getUUIDConverter() {
+        return new FileUUIDConverter(plugin);
     }
 
     @Override

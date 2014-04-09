@@ -6,7 +6,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import nl.rutgerkok.betterenderchest.BetterEnderWorldGroupManager;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
@@ -15,6 +21,8 @@ import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
  * 
  */
 public class SQLHandler {
+    private static final String LEGACY_TABLE_NAME_PREFIX = "bec_chests_";
+    private static final String TABLE_NAME_PREFIX = "bec_chestdata_";
     private final Connection connection;
 
     public SQLHandler(DatabaseSettings settings) throws SQLException {
@@ -32,24 +40,61 @@ public class SQLHandler {
     /**
      * Adds a chest to the database.
      * 
-     * @param chestOwner
-     *            The owner of the inventory.
-     * @param group
-     *            The group of the inventory.
-     * @param jsonString
-     *            The raw bytes of the chest.
+     * @param saveEntry
+     *            Entries to save.
      * @throws SQLException
-     *             If something went wrong.
+     *             If something went wrong. For example, the chest already
+     *             exists.
      */
-    private void addChest(ChestOwner chestOwner, WorldGroup group, String jsonString) throws SQLException {
+    private void addChest(SaveEntry saveEntry) throws SQLException {
         PreparedStatement statement = null;
         try {
             // New chest, insert in database
-            String query = "INSERT INTO `" + getTableName(group) + "` (`chest_owner`, `chest_data`) ";
+            String query = "INSERT INTO `" + getTableName(saveEntry.getWorldGroup()) + "` (`chest_owner`, `chest_data`) ";
             query += "VALUES (?, ?)";
             statement = connection.prepareStatement(query);
-            statement.setString(1, chestOwner.getSaveFileName());
-            statement.setString(2, jsonString);
+            statement.setString(1, saveEntry.getChestOwner().getSaveFileName());
+            statement.setString(2, saveEntry.getChestJson());
+            statement.executeUpdate();
+        } finally {
+            if (statement != null) {
+                statement.close();
+            }
+        }
+    }
+
+    /**
+     * Adds all chests.
+     * 
+     * @param saveEntries
+     *            The chests to add. All chests must be in the same WorldGroup.
+     * @throws SQLException
+     *             When something went wrong.
+     */
+    public void addChests(List<SaveEntry> saveEntries) throws SQLException {
+        if (saveEntries.size() == 0) {
+            return;
+        }
+
+        PreparedStatement statement = null;
+        try {
+            // Build query
+            StringBuilder query = new StringBuilder();
+            query.append("INSERT INTO `").append(getTableName(saveEntries.get(0).getWorldGroup()));
+            query.append("` (`chest_owner`, `chest_data`) VALUES (?, ?)");
+            for (int i = 1; i < saveEntries.size(); i++) {
+                query.append(", (?, ?) ");
+            }
+            statement = connection.prepareStatement(query.toString());
+
+            // Set parameters
+            for (int i = 0; i < saveEntries.size(); i++) {
+                SaveEntry saveEntry = saveEntries.get(i);
+                statement.setString(i * 2 + 1, saveEntry.getChestOwner().getSaveFileName());
+                statement.setString(i * 2 + 2, saveEntry.getChestJson());
+            }
+
+            // Excecute
             statement.executeUpdate();
         } finally {
             if (statement != null) {
@@ -64,7 +109,7 @@ public class SQLHandler {
      * @throws SQLException
      *             If something went wrong.
      */
-    public void closeConnection() throws SQLException {
+    void closeConnection() throws SQLException {
         connection.close();
     }
 
@@ -77,7 +122,7 @@ public class SQLHandler {
      * @throws SQLException
      *             If somehting went wrong.
      */
-    public void createGroupTable(WorldGroup group) throws SQLException {
+    void createGroupTable(WorldGroup group) throws SQLException {
         Statement statement = connection.createStatement();
         try {
             String query = "CREATE TABLE IF NOT EXISTS `" + getTableName(group) + "` ("
@@ -90,8 +135,94 @@ public class SQLHandler {
         }
     }
 
-    protected String getTableName(WorldGroup group) {
-        return "bec_chestdata_" + group.getGroupName();
+    /**
+     * Deletes the legacy chests with the given names. Names must be lowercase.
+     * 
+     * @param worldGroup
+     *            The group the chests are in.
+     * @param chestNames
+     *            The names of the chests.
+     * @throws SQLException
+     *             If something went wrong.
+     */
+    public void deleteLegacyChests(WorldGroup worldGroup, Collection<String> chestNames) throws SQLException {
+        if (chestNames.isEmpty()) {
+            return;
+        }
+        PreparedStatement statement = null;
+        try {
+            // Build query
+            StringBuilder query = new StringBuilder();
+            query.append("DELETE FROM `" + getLegacyTableName(worldGroup) + "` ");
+            query.append("WHERE `chest_owner` IN (?");
+            for (int i = 1; i < chestNames.size(); i++) {
+                query.append(", ?");
+            }
+            query.append(")");
+
+            // Set parameters
+            statement = connection.prepareStatement(query.toString());
+            int i = 1;
+            for (String chestName : chestNames) {
+                statement.setString(i, chestName);
+                i++;
+            }
+
+            statement.executeUpdate();
+        } finally {
+            if (statement != null) {
+                statement.close();
+            }
+        }
+    }
+
+    /**
+     * Drops the legacy table for the given world group.
+     * 
+     * @param worldGroup
+     *            The group to drop the legacy table for.
+     * @return Whether the table was dropped.
+     * @throws SQLException
+     *             If the SQL was invalid, or the connection closed.
+     */
+    public boolean dropLegacyTable(WorldGroup worldGroup) throws SQLException {
+        return connection.createStatement().execute("DROP TABLE `" + this.getLegacyTableName(worldGroup) + "`");
+    }
+
+    private String getLegacyTableName(WorldGroup group) {
+        return LEGACY_TABLE_NAME_PREFIX + group.getGroupName();
+    }
+
+    /**
+     * Gets all legacy world groups that still need conversion to the new
+     * format.
+     * 
+     * @param groups
+     *            The group manager.
+     * @return All legacy world groups. List may be empty if no conversion is
+     *         needed.
+     * @throws SQLException
+     *             If something went wrong.
+     */
+    public List<WorldGroup> getLegacyTables(BetterEnderWorldGroupManager groups) throws SQLException {
+        ResultSet resultSet = connection.createStatement().executeQuery("SHOW TABLES");
+
+        List<WorldGroup> worldGroups = new ArrayList<WorldGroup>();
+        while (resultSet.next()) {
+            String tableName = resultSet.getString(1);
+            if (tableName.startsWith(LEGACY_TABLE_NAME_PREFIX)) {
+                String groupName = tableName.substring(LEGACY_TABLE_NAME_PREFIX.length());
+                WorldGroup worldGroup = groups.getGroupByGroupName(groupName);
+                if (worldGroup != null) {
+                    worldGroups.add(worldGroup);
+                }
+            }
+        }
+        return worldGroups;
+    }
+
+    private String getTableName(WorldGroup group) {
+        return TABLE_NAME_PREFIX + group.getGroupName();
     }
 
     /**
@@ -130,27 +261,53 @@ public class SQLHandler {
     }
 
     /**
-     * Saves a chest to the database. First the UPDATE query is tried, if
-     * nothing has been updated, the INSERT query is tried.
+     * Gets the data for the specified number of chests, encoded in the legacy
+     * format.
      * 
-     * @param chestOwner
-     *            The owner of the chest.
+     * @param numberOfChests
+     *            The number of chests to fetch at most.
      * @param group
-     *            The group the chest belongs to.
-     * @param jsonString
-     *            The raw data of the chest.
+     *            The group the chests are in.
+     * @return A map with the chests.
      * @throws SQLException
      *             If something went wrong.
      */
-    public void updateChest(ChestOwner chestOwner, WorldGroup group, String jsonString) throws SQLException {
+    public Map<String, byte[]> loadLegacyChests(int numberOfChests, WorldGroup group) throws SQLException {
+        Map<String, byte[]> chestData = new HashMap<String, byte[]>();
+        ResultSet result = null;
+        try {
+            String query = "SELECT `chest_owner`, `chest_data` FROM `" + getLegacyTableName(group);
+            query += "` LIMIT 0, " + numberOfChests;
+            result = connection.createStatement().executeQuery(query);
+            while (result.next()) {
+                chestData.put(result.getString(1).toLowerCase(), result.getBytes(2));
+            }
+        } finally {
+            if (result != null) {
+                result.close();
+            }
+        }
+        return chestData;
+    }
+
+    /**
+     * Saves a chest to the database. First the UPDATE query is tried, if
+     * nothing has been updated, the INSERT query is tried.
+     * 
+     * @param saveEntry
+     *            The chest to save.
+     * @throws SQLException
+     *             If something went wrong.
+     */
+    public void updateChest(SaveEntry saveEntry) throws SQLException {
         PreparedStatement statement = null;
         boolean performInsert = false;
         try {
             // Existing chest, update row
-            String query = "UPDATE `" + getTableName(group) + "` SET `chest_data` = ? WHERE `chest_owner` = ?";
+            String query = "UPDATE `" + getTableName(saveEntry.getWorldGroup()) + "` SET `chest_data` = ? WHERE `chest_owner` = ?";
             statement = connection.prepareStatement(query);
-            statement.setString(1, jsonString);
-            statement.setString(2, chestOwner.getSaveFileName());
+            statement.setString(1, saveEntry.getChestJson());
+            statement.setString(2, saveEntry.getChestOwner().getSaveFileName());
             int changedRows = statement.executeUpdate();
             if (changedRows == 0) {
                 // Chest doesn't exist yet
@@ -163,7 +320,7 @@ public class SQLHandler {
         }
 
         if (performInsert) {
-            addChest(chestOwner, group, jsonString);
+            addChest(saveEntry);
         }
     }
 }
