@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
@@ -36,12 +35,12 @@ public class ConvertMySQLTask extends ConvertTask {
     }
 
     @Override
-    protected void convertFiles(Map<String, UUID> toConvert) throws IOException {
+    protected void convertFiles(Map<String, ChestOwner> toConvert) throws IOException {
         NMSHandler nmsHandler = plugin.getNMSHandlers().getSelectedRegistration();
 
         // Convert to chest entries
         List<SaveEntry> toSave = new ArrayList<SaveEntry>(toConvert.size());
-        for (Entry<String, UUID> chestEntry : toConvert.entrySet()) {
+        for (Entry<String, ChestOwner> chestEntry : toConvert.entrySet()) {
             String ownerName = chestEntry.getKey();
             byte[] chestData = chests.get(ownerName.toLowerCase());
             if (chestData == null) {
@@ -49,8 +48,7 @@ public class ConvertMySQLTask extends ConvertTask {
                 continue;
             }
             String jsonString = nmsHandler.convertNBTBytesToJson(chestData);
-            UUID uuid = toConvert.get(ownerName);
-            ChestOwner chestOwner = plugin.getChestOwners().playerChest(ownerName, uuid);
+            ChestOwner chestOwner = chestEntry.getValue();
             toSave.add(new SaveEntry(chestOwner, worldGroup, jsonString));
         }
 
@@ -66,6 +64,7 @@ public class ConvertMySQLTask extends ConvertTask {
     @Override
     protected Collection<String> getBatch(int maxEntries) throws IOException {
         try {
+            // Saves chest data in this class
             chests = sqlHandler.loadLegacyChests(maxEntries, worldGroup);
             return chests.keySet();
         } catch (SQLException e) {
@@ -75,7 +74,7 @@ public class ConvertMySQLTask extends ConvertTask {
 
     @Override
     protected void startup() throws IOException {
-
+        // Empty!
     }
 
 }

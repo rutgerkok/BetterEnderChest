@@ -3,10 +3,10 @@ package nl.rutgerkok.betterenderchest.uuidconversion;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
-import java.util.UUID;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.json.simple.parser.ParseException;
 
@@ -89,7 +89,7 @@ abstract class ConvertTask {
 
         checkStopRequested();
 
-        Map<String, UUID> toConvert = new UUIDFetcher(batch).call();
+        Map<String, ChestOwner> toConvert = new UUIDFetcher(plugin, batch).call();
 
         checkStopRequested();
 
@@ -106,7 +106,7 @@ abstract class ConvertTask {
      * @throws IOException
      *             If the file could not be converted.
      */
-    protected abstract void convertFiles(Map<String, UUID> toConvert) throws IOException;
+    protected abstract void convertFiles(Map<String, ChestOwner> toConvert) throws IOException;
 
     /**
      * Gets a batch of files names to look up.

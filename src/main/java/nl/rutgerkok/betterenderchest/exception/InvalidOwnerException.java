@@ -11,7 +11,9 @@ public class InvalidOwnerException extends Exception {
 
     /**
      * Creates a new InvalidOwnerException.
-     * @param ownerName Name of the person that was not found.
+     * 
+     * @param ownerName
+     *            Name of the person that was not found.
      */
     public InvalidOwnerException(String ownerName) {
         Validate.notNull(ownerName, "chestOwner may not be null");

@@ -2,7 +2,8 @@
  * UUID fetcher by Nate Mortensen.
  * https://gist.github.com/evilmidget38/df8dcd7855937e9d1e1f
  * 
- * Modified by BetterEnderChest to throw less generic exceptions.
+ * Modified by BetterEnderChest to throw less generic exceptions and to return
+ * ChestOwner instead of UUID.
  */
 package nl.rutgerkok.betterenderchest.uuidconversion;
 
@@ -19,15 +20,16 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.google.common.collect.ImmutableList;
-
-public class UUIDFetcher implements Callable<Map<String, UUID>> {
+public class UUIDFetcher implements Callable<Map<String, ChestOwner>> {
     private static final String AGENT = "minecraft";
     private static final int MAX_SEARCH = 100;
     private static final String PROFILE_URL = "https://api.mojang.com/profiles/page/";
@@ -65,13 +67,27 @@ public class UUIDFetcher implements Callable<Map<String, UUID>> {
     private final JSONParser jsonParser = new JSONParser();
 
     private final List<String> names;
+    private final BetterEnderChest plugin;
+    private final Map<String, ChestOwner> specialChests;
 
-    public UUIDFetcher(Collection<String> batch) {
-        this.names = ImmutableList.copyOf(batch);
+    @SuppressWarnings("deprecation")
+    public UUIDFetcher(BetterEnderChest plugin, Collection<String> batch) {
+        this.plugin = plugin;
+
+        names = new ArrayList<String>(batch);
+
+        // Move over special chests early
+        specialChests = new HashMap<String, ChestOwner>();
+        if (names.remove(BetterEnderChest.PUBLIC_CHEST_NAME)) {
+            specialChests.put(BetterEnderChest.PUBLIC_CHEST_NAME, plugin.getChestOwners().publicChest());
+        }
+        if (names.remove(BetterEnderChest.DEFAULT_CHEST_NAME)) {
+            specialChests.put(BetterEnderChest.DEFAULT_CHEST_NAME, plugin.getChestOwners().defaultChest());
+        }
     }
 
-    public Map<String, UUID> call() throws IOException, ParseException {
-        Map<String, UUID> uuidMap = new HashMap<String, UUID>();
+    public Map<String, ChestOwner> call() throws IOException, ParseException {
+        Map<String, ChestOwner> uuidMap = new HashMap<String, ChestOwner>();
         String body = buildBody(names);
         for (int i = 1; i < MAX_SEARCH; i++) {
             HttpURLConnection connection = createConnection(i);
@@ -87,9 +103,13 @@ public class UUIDFetcher implements Callable<Map<String, UUID>> {
                 String id = (String) jsonProfile.get("id");
                 String name = (String) jsonProfile.get("name");
                 UUID uuid = UUID.fromString(id.substring(0, 8) + "-" + id.substring(8, 12) + "-" + id.substring(12, 16) + "-" + id.substring(16, 20) + "-" + id.substring(20, 32));
-                uuidMap.put(name, uuid);
+                uuidMap.put(name, plugin.getChestOwners().playerChest(name, uuid));
             }
         }
+
+        // Add special chests back
+        uuidMap.putAll(specialChests);
+
         return uuidMap;
     }
 }

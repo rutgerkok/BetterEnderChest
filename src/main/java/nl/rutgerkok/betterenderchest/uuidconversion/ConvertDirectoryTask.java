@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
@@ -28,14 +27,14 @@ class ConvertDirectoryTask extends ConvertTask {
     }
 
     @Override
-    protected void convertFiles(Map<String, UUID> toConvert) throws IOException {
-        for (Entry<String, UUID> entry : toConvert.entrySet()) {
+    protected void convertFiles(Map<String, ChestOwner> toConvert) throws IOException {
+        for (Entry<String, ChestOwner> entry : toConvert.entrySet()) {
 
             String name = entry.getKey();
-            UUID uuid = entry.getValue();
+            ChestOwner chestOwner = entry.getValue();
 
             File oldFile = new File(oldChestsDir, name + extension);
-            File newFile = new File(newChestsDir, uuid + extension);
+            File newFile = new File(newChestsDir, chestOwner.getSaveFileName() + extension);
 
             moveFile(oldFile, newFile);
         }
@@ -79,27 +78,6 @@ class ConvertDirectoryTask extends ConvertTask {
         }
     }
 
-    /**
-     * Moves over a special chest (public or default). Does nothing if the file
-     * does not exist.
-     * 
-     * @param chestOwner
-     *            The special chest that should be moved.
-     * @throws IOException
-     *             When the file cannot be removed.
-     * @throws IllegalArgumentException
-     *             If the chest is not a special chest, but just a player chest.
-     */
-    private void moveSpecialChest(ChestOwner chestOwner) throws IOException {
-        if (!chestOwner.isSpecialChest()) {
-            throw new IllegalArgumentException();
-        }
-        File oldChestFile = new File(oldChestsDir, chestOwner.getSaveFileName() + extension);
-        if (oldChestFile.exists()) {
-            moveFile(oldChestFile, new File(newChestsDir, chestOwner.getSaveFileName() + extension));
-        }
-    }
-
     @Override
     protected void startup() throws IOException {
         // Unused world groups might have no folder
@@ -108,10 +86,6 @@ class ConvertDirectoryTask extends ConvertTask {
         }
 
         newChestsDir.mkdirs();
-
-        // Move over the public and default chests
-        moveSpecialChest(plugin.getChestOwners().publicChest());
-        moveSpecialChest(plugin.getChestOwners().defaultChest());
     }
 
 }
