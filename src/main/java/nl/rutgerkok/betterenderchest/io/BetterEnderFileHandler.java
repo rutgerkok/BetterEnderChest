@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
-import nl.rutgerkok.betterenderchest.EmptyInventoryProvider;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
@@ -74,59 +73,6 @@ public class BetterEnderFileHandler {
     }
 
     /**
-     * Loads the inventory from various fallbacks. Use this when the inventory
-     * is not found where it should normally be (either the database or on
-     * disk).
-     * <p />
-     * The inventory will be imported. When there is nothing to be imported, the
-     * default chest will be returned. When there is no default chest, an empty
-     * chest will be returned. When an error occurs, an emtpy chest is returned.
-     * 
-     * @param chestOwner
-     *            The name of the inventory, must be lowercase.
-     * @param worldGroup
-     *            The group the inventory is in.
-     * @return The inventory. {@link BetterEnderInventoryHolder} will be the
-     *         holder of the inventory.
-     */
-    public Inventory getFallbackInventory(ChestOwner chestOwner, WorldGroup worldGroup) {
-        EmptyInventoryProvider emptyChests = plugin.getEmptyInventoryProvider();
-
-        // Try to import it from vanilla/some other plugin
-        try {
-            Inventory importedInventory = worldGroup.getInventoryImporter().importInventory(chestOwner, worldGroup, plugin);
-            if (importedInventory != null) {
-                // Make sure that the inventory is saved
-                ((BetterEnderInventoryHolder) importedInventory.getHolder()).setHasUnsavedChanges(true);
-                return importedInventory;
-            }
-        } catch (IOException e) {
-            plugin.severe("Could not import inventory " + chestOwner, e);
-
-            // Return an empty inventory. Loading the default chest again
-            // could cause issues when someone
-            // finds a way to constantly break this plugin.
-            return emptyChests.loadEmptyInventory(chestOwner, worldGroup);
-        }
-
-        // Try to load the default inventory
-        if (inventoryFileExists(plugin.getChestOwners().defaultChest(), worldGroup)) {
-            try {
-                Inventory inventory = loadInventory0(plugin.getChestOwners().defaultChest(), worldGroup);
-                // Make sure that the inventory is saved
-                BetterEnderInventoryHolder.of(inventory).setHasUnsavedChanges(true);
-                return inventory;
-            } catch (IOException e) {
-                plugin.severe("Failed to load default chest for " + chestOwner, e);
-                return emptyChests.loadEmptyInventory(chestOwner, worldGroup);
-            }
-        }
-
-        // Just return an empty chest
-        return emptyChests.loadEmptyInventory(chestOwner, worldGroup);
-    }
-
-    /**
      * Returns whether the specified inventory exists on disk.
      * 
      * @param chestOwner
@@ -150,20 +96,22 @@ public class BetterEnderFileHandler {
      * @return The Inventory. {@link BetterEnderInventoryHolder} will be the
      *         holder of the inventory.
      */
-    public Inventory loadInventory(ChestOwner chestOwner, WorldGroup worldGroup) {
+    public void loadInventory(ChestOwner chestOwner, WorldGroup worldGroup, Consumer<Inventory> callback) {
         // Try to load it from a file
         if (inventoryFileExists(chestOwner, worldGroup)) {
             try {
-                return loadInventory0(chestOwner, worldGroup);
+                callback.consume(loadInventory0(chestOwner, worldGroup));
+                return;
             } catch (IOException e) {
                 plugin.severe("Failed to load chest of " + chestOwner.getDisplayName(), e);
                 plugin.disableSaveAndLoad("Failed to load chest of " + chestOwner.getDisplayName(), e);
-                return plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup);
+                callback.consume(plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup));
+                return;
             }
         }
 
         // Use various fallback methods
-        return getFallbackInventory(chestOwner, worldGroup);
+        plugin.getEmptyInventoryProvider().getFallbackInventory(chestOwner, worldGroup, callback);
     }
 
     /**

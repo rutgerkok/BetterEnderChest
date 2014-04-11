@@ -49,20 +49,27 @@ public class LoadEntry {
         }
     }
 
-    private void callbackOnMainThread(BetterEnderChest plugin, BetterEnderSQLCache cache, String jsonData) {
+    private void callbackOnMainThread(BetterEnderChest plugin, final BetterEnderSQLCache cache, String jsonData) {
+        // No data returned, get fallback inventory and return that
+        if (jsonData == null) {
+            plugin.getEmptyInventoryProvider().getFallbackInventory(chestOwner, worldGroup, new Consumer<Inventory>() {
+                @Override
+                public void consume(Inventory fallbackInventory) {
+                    cache.setInventory(fallbackInventory);
+                    callback.consume(fallbackInventory);
+                }
+            });
+            return;
+        }
+
         Inventory inventory = null;
 
         // Load inventory
-        if (jsonData == null) {
-            // Import or get the default chest, or get an empty chest
-            inventory = plugin.getFileHandler().getFallbackInventory(chestOwner, worldGroup);
-        } else {
-            try {
-                inventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventoryFromJson(jsonData, chestOwner, worldGroup);
-            } catch (IOException e) {
-                plugin.severe("Failed to decode inventory in database", e);
-                inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup);
-            }
+        try {
+            inventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventoryFromJson(jsonData, chestOwner, worldGroup);
+        } catch (IOException e) {
+            plugin.severe("Failed to decode inventory in database", e);
+            inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup);
         }
 
         // Add to loaded inventories

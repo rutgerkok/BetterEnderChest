@@ -105,7 +105,7 @@ public class BetterEnderFileCache extends AbstractEnderCache {
                 SaveQueueEntry toSave = saveQueue.get(saveQueue.size() - 1);
                 ChestOwner chestOwner = toSave.getChestOwner();
                 WorldGroup group = toSave.getWorldGroup();
-                Inventory inventory = getInventory(chestOwner, group);
+                Inventory inventory = getCachedInventory(chestOwner, group);
                 boolean needsSave = ((BetterEnderInventoryHolder) inventory.getHolder()).hasUnsavedChanges();
 
                 // Saving
@@ -143,34 +143,56 @@ public class BetterEnderFileCache extends AbstractEnderCache {
         this.unloadAllInventories();
     }
 
-    private Inventory getInventory(ChestOwner chestOwner, WorldGroup worldGroup) {
-        // Don't try to load when it is disabled
-        if (!plugin.canSaveAndLoad()) {
-            return plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup);
+    /**
+     * Gets the cached inventory with the given owner in the given group.
+     * 
+     * @param chestOwner
+     *            The owner of the chest.
+     * @param worldGroup
+     *            The group the inventory is in.
+     * @return The cached inventory, or null if the inventory was not cached.
+     */
+    private Inventory getCachedInventory(ChestOwner chestOwner, WorldGroup worldGroup) {
+        Map<ChestOwner, Inventory> worldGroupInventories = inventories.get(worldGroup);
+        if (worldGroupInventories == null) {
+            return null;
         }
-
-        // Check if loaded
-        if (inventories.containsKey(worldGroup) && inventories.get(worldGroup).containsKey(chestOwner)) {
-            // Already loaded, return it
-            return inventories.get(worldGroup).get(chestOwner);
-        } else {
-            // Inventory has to be loaded
-            Inventory enderInventory = plugin.getFileHandler().loadInventory(chestOwner, worldGroup);
-            // Check if something from that group has been loaded
-            if (!inventories.containsKey(worldGroup)) {
-                // If not, create the group first
-                inventories.put(worldGroup, new HashMap<ChestOwner, Inventory>());
-            }
-            // Put in cache
-            inventories.get(worldGroup).put(chestOwner, enderInventory);
-            return enderInventory;
-        }
+        return worldGroupInventories.get(chestOwner);
     }
 
     @Override
-    public void getInventory(ChestOwner chestOwner, WorldGroup worldGroup, Consumer<Inventory> callback) {
-        // We're not async, so return immediatly.
-        callback.consume(getInventory(chestOwner, worldGroup));
+    public void getInventory(final ChestOwner chestOwner, final WorldGroup worldGroup, final Consumer<Inventory> callback) {
+        // Don't try to load when it is disabled
+        if (!plugin.canSaveAndLoad()) {
+            callback.consume(plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup));
+            return;
+        }
+
+        // Check if loaded
+        Inventory cachedInventory = getCachedInventory(chestOwner, worldGroup);
+        if (cachedInventory != null) {
+            // Already loaded, return it
+            callback.consume(cachedInventory);
+            return;
+        }
+
+        // Inventory has to be loaded
+        plugin.getFileHandler().loadInventory(chestOwner, worldGroup, new Consumer<Inventory>() {
+            @Override
+            public void consume(Inventory enderInventory) {
+                // Check if something from that group has been loaded
+                if (!inventories.containsKey(worldGroup)) {
+                    // If not, create the group first
+                    inventories.put(worldGroup, new HashMap<ChestOwner, Inventory>());
+                }
+                // Put in cache
+                inventories.get(worldGroup).put(chestOwner, enderInventory);
+
+                // Return chest
+                callback.consume(enderInventory);
+            }
+        });
+
     }
 
     @Override

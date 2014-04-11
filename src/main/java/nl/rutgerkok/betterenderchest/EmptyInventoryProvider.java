@@ -1,8 +1,11 @@
 package nl.rutgerkok.betterenderchest;
 
+import java.io.IOException;
 import java.util.ListIterator;
 
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.betterenderchest.exception.NoChestImportedException;
+import nl.rutgerkok.betterenderchest.io.Consumer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
@@ -17,6 +20,76 @@ public class EmptyInventoryProvider {
 
     public EmptyInventoryProvider(BetterEnderChest plugin) {
         this.plugin = plugin;
+    }
+
+    /**
+     * Gets the default inventory and copies the contets over to an inventory
+     * belonging to the given chest owner in the given world group.
+     * 
+     * @param chestOwner
+     *            The owner of the chest.
+     * @param worldGroup
+     *            The world group.
+     * @param callback
+     *            Called when the default chest is loaded.
+     */
+    private void getDefaultInventory(final ChestOwner chestOwner, final WorldGroup worldGroup, final Consumer<Inventory> callback) {
+        // Check owner
+        if (chestOwner.equals(plugin.getChestOwners().defaultChest())) {
+            // This is the default chest, prevent infinite recursion
+            callback.consume(loadEmptyInventory(chestOwner, worldGroup));
+            return;
+        }
+
+        // Try to load the default inventory
+        plugin.getChestCache().getInventory(plugin.getChestOwners().defaultChest(), worldGroup, new Consumer<Inventory>() {
+            @Override
+            public void consume(Inventory defaultInventory) {
+                Inventory playerInventory = loadEmptyInventory(chestOwner, worldGroup);
+                BetterEnderUtils.copyContents(defaultInventory, playerInventory, null);
+                callback.consume(playerInventory);
+            }
+        });
+    }
+
+    /**
+     * Loads the inventory from various fallbacks. Use this when the inventory
+     * is not found where it should normally be (either the database or on
+     * disk).
+     * <p />
+     * The inventory will be imported. When there is nothing to be imported, the
+     * default chest will be returned. When there is no default chest, an empty
+     * chest will be returned. When an error occurs, an emtpy chest is returned.
+     * 
+     * @param chestOwner
+     *            The name of the inventory, must be lowercase.
+     * @param worldGroup
+     *            The group the inventory is in.
+     * @param callback
+     *            Called when the invenotory is available.
+     *            {@link BetterEnderInventoryHolder} will be the holder of the
+     *            inventory.
+     */
+    public void getFallbackInventory(final ChestOwner chestOwner, final WorldGroup worldGroup, final Consumer<Inventory> callback) {
+        // Try to import it from vanilla/some other plugin
+        worldGroup.getInventoryImporter().importInventoryAsync(chestOwner, worldGroup, plugin, callback, new Consumer<IOException>() {
+            @Override
+            public void consume(IOException e) {
+                if (e instanceof NoChestImportedException) {
+                    // No chest was found, load default inventory
+                    getDefaultInventory(chestOwner, worldGroup, callback);
+                    return;
+                }
+
+                plugin.severe("Could not import inventory " + chestOwner, e);
+
+                // Return an empty inventory. Loading the default
+                // chest again
+                // could cause issues when someone
+                // finds a way to constantly break this plugin.
+                callback.consume(loadEmptyInventory(chestOwner, worldGroup));
+            }
+        });
     }
 
     /**
