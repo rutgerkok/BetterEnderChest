@@ -3,6 +3,8 @@ package nl.rutgerkok.betterenderchest.chestowner;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.exception.InvalidOwnerException;
@@ -13,12 +15,26 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+
 public class ChestOwners {
 
     private final BetterEnderChest plugin;
+    private final Cache<String, ChestOwner> uuidCache;
 
     public ChestOwners(BetterEnderChest plugin) {
         this.plugin = plugin;
+        this.uuidCache = CacheBuilder.newBuilder()
+                .maximumSize(100)
+                .expireAfterWrite(60, TimeUnit.MINUTES)
+                .build(new CacheLoader<String, ChestOwner>() {
+                    @Override
+                    public ChestOwner load(String name) throws Exception {
+                        return fetchProfileSync(name);
+                    }
+                });
     }
 
     /**
@@ -62,38 +78,40 @@ public class ChestOwners {
         }
 
         // Check online players
-        @SuppressWarnings("deprecation")
-        Player player = Bukkit.getPlayerExact(name);
-        if (player != null) {
-            onSuccess.consume(playerChest(player));
-            return;
-        }
-        
-        // Go to Mojang.com
         Bukkit.getScheduler().runTaskAsynchronously(plugin.getPlugin(), new Runnable() {
+
             @Override
             public void run() {
                 try {
-                    final ChestOwner chestOwner = fetchProfileSync(name);
+                    final ChestOwner chestOwner = uuidCache.get(name.toLowerCase());
                     Bukkit.getScheduler().runTask(plugin.getPlugin(), new Runnable() {
                         @Override
                         public void run() {
                             onSuccess.consume(chestOwner);
                         }
                     });
-                } catch (final InvalidOwnerException e) {
+                } catch (ExecutionException e) {
                     Bukkit.getScheduler().runTask(plugin.getPlugin(), new Runnable() {
                         @Override
                         public void run() {
-                            onFailure.consume(e);
+                            onFailure.consume(new InvalidOwnerException(name));
                         }
                     });
                 }
             }
+
         });
     }
 
     private ChestOwner fetchProfileSync(final String name) throws InvalidOwnerException {
+        // Check online players
+        @SuppressWarnings("deprecation") // We actually want to get the player by name
+        Player player = Bukkit.getPlayerExact(name);
+        if (player != null) {
+            return playerChest(player);
+        }
+
+        // Go to mojang.com
         UUIDFetcher uuidFetcher = new UUIDFetcher(plugin, Collections.singletonList(name));
         try {
             Map<String, ChestOwner> chestOwnerMap = uuidFetcher.call();
