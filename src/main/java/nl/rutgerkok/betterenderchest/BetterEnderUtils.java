@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 
+import net.minecraft.util.com.google.common.collect.ImmutableList;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.io.CaseInsensitiveFileFilter;
 
@@ -39,8 +40,9 @@ public class BetterEnderUtils {
      *            Shown to the victims
      */
     public static void closeInventory(Inventory inventory, String message) {
-        for (HumanEntity player : inventory.getViewers()) {
-            player.closeInventory();
+        List<HumanEntity> viewers = ImmutableList.copyOf(inventory.getViewers());
+        for (HumanEntity player : viewers) {
+            player.closeInventory(); // Removes them from inventory.getViewers()
             if (player instanceof Player) {
                 ((Player) player).sendMessage(message);
             }
