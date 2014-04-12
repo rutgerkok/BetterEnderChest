@@ -519,7 +519,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         }
 
         // Inventory owners
-        chestOwners = new ChestOwners();
+        chestOwners = new ChestOwners(this);
 
         // Inventory opener
         if (chestOpener == null) {

@@ -1,14 +1,25 @@
 package nl.rutgerkok.betterenderchest.chestowner;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.exception.InvalidOwnerException;
 import nl.rutgerkok.betterenderchest.io.Consumer;
+import nl.rutgerkok.betterenderchest.uuidconversion.UUIDFetcher;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 public class ChestOwners {
+
+    private final BetterEnderChest plugin;
+
+    public ChestOwners(BetterEnderChest plugin) {
+        this.plugin = plugin;
+    }
 
     /**
      * Gets the "owner" of the default chest. Since the default chest doesn't
@@ -40,7 +51,7 @@ public class ChestOwners {
      *            Will be called when the {@link ChestOwner} was not found,
      *            which usually happens because no player exists with that name.
      */
-    public void fromInput(String name, Consumer<ChestOwner> onSuccess, Consumer<InvalidOwnerException> onFailure) {
+    public void fromInput(final String name, final Consumer<ChestOwner> onSuccess, final Consumer<InvalidOwnerException> onFailure) {
         if (name.equalsIgnoreCase(publicChest().getSaveFileName())) {
             onSuccess.consume(publicChest());
             return;
@@ -50,13 +61,51 @@ public class ChestOwners {
             return;
         }
 
-        // TODO Replace this with async lookup
-        OfflinePlayer player = Bukkit.getOfflinePlayer(name);
-        if (player.getUniqueId() == null) {
-            onFailure.consume(new InvalidOwnerException(name));
+        // Check online players
+        @SuppressWarnings("deprecation")
+        Player player = Bukkit.getPlayerExact(name);
+        if (player != null) {
+            onSuccess.consume(playerChest(player));
             return;
         }
-        onSuccess.consume(playerChest(player));
+        
+        // Go to Mojang.com
+        Bukkit.getScheduler().runTaskAsynchronously(plugin.getPlugin(), new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final ChestOwner chestOwner = fetchProfileSync(name);
+                    Bukkit.getScheduler().runTask(plugin.getPlugin(), new Runnable() {
+                        @Override
+                        public void run() {
+                            onSuccess.consume(chestOwner);
+                        }
+                    });
+                } catch (final InvalidOwnerException e) {
+                    Bukkit.getScheduler().runTask(plugin.getPlugin(), new Runnable() {
+                        @Override
+                        public void run() {
+                            onFailure.consume(e);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private ChestOwner fetchProfileSync(final String name) throws InvalidOwnerException {
+        UUIDFetcher uuidFetcher = new UUIDFetcher(plugin, Collections.singletonList(name));
+        try {
+            Map<String, ChestOwner> chestOwnerMap = uuidFetcher.call();
+            if (chestOwnerMap.size() == 1) {
+                return chestOwnerMap.values().iterator().next();
+            }
+        } catch (Exception e) {
+            // mojang.com is probably down
+            plugin.log("Error communicating with mojang.com: " + e.getMessage());
+        }
+        throw new InvalidOwnerException(name);
+
     }
 
     /**
