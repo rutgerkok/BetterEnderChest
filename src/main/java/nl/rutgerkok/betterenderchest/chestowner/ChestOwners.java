@@ -2,7 +2,6 @@ package nl.rutgerkok.betterenderchest.chestowner;
 
 import java.util.UUID;
 
-import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.exception.InvalidOwnerException;
 import nl.rutgerkok.betterenderchest.io.Consumer;
 
@@ -42,11 +41,11 @@ public class ChestOwners {
      *            which usually happens because no player exists with that name.
      */
     public void fromInput(String name, Consumer<ChestOwner> onSuccess, Consumer<InvalidOwnerException> onFailure) {
-        if (name.equalsIgnoreCase(BetterEnderChest.PUBLIC_CHEST_NAME)) {
+        if (name.equalsIgnoreCase(publicChest().getSaveFileName())) {
             onSuccess.consume(publicChest());
             return;
         }
-        if (name.equalsIgnoreCase(BetterEnderChest.DEFAULT_CHEST_NAME)) {
+        if (name.equalsIgnoreCase(defaultChest().getSaveFileName())) {
             onSuccess.consume(defaultChest());
             return;
         }
@@ -67,8 +66,6 @@ public class ChestOwners {
      *            The player.
      * @return The <code>ChestOwner</code> belonging to the player.
      */
-    @SuppressWarnings("deprecation")
-    // ^ It's just a display name, not actually used for saving
     public ChestOwner playerChest(OfflinePlayer player) {
         return new PlayerChestOwner(player.getName(), player.getUniqueId());
     }

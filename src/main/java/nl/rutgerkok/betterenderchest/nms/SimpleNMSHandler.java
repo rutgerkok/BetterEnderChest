@@ -12,18 +12,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import net.minecraft.server.v1_7_R2.MinecraftServer;
-import net.minecraft.server.v1_7_R2.MojangsonParser;
-import net.minecraft.server.v1_7_R2.NBTBase;
-import net.minecraft.server.v1_7_R2.NBTCompressedStreamTools;
-import net.minecraft.server.v1_7_R2.NBTNumber;
-import net.minecraft.server.v1_7_R2.NBTTagByteArray;
-import net.minecraft.server.v1_7_R2.NBTTagCompound;
-import net.minecraft.server.v1_7_R2.NBTTagIntArray;
-import net.minecraft.server.v1_7_R2.NBTTagList;
-import net.minecraft.server.v1_7_R2.NBTTagString;
-import net.minecraft.server.v1_7_R2.TileEntity;
-import net.minecraft.server.v1_7_R2.TileEntityEnderChest;
+import net.minecraft.server.v1_7_R3.MinecraftServer;
+import net.minecraft.server.v1_7_R3.MojangsonParser;
+import net.minecraft.server.v1_7_R3.NBTBase;
+import net.minecraft.server.v1_7_R3.NBTCompressedStreamTools;
+import net.minecraft.server.v1_7_R3.NBTNumber;
+import net.minecraft.server.v1_7_R3.NBTTagByteArray;
+import net.minecraft.server.v1_7_R3.NBTTagCompound;
+import net.minecraft.server.v1_7_R3.NBTTagIntArray;
+import net.minecraft.server.v1_7_R3.NBTTagList;
+import net.minecraft.server.v1_7_R3.NBTTagString;
+import net.minecraft.server.v1_7_R3.TileEntity;
+import net.minecraft.server.v1_7_R3.TileEntityEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
@@ -31,8 +31,8 @@ import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_7_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_7_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_7_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_7_R3.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONObject;
@@ -292,7 +292,7 @@ public class SimpleNMSHandler extends NMSHandler {
         for (int i = 0; i < inventoryTag.size(); i++) {
             NBTTagCompound item = (NBTTagCompound) inventoryTag.get(i);
             int slot = item.getByte("Slot") & 255;
-            inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_7_R2.ItemStack.createStack(item)));
+            inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_7_R3.ItemStack.createStack(item)));
         }
 
         // Return the inventory

@@ -40,20 +40,14 @@ public class VanillaImporter extends InventoryImporter {
         if (player == null) {
 
             // Offline, load from file
-            File playerDirectory = new File(Bukkit.getWorlds().get(0).getWorldFolder().getAbsolutePath() + "/players");
+            File playerDirectory = new File(Bukkit.getWorlds().get(0).getWorldFolder().getAbsolutePath() + "/playerdata");
 
             File playerFile = new File(playerDirectory.getAbsolutePath() + "/" + chestOwner.getSaveFileName() + ".dat");
             if (!playerFile.exists()) {
-                // File doesn't exist. Maybe there is a problem with those
-                // case-sensitive file systems?
-                playerFile = BetterEnderUtils.getCaseInsensitiveFile(playerDirectory, chestOwner.getSaveFileName() + ".dat");
-                if (playerFile == null) {
-                    // Nope, the file really doesn't exist. Return nothing.
-                    return null;
-                }
+                return null;
             }
 
-            // Load it from the file (mainworld/players/playername.dat)
+            // Load it from the file (mainworld/playerdata/playername.dat)
             betterEnderInventory = plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventoryFromFile(playerFile, chestOwner, worldGroup, "EnderItems");
             if (betterEnderInventory == null) {
                 // Cannot load the inventory from that file, most likely because

@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.Map;
 
-import net.minecraft.server.v1_7_R2.NBTTagCompound;
+import net.minecraft.server.v1_7_R3.NBTTagCompound;
 import nl.rutgerkok.betterenderchest.nms.SimpleNMSHandler.JSONSimpleTypes;
 
 import org.json.simple.JSONObject;

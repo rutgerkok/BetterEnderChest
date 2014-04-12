@@ -71,7 +71,7 @@ final class PlayerChestOwner implements ChestOwner {
 
     @Override
     public boolean isPlayer(OfflinePlayer player) {
-        return player.getUniqueId().equals(uuid);
+        return uuid.equals(player.getUniqueId());
     }
 
     @Override
