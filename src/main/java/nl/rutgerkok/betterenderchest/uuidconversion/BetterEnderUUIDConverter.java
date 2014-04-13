@@ -136,7 +136,7 @@ public abstract class BetterEnderUUIDConverter {
             public void run() {
                 if (safeConvertWorldGroups(groups)) {
                     plugin.enableSaveAndLoad();
-                    plugin.log("Successfully converted all Ender Chests.");
+                    plugin.log("Conversion process finished without fatal errors.");
                 }
             }
         });
