@@ -83,4 +83,9 @@ final class SpecialChestOwner implements ChestOwner {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "SpecialChest[" + ownerName + "]";
+    }
+
 }

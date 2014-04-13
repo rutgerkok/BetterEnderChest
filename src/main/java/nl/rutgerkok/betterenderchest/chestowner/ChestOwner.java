@@ -23,6 +23,7 @@ public interface ChestOwner {
      *            {@inheritDoc}
      * @return {@inheritDoc}
      */
+    @Override
     boolean equals(Object object);
 
     /**

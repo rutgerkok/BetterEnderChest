@@ -86,4 +86,9 @@ final class PlayerChestOwner implements ChestOwner {
         return false;
     }
 
+    @Override
+    public String toString() {
+        return "PlayerChest[uuid=" + uuid + ",name=" + displayName + "]";
+    }
+
 }

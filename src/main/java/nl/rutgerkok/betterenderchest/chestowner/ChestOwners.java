@@ -48,6 +48,44 @@ public class ChestOwners {
     }
 
     /**
+     * Fetches a profile either from the online players list or from mojang.com.
+     * 
+     * @param name
+     *            The name of the profile.
+     * @return The profile.
+     * @throws InvalidOwnerException
+     *             If the profile was not found.
+     */
+    private ChestOwner fetchProfileSync(final String name) throws InvalidOwnerException {
+        // Check online players
+        @SuppressWarnings("deprecation")
+        // We actually want to get the player by name
+        Player player = Bukkit.getPlayerExact(name);
+        if (player != null) {
+            return playerChest(player);
+        }
+
+        // Go to mojang.com
+        UUIDFetcher uuidFetcher = new UUIDFetcher(plugin, Collections.singletonList(name));
+        try {
+            Map<String, ChestOwner> chestOwnerMap = uuidFetcher.call();
+            if (chestOwnerMap.size() == 0) {
+                throw new InvalidOwnerException(name);
+            } else if (chestOwnerMap.size() == 1) {
+                return chestOwnerMap.values().iterator().next();
+            } else {
+                // Multiple UUIDs for one user. See http://cbukk.it/j/MC-51758
+                plugin.log("Multiple UUIDs for " + name + ": " + chestOwnerMap.values());
+                throw new InvalidOwnerException(name);
+            }
+        } catch (Exception e) {
+            // mojang.com is probably down
+            plugin.log("Error communicating with mojang.com: " + e.getMessage());
+            throw new InvalidOwnerException(name);
+        }
+    }
+
+    /**
      * Retrieves the {@link ChestOwner} with the given name. In the future, this
      * method might need to contact Mojang's auth service to look up the UUID
      * for the given name, so it may take some time to be completed. The
@@ -103,29 +141,6 @@ public class ChestOwners {
         });
     }
 
-    private ChestOwner fetchProfileSync(final String name) throws InvalidOwnerException {
-        // Check online players
-        @SuppressWarnings("deprecation") // We actually want to get the player by name
-        Player player = Bukkit.getPlayerExact(name);
-        if (player != null) {
-            return playerChest(player);
-        }
-
-        // Go to mojang.com
-        UUIDFetcher uuidFetcher = new UUIDFetcher(plugin, Collections.singletonList(name));
-        try {
-            Map<String, ChestOwner> chestOwnerMap = uuidFetcher.call();
-            if (chestOwnerMap.size() == 1) {
-                return chestOwnerMap.values().iterator().next();
-            }
-        } catch (Exception e) {
-            // mojang.com is probably down
-            plugin.log("Error communicating with mojang.com: " + e.getMessage());
-        }
-        throw new InvalidOwnerException(name);
-
-    }
-
     /**
      * Gets the {@link ChestOwner} belonging to the player.
      * 
@@ -138,7 +153,6 @@ public class ChestOwners {
     }
 
     /**
-     * 
      * Gets the {@link ChestOwner} belonging to the player.
      * 
      * @param playerName
