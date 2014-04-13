@@ -28,8 +28,9 @@ public class DeleteInvCommand extends BaseCommand {
 
     @Override
     public boolean execute(final CommandSender sender, String[] args) {
-        if (args.length != 1)
+        if (args.length != 1) {
             return false; // Wrong argument count!
+        }
 
         String inventoryName = getInventoryName(args[0]);
 

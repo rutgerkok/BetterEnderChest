@@ -3,7 +3,6 @@ package nl.rutgerkok.betterenderchest.io;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -84,11 +83,9 @@ public class BetterEnderFileCache extends AbstractEnderCache {
             plugin.warning("Skipping this autosave.");
             return;
         }
-        for (Iterator<WorldGroup> outerIterator = inventories.keySet().iterator(); outerIterator.hasNext();) {
-            WorldGroup group = outerIterator.next();
+        for (WorldGroup group : inventories.keySet()) {
             Map<ChestOwner, Inventory> inGroup = inventories.get(group);
-            for (Iterator<Entry<ChestOwner, Inventory>> it = inGroup.entrySet().iterator(); it.hasNext();) {
-                Entry<ChestOwner, Inventory> inventoryEntry = it.next();
+            for (Entry<ChestOwner, Inventory> inventoryEntry : inGroup.entrySet()) {
                 // Add to save queue, but only if there are unsaved changes
                 saveQueue.add(new SaveQueueEntry(inventoryEntry.getKey(), group));
             }
@@ -211,8 +208,7 @@ public class BetterEnderFileCache extends AbstractEnderCache {
         saveQueue.clear();
 
         try {
-            for (Iterator<WorldGroup> outerIterator = inventories.keySet().iterator(); outerIterator.hasNext();) {
-                WorldGroup group = outerIterator.next();
+            for (WorldGroup group : inventories.keySet()) {
                 Map<ChestOwner, Inventory> chestsInGroup = inventories.get(group);
                 for (Entry<ChestOwner, Inventory> entryInGroup : chestsInGroup.entrySet()) {
                     ChestOwner chestOwner = entryInGroup.getKey();

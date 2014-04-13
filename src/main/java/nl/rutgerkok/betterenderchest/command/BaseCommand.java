@@ -201,16 +201,20 @@ public abstract class BaseCommand implements Registration {
      */
     @Deprecated
     protected boolean isValidPlayer(String name) {
-        if (name.equals(BetterEnderChest.PUBLIC_CHEST_NAME))
+        if (name.equals(BetterEnderChest.PUBLIC_CHEST_NAME)) {
             return true;
-        if (name.equals(BetterEnderChest.DEFAULT_CHEST_NAME))
+        }
+        if (name.equals(BetterEnderChest.DEFAULT_CHEST_NAME)) {
             return true;
+        }
 
         OfflinePlayer player = Bukkit.getOfflinePlayer(name);
-        if (player.hasPlayedBefore())
+        if (player.hasPlayedBefore()) {
             return true;
-        if (player.isOnline())
+        }
+        if (player.isOnline()) {
             return true;
+        }
 
         return false;
     }

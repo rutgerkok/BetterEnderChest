@@ -86,6 +86,7 @@ public class UUIDFetcher implements Callable<Map<String, ChestOwner>> {
         }
     }
 
+    @Override
     public Map<String, ChestOwner> call() throws IOException, ParseException {
         Map<String, ChestOwner> uuidMap = new HashMap<String, ChestOwner>();
         String body = buildBody(names);

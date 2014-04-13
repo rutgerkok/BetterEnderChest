@@ -18,8 +18,9 @@ public class SwapInvCommand extends BaseCommand {
 
     @Override
     public boolean execute(final CommandSender sender, String[] args) {
-        if (args.length != 2)
+        if (args.length != 2) {
             return false;
+        }
 
         final String inventoryName1 = getInventoryName(args[0]);
         final WorldGroup group1 = getGroup(args[0], sender);

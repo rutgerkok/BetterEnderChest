@@ -241,7 +241,7 @@ public class SimpleNMSHandler extends NMSHandler {
             for (int i = 0; i < inventoryListTag.size(); i++) {
 
                 // Replace the current highest slot if this slot is higher
-                highestSlot = Math.max(((NBTTagCompound) inventoryListTag.get(i)).getByte("Slot") & 255, highestSlot);
+                highestSlot = Math.max(inventoryListTag.get(i).getByte("Slot") & 255, highestSlot);
             }
 
             // Calculate the needed number of rows for the items, and return the
@@ -290,7 +290,7 @@ public class SimpleNMSHandler extends NMSHandler {
 
         // Add all the items
         for (int i = 0; i < inventoryTag.size(); i++) {
-            NBTTagCompound item = (NBTTagCompound) inventoryTag.get(i);
+            NBTTagCompound item = inventoryTag.get(i);
             int slot = item.getByte("Slot") & 255;
             inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_7_R3.ItemStack.createStack(item)));
         }

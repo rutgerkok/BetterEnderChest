@@ -22,8 +22,9 @@ public class GiveCommand extends BaseCommand {
 
     @Override
     public boolean execute(final CommandSender sender, final String[] args) {
-        if (args.length < 2)
+        if (args.length < 2) {
             return false;
+        }
 
         String inventoryName = getInventoryName(args[0]);
 
