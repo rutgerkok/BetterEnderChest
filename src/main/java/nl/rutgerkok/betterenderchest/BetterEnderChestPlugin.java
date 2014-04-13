@@ -257,6 +257,9 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         reloadConfig();
         FileConfiguration config = getConfig();
 
+        // Version
+        config.set("BetterEnderChest.lastModifiedByVersion", this.getDescription().getVersion());
+
         // Reading translations
         String language = config.getString("BetterEnderChest.language", "en");
         File translationsFile = new File(getDataFolder(), "translations-" + language + ".yml");
