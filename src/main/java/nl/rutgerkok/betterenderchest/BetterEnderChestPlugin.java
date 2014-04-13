@@ -277,8 +277,15 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             warning(givenSaveLocation + " is not a valid save location. Defaulting to " + defaultSaveLocation + ".");
             saveLocation = SaveLocation.getDefaultSaveLocation();
         }
+        if (saveLocation == SaveLocation.SERVER_ROOT) {
+            // Print warning about deprecated save location
+            log("The save location " + SaveLocation.SERVER_ROOT + " is no longer supported. During the UUID conversion process "
+                    + "all chests will be/have been moved to the plugin folder. You can remove this setting from the config.yml.");
+        } else {
+            // Remove this setting
+            config.set("BetterEnderChest.saveFolderLocation", null);
+        }
         legacyChestSaveLocation = saveLocation.getLegacyFolder(this);
-        config.set("BetterEnderChest.saveFolderLocation", saveLocation.toString());
 
         // ChestDrop
         String chestDrop = config.getString("BetterEnderChest.drop", "OBSIDIAN");
