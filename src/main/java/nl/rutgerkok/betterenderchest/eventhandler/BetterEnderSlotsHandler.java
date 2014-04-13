@@ -41,11 +41,7 @@ public class BetterEnderSlotsHandler implements Listener {
             return;
         }
 
-        if (event.isShiftClick()) {
-            handleDisabledSlotsShiftClick(event);
-        } else {
-            handleDisabledSlotsNormalClick(event);
-        }
+        handleDisabledSlotsNormalClick(event);
 
     }
 
