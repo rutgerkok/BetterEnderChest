@@ -1,5 +1,7 @@
 package nl.rutgerkok.betterenderchest.eventhandler;
 
+import java.util.Set;
+
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.ImmutableInventory;
@@ -10,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -31,7 +34,7 @@ public class BetterEnderSlotsHandler implements Listener {
      */
     protected void handleDisabledSlots(InventoryClickEvent event) {
         Inventory inventory = event.getInventory();
-        BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
+        BetterEnderInventoryHolder holder = BetterEnderInventoryHolder.of(inventory);
 
         if (holder.getDisabledSlots() == 0) {
             // Noting to prevent
@@ -162,6 +165,29 @@ public class BetterEnderSlotsHandler implements Listener {
             // Make chest immutable.
             event.setCancelled(true);
             return;
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onInventoryDrag(InventoryDragEvent event) {
+        Inventory inventory = event.getInventory();
+        if (!(inventory.getHolder() instanceof BetterEnderInventoryHolder)) {
+            return;
+        }
+        BetterEnderInventoryHolder holder = BetterEnderInventoryHolder.of(inventory);
+        if (holder.getDisabledSlots() == 0) {
+            return;
+        }
+
+        // Check for illegal slots
+        Set<Integer> allSlots = event.getInventorySlots();
+        for (int i = 0; i < holder.getDisabledSlots(); i++) {
+            int slotToDisable = inventory.getSize() - i - 1;
+            if (allSlots.contains(slotToDisable)) {
+                event.setCancelled(true);
+                // Would it be possible to redistribute the items instead?
+                return;
+            }
         }
     }
 }
