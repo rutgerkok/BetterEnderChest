@@ -3,6 +3,7 @@ package nl.rutgerkok.betterenderchest.mysql;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
@@ -100,7 +101,8 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
         }
 
         for (Entry<WorldGroup, Map<ChestOwner, Inventory>> groupEntry : this.cachedInventories.entrySet()) {
-            for (Entry<ChestOwner, Inventory> inventoryEntry : groupEntry.getValue().entrySet()) {
+            for (Iterator<Entry<ChestOwner, Inventory>> it = groupEntry.getValue().entrySet().iterator(); it.hasNext();) {
+                Entry<ChestOwner, Inventory> inventoryEntry = it.next();
                 Inventory inventory = inventoryEntry.getValue();
                 BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
                 if (holder.hasUnsavedChanges()) {
@@ -109,17 +111,16 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
                     saveQueue.add(new SaveEntry(plugin, inventory));
                     // Chest in its current state will be saved
                     holder.setHasUnsavedChanges(false);
-                    // Check if more chests can be saved
                 } else {
                     plugin.debug("Chest of " + holder.getChestOwner().getDisplayName() + " has no changes, skipping autosave");
-                    ChestOwner chestOwner = holder.getChestOwner();
+                    ChestOwner chestOwner = inventoryEntry.getKey();
                     if (!chestOwner.isOwnerOnline()
                             && (inventory.getViewers().size() == 0)) {
                         // This inventory is NOT the public chest, the owner is
                         // NOT online and NO ONE is viewing it
                         // So unload it
                         plugin.debug("Unloading chest of " + chestOwner.getDisplayName());
-                        unloadInventory(chestOwner, groupEntry.getKey());
+                        it.remove();
                     }
                 }
             }
