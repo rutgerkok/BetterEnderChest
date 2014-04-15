@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.io.Files;
+
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
@@ -74,7 +76,12 @@ class ConvertDirectoryTask extends ConvertTask {
      */
     private void moveFile(File oldFile, File newFile) throws IOException {
         if (!oldFile.renameTo(newFile)) {
-            throw new IOException("Failed to move " + oldFile.getAbsolutePath() + " to " + newFile.getAbsolutePath());
+            // Try copy and delete
+            plugin.debug("Failed to rename file " + oldFile.getAbsolutePath() + ", trying copy and delete");
+            Files.copy(oldFile, newFile);
+            if (!oldFile.delete()) {
+                plugin.warning("Failed to delete old file " + oldFile.getAbsolutePath() + " after copying it to " + newFile.getAbsolutePath());
+            }
         }
     }
 
