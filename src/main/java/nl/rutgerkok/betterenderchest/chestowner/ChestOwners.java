@@ -12,7 +12,6 @@ import nl.rutgerkok.betterenderchest.io.Consumer;
 import nl.rutgerkok.betterenderchest.uuidconversion.UUIDFetcher;
 
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import com.google.common.cache.Cache;
@@ -115,7 +114,13 @@ public class ChestOwners {
             return;
         }
 
-        // Check online players
+        // Get by name if not using UUIDs
+        if (!plugin.useUuidsForSaving()) {
+            onSuccess.consume(new NamedChestOwner(name));
+            return;
+        }
+
+        // Get from cache or do a web lookup
         Bukkit.getScheduler().runTaskAsynchronously(plugin.getPlugin(), new Runnable() {
 
             @Override
@@ -148,8 +153,12 @@ public class ChestOwners {
      *            The player.
      * @return The <code>ChestOwner</code> belonging to the player.
      */
-    public ChestOwner playerChest(OfflinePlayer player) {
-        return new PlayerChestOwner(player.getName(), player.getUniqueId());
+    public ChestOwner playerChest(Player player) {
+        if (plugin.useUuidsForSaving()) {
+            return new UUIDChestOwner(player.getName(), player.getUniqueId());
+        } else {
+            return new NamedChestOwner(player.getName());
+        }
     }
 
     /**
@@ -162,7 +171,11 @@ public class ChestOwners {
      * @return The <code>ChestOwner</code> belonging to the player.
      */
     public ChestOwner playerChest(String playerName, UUID uuid) {
-        return new PlayerChestOwner(playerName, uuid);
+        if (plugin.useUuidsForSaving()) {
+            return new UUIDChestOwner(playerName, uuid);
+        } else {
+            return new NamedChestOwner(playerName);
+        }
     }
 
     /**

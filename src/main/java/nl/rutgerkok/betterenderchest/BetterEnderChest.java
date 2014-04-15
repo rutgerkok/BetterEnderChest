@@ -310,6 +310,14 @@ public interface BetterEnderChest {
     void severe(String message, Throwable thrown);
 
     /**
+     * Gets whether UUIDs are used to save chests. If false, the chests will be
+     * saved using player names.
+     * 
+     * @return Whether UUIDs are used to save chests.
+     */
+    boolean useUuidsForSaving();
+
+    /**
      * Logs a warning. Message will be prefixed with the plugin name between
      * square brackets.
      * 

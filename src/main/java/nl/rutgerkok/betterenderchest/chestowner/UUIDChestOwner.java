@@ -13,12 +13,12 @@ import org.bukkit.entity.Player;
  * Implementation of {@link ChestOwner} that represents a normal player.
  *
  */
-final class PlayerChestOwner implements ChestOwner {
+final class UUIDChestOwner implements ChestOwner {
 
     private final String displayName;
     private final UUID uuid;
 
-    PlayerChestOwner(String displayName, UUID uuid) {
+    UUIDChestOwner(String displayName, UUID uuid) {
         Validate.notNull(displayName, "Name may not be null");
         Validate.notNull(uuid, "UUID may not be null");
         this.displayName = displayName;
@@ -27,10 +27,10 @@ final class PlayerChestOwner implements ChestOwner {
 
     @Override
     public boolean equals(Object other) {
-        if (!(other instanceof PlayerChestOwner)) {
+        if (!(other instanceof UUIDChestOwner)) {
             return false;
         }
-        return ((PlayerChestOwner) other).uuid.equals(this.uuid);
+        return ((UUIDChestOwner) other).uuid.equals(this.uuid);
     }
 
     @Override

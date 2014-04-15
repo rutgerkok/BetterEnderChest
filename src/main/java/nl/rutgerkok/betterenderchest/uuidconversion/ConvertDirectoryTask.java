@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.google.common.io.Files;
-
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.io.BetterEnderFileHandler;
+
+import com.google.common.io.Files;
 
 class ConvertDirectoryTask extends ConvertTask {
 

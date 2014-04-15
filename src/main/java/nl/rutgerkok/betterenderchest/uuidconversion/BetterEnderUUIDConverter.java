@@ -102,11 +102,11 @@ public abstract class BetterEnderUUIDConverter {
             plugin.severe("Failed to parse JSON", e);
             plugin.disableSaveAndLoad("Failed to parse JSON during UUID conversion", e);
         } catch (IOException e) {
-            plugin.severe("Error during name->UUID conversion process", e);
-            plugin.disableSaveAndLoad("Error during name->UUID conversion process", e);
+            plugin.severe("Error during conversion process", e);
+            plugin.disableSaveAndLoad("Error during conversion process", e);
         } catch (Throwable t) {
-            plugin.severe("Unexpected error during name->UUID conversion process", t);
-            plugin.disableSaveAndLoad("Unexpected error during name->UUID conversion process", t);
+            plugin.severe("Unexpected error during conversion process", t);
+            plugin.disableSaveAndLoad("Unexpected error during conversion process", t);
         }
         return false;
     }
@@ -123,12 +123,16 @@ public abstract class BetterEnderUUIDConverter {
         }
 
         // Disable saving and loading for now
-        plugin.log("Converting everything from name to UUID. This process may take a while.");
+        if (plugin.useUuidsForSaving()) {
+            plugin.log("Converting everything from name to UUID. This process may take a while.");
+        } else {
+            plugin.log("Changing save directory. This shouldn't take that long.");
+        }
         plugin.log("The server will still be usable while the Ender Chests are converted, Ender Chests just won't open.");
         Exception convertingException = new Exception("Converting to UUID files, may take a while");
         // No stack trace needed
         convertingException.setStackTrace(new StackTraceElement[0]);
-        plugin.disableSaveAndLoad("Converting to UUID files, may take a while", convertingException);
+        plugin.disableSaveAndLoad("Converting files, may take a while", convertingException);
 
         // Run conversion on another thread
         Bukkit.getScheduler().runTaskAsynchronously(plugin.getPlugin(), new Runnable() {

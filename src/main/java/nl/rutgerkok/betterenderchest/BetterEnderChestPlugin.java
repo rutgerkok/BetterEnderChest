@@ -84,6 +84,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private Registry<ProtectionBridge> protectionBridges = new Registry<ProtectionBridge>();
     private int rankUpgrades;
     private SaveAndLoadError saveAndLoadError;
+    private boolean useUuids;
     private BetterEnderUUIDConverter uuidConverter;
 
     @Override
@@ -271,6 +272,10 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             translationSettings = new YamlConfiguration();
         }
         config.set("BetterEnderChest.language", language);
+
+        // UUIDs
+        useUuids = config.getBoolean("BetterEnderChest.useUUIDs", true);
+        config.set("BetterEnderChest.useUUIDs", useUuids);
 
         // Save location
         String defaultSaveLocation = SaveLocation.getDefaultSaveLocation().toString();
@@ -611,6 +616,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         enderCache = null;
         uuidConverter.stopConversion();
         uuidConverter = null;
+    }
+
+    @Override
+    public boolean useUuidsForSaving() {
+        return useUuids;
     }
 
     @Override

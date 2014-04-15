@@ -2,10 +2,9 @@
  * UUID fetcher by Nate Mortensen.
  * https://gist.github.com/evilmidget38/df8dcd7855937e9d1e1f
  * 
- * Modified by BetterEnderChest to
- * - throw less generic exceptions
- * - return ChestOwner instead of UUID.
- * - use the new API Mojang provided to avoid getting rate-limited
+ * Modified by BetterEnderChest to throw less generic exceptions, return
+ * ChestOwner instead of UUID, use the new API Mojang provided to avoid getting
+ * rate-limited and to add support to continue using names.
  */
 package nl.rutgerkok.betterenderchest.uuidconversion;
 
@@ -86,8 +85,33 @@ public class UUIDFetcher implements Callable<Map<String, ChestOwner>> {
 
     @Override
     public Map<String, ChestOwner> call() throws IOException, ParseException {
+        if (plugin.useUuidsForSaving()) {
+            return callOnline();
+        } else {
+            return callOffline();
+        }
+    }
+
+    private Map<String, ChestOwner> callOffline() {
+        // Converting is easy when not doing web lookups :)
+        Map<String, ChestOwner> results = new HashMap<String, ChestOwner>();
+        for (String name : names) {
+            results.put(name, plugin.getChestOwners().playerChest(name, null));
+        }
+        results.putAll(specialChests);
+        return results;
+    }
+
+    private Map<String, ChestOwner> callOnline() throws IOException, ParseException {
+        if (!plugin.useUuidsForSaving()) {
+            // Should never happen, but it makes reviewing the code easier for
+            // the BukkitDev staff, as they can easily see that all networking
+            // can be blocked
+            throw new IllegalStateException();
+        }
+
         Map<String, ChestOwner> uuidMap = new HashMap<String, ChestOwner>();
-        for(int i = 0; i < names.size(); i+=MAX_SEARCH) {
+        for (int i = 0; i < names.size(); i += MAX_SEARCH) {
             String body = buildBody(names, i);
             HttpURLConnection connection = createConnection();
             writeBody(connection, body);
