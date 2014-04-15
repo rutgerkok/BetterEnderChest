@@ -35,7 +35,7 @@ class ConvertDirectoryTask extends ConvertTask {
             String name = entry.getKey();
             ChestOwner chestOwner = entry.getValue();
 
-            File oldFile = new File(oldChestsDir, name + extension);
+            File oldFile = new File(oldChestsDir, name.toLowerCase() + extension);
             File newFile = new File(newChestsDir, chestOwner.getSaveFileName() + extension);
 
             moveFile(oldFile, newFile);
