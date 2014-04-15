@@ -2,8 +2,10 @@
  * UUID fetcher by Nate Mortensen.
  * https://gist.github.com/evilmidget38/df8dcd7855937e9d1e1f
  * 
- * Modified by BetterEnderChest to throw less generic exceptions and to return
- * ChestOwner instead of UUID.
+ * Modified by BetterEnderChest to
+ * - throw less generic exceptions
+ * - return ChestOwner instead of UUID.
+ * - use the new API Mojang provided to avoid getting rate-limited
  */
 package nl.rutgerkok.betterenderchest.uuidconversion;
 
@@ -32,22 +34,18 @@ import org.json.simple.parser.ParseException;
 public class UUIDFetcher implements Callable<Map<String, ChestOwner>> {
     private static final String AGENT = "minecraft";
     private static final int MAX_SEARCH = 100;
-    private static final String PROFILE_URL = "https://api.mojang.com/profiles/page/";
+    private static final String PROFILE_URL = "https://api.mojang.com/profiles/" + AGENT;
 
-    @SuppressWarnings("unchecked")
-    private static String buildBody(List<String> names) {
-        List<JSONObject> lookups = new ArrayList<JSONObject>();
-        for (String name : names) {
-            JSONObject obj = new JSONObject();
-            obj.put("name", name);
-            obj.put("agent", AGENT);
-            lookups.add(obj);
+    private static String buildBody(List<String> names, int startPos) {
+        List<String> lookups = new ArrayList<String>();
+        for (int i = startPos; i < startPos + MAX_SEARCH && i < names.size(); i++) {
+            lookups.add(names.get(i));
         }
         return JSONValue.toJSONString(lookups);
     }
 
-    private static HttpURLConnection createConnection(int page) throws IOException {
-        URL url = new URL(PROFILE_URL + page);
+    private static HttpURLConnection createConnection() throws IOException {
+        URL url = new URL(PROFILE_URL);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Content-Type", "application/json");
@@ -89,14 +87,12 @@ public class UUIDFetcher implements Callable<Map<String, ChestOwner>> {
     @Override
     public Map<String, ChestOwner> call() throws IOException, ParseException {
         Map<String, ChestOwner> uuidMap = new HashMap<String, ChestOwner>();
-        String body = buildBody(names);
-        for (int i = 1; i < MAX_SEARCH; i++) {
-            HttpURLConnection connection = createConnection(i);
+        for(int i = 0; i < names.size(); i+=MAX_SEARCH) {
+            String body = buildBody(names, i);
+            HttpURLConnection connection = createConnection();
             writeBody(connection, body);
-            JSONObject jsonObject = (JSONObject) jsonParser.parse(new InputStreamReader(connection.getInputStream()));
-            JSONArray array = (JSONArray) jsonObject.get("profiles");
-            Number count = (Number) jsonObject.get("size");
-            if (count.intValue() == 0) {
+            JSONArray array = (JSONArray) jsonParser.parse(new InputStreamReader(connection.getInputStream()));
+            if (array.size() == 0) {
                 break;
             }
             for (Object profile : array) {
