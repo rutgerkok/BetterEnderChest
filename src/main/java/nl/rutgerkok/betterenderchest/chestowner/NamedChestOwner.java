@@ -21,6 +21,20 @@ class NamedChestOwner implements ChestOwner {
     }
 
     @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+        if (other == null) {
+            return false;
+        }
+        if (!(other instanceof NamedChestOwner)) {
+            return false;
+        }
+        return ((NamedChestOwner) other).name.equalsIgnoreCase(name);
+    }
+
+    @Override
     public String getDisplayName() {
         return name;
     }
@@ -41,6 +55,11 @@ class NamedChestOwner implements ChestOwner {
     @Override
     public String getSaveFileName() {
         return name.toLowerCase();
+    }
+
+    @Override
+    public int hashCode() {
+        return name.toLowerCase().hashCode();
     }
 
     @Override

@@ -9,21 +9,12 @@ import net.minecraft.server.v1_7_R3.NBTTagCompound;
 import nl.rutgerkok.betterenderchest.nms.SimpleNMSHandler.JSONSimpleTypes;
 
 import org.json.simple.JSONObject;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class TestJSON {
-    @BeforeClass
-    public static void startup() {
-        // Keeps startup time of Minecraft server out of the time individual
-        // tests take to complete
-        // Otherwise it looks like the first test takes 5s to run, and real
-        // performance bugs will get hidden
-        new NBTTagCompound();
-    }
 
     /**
      * Encodes to JSON and decodes. Useful for testing serialization and
