@@ -36,6 +36,7 @@ public class OpenInvCommand extends BaseCommand {
 
         if (!plugin.canSaveAndLoad()) {
             sender.sendMessage(ChatColor.RED + Translations.ENDER_CHESTS_DISABLED.toString());
+            plugin.printSaveAndLoadError();
             return true;
         }
 

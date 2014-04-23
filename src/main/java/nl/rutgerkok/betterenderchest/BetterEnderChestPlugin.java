@@ -238,8 +238,21 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     }
 
     @Override
-    public synchronized SaveAndLoadError getSaveAndLoadError() {
-        return saveAndLoadError;
+    public void printSaveAndLoadError() {
+        SaveAndLoadError error;
+        synchronized (this) {
+            error = saveAndLoadError;
+        }
+
+        if (error == null) {
+            return;
+        }
+
+        severe("- ---------------------------------------------------------- -");
+        severe("Saving and loading had to be disabled. Here's the error again:");
+        severe("(Use \"/bec reload\" to try again to save and load.)");
+        severe(error.getMessage(), error.getCause());
+        severe("- ---------------------------------------------------------- -");
     }
 
     @Override

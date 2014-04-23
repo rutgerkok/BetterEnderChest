@@ -9,7 +9,6 @@ import nl.rutgerkok.betterenderchest.command.BetterEnderCommandManager;
 import nl.rutgerkok.betterenderchest.importers.InventoryImporter;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.BetterEnderFileHandler;
-import nl.rutgerkok.betterenderchest.io.SaveAndLoadError;
 import nl.rutgerkok.betterenderchest.mysql.DatabaseSettings;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.registry.Registry;
@@ -252,14 +251,6 @@ public interface BetterEnderChest {
     Registry<ProtectionBridge> getProtectionBridges();
 
     /**
-     * Gets the latest error that occurred during saving and loading. Will be
-     * null if there were no errors yet.
-     * 
-     * @return The latest error.
-     */
-    SaveAndLoadError getSaveAndLoadError();
-
-    /**
      * Gets the world group manager. You can ask it in which world group a world
      * is.
      * 
@@ -283,6 +274,14 @@ public interface BetterEnderChest {
      *            The message to show.
      */
     void log(String message);
+
+    /**
+     * Prints the latest error that occurred during saving and loading to the
+     * console. Does nothing if there was no error.
+     * 
+     * @see #canSaveAndLoad()
+     */
+    void printSaveAndLoadError();
 
     /**
      * Reloads the configuration and all chests.
