@@ -24,6 +24,11 @@ public class MySQLUUIDConverter extends BetterEnderUUIDConverter {
 
     @Override
     protected List<WorldGroup> needsConversion() {
+        if (sqlHandler == null) {
+            // For when database connection failed
+            return Collections.emptyList();
+        }
+
         try {
             return sqlHandler.getLegacyTables(plugin.getWorldGroupManager());
         } catch (SQLException e) {
