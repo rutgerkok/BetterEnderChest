@@ -23,18 +23,17 @@ import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 public class SQLHandler {
     private static final String LEGACY_TABLE_NAME_PREFIX = "bec_chests_";
     private static final String TABLE_NAME_PREFIX = "bec_chestdata_";
-    private final Connection connection;
+    /**
+     * Never use this field directly, use {@link #getConnection()} or {@link #closeConnection()}.
+     */
+    private Connection connection;
+    private final Object connectionLock = new Object();
+    private final DatabaseSettings settings;
 
     public SQLHandler(DatabaseSettings settings) throws SQLException {
-        Connection connection = null;
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            String connectionString = "jdbc:mysql://" + settings.getHost() + ":" + settings.getPort() + "/" + settings.getDatabaseName();
-            connection = DriverManager.getConnection(connectionString, settings.getUsername(), settings.getPassword());
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("JDBC Driver not found!");
-        }
-        this.connection = connection;
+        this.settings = settings;
+        getConnection(); // Initializes the connection, so that errors are
+        // displayed at server startup
     }
 
     /**
@@ -52,7 +51,7 @@ public class SQLHandler {
             // New chest, insert in database
             String query = "INSERT INTO `" + getTableName(saveEntry.getWorldGroup()) + "` (`chest_owner`, `chest_data`) ";
             query += "VALUES (?, ?)";
-            statement = connection.prepareStatement(query);
+            statement = getConnection().prepareStatement(query);
             statement.setString(1, saveEntry.getChestOwner().getSaveFileName());
             statement.setString(2, saveEntry.getChestJson());
             statement.executeUpdate();
@@ -85,7 +84,7 @@ public class SQLHandler {
             for (int i = 1; i < saveEntries.size(); i++) {
                 query.append(", (?, ?) ");
             }
-            statement = connection.prepareStatement(query.toString());
+            statement = getConnection().prepareStatement(query.toString());
 
             // Set parameters
             for (int i = 0; i < saveEntries.size(); i++) {
@@ -104,13 +103,19 @@ public class SQLHandler {
     }
 
     /**
-     * Closes the connection.
+     * Closes the connection. Does nothing if the connection was already closed.
      * 
      * @throws SQLException
      *             If something went wrong.
      */
     void closeConnection() throws SQLException {
-        connection.close();
+        synchronized (connectionLock) {
+            // Connection status may have been changed since method was called,
+            // so do a quick recheck
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        }
     }
 
     /**
@@ -123,7 +128,7 @@ public class SQLHandler {
      *             If somehting went wrong.
      */
     void createGroupTable(WorldGroup group) throws SQLException {
-        Statement statement = connection.createStatement();
+        Statement statement = getConnection().createStatement();
         try {
             String query = "CREATE TABLE IF NOT EXISTS `" + getTableName(group) + "` ("
                     + " `chest_id` int(10) unsigned NOT NULL AUTO_INCREMENT, `chest_owner` char(36) NOT NULL,"
@@ -161,7 +166,7 @@ public class SQLHandler {
             query.append(")");
 
             // Set parameters
-            statement = connection.prepareStatement(query.toString());
+            statement = getConnection().prepareStatement(query.toString());
             int i = 1;
             for (String chestName : chestNames) {
                 statement.setString(i, chestName);
@@ -186,7 +191,38 @@ public class SQLHandler {
      *             If the SQL was invalid, or the connection closed.
      */
     public boolean dropLegacyTable(WorldGroup worldGroup) throws SQLException {
-        return connection.createStatement().execute("DROP TABLE `" + this.getLegacyTableName(worldGroup) + "`");
+        return getConnection().createStatement().execute("DROP TABLE `" + this.getLegacyTableName(worldGroup) + "`");
+    }
+
+    /**
+     * Gets the active connection. If the connection is not active yet/anymore,
+     * an attempt to (re)connect is made.
+     * 
+     * @return The active connection.
+     * @throws SQLException
+     *             If no connection could be made
+     */
+    private Connection getConnection() throws SQLException {
+        synchronized (connectionLock) {
+            if (connection != null && !connection.isClosed() && connection.isValid(1)) {
+                // We already have a valid connection
+                return connection;
+            }
+            if (connection != null) {
+                // We have a connection, but it's invalid
+                connection.close();
+            }
+
+            // Try to (re)connect
+            try {
+                Class.forName("com.mysql.jdbc.Driver");
+                String connectionString = "jdbc:mysql://" + settings.getHost() + ":" + settings.getPort() + "/" + settings.getDatabaseName();
+                connection = DriverManager.getConnection(connectionString, settings.getUsername(), settings.getPassword());
+            } catch (ClassNotFoundException e) {
+                throw new SQLException("JDBC Driver not found!");
+            }
+            return connection;
+        }
     }
 
     private String getLegacyTableName(WorldGroup group) {
@@ -205,7 +241,7 @@ public class SQLHandler {
      *             If something went wrong.
      */
     public List<WorldGroup> getLegacyTables(BetterEnderWorldGroupManager groups) throws SQLException {
-        ResultSet resultSet = connection.createStatement().executeQuery("SHOW TABLES");
+        ResultSet resultSet = getConnection().createStatement().executeQuery("SHOW TABLES");
 
         List<WorldGroup> worldGroups = new ArrayList<WorldGroup>();
         while (resultSet.next()) {
@@ -242,7 +278,7 @@ public class SQLHandler {
         try {
             String query = "SELECT `chest_data` FROM `" + getTableName(group);
             query += "` WHERE `chest_owner` = ?";
-            statement = connection.prepareStatement(query);
+            statement = getConnection().prepareStatement(query);
             statement.setString(1, chestOwner.getSaveFileName());
             result = statement.executeQuery();
             if (result.first()) {
@@ -278,7 +314,7 @@ public class SQLHandler {
         try {
             String query = "SELECT `chest_owner`, `chest_data` FROM `" + getLegacyTableName(group);
             query += "` LIMIT 0, " + numberOfChests;
-            result = connection.createStatement().executeQuery(query);
+            result = getConnection().createStatement().executeQuery(query);
             while (result.next()) {
                 chestData.put(result.getString(1).toLowerCase(), result.getBytes(2));
             }
@@ -305,7 +341,7 @@ public class SQLHandler {
         try {
             // Existing chest, update row
             String query = "UPDATE `" + getTableName(saveEntry.getWorldGroup()) + "` SET `chest_data` = ? WHERE `chest_owner` = ?";
-            statement = connection.prepareStatement(query);
+            statement = getConnection().prepareStatement(query);
             statement.setString(1, saveEntry.getChestJson());
             statement.setString(2, saveEntry.getChestOwner().getSaveFileName());
             int changedRows = statement.executeUpdate();
