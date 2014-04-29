@@ -10,17 +10,19 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
+import java.util.Map.Entry;
 
 import net.minecraft.server.v1_7_R3.MinecraftServer;
-import net.minecraft.server.v1_7_R3.MojangsonParser;
 import net.minecraft.server.v1_7_R3.NBTBase;
 import net.minecraft.server.v1_7_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_7_R3.NBTNumber;
 import net.minecraft.server.v1_7_R3.NBTTagByteArray;
 import net.minecraft.server.v1_7_R3.NBTTagCompound;
+import net.minecraft.server.v1_7_R3.NBTTagDouble;
+import net.minecraft.server.v1_7_R3.NBTTagInt;
 import net.minecraft.server.v1_7_R3.NBTTagIntArray;
 import net.minecraft.server.v1_7_R3.NBTTagList;
+import net.minecraft.server.v1_7_R3.NBTTagLong;
 import net.minecraft.server.v1_7_R3.NBTTagString;
 import net.minecraft.server.v1_7_R3.TileEntity;
 import net.minecraft.server.v1_7_R3.TileEntityEnderChest;
@@ -36,14 +38,11 @@ import org.bukkit.craftbukkit.v1_7_R3.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class SimpleNMSHandler extends NMSHandler {
     static class JSONSimpleTypes {
-        /**
-         * Replaces "Key":"value" with Key:"value" to make it valid Mojangson.
-         */
-        private static final Pattern JSON_TO_MOJANGSON = Pattern.compile("\"([\\w]+)\":");
-
         /**
          * Boxes all the values of the array (<code>Byte.valueOf</code>), for
          * consumption by JSONSimple.
@@ -76,28 +75,59 @@ public class SimpleNMSHandler extends NMSHandler {
             return integerList;
         }
 
-        /**
-         * Converts the compound tag to a map. All values in the tag will also
-         * have their tags converted to String//primitives/maps/Lists.
-         * 
-         * @param tagCompound
-         * @return
-         * @throws IOException
-         */
-        static final Map<String, Object> toMap(NBTTagCompound tagCompound) throws IOException {
-            @SuppressWarnings("unchecked")
-            Collection<String> tagNames = tagCompound.c();
-
-            // Add all children
-            Map<String, Object> jsonObject = new HashMap<String, Object>(tagNames.size());
-            for (String subTagName : tagNames) {
-                NBTBase subTag = tagCompound.get(subTagName);
-                jsonObject.put(subTagName, toObject(subTag));
+        static final NBTBase javaTypeToNBTTag(Object object) throws IOException {
+            // Handle compounds
+            if (object instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, ?> map = (Map<String, ?>) object;
+                NBTTagCompound tag = new NBTTagCompound();
+                for (Entry<String, ?> entry : map.entrySet()) {
+                    tag.set(entry.getKey(), javaTypeToNBTTag(entry.getValue()));
+                }
+                return tag;
             }
-            return jsonObject;
+            // Handle numbers
+            if (object instanceof Number) {
+                Number number = (Number) object;
+                if (number.longValue() == number.doubleValue()) {
+                    // Whole number
+                    if (number.intValue() == number.longValue()) {
+                        // Fits in integer
+                        return new NBTTagInt(number.intValue());
+                    }
+                    return new NBTTagLong(number.longValue());
+                } else {
+                    return new NBTTagDouble(number.doubleValue());
+                }
+            }
+            // Handle strings
+            if (object instanceof String) {
+                return new NBTTagString((String) object);
+            }
+            // Handle lists
+            if (object instanceof List) {
+                List<?> list = (List<?>) object;
+                NBTTagList listTag = new NBTTagList();
+
+                // Handle int arrays
+                if (list.size() > 0) {
+                    Object firstElement = list.get(0);
+                    if (firstElement instanceof Number) {
+                        @SuppressWarnings("unchecked")
+                        List<Number> intList = (List<Number>) list;
+                        return new NBTTagIntArray(unboxIntegers(intList));
+                    }
+                }
+
+                for (Object entry : list) {
+                    listTag.add(javaTypeToNBTTag(entry));
+                }
+                return listTag;
+            }
+            throw new IOException("Unknown object: (" + object.getClass() + ") " + object + "");
         }
 
-        private static final Object toObject(NBTBase tag) throws IOException {
+        private static final Object nbtTagToJavaType(NBTBase tag) throws IOException {
             if (tag instanceof NBTTagCompound) {
                 return toMap((NBTTagCompound) tag);
             } else if (tag instanceof NBTTagList) {
@@ -105,7 +135,7 @@ public class SimpleNMSHandler extends NMSHandler {
                 NBTTagList listTag = (NBTTagList) tag;
                 List<Object> objects = new ArrayList<Object>();
                 for (int i = 0; i < listTag.size(); i++) {
-                    objects.add(toObject(listTag, i));
+                    objects.add(tagInNBTListToJavaType(listTag, i));
                 }
                 return objects;
             } else if (tag instanceof NBTNumber) {
@@ -142,11 +172,11 @@ public class SimpleNMSHandler extends NMSHandler {
          * @throws IOException
          *             If the tag type is unknown.
          */
-        private static final Object toObject(NBTTagList tagList, int position) throws IOException {
+        private static final Object tagInNBTListToJavaType(NBTTagList tagList, int position) throws IOException {
             switch (tagList.d()) {
                 case TagType.COMPOUND:
                     NBTTagCompound compoundValue = tagList.get(position);
-                    return toObject(compoundValue);
+                    return nbtTagToJavaType(compoundValue);
                 case TagType.INT_ARRAY:
                     return boxIntegers(tagList.c(position));
                 case TagType.DOUBLE:
@@ -163,6 +193,27 @@ public class SimpleNMSHandler extends NMSHandler {
         }
 
         /**
+         * Converts the compound tag to a map. All values in the tag will also
+         * have their tags converted to String//primitives/maps/Lists.
+         * 
+         * @param tagCompound
+         * @return
+         * @throws IOException
+         */
+        static final Map<String, Object> toMap(NBTTagCompound tagCompound) throws IOException {
+            @SuppressWarnings("unchecked")
+            Collection<String> tagNames = tagCompound.c();
+
+            // Add all children
+            Map<String, Object> jsonObject = new HashMap<String, Object>(tagNames.size());
+            for (String subTagName : tagNames) {
+                NBTBase subTag = tagCompound.get(subTagName);
+                jsonObject.put(subTagName, nbtTagToJavaType(subTag));
+            }
+            return jsonObject;
+        }
+
+        /**
          * Turns the given json-formatted string back into a NBTTagCompound.
          * Mojangson formatting is also accepted.
          * 
@@ -174,11 +225,27 @@ public class SimpleNMSHandler extends NMSHandler {
          */
         static final NBTTagCompound toTag(String jsonString) throws IOException {
             try {
-                jsonString = JSON_TO_MOJANGSON.matcher(jsonString).replaceAll("$1:");
-                return (NBTTagCompound) MojangsonParser.parse(jsonString);
-            } catch (RuntimeException e) {
+                return (NBTTagCompound) javaTypeToNBTTag(new JSONParser().parse(jsonString));
+            } catch (ParseException e) {
                 throw new IOException(e);
             }
+        }
+
+        /**
+         * Unboxes all the values of the list, for consumption by Minecraft.
+         * 
+         * @param boxed
+         *            The boxed integers. JSONArray uses longs instead of ints
+         *            for non-fractional numbers, so you can use any kind of
+         *            number for this method.
+         * @return The unboxed array.
+         */
+        private static final int[] unboxIntegers(List<Number> boxed) {
+            int[] ints = new int[boxed.size()];
+            for (int i = 0; i < ints.length; i++) {
+                ints[i] = boxed.get(i).intValue();
+            }
+            return ints;
         }
     }
 
