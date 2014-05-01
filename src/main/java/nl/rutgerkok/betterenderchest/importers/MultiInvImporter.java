@@ -18,6 +18,7 @@ import org.bukkit.inventory.Inventory;
 
 import uk.co.tggl.pluckerpluck.multiinv.MIYamlFiles;
 import uk.co.tggl.pluckerpluck.multiinv.inventory.MIEnderchestInventory;
+import uk.co.tggl.pluckerpluck.multiinv.inventory.MIItemStack;
 
 public class MultiInvImporter extends InventoryImporter {
 
@@ -121,9 +122,19 @@ public class MultiInvImporter extends InventoryImporter {
             return null;
         }
 
+        MIItemStack[] inventoryContents = multiInvEnderInventory.getInventoryContents();
+        if (inventoryContents == null) {
+            // Nothing to return
+            return null;
+        }
+
         // Add everything from multiInvEnderInventory to betterInventory
-        for (int i = 0; i < multiInvEnderInventory.getInventoryContents().length && i < betterInventory.getSize(); i++) {
-            betterInventory.setItem(i, multiInvEnderInventory.getInventoryContents()[i].getItemStack());
+        for (int i = 0; i < inventoryContents.length && i < betterInventory.getSize(); i++) {
+            MIItemStack stack = inventoryContents[i];
+            if (stack == null) {
+                continue;
+            }
+            betterInventory.setItem(i, stack.getItemStack());
         }
 
         // Return it
