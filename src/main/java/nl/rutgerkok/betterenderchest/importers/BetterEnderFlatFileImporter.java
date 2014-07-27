@@ -27,7 +27,7 @@ public class BetterEnderFlatFileImporter extends InventoryImporter {
 
     @Override
     public void importInventoryAsync(ChestOwner chestOwner, WorldGroup worldGroup, BetterEnderChest plugin, Consumer<Inventory> callback, Consumer<IOException> onError) {
-        plugin.getFileHandler().loadInventory(chestOwner, worldGroup, callback);
+        plugin.getFileHandler().loadFromFileOrError(chestOwner, worldGroup, callback, onError);
     }
 
     @Override

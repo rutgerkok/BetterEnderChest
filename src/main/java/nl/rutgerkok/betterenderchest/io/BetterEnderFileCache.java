@@ -174,7 +174,7 @@ public class BetterEnderFileCache extends AbstractEnderCache {
         }
 
         // Inventory has to be loaded
-        plugin.getFileHandler().loadInventory(chestOwner, worldGroup, new Consumer<Inventory>() {
+        plugin.getFileHandler().loadFromFileOrImport(chestOwner, worldGroup, new Consumer<Inventory>() {
             @Override
             public void consume(Inventory enderInventory) {
                 // Check if something from that group has been loaded

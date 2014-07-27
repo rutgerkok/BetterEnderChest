@@ -7,6 +7,7 @@ import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.betterenderchest.exception.ChestNotFoundException;
 
 import org.bukkit.inventory.Inventory;
 
@@ -15,6 +16,10 @@ import org.bukkit.inventory.Inventory;
  * 
  */
 public class BetterEnderFileHandler {
+    /**
+     * @deprecated Internal constant, will be made private in the future
+     */
+    @Deprecated
     public static final String EXTENSION = ".dat";
     private final BetterEnderChest plugin;
 
@@ -48,7 +53,9 @@ public class BetterEnderFileHandler {
      * @param worldGroup
      *            The world group.
      * @return The directory where all files of a group will be saved in.
+     * @deprecated Internal method, will be private in the future.
      */
+    @Deprecated
     public File getChestDirectory(File baseDir, WorldGroup worldGroup) {
         if (worldGroup.getGroupName().equals(BetterEnderChest.STANDARD_GROUP_NAME)) {
             return baseDir;
@@ -66,21 +73,18 @@ public class BetterEnderFileHandler {
      * @param worldGroup
      *            The group the chest is in.
      * @return The file.
+     * @deprecated Internal method, will be private in the future
      */
+    @Deprecated
     public File getChestFile(ChestOwner chestOwner, WorldGroup worldGroup) {
         File directory = getChestDirectory(plugin.getChestSaveLocation(), worldGroup);
         return new File(directory, chestOwner.getSaveFileName() + EXTENSION);
     }
 
     /**
-     * Returns whether the specified inventory exists on disk.
-     * 
-     * @param chestOwner
-     *            The inventory to search for.
-     * @param group
-     *            The group to search in.
-     * @return Whether the inventory exists.
+     * @deprecated Internal method, will be removed, no replacement
      */
+    @Deprecated
     public boolean inventoryFileExists(ChestOwner chestOwner, WorldGroup group) {
         return getChestFile(chestOwner, group).exists();
     }
@@ -96,38 +100,63 @@ public class BetterEnderFileHandler {
      * @return The Inventory. {@link BetterEnderInventoryHolder} will be the
      *         holder of the inventory.
      */
-    public void loadInventory(ChestOwner chestOwner, WorldGroup worldGroup, Consumer<Inventory> callback) {
+    public void loadFromFileOrImport(ChestOwner chestOwner, WorldGroup worldGroup, Consumer<Inventory> callback) {
         // Try to load it from a file
-        if (inventoryFileExists(chestOwner, worldGroup)) {
-            try {
-                callback.consume(loadInventory0(chestOwner, worldGroup));
-                return;
-            } catch (IOException e) {
-                plugin.severe("Failed to load chest of " + chestOwner.getDisplayName(), e);
-                plugin.disableSaveAndLoad("Failed to load chest of " + chestOwner.getDisplayName(), e);
-                callback.consume(plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup));
-                return;
-            }
+        try {
+            callback.consume(loadFromFileOrError0(chestOwner, worldGroup));
+        } catch (ChestNotFoundException e) {
+            // Use various fallback methods
+            plugin.getEmptyInventoryProvider().getFallbackInventory(chestOwner, worldGroup, callback);
+        } catch (IOException e) {
+            // Load empty inventory
+            plugin.severe("Failed to load chest of " + chestOwner.getDisplayName(), e);
+            plugin.disableSaveAndLoad("Failed to load chest of " + chestOwner.getDisplayName(), e);
+            callback.consume(plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup));
         }
-
-        // Use various fallback methods
-        plugin.getEmptyInventoryProvider().getFallbackInventory(chestOwner, worldGroup, callback);
     }
 
     /**
-     * Tries to load an inventory from the file. Doesn't use fallback methods.
-     * Assumes that the file exists.
+     * @deprecated Ambiguous name
+     * @see #loadFromFileOrImport(ChestOwner, WorldGroup, Consumer) for a direct
+     *      replacement
+     * @see #loadFromFileOrError(ChestOwner, WorldGroup) for a replacement that
+     *      throws errors
+     */
+    @Deprecated
+    public void loadInventory(ChestOwner chestOwner, WorldGroup worldGroup, Consumer<Inventory> callback) {
+        loadFromFileOrImport(chestOwner, worldGroup, callback);
+    }
+
+    /**
+     * Tries to load an inventory from the file. If the file doens't exist, null
+     * is returned. If an IO error occurs, an empty inventory is returned.
      * 
      * @param chestOwner
      *            Owner of the chest.
      * @param worldGroup
      *            Group the chest is in.
-     * @return The invenotory.
-     * @throws IOException
-     *             If the inventory doesn't exist on disk, or is corrupted.
+     * @param callback
+     *            Called when the chest has been loaded.
+     * @param onError
+     *            Called when the chest could not be loaded. When it could not
+     *            be loaded because of a missing file, the exception will be of
+     *            the type {@link ChestNotFoundException}.
      */
-    private Inventory loadInventory0(ChestOwner chestOwner, WorldGroup worldGroup) throws IOException {
+    public void loadFromFileOrError(ChestOwner chestOwner, WorldGroup worldGroup, Consumer<Inventory> callback,
+            Consumer<IOException> onError) {
+        try {
+            callback.consume(loadFromFileOrError0(chestOwner, worldGroup));
+        } catch (IOException e) {
+            onError.consume(e);
+        }
+    }
+
+    private Inventory loadFromFileOrError0(ChestOwner chestOwner, WorldGroup worldGroup) throws IOException {
         File file = getChestFile(chestOwner, worldGroup);
+        if (!file.exists()) {
+            throw new ChestNotFoundException(chestOwner, worldGroup);
+        }
+
         return plugin.getNMSHandlers().getSelectedRegistration().loadNBTInventoryFromFile(file, chestOwner, worldGroup, "Inventory");
     }
 

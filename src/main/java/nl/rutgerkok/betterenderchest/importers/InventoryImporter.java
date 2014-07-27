@@ -5,7 +5,7 @@ import java.io.IOException;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
-import nl.rutgerkok.betterenderchest.exception.NoChestImportedException;
+import nl.rutgerkok.betterenderchest.exception.ChestNotFoundException;
 import nl.rutgerkok.betterenderchest.io.Consumer;
 import nl.rutgerkok.betterenderchest.registry.Registration;
 
@@ -54,7 +54,7 @@ public abstract class InventoryImporter implements Registration {
             if (inventory != null) {
                 callback.consume(inventory);
             } else {
-                onError.consume(new NoChestImportedException());
+                onError.consume(new ChestNotFoundException(chestOwner, worldGroup));
             }
         } catch (IOException e) {
             onError.consume(e);

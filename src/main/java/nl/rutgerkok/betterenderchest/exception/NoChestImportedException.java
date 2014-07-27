@@ -3,9 +3,10 @@ package nl.rutgerkok.betterenderchest.exception;
 import java.io.IOException;
 
 /**
- * Thrown when the other plugin has no chest available.
- *
+ * @deprecated Replaced by {@link ChestNotFoundException}.
+ * @see ChestNotFoundException
  */
+@Deprecated
 public class NoChestImportedException extends IOException {
 
     private static final long serialVersionUID = 1L;

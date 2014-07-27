@@ -21,6 +21,8 @@ class ConvertDirectoryTask extends ConvertTask {
     private final File newChestsDir;
     private final File oldChestsDir;
 
+    @SuppressWarnings("deprecation")
+    // ^ When getChestDirectory is made private, this class will be gone
     ConvertDirectoryTask(BetterEnderChest plugin, WorldGroup worldGroup) {
         super(plugin, worldGroup);
         this.extension = BetterEnderFileHandler.EXTENSION;
