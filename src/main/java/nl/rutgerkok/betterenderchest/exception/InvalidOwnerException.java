@@ -7,6 +7,9 @@ import org.apache.commons.lang.Validate;
  *
  */
 public class InvalidOwnerException extends Exception {
+
+    private static final long serialVersionUID = 1L;
+
     private final String ownerName;
 
     /**

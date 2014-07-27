@@ -10,6 +10,9 @@ import org.apache.commons.lang.Validate;
  *
  */
 public class NoPermissionException extends Exception {
+
+    private static final long serialVersionUID = 1L;
+
     private final String permission;
 
     /**

@@ -6,4 +6,6 @@ package nl.rutgerkok.betterenderchest.exception;
  */
 public class ChestProtectedException extends Exception {
 
+    private static final long serialVersionUID = 1L;
+
 }
