@@ -3,6 +3,11 @@ package nl.rutgerkok.betterenderchest.uuidconversion;
 import java.io.File;
 import java.io.FilenameFilter;
 
+/**
+ * @deprecated Will be removed once UUID conversion is removed.
+ *
+ */
+@Deprecated
 class LimitingFilenameFilter implements FilenameFilter {
     private int count;
     private final String extension;

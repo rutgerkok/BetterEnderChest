@@ -69,7 +69,9 @@ public class SQLHandler {
      *            The chests to add. All chests must be in the same WorldGroup.
      * @throws SQLException
      *             When something went wrong.
+     * @deprecated Will be removed once support for legacy chests is dropped.
      */
+    @Deprecated
     public void addChests(List<SaveEntry> saveEntries) throws SQLException {
         if (saveEntries.size() == 0) {
             return;
@@ -149,7 +151,9 @@ public class SQLHandler {
      *            The names of the chests.
      * @throws SQLException
      *             If something went wrong.
+     * @deprecated Will be removed once support for legacy chests is dropped.
      */
+    @Deprecated
     public void deleteLegacyChests(WorldGroup worldGroup, Collection<String> chestNames) throws SQLException {
         if (chestNames.isEmpty()) {
             return;
@@ -189,7 +193,9 @@ public class SQLHandler {
      * @return Whether the table was dropped.
      * @throws SQLException
      *             If the SQL was invalid, or the connection closed.
+     * @deprecated Will be removed once support for legacy chests is dropped.
      */
+    @Deprecated
     public boolean dropLegacyTable(WorldGroup worldGroup) throws SQLException {
         return getConnection().createStatement().execute("DROP TABLE `" + this.getLegacyTableName(worldGroup) + "`");
     }
@@ -239,7 +245,9 @@ public class SQLHandler {
      *         needed.
      * @throws SQLException
      *             If something went wrong.
+     * @deprecated Will be removed once support for legacy chests is dropped.
      */
+    @Deprecated
     public List<WorldGroup> getLegacyTables(BetterEnderWorldGroupManager groups) throws SQLException {
         ResultSet resultSet = getConnection().createStatement().executeQuery("SHOW TABLES");
 
@@ -307,7 +315,9 @@ public class SQLHandler {
      * @return A map with the chests.
      * @throws SQLException
      *             If something went wrong.
+     * @deprecated Will be removed once support for legacy chests is dropped.
      */
+    @Deprecated
     public Map<String, byte[]> loadLegacyChests(int numberOfChests, WorldGroup group) throws SQLException {
         Map<String, byte[]> chestData = new HashMap<String, byte[]>();
         ResultSet result = null;

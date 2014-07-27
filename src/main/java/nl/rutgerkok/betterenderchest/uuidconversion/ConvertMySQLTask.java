@@ -20,6 +20,11 @@ import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 
 import com.google.common.collect.ImmutableList;
 
+/**
+ * @deprecated Will be removed once UUID conversion is removed.
+ *
+ */
+@Deprecated
 public class ConvertMySQLTask extends ConvertTask {
     // Map of lowerCaseName => chestData
     private Map<String, byte[]> chestsData;

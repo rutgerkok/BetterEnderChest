@@ -22,12 +22,19 @@ import java.util.concurrent.Callable;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwners;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+/**
+ * @deprecated Class will be moved to another package once UUID conversion
+ * support is removed. Use {@link ChestOwners} to retrieve UUIDs.
+ *
+ */
+@Deprecated
 public class UUIDFetcher implements Callable<Map<String, ChestOwner>> {
     private static final String PROFILE_URL = "https://api.mojang.com/profiles/minecraft";
     private static final double PROFILES_PER_REQUEST = 100;
@@ -65,7 +72,6 @@ public class UUIDFetcher implements Callable<Map<String, ChestOwner>> {
         this(plugin, names, true);
     }
 
-    @SuppressWarnings("deprecation")
     public UUIDFetcher(BetterEnderChest plugin, Collection<String> names, boolean rateLimiting) {
         this.plugin = plugin;
         this.names = new ArrayList<String>(names);

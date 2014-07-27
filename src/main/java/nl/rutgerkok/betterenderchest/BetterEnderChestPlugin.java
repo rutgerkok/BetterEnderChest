@@ -33,7 +33,6 @@ import nl.rutgerkok.betterenderchest.mysql.DatabaseSettings;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.nms.SimpleNMSHandler;
 import nl.rutgerkok.betterenderchest.registry.Registry;
-import nl.rutgerkok.betterenderchest.uuidconversion.BetterEnderUUIDConverter;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -85,7 +84,9 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private int rankUpgrades;
     private SaveAndLoadError saveAndLoadError;
     private boolean useUuids;
-    private BetterEnderUUIDConverter uuidConverter;
+
+    @Deprecated
+    private nl.rutgerkok.betterenderchest.uuidconversion.BetterEnderUUIDConverter uuidConverter;
 
     @Override
     public synchronized boolean canSaveAndLoad() {
@@ -484,6 +485,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     /**
      * Loads all IO services that were not yet loaded.
      */
+    @SuppressWarnings("deprecation")
     private void loadIOServices() {
         // File handlers
         fileHandler = new BetterEnderFileHandler(this);
@@ -496,6 +498,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         }
 
         // Converter
+        // Lines will be removed once UUID conversion support is removed
         uuidConverter = enderCache.getUUIDConverter();
         uuidConverter.startConversion();
     }
@@ -623,10 +626,13 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     /**
      * Unloads all IO services.
      */
+    @SuppressWarnings("deprecation")
     private void unloadIOServices() {
         enderCache.disable();
         fileHandler = null;
         enderCache = null;
+
+        // Lines will be removed once UUID conversion support is removed
         uuidConverter.stopConversion();
         uuidConverter = null;
     }

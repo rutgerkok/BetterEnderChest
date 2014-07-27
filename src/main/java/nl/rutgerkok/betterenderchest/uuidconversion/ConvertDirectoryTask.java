@@ -15,14 +15,17 @@ import nl.rutgerkok.betterenderchest.io.BetterEnderFileHandler;
 
 import com.google.common.io.Files;
 
+/**
+ * @deprecated Will be removed once UUID conversion is removed.
+ *
+ */
+@Deprecated
 class ConvertDirectoryTask extends ConvertTask {
 
     private final String extension;
     private final File newChestsDir;
     private final File oldChestsDir;
 
-    @SuppressWarnings("deprecation")
-    // ^ When getChestDirectory is made private, this class will be gone
     ConvertDirectoryTask(BetterEnderChest plugin, WorldGroup worldGroup) {
         super(plugin, worldGroup);
         this.extension = BetterEnderFileHandler.EXTENSION;

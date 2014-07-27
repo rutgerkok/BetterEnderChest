@@ -9,6 +9,11 @@ import nl.rutgerkok.betterenderchest.WorldGroup;
 import org.bukkit.Bukkit;
 import org.json.simple.parser.ParseException;
 
+/**
+ * @deprecated Will be removed once UUID conversion is removed.
+ *
+ */
+@Deprecated
 public abstract class BetterEnderUUIDConverter {
     protected static final int BATCH_SIZE = 1000;
 

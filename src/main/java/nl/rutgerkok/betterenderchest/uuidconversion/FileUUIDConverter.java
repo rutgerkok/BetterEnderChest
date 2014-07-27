@@ -7,6 +7,11 @@ import java.util.List;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 
+/**
+ * @deprecated Will be removed once UUID conversion is removed.
+ *
+ */
+@Deprecated
 public class FileUUIDConverter extends BetterEnderUUIDConverter {
 
     public FileUUIDConverter(BetterEnderChest plugin) {

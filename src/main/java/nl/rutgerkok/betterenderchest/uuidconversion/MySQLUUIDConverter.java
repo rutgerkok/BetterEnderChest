@@ -8,6 +8,11 @@ import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.mysql.SQLHandler;
 
+/**
+ * @deprecated Will be removed once UUID conversion is removed.
+ *
+ */
+@Deprecated
 public class MySQLUUIDConverter extends BetterEnderUUIDConverter {
 
     private final SQLHandler sqlHandler;

@@ -10,6 +10,11 @@ import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.json.simple.parser.ParseException;
 
+/**
+ * @deprecated Will be removed once UUID conversion is removed.
+ *
+ */
+@Deprecated
 abstract class ConvertTask {
 
     protected final BetterEnderChest plugin;
