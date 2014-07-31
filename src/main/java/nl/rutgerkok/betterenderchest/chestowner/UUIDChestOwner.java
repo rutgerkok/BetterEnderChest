@@ -44,6 +44,11 @@ final class UUIDChestOwner implements ChestOwner {
     }
 
     @Override
+    public OfflinePlayer getOfflinePlayer() {
+        return Bukkit.getOfflinePlayer(uuid);
+    }
+
+    @Override
     public Player getPlayer() {
         return Bukkit.getPlayer(uuid);
     }

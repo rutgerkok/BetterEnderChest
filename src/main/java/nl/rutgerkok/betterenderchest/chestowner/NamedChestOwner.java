@@ -48,6 +48,14 @@ class NamedChestOwner implements ChestOwner {
     // ^ The server owner chose to use names, not our problem if something
     // breaks
     @Override
+    public OfflinePlayer getOfflinePlayer() {
+        return Bukkit.getOfflinePlayer(name);
+    }
+
+    @SuppressWarnings("deprecation")
+    // ^ The server owner chose to use names, not our problem if something
+    // breaks
+    @Override
     public Player getPlayer() {
         return Bukkit.getPlayerExact(name);
     }

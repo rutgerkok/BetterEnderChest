@@ -45,6 +45,16 @@ public interface ChestOwner {
 
     /**
      * Gets the player that this <code>ChestOwner</code> represents. Returns
+     * null if this owner {@link #isSpecialChest() is a special chest}.
+     * 
+     * @return The player that this <code>ChestOwner</code> represents, or null.
+     * @see #getPlayer() More efficient implementation if you are only
+     *      interested in online players.
+     */
+    OfflinePlayer getOfflinePlayer();
+
+    /**
+     * Gets the player that this <code>ChestOwner</code> represents. Returns
      * null if the owner is offline, or if this owner {@link #isSpecialChest()
      * is a special chest}.
      * 

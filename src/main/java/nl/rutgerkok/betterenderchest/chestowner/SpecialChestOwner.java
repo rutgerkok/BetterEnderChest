@@ -46,6 +46,12 @@ final class SpecialChestOwner implements ChestOwner {
     }
 
     @Override
+    public OfflinePlayer getOfflinePlayer() {
+        // Will never represent a player
+        return null;
+    }
+
+    @Override
     public Player getPlayer() {
         // Will never represent a player
         return null;
