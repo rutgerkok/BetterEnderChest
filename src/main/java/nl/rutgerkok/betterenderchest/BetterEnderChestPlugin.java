@@ -448,9 +448,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         getChestSizes().setSizes(publicChestSlots, playerChestSlots);
 
         // Database settings
-        if (databaseSettings == null) {
-            databaseSettings = new DatabaseSettings(config);
-        }
+        databaseSettings = new DatabaseSettings(config);
 
         // Save translations
         Translations.save(translationSettings);
