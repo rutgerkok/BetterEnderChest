@@ -93,7 +93,7 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
             }
 
             // Get the data
-            PlayerProfile playerData = multiverseInventories.getGroupManager().getGroup(groupName).getPlayerData(profileType, Bukkit.getOfflinePlayer(chestOwner.getDisplayName()));
+            PlayerProfile playerData = multiverseInventories.getGroupManager().getGroup(groupName).getPlayerData(profileType, chestOwner.getOfflinePlayer());
 
             // Return nothing if there is nothing
             if (playerData == null) {
