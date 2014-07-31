@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.exception.InvalidOwnerException;
 import nl.rutgerkok.betterenderchest.io.Consumer;
-import nl.rutgerkok.betterenderchest.uuidconversion.UUIDFetcher;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -65,8 +64,10 @@ public class ChestOwners {
         }
 
         // Go to mojang.com
-        UUIDFetcher uuidFetcher = new UUIDFetcher(plugin, Collections.singletonList(name));
+        @SuppressWarnings("deprecation")
+        nl.rutgerkok.betterenderchest.uuidconversion.UUIDFetcher uuidFetcher = new nl.rutgerkok.betterenderchest.uuidconversion.UUIDFetcher(plugin, Collections.singletonList(name));
         try {
+            @SuppressWarnings("deprecation")
             Map<String, ChestOwner> chestOwnerMap = uuidFetcher.call();
             if (chestOwnerMap.size() == 0) {
                 throw new InvalidOwnerException(name);

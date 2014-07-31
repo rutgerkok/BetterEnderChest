@@ -11,8 +11,6 @@ import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.AutoSave;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
-import nl.rutgerkok.betterenderchest.uuidconversion.BetterEnderUUIDConverter;
-import nl.rutgerkok.betterenderchest.uuidconversion.FileUUIDConverter;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
@@ -192,9 +190,10 @@ public class BetterEnderFileCache extends AbstractEnderCache {
 
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public BetterEnderUUIDConverter getUUIDConverter() {
-        return new FileUUIDConverter(plugin);
+    public nl.rutgerkok.betterenderchest.uuidconversion.BetterEnderUUIDConverter getUUIDConverter() {
+        return new nl.rutgerkok.betterenderchest.uuidconversion.FileUUIDConverter(plugin);
     }
 
     @Override

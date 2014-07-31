@@ -16,8 +16,6 @@ import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.io.AbstractEnderCache;
 import nl.rutgerkok.betterenderchest.io.Consumer;
-import nl.rutgerkok.betterenderchest.uuidconversion.BetterEnderUUIDConverter;
-import nl.rutgerkok.betterenderchest.uuidconversion.MySQLUUIDConverter;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
@@ -184,9 +182,10 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
         });
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public BetterEnderUUIDConverter getUUIDConverter() {
-        return new MySQLUUIDConverter(plugin, sqlHandler);
+    public nl.rutgerkok.betterenderchest.uuidconversion.BetterEnderUUIDConverter getUUIDConverter() {
+        return new nl.rutgerkok.betterenderchest.uuidconversion.MySQLUUIDConverter(plugin, sqlHandler);
     }
 
     /**
