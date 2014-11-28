@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 
-import net.minecraft.util.com.google.common.collect.ImmutableList;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.io.CaseInsensitiveFileFilter;
 
@@ -19,6 +18,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.metadata.Metadatable;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Various utilities used in the BetterEnderChest plugin.

@@ -3,23 +3,18 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nl.rutgerkok.betterenderchest</groupId>
 	<artifactId>BetterEnderChest</artifactId>
-	<version>2.2.5</version>
+	<version>2.2.6</version>
 	<name>BetterEnderChest</name>
 	<description>CraftBukkit plugin that adds functionality for both players and admins to the Ender Chest.</description>
 	<url>https://github.com/rutgerkok/BetterEnderChest</url>
 	<repositories>
 		<repository>
-			<id>bukkit-repo</id>
-			<url>http://repo.bukkit.org/content/groups/public</url>
-		</repository>
-		<repository>
 			<id>rutger-repo</id>
 			<url>http://www.rutgerkok.nl/repo</url>
 		</repository>
-		<!-- MyWorlds -->
 		<repository>
-			<id>dj-tcraft-repo</id>
-			<url>http://ci.dj-tcraft.nl/plugin/repository/everything/</url>
+			<id>spigot-repo</id>
+			<url>http://repo.md-5.net/contents/groups/public</url>
 		</repository>
 	</repositories>
 	<build>
@@ -45,16 +40,44 @@
 		</resources>
 	</build>
 	<dependencies>
+		<!--
+		   - The order is important. Guava must override the old Spigot-API
+		   - classes (so that we're using the new Guava cache included in
+		   - Spigot), Spigot-API must override Spigot (so that the new
+		   - Bukkit.getOnlinePlayers() method that returns a Collection is
+		   - used), Spigot comes last to provide the NMS classes.
+		   -->
 		<dependency>
-			<groupId>org.bukkit</groupId>
-			<artifactId>bukkit</artifactId>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>17.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<!--
+			   - Reason for using an old version is that this is the newest
+			   - one available in a public repo. Because an updated version of
+			   - Guava is included it doesn't really matter.
+			   -->
+			<groupId>org.spigot</groupId>
+			<artifactId>spigot-api</artifactId>
 			<version>1.7.10-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.bukkit</groupId>
-			<artifactId>craftbukkit</artifactId>
-			<version>1.7.10-R0.1-SNAPSHOT</version>
+			<!--
+			   - Spigot cannot be installed from a repo at the moment, so
+			   - install this file yourself. The Spigot BuildTools.jar does
+			   - this automatically. You can also install it from source. As
+			   - a last resort, you can run this command on a pre-built
+			   - spigot.jar:
+			   -
+			   - mvn install:install-file -DgroupId=org.spigotmc -DartifactId=spigot -Dversion=1.8-R0.1-SNAPSHOT -Dpackaging=jar -Dfile=/path/to/spigot.jar
+			   -
+			   -->
+			<groupId>org.spigotmc</groupId>
+			<artifactId>spigot</artifactId>
+			<version>1.8-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

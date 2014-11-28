@@ -13,14 +13,14 @@ import nl.rutgerkok.betterenderchest.io.Consumer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 public class ChestOwners {
 
     private final BetterEnderChest plugin;
-    private final Cache<String, ChestOwner> uuidCache;
+    private final LoadingCache<String, ChestOwner> uuidCache;
 
     public ChestOwners(BetterEnderChest plugin) {
         this.plugin = plugin;
@@ -56,8 +56,6 @@ public class ChestOwners {
      */
     private ChestOwner fetchProfileSync(final String name) throws InvalidOwnerException {
         // Check online players
-        @SuppressWarnings("deprecation")
-        // We actually want to get the player by name
         Player player = Bukkit.getPlayerExact(name);
         if (player != null) {
             return playerChest(player);

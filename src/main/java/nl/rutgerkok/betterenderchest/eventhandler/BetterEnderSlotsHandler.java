@@ -75,7 +75,6 @@ public class BetterEnderSlotsHandler implements Listener {
                 if (event.getWhoClicked() instanceof Player) {
                     final Player player = (Player) event.getWhoClicked();
                     Bukkit.getScheduler().runTask(plugin.getPlugin(), new Runnable() {
-                        @SuppressWarnings("deprecation")
                         @Override
                         public void run() {
                             player.updateInventory();

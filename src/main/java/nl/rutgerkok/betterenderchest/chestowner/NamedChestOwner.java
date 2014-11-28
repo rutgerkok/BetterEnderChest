@@ -52,9 +52,6 @@ class NamedChestOwner implements ChestOwner {
         return Bukkit.getOfflinePlayer(name);
     }
 
-    @SuppressWarnings("deprecation")
-    // ^ The server owner chose to use names, not our problem if something
-    // breaks
     @Override
     public Player getPlayer() {
         return Bukkit.getPlayerExact(name);

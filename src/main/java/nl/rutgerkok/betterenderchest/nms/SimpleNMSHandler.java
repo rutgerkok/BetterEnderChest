@@ -12,20 +12,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import net.minecraft.server.v1_7_R4.MinecraftServer;
-import net.minecraft.server.v1_7_R4.NBTBase;
-import net.minecraft.server.v1_7_R4.NBTCompressedStreamTools;
-import net.minecraft.server.v1_7_R4.NBTNumber;
-import net.minecraft.server.v1_7_R4.NBTTagByteArray;
-import net.minecraft.server.v1_7_R4.NBTTagCompound;
-import net.minecraft.server.v1_7_R4.NBTTagDouble;
-import net.minecraft.server.v1_7_R4.NBTTagInt;
-import net.minecraft.server.v1_7_R4.NBTTagIntArray;
-import net.minecraft.server.v1_7_R4.NBTTagList;
-import net.minecraft.server.v1_7_R4.NBTTagLong;
-import net.minecraft.server.v1_7_R4.NBTTagString;
-import net.minecraft.server.v1_7_R4.TileEntity;
-import net.minecraft.server.v1_7_R4.TileEntityEnderChest;
+import net.minecraft.server.v1_8_R1.BlockPosition;
+import net.minecraft.server.v1_8_R1.MinecraftServer;
+import net.minecraft.server.v1_8_R1.NBTBase;
+import net.minecraft.server.v1_8_R1.NBTCompressedStreamTools;
+import net.minecraft.server.v1_8_R1.NBTNumber;
+import net.minecraft.server.v1_8_R1.NBTTagByteArray;
+import net.minecraft.server.v1_8_R1.NBTTagCompound;
+import net.minecraft.server.v1_8_R1.NBTTagDouble;
+import net.minecraft.server.v1_8_R1.NBTTagInt;
+import net.minecraft.server.v1_8_R1.NBTTagIntArray;
+import net.minecraft.server.v1_8_R1.NBTTagList;
+import net.minecraft.server.v1_8_R1.NBTTagLong;
+import net.minecraft.server.v1_8_R1.NBTTagString;
+import net.minecraft.server.v1_8_R1.TileEntity;
+import net.minecraft.server.v1_8_R1.TileEntityEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
@@ -33,8 +34,8 @@ import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_7_R4.CraftWorld;
-import org.bukkit.craftbukkit.v1_7_R4.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_8_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_8_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONObject;
@@ -173,7 +174,7 @@ public class SimpleNMSHandler extends NMSHandler {
          *             If the tag type is unknown.
          */
         private static final Object tagInNBTListToJavaType(NBTTagList tagList, int position) throws IOException {
-            switch (tagList.d()) {
+            switch (tagList.f()) {
                 case TagType.COMPOUND:
                     NBTTagCompound compoundValue = tagList.get(position);
                     return nbtTagToJavaType(compoundValue);
@@ -268,9 +269,10 @@ public class SimpleNMSHandler extends NMSHandler {
 
     @Override
     public void closeEnderChest(Location loc) {
-        TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+        BlockPosition blockPos = toBlockPosition(loc);
+        TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(blockPos);
         if (tileEntity instanceof TileEntityEnderChest) {
-            ((TileEntityEnderChest) tileEntity).b(); // .close()
+            ((TileEntityEnderChest) tileEntity).d(); // .close()
         }
     }
 
@@ -281,40 +283,9 @@ public class SimpleNMSHandler extends NMSHandler {
         return JSONObject.toJSONString(JSONSimpleTypes.toMap(baseTag));
     }
 
-    private int getDisabledSlots(NBTTagCompound baseTag) {
-        if (baseTag.hasKey("DisabledSlots")) {
-            // Load the number of disabled slots
-            return baseTag.getByte("DisabledSlots");
-        } else {
-            // Return 0. It doesn't harm anything and it will be corrected when
-            // the chest is opened
-            return 0;
-        }
-    }
-
     @Override
     public String getName() {
         return getClass().getSimpleName();
-    }
-
-    private int getRows(ChestOwner chestOwner, NBTTagCompound baseTag, NBTTagList inventoryListTag) {
-        if (baseTag.hasKey("Rows")) {
-            // Load the number of rows
-            return baseTag.getByte("Rows");
-        } else {
-            // Guess the number of rows
-            // Iterates through all the items to find the highest slot number
-            int highestSlot = 0;
-            for (int i = 0; i < inventoryListTag.size(); i++) {
-
-                // Replace the current highest slot if this slot is higher
-                highestSlot = Math.max(inventoryListTag.get(i).getByte("Slot") & 255, highestSlot);
-            }
-
-            // Calculate the needed number of rows for the items, and return the
-            // required number of rows
-            return Math.max((int) Math.ceil(highestSlot / 9.0), plugin.getEmptyInventoryProvider().getInventoryRows(chestOwner));
-        }
     }
 
     @Override
@@ -347,30 +318,12 @@ public class SimpleNMSHandler extends NMSHandler {
         return this.loadNBTInventoryFromTag(JSONSimpleTypes.toTag(jsonString), chestOwner, worldGroup, "Inventory");
     }
 
-    private Inventory loadNBTInventoryFromTag(NBTTagCompound baseTag, ChestOwner chestOwner, WorldGroup worldGroup, String inventoryTagName) throws IOException {
-        NBTTagList inventoryTag = baseTag.getList(inventoryTagName, TagType.COMPOUND);
-
-        // Create the Bukkit inventory
-        int inventoryRows = getRows(chestOwner, baseTag, inventoryTag);
-        int disabledSlots = getDisabledSlots(baseTag);
-        Inventory inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup, inventoryRows, disabledSlots);
-
-        // Add all the items
-        for (int i = 0; i < inventoryTag.size(); i++) {
-            NBTTagCompound item = inventoryTag.get(i);
-            int slot = item.getByte("Slot") & 255;
-            inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_7_R4.ItemStack.createStack(item)));
-        }
-
-        // Return the inventory
-        return inventory;
-    }
-
     @Override
     public void openEnderChest(Location loc) {
-        TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+        BlockPosition blockPos = toBlockPosition(loc);
+        TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(blockPos);
         if (tileEntity instanceof TileEntityEnderChest) {
-            ((TileEntityEnderChest) tileEntity).a(); // .open()
+            ((TileEntityEnderChest) tileEntity).b(); // .open()
         }
     }
 
@@ -396,6 +349,60 @@ public class SimpleNMSHandler extends NMSHandler {
         NBTTagCompound tag = saveInventoryToTag(inventory);
         Map<String, Object> map = JSONSimpleTypes.toMap(tag);
         return JSONObject.toJSONString(map);
+    }
+
+    private BlockPosition toBlockPosition(Location location) {
+        return new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    }
+
+    private int getDisabledSlots(NBTTagCompound baseTag) {
+        if (baseTag.hasKey("DisabledSlots")) {
+            // Load the number of disabled slots
+            return baseTag.getByte("DisabledSlots");
+        } else {
+            // Return 0. It doesn't harm anything and it will be corrected when
+            // the chest is opened
+            return 0;
+        }
+    }
+
+    private int getRows(ChestOwner chestOwner, NBTTagCompound baseTag, NBTTagList inventoryListTag) {
+        if (baseTag.hasKey("Rows")) {
+            // Load the number of rows
+            return baseTag.getByte("Rows");
+        } else {
+            // Guess the number of rows
+            // Iterates through all the items to find the highest slot number
+            int highestSlot = 0;
+            for (int i = 0; i < inventoryListTag.size(); i++) {
+
+                // Replace the current highest slot if this slot is higher
+                highestSlot = Math.max(inventoryListTag.get(i).getByte("Slot") & 255, highestSlot);
+            }
+
+            // Calculate the needed number of rows for the items, and return the
+            // required number of rows
+            return Math.max((int) Math.ceil(highestSlot / 9.0), plugin.getEmptyInventoryProvider().getInventoryRows(chestOwner));
+        }
+    }
+
+    private Inventory loadNBTInventoryFromTag(NBTTagCompound baseTag, ChestOwner chestOwner, WorldGroup worldGroup, String inventoryTagName) throws IOException {
+        NBTTagList inventoryTag = baseTag.getList(inventoryTagName, TagType.COMPOUND);
+
+        // Create the Bukkit inventory
+        int inventoryRows = getRows(chestOwner, baseTag, inventoryTag);
+        int disabledSlots = getDisabledSlots(baseTag);
+        Inventory inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup, inventoryRows, disabledSlots);
+
+        // Add all the items
+        for (int i = 0; i < inventoryTag.size(); i++) {
+            NBTTagCompound item = inventoryTag.get(i);
+            int slot = item.getByte("Slot") & 255;
+            inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_8_R1.ItemStack.createStack(item)));
+        }
+
+        // Return the inventory
+        return inventory;
     }
 
     private NBTTagCompound saveInventoryToTag(Inventory inventory) throws IOException {
