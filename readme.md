@@ -166,7 +166,19 @@ Create a new class that inherits [BaseCommand](https://github.com/rutgerkok/Bett
 Don't forget to look at the utility methods in BaseCommand, which can parse the [groupName/]inventoryName syntax.
 
 # Compiling BetterEnderChest
-BetterEnderChest uses [Maven](http://maven.apache.org/download.cgi), so you can build it using `mvn install`.
+BetterEnderChest uses [Maven](http://maven.apache.org/download.cgi). However, it requires Spigot 1.8, which is
+not available in a public repo. A stripped version of Spigot that contains just the method/field/class
+signatures has been uploaded to my personal repo. This version contains no code and cannot be used
+to run the tests.
+
+Spigot's BuildTools.jar automatically installs Spigot to your local Maven repo, so chances are you already have
+Spigot in your local Maven repo. To compile BetterEnderChest, just use:
+
+    mvn install
+
+If the tests fail you can use:
+
+    mvn install -DskipTests
 
 # Pull requests
 Pull requests are greatly appreciated. Just try to follow my formatting (spaces, not tabs and opening brackets

@@ -12,10 +12,6 @@
 			<id>rutger-repo</id>
 			<url>http://www.rutgerkok.nl/repo</url>
 		</repository>
-		<repository>
-			<id>spigot-repo</id>
-			<url>http://repo.md-5.net/contents/groups/public</url>
-		</repository>
 	</repositories>
 	<build>
 		<plugins>
@@ -41,40 +37,19 @@
 	</build>
 	<dependencies>
 		<!--
-		   - The order is important. Guava must override the old Spigot-API
-		   - classes (so that we're using the new Guava cache included in
-		   - Spigot), Spigot-API must override Spigot (so that the new
-		   - Bukkit.getOnlinePlayers() method that returns a Collection is
-		   - used), Spigot comes last to provide the NMS classes.
+		   - The order is important. Spigot-API must override Spigot. Spigot
+		   - contains multiple methods that differ only in the return value,
+		   - which is not allowed in Java (it is on the JVM). Spigot-API
+		   - doesn't have this problem and therefore should override Spigot.
+		   - Spigot is still needed for some NMS classes.
 		   -->
 		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>17.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<!--
-			   - Reason for using an old version is that this is the newest
-			   - one available in a public repo. Because an updated version of
-			   - Guava is included it doesn't really matter.
-			   -->
-			<groupId>org.spigot</groupId>
+			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.7.10-R0.1-SNAPSHOT</version>
+			<version>1.8-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<!--
-			   - Spigot cannot be installed from a repo at the moment, so
-			   - install this file yourself. The Spigot BuildTools.jar does
-			   - this automatically. You can also install it from source. As
-			   - a last resort, you can run this command on a pre-built
-			   - spigot.jar:
-			   -
-			   - mvn install:install-file -DgroupId=org.spigotmc -DartifactId=spigot -Dversion=1.8-R0.1-SNAPSHOT -Dpackaging=jar -Dfile=/path/to/spigot.jar
-			   -
-			   -->
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot</artifactId>
 			<version>1.8-R0.1-SNAPSHOT</version>
