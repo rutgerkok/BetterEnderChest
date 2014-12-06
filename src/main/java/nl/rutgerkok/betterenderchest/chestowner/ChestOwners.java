@@ -1,5 +1,6 @@
 package nl.rutgerkok.betterenderchest.chestowner;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
@@ -12,6 +13,7 @@ import nl.rutgerkok.betterenderchest.io.Consumer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.json.simple.parser.ParseException;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -76,9 +78,13 @@ public class ChestOwners {
                 plugin.log("Multiple UUIDs for " + name + ": " + chestOwnerMap.values());
                 throw new InvalidOwnerException(name);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             // mojang.com is probably down
-            plugin.log("Error communicating with mojang.com: " + e.getMessage());
+            plugin.log("Error communicating with mojang.com: " + e.getClass().getSimpleName() + " " + e.getMessage());
+            throw new InvalidOwnerException(name);
+        } catch (ParseException e) {
+            // invalid JSON, interesting
+            plugin.log("Error communicating with mojang.com: " + e.getClass().getSimpleName() + " " + e.getMessage());
             throw new InvalidOwnerException(name);
         }
     }
@@ -132,11 +138,16 @@ public class ChestOwners {
                             onSuccess.consume(chestOwner);
                         }
                     });
-                } catch (ExecutionException e) {
+                } catch (final ExecutionException e) {
                     Bukkit.getScheduler().runTask(plugin.getPlugin(), new Runnable() {
                         @Override
                         public void run() {
-                            onFailure.consume(new InvalidOwnerException(name));
+                            if (e.getCause() instanceof InvalidOwnerException) {
+                                onFailure.consume((InvalidOwnerException) e.getCause());
+                            } else {
+                                plugin.severe("Unexpected error fetching uuid of " + name, e);
+                                onFailure.consume(new InvalidOwnerException(name));
+                            }
                         }
                     });
                 }

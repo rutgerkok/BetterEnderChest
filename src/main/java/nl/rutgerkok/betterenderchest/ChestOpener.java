@@ -73,6 +73,7 @@ public class ChestOpener {
             ChestOwner chestOwner = bridge.getChestOwner(block);
             if (chestOwner != null) {
                 plugin.getChestCache().getInventory(chestOwner, worldGroup, callback);
+                return;
             }
 
             // Use old method
@@ -85,7 +86,7 @@ public class ChestOpener {
             }, new Consumer<InvalidOwnerException>() {
                 @Override
                 public void consume(InvalidOwnerException e) {
-                    plugin.severe("Could not open chest of " + inventoryName, e);
+                    plugin.severe("Could not open chest of " + inventoryName);
                 }
             });
         } else {
