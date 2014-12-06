@@ -16,11 +16,6 @@
 			<id>rutger-repo</id>
 			<url>http://www.rutgerkok.nl/repo</url>
 		</repository>
-		<!-- MyWorlds -->
-		<repository>
-			<id>dj-tcraft-repo</id>
-			<url>http://ci.dj-tcraft.nl/plugin/repository/everything/</url>
-		</repository>
 	</repositories>
 	<build>
 		<plugins>
