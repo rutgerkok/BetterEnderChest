@@ -522,7 +522,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
         // ProtectionBridge
         protectionBridges.register(new LocketteBridge());
-        protectionBridges.register(new LWCBridge());
+        protectionBridges.register(new LWCBridge(this));
         protectionBridges.register(new NoBridge());
         protectionBridges.selectAvailableRegistration();
 
