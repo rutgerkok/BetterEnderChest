@@ -155,6 +155,16 @@ public class LWCBridge extends ProtectionBridge {
 
     @Override
     public boolean isProtected(Block block) {
-        return (LWC.getInstance().findProtection(block) != null);
+        LWC lwc = LWC.getInstance();
+        Protection protection = lwc.findProtection(block);
+        if (protection == null) {
+            // Not protected
+            return false;
+        }
+        if (!protection.getBlock().equals(block)) {
+            // Main block of protection is not the Ender Chest
+            return false;
+        }
+        return true;
     }
 }
