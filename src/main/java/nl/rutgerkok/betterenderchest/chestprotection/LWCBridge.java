@@ -27,28 +27,27 @@ import com.griefcraft.model.Protection;
 public class LWCBridge extends ProtectionBridge {
 
 
-    private static final Method GET_NAME_METHOD;
-    private static final Method GET_OWNER_METHOD;
-    private static final Method GET_UUID_METHOD;
-    static {
-        try {
-            GET_OWNER_METHOD = Protection.class.getMethod("getOwner");
-            Class<?> returnType = GET_OWNER_METHOD.getReturnType();
-            if (returnType.getName().equals("com.griefcraft.model.PlayerInfo")) {
-                GET_NAME_METHOD = returnType.getMethod("getName");
-                GET_UUID_METHOD = returnType.getMethod("getUUID");
-            } else {
-                GET_NAME_METHOD = null;
-                GET_UUID_METHOD = null;
-            }
-        } catch (Exception e) {
-            throw Throwables.propagate(e);
-        }
-    }
+    private Method playerInfoGetNameMethod;
+    private Method protectionGetOwnerMethod;
+    private Method playerInfoGetUUIDMethod;
+
     private final BetterEnderChest plugin;
 
     public LWCBridge(BetterEnderChest plugin) {
         this.plugin = plugin;
+
+        try {
+            protectionGetOwnerMethod = Protection.class.getMethod("getOwner");
+            Class<?> returnType = protectionGetOwnerMethod.getReturnType();
+            if (returnType.getName().equals("com.griefcraft.model.PlayerInfo")) {
+                playerInfoGetNameMethod = returnType.getMethod("getName");
+                playerInfoGetUUIDMethod = returnType.getMethod("getUUID");
+            }
+        } catch (NoClassDefFoundError e) {
+            // Ignore, LWC is not installed
+        } catch (Exception e) {
+            throw Throwables.propagate(e);
+        }
     }
 
     @Override
@@ -77,15 +76,15 @@ public class LWCBridge extends ProtectionBridge {
      */
     private ChestOwner getOwnerFromProtection(Protection protection) {
         try {
-            Object owner = GET_OWNER_METHOD.invoke(protection);
+            Object owner = protectionGetOwnerMethod.invoke(protection);
             if (owner instanceof String) {
                 // Maybe an UUID string? (Situation 2)
                 return getOwnerFromUUIDString((String) owner);
             }
 
             // Assume it's a PlayerInfo object (situation 3 or 4)
-            String name = (String) GET_NAME_METHOD.invoke(owner);
-            UUID uuid = (UUID) GET_UUID_METHOD.invoke(owner);
+            String name = (String) playerInfoGetNameMethod.invoke(owner);
+            UUID uuid = (UUID) playerInfoGetUUIDMethod.invoke(owner);
             if (uuid == null) {
                 // No UUID stored, situation 4
                 return null;
@@ -130,14 +129,14 @@ public class LWCBridge extends ProtectionBridge {
         // So we're in situation 1 or 4
         Protection protection = LWC.getInstance().findProtection(block);
         try {
-            Object owner = GET_OWNER_METHOD.invoke(protection);
+            Object owner = protectionGetOwnerMethod.invoke(protection);
             if (owner instanceof String) {
                 // Situation 1
                 return (String) owner;
             }
 
             // Situation 4
-            return (String) GET_NAME_METHOD.invoke(owner);
+            return (String) playerInfoGetNameMethod.invoke(owner);
         } catch (Exception e) {
             throw Throwables.propagate(e);
         }
@@ -150,7 +149,7 @@ public class LWCBridge extends ProtectionBridge {
 
     @Override
     public boolean isAvailable() {
-        return Bukkit.getPluginManager().getPlugin("LWC") != null;
+        return protectionGetOwnerMethod != null;
     }
 
     @Override
