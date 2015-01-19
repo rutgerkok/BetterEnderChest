@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwners;
+import nl.rutgerkok.betterenderchest.chestprotection.BlockLockerBridge;
 import nl.rutgerkok.betterenderchest.chestprotection.LWCBridge;
 import nl.rutgerkok.betterenderchest.chestprotection.LocketteBridge;
 import nl.rutgerkok.betterenderchest.chestprotection.NoBridge;
@@ -523,6 +524,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         // ProtectionBridge
         protectionBridges.register(new LocketteBridge());
         protectionBridges.register(new LWCBridge(this));
+        protectionBridges.register(new BlockLockerBridge(this));
         protectionBridges.register(new NoBridge());
         protectionBridges.selectAvailableRegistration();
 
