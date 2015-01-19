@@ -44,6 +44,7 @@ public class TestJSON {
         tagCompound.setDouble("Test_Double", 8.3);
         tagCompound.setInt("Test_Int", 1545);
         tagCompound.setIntArray("Test_Int_Array", new int[] { 0, 1, 2, -8, Integer.MAX_VALUE });
+        tagCompound.setByteArray("Test_Byte_Array", new byte[] { 0, 1, 2, -8, Byte.MAX_VALUE });
 
         // Add a subtag
         NBTTagCompound subTag = new NBTTagCompound();
