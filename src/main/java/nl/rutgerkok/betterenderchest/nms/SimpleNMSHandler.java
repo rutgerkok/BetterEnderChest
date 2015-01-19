@@ -41,11 +41,20 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.google.common.collect.ImmutableMap;
+
 public class SimpleNMSHandler extends NMSHandler {
     static class JSONSimpleTypes {
         /**
-         * Boxes all the values of the array (<code>Byte.valueOf</code>), for
-         * consumption by JSONSimple.
+         * Byte arrays are stored as {{@value #BYTE_ARRAY}: [0,1,3,etc.]}, ints
+         * simply as [0,1,3,etc]. Storing byte arrays this way preserves their
+         * type. So when reading a map, check for this value to see whether you
+         * have a byte[] or a compound tag.
+         */
+        private static final String BYTE_ARRAY = "byteArray";
+
+        /**
+         * Boxes all the values of the array for consumption by JSONSimple.
          * 
          * @param byteArray
          *            Array to box.
@@ -60,8 +69,7 @@ public class SimpleNMSHandler extends NMSHandler {
         }
 
         /**
-         * Boxes all the values of the array (<code>Integer.valueOf</code>), for
-         * consumption by JSONSimple.
+         * Boxes all the values of the array for consumption by JSONSimple.
          * 
          * @param intArray
          *            Array to box.
@@ -80,6 +88,15 @@ public class SimpleNMSHandler extends NMSHandler {
             if (object instanceof Map) {
                 @SuppressWarnings("unchecked")
                 Map<String, ?> map = (Map<String, ?>) object;
+
+                Object byteArrayValue = map.get(BYTE_ARRAY);
+                if (byteArrayValue instanceof List) {
+                    // The map is actually a byte array, not a compound tag
+                    @SuppressWarnings("unchecked")
+                    List<Number> boxedBytes = (List<Number>) byteArrayValue;
+                    return new NBTTagByteArray(unboxBytes(boxedBytes));
+                }
+
                 NBTTagCompound tag = new NBTTagCompound();
                 for (Entry<String, ?> entry : map.entrySet()) {
                     tag.set(entry.getKey(), javaTypeToNBTTag(entry.getValue()));
@@ -152,7 +169,8 @@ public class SimpleNMSHandler extends NMSHandler {
                 String value = ((NBTTagString) tag).a_();
                 return value;
             } else if (tag instanceof NBTTagByteArray) {
-                return boxBytes(((NBTTagByteArray) tag).c());
+                // Byte arrays are placed in a map, see comment for BYTE_ARRAY
+                return ImmutableMap.of(BYTE_ARRAY, boxBytes(((NBTTagByteArray) tag).c()));
             } else if (tag instanceof NBTTagIntArray) {
                 return boxIntegers(((NBTTagIntArray) tag).c());
             }
@@ -232,13 +250,10 @@ public class SimpleNMSHandler extends NMSHandler {
         }
 
         /**
-         * Unboxes all the values of the list, for consumption by Minecraft.
+         * Converts from a List<Number>, as found in the JSON, to int[].
          * 
          * @param boxed
-         *            The boxed integers. JSONArray uses longs instead of ints
-         *            for non-fractional numbers, so you can use any kind of
-         *            number for this method.
-         * @return The unboxed array.
+         *            List from the JSON. return The int array.
          */
         private static final int[] unboxIntegers(List<Number> boxed) {
             int[] ints = new int[boxed.size()];
@@ -246,6 +261,20 @@ public class SimpleNMSHandler extends NMSHandler {
                 ints[i] = boxed.get(i).intValue();
             }
             return ints;
+        }
+
+        /**
+         * Converts from a List<Number>, as found in the JSON, to byte[].
+         * 
+         * @param boxed
+         *            List from the JSON. return The byte array.
+         */
+        private static final byte[] unboxBytes(List<Number> boxed) {
+            byte[] bytes = new byte[boxed.size()];
+            for (int i = 0; i < bytes.length; i++) {
+                bytes[i] = boxed.get(i).byteValue();
+            }
+            return bytes;
         }
     }
 
