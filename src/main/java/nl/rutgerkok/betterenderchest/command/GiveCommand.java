@@ -1,5 +1,6 @@
 package nl.rutgerkok.betterenderchest.command;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
@@ -8,16 +9,39 @@ import nl.rutgerkok.betterenderchest.Translations;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.io.Consumer;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import com.google.common.base.Joiner;
+
 public class GiveCommand extends BaseCommand {
 
     public GiveCommand(BetterEnderChest plugin) {
         super(plugin);
+    }
+
+    /**
+     * Wrapper around the unsafe method
+     * {@link org.bukkit.UnsafeValues#modifyItemStack(ItemStack, String)}, that
+     * forces you to catch any exceptions, but suppresses deprecation warnings.
+     *
+     * @param stack
+     *            Stack to add NBT to. Depending on the implementation, this
+     *            stack may or may not be modified.
+     * @param nbt
+     *            NBT to add.
+     * @return The modified stack.
+     * @throws Throwable
+     *             Method may throw anything, as indicated by
+     *             {@link org.bukkit.UnsafeValues}.
+     */
+    @SuppressWarnings("deprecation")
+    private ItemStack addNBT(ItemStack stack, String nbt) throws Throwable {
+        return Bukkit.getUnsafe().modifyItemStack(stack, nbt);
     }
 
     @Override
@@ -67,8 +91,22 @@ public class GiveCommand extends BaseCommand {
             }
         }
 
+        ItemStack stack = new ItemStack(material, count, damage);
+
+        // NBT data
+        if (args.length >= 5) {
+            String nbt = Joiner.on(' ').join(Arrays.asList(args).subList(4, args.length));
+            try {
+                stack = addNBT(stack, nbt);
+            } catch (Throwable t) {
+                sender.sendMessage(ChatColor.RED + "Could not set NBT tag "
+                        + ChatColor.WHITE + nbt + ChatColor.RED + ". Invalid tag?");
+                return true;
+            }
+        }
+
         // Add the item to the inventory
-        final ItemStack adding = new ItemStack(material, count, damage);
+        final ItemStack adding = stack;
         this.getInventory(sender, inventoryName, group, new Consumer<Inventory>() {
             @Override
             public void consume(Inventory inventory) {
