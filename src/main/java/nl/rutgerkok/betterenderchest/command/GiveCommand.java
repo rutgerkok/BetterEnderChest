@@ -59,7 +59,7 @@ public class GiveCommand extends BaseCommand {
         }
 
         // Material
-        Material material = Material.matchMaterial(args[1]);
+        Material material = matchMaterial(args[1]);
         if (material == null) {
             sender.sendMessage("" + ChatColor.RED + args[1] + " is not a valid material!");
             return true;
@@ -139,6 +139,29 @@ public class GiveCommand extends BaseCommand {
     @Override
     public String getUsage() {
         return "<player> <item> [count] [damage]";
+    }
+
+    /**
+     * Parses the material. If possible, internal Minecraft names are supported
+     * too.
+     *
+     * @param name
+     *            Name of the material.
+     * @return The parsed material, or null if no such material exists.
+     */
+    @SuppressWarnings("deprecation")
+    private Material matchMaterial(String name) {
+        Material material = Material.matchMaterial(name);
+        if (material == null) {
+            try {
+                material = Bukkit.getUnsafe().getMaterialFromInternalName(name);
+            } catch (Throwable t) {
+                // As per the JavaDocs of UnsafeValues, anything can be thrown
+                // The method can also cease to exist.
+                // Anyways, the error is useless to us.
+            }
+        }
+        return material;
     }
 
 }
