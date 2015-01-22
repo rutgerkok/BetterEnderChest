@@ -20,6 +20,8 @@ import com.google.common.base.Joiner;
 
 public class GiveCommand extends BaseCommand {
 
+    private static final int MAX_COUNT = 512;
+
     public GiveCommand(BetterEnderChest plugin) {
         super(plugin);
     }
@@ -45,7 +47,7 @@ public class GiveCommand extends BaseCommand {
     }
 
     @Override
-    public boolean execute(final CommandSender sender, final String[] args) {
+    public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 2) {
             return false;
         }
@@ -70,8 +72,8 @@ public class GiveCommand extends BaseCommand {
         if (args.length >= 3) { // set the count
             try {
                 count = Integer.parseInt(args[2]);
-                if (count > material.getMaxStackSize()) {
-                    sender.sendMessage(ChatColor.RED + "Amount was capped at " + material.getMaxStackSize() + ".");
+                if (count > MAX_COUNT) {
+                    sender.sendMessage(ChatColor.RED + "Amount was capped at " + MAX_COUNT + ".");
                     count = material.getMaxStackSize();
                 }
             } catch (NumberFormatException e) {
@@ -91,7 +93,10 @@ public class GiveCommand extends BaseCommand {
             }
         }
 
-        ItemStack stack = new ItemStack(material, count, damage);
+        // Using amount of 1; the addItem method will distribute the item
+        // correctly
+        // Setting the amount here on the stack fails for large amounts of items
+        ItemStack stack = new ItemStack(material, 1, damage);
 
         // NBT data
         if (args.length >= 5) {
@@ -106,24 +111,62 @@ public class GiveCommand extends BaseCommand {
         }
 
         // Add the item to the inventory
-        final ItemStack adding = stack;
+        addItem(sender, inventoryName, group, stack, count);
+
+        return true;
+    }
+
+    private void addItem(final CommandSender sender, final String inventoryName, WorldGroup group, final ItemStack stack, final int amount) {
         this.getInventory(sender, inventoryName, group, new Consumer<Inventory>() {
             @Override
             public void consume(Inventory inventory) {
-                Map<Integer, ItemStack> overflow = inventory.addItem(adding);
-                if (overflow.isEmpty()) {
-                    sender.sendMessage("Item added to the Ender Chest inventory of " + args[0]);
-                } else {
-                    sender.sendMessage("One or more items have not been added; Ender Chest inventory of " + args[0] + " was full.");
+                int remainingAmount = amount;
+                while (remainingAmount > 0) {
+                    ItemStack add = stack.clone();
+                    int addCount = Math.min(add.getMaxStackSize(), remainingAmount);
+                    remainingAmount -= addCount;
+                    add.setAmount(addCount);
+
+                    Map<Integer, ItemStack> overflow = inventory.addItem(add);
+                    if (!overflow.isEmpty()) {
+                        // Inventory is full
+                        int didntAdd = overflow.values().iterator().next().getAmount();
+                        remainingAmount += didntAdd;
+                        break;
+                    }
                 }
 
-                // Mark for resave,
-                // now that there are changed items.
-                ((BetterEnderInventoryHolder) inventory.getHolder()).setHasUnsavedChanges(true);
+                // Show appropriate message
+                sendItemAddedMessage(sender, inventoryName, amount, remainingAmount);
+
+                // Mark for resave, // now that there are changed items.
+                BetterEnderInventoryHolder.of(inventory).setHasUnsavedChanges(true);
             }
         });
+    }
 
-        return true;
+    private void sendItemAddedMessage(CommandSender sender, String inventoryName, int totalAmount, int remainingAmount) {
+        if (remainingAmount == 0) {
+            if (totalAmount == 1) {
+                sender.sendMessage("Item added to the Ender Chest inventory of " + inventoryName);
+            } else {
+                sender.sendMessage("Items added to the Ender Chest inventory of " + inventoryName);
+            }
+        } else if (remainingAmount == totalAmount) {
+            // None added
+            if (totalAmount == 1) {
+                sender.sendMessage(ChatColor.RED + "Item has not been added; Ender Chest inventory of " + inventoryName + " was full.");
+            } else {
+                sender.sendMessage(ChatColor.RED + "All items have not been added; Ender Chest inventory of " + inventoryName + " was full.");
+            }
+        } else {
+            // Some added
+            if (remainingAmount == 1) {
+                sender.sendMessage(ChatColor.RED + "One item has not been added; Ender Chest inventory of " + inventoryName + " was full.");
+            } else {
+                sender.sendMessage(ChatColor.RED + "" + remainingAmount + " items have not been added; Ender Chest inventory of " + inventoryName + " was full.");
+            }
+        }
     }
 
     @Override
