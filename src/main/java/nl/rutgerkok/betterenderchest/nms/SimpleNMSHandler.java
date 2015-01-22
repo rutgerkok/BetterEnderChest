@@ -98,7 +98,10 @@ public class SimpleNMSHandler extends NMSHandler {
 
                 NBTTagCompound tag = new NBTTagCompound();
                 for (Entry<String, ?> entry : map.entrySet()) {
-                    tag.set(entry.getKey(), javaTypeToNBTTag(entry.getValue()));
+                    NBTBase value = javaTypeToNBTTag(entry.getValue());
+                    if (value != null) {
+                        tag.set(entry.getKey(), value);
+                    }
                 }
                 return tag;
             }
@@ -136,9 +139,15 @@ public class SimpleNMSHandler extends NMSHandler {
                 }
 
                 for (Object entry : list) {
-                    listTag.add(javaTypeToNBTTag(entry));
+                    NBTBase javaType = javaTypeToNBTTag(entry);
+                    if (javaType != null) {
+                        listTag.add(javaType);
+                    }
                 }
                 return listTag;
+            }
+            if (object == null) {
+                return null;
             }
             throw new IOException("Unknown object: (" + object.getClass() + ") " + object + "");
         }
