@@ -40,7 +40,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -245,7 +244,7 @@ public class SimpleNMSHandler extends NMSHandler {
         static final NBTTagCompound toTag(String jsonString) throws IOException {
             try {
                 return (NBTTagCompound) javaTypeToNBTTag(new JSONParser().parse(jsonString));
-            } catch (ParseException e) {
+            } catch (Exception e) {
                 throw new IOException(e);
             }
         }
