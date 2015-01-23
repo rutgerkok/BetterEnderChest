@@ -134,7 +134,7 @@ public class SQLHandler {
         try {
             String query = "CREATE TABLE IF NOT EXISTS `" + getTableName(group) + "` ("
                     + " `chest_id` int(10) unsigned NOT NULL AUTO_INCREMENT, `chest_owner` char(36) NOT NULL,"
-                    + " `chest_data` text NOT NULL, PRIMARY KEY (`chest_id`), UNIQUE KEY (`chest_owner`)"
+                    + " `chest_data` MEDIUMTEXT NOT NULL, PRIMARY KEY (`chest_id`), UNIQUE KEY (`chest_owner`)"
                     + ") ENGINE=InnoDB";
             statement.execute(query);
         } finally {
