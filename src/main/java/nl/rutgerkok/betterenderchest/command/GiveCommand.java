@@ -20,7 +20,7 @@ import com.google.common.base.Joiner;
 
 public class GiveCommand extends BaseCommand {
 
-    private static final int MAX_COUNT = 512;
+    private static final int MAX_COUNT = 54 * 64;
 
     public GiveCommand(BetterEnderChest plugin) {
         super(plugin);
@@ -69,12 +69,12 @@ public class GiveCommand extends BaseCommand {
 
         // Count
         int count = 1;
-        if (args.length >= 3) { // set the count
+        if (args.length >= 3) {
             try {
                 count = Integer.parseInt(args[2]);
                 if (count > MAX_COUNT) {
                     sender.sendMessage(ChatColor.RED + "Amount was capped at " + MAX_COUNT + ".");
-                    count = material.getMaxStackSize();
+                    count = MAX_COUNT;
                 }
             } catch (NumberFormatException e) {
                 sender.sendMessage("" + ChatColor.RED + args[2] + " is not a valid amount!");
@@ -84,7 +84,7 @@ public class GiveCommand extends BaseCommand {
 
         // Damage value
         short damage = 0;
-        if (args.length >= 4) { // Set the damage
+        if (args.length >= 4) {
             try {
                 damage = Short.parseShort(args[3]);
             } catch (NumberFormatException e) {
