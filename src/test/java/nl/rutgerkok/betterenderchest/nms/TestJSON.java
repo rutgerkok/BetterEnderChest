@@ -17,9 +17,9 @@ import org.junit.runners.JUnit4;
 public class TestJSON {
 
     /**
-     * Encodes to JSON and decodes. Useful for testing serialization and
-     * deserialization.
-     * 
+     * Encodes to JSON and decodes. Useful to test whether Minecraft's NBT
+     * representation is correctly preserved as JSON.
+     *
      * @param tagCompound
      *            The tag to encode.
      * @return The decoded tag.
@@ -28,12 +28,35 @@ public class TestJSON {
      */
     private NBTTagCompound roundTrip(NBTTagCompound tagCompound) throws IOException {
         // Encode
-        Map<String, Object> javaTypes = JSONSimpleTypes.toMap(tagCompound);
-        String jsonString = JSONObject.toJSONString(javaTypes);
+        String jsonString = toJSON(tagCompound);
 
         // Decode and assert
         NBTTagCompound tagDeserialized = JSONSimpleTypes.toTag(jsonString);
         return tagDeserialized;
+    }
+
+    /**
+     * Decodes the JSON and encodes. Useful for testing whether JSON is
+     * correctly read and written.
+     *
+     * <p>
+     * Do not rely on the order of elements in the tag, keep in mind that
+     * Minecraft uses a HashMap for storage. When a compound tag contains more
+     * than one element, do not compare serialized forms of the tag directly.
+     *
+     * @param json
+     *            JSON to decode and encode.
+     * @return The JSON after it has been decoded and encoded.
+     * @throws IOException
+     */
+    private String reserialize(String json) throws IOException {
+        NBTTagCompound compoundTag = JSONSimpleTypes.toTag(json);
+        return toJSON(compoundTag);
+    }
+
+    private String toJSON(NBTTagCompound tagCompound) throws IOException {
+        Map<String, Object> javaTypes = JSONSimpleTypes.toMap(tagCompound);
+        return JSONObject.toJSONString(javaTypes);
     }
 
     @Test
@@ -90,5 +113,36 @@ public class TestJSON {
 
         NBTTagCompound tagCompound = JSONSimpleTypes.toTag(json);
         assertEquals(tagCompound, roundTrip(tagCompound));
+    }
+
+    @Test
+    public void testFloatLists() throws IOException {
+        String json = "{\"FloatList\":[0.0,1.0,2.0]}";
+
+        // Must be reserialized *exactly* the same, which is not possible if
+        // the number is read as an int array (used to be the case in old
+        // versions of BetterEnderChest)
+        assertEquals(json, reserialize(json));
+    }
+
+    @Test
+    public void testIntValue() throws IOException {
+        // Must be reserialized *exactly* the same, which is not possible if
+        // the number is read as a float or double
+        String json = "{\"IntValue\":1}";
+        assertEquals(json, reserialize(json));
+    }
+
+    @Test
+    public void testEmptyLists() throws IOException {
+        // No idea what type the list is, so getting it as int[] or List<?>
+        // must both work
+        // This can be achieved in Minecraft's NBTTagCompound simply by not
+        // deserializing it
+        String json = "{\"EmptyList\":[]}";
+        NBTTagCompound tagCompound = JSONSimpleTypes.toTag(json);
+
+        tagCompound.getIntArray("EmptyList"); // Must work
+        tagCompound.getList("EmptyList", 10); // Must work too
     }
 }

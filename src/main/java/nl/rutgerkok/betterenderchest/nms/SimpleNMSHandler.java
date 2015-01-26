@@ -109,7 +109,7 @@ public class SimpleNMSHandler extends NMSHandler {
             // Handle numbers
             if (object instanceof Number) {
                 Number number = (Number) object;
-                if (number.longValue() == number.doubleValue()) {
+                if (number instanceof Integer || number instanceof Long) {
                     // Whole number
                     if (number.intValue() == number.longValue()) {
                         // Fits in integer
@@ -129,16 +129,24 @@ public class SimpleNMSHandler extends NMSHandler {
                 List<?> list = (List<?>) object;
                 NBTTagList listTag = new NBTTagList();
 
-                // Handle int arrays
-                if (list.size() > 0) {
-                    Object firstElement = list.get(0);
-                    if (firstElement instanceof Number) {
-                        @SuppressWarnings("unchecked")
-                        List<Number> intList = (List<Number>) list;
-                        return new NBTTagIntArray(unboxIntegers(intList));
-                    }
+                if (list.isEmpty()) {
+                    // Don't deserialize empty lists - we have no idea what
+                    // type it should be. The methods on NBTTagCompound will
+                    // now return empty lists of the appropriate type
+                    return null;
                 }
 
+                // Handle int arrays
+                Object firstElement = list.get(0);
+                if (firstElement instanceof Integer || firstElement instanceof Long) {
+                    // Ints may be deserialized as longs, even if the numbers
+                    // are small enough for ints
+                    @SuppressWarnings("unchecked")
+                    List<Number> intList = (List<Number>) list;
+                    return new NBTTagIntArray(unboxIntegers(intList));
+                }
+
+                // Other lists
                 for (Object entry : list) {
                     NBTBase javaType = javaTypeToNBTTag(entry);
                     if (javaType != null) {
@@ -165,13 +173,15 @@ public class SimpleNMSHandler extends NMSHandler {
                 }
                 return objects;
             } else if (tag instanceof NBTNumber) {
-                // Check if double or long
+                // Check for whole or fractional number (we don't care about
+                // the difference between int/long or double/float, in JSON
+                // they look the same)
                 NBTNumber nbtNumber = (NBTNumber) tag;
-                if (nbtNumber.c() == nbtNumber.g()) {
-                    // Long, as double value == long value
+                if (nbtNumber instanceof NBTTagInt || nbtNumber instanceof NBTTagLong) {
+                    // Whole number
                     return nbtNumber.c();
                 } else {
-                    // Double
+                    // Fractional number
                     return nbtNumber.g();
                 }
             } else if (tag instanceof NBTTagString) {
@@ -216,7 +226,7 @@ public class SimpleNMSHandler extends NMSHandler {
                     String stringValue = tagList.getString(position);
                     return stringValue;
             }
-            throw new IOException("Unknown list: " + tagList);
+            throw new IOException("Unknown list (type " + tagList.getTypeId() + "): " + tagList);
         }
 
         /**
