@@ -16,11 +16,8 @@ import org.bukkit.inventory.Inventory;
  * 
  */
 public class BetterEnderFileHandler {
-    /**
-     * @deprecated Internal constant, will be made private in the future
-     */
-    @Deprecated
-    public static final String EXTENSION = ".dat";
+
+    private static final String EXTENSION = ".dat";
     private final BetterEnderChest plugin;
 
     public BetterEnderFileHandler(BetterEnderChest plugin) {
@@ -53,10 +50,8 @@ public class BetterEnderFileHandler {
      * @param worldGroup
      *            The world group.
      * @return The directory where all files of a group will be saved in.
-     * @deprecated Internal method, will be private in the future.
      */
-    @Deprecated
-    public File getChestDirectory(File baseDir, WorldGroup worldGroup) {
+    private File getChestDirectory(File baseDir, WorldGroup worldGroup) {
         if (worldGroup.getGroupName().equals(BetterEnderChest.STANDARD_GROUP_NAME)) {
             return baseDir;
         } else {
@@ -73,20 +68,10 @@ public class BetterEnderFileHandler {
      * @param worldGroup
      *            The group the chest is in.
      * @return The file.
-     * @deprecated Internal method, will be private in the future
      */
-    @Deprecated
-    public File getChestFile(ChestOwner chestOwner, WorldGroup worldGroup) {
+    private File getChestFile(ChestOwner chestOwner, WorldGroup worldGroup) {
         File directory = getChestDirectory(plugin.getChestSaveLocation(), worldGroup);
         return new File(directory, chestOwner.getSaveFileName() + EXTENSION);
-    }
-
-    /**
-     * @deprecated Internal method, will be removed, no replacement
-     */
-    @Deprecated
-    public boolean inventoryFileExists(ChestOwner chestOwner, WorldGroup group) {
-        return getChestFile(chestOwner, group).exists();
     }
 
     /**
@@ -113,18 +98,6 @@ public class BetterEnderFileHandler {
             plugin.disableSaveAndLoad("Failed to load chest of " + chestOwner.getDisplayName(), e);
             callback.consume(plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup));
         }
-    }
-
-    /**
-     * @deprecated Ambiguous name
-     * @see #loadFromFileOrImport(ChestOwner, WorldGroup, Consumer) for a direct
-     *      replacement
-     * @see #loadFromFileOrError(ChestOwner, WorldGroup) for a replacement that
-     *      throws errors
-     */
-    @Deprecated
-    public void loadInventory(ChestOwner chestOwner, WorldGroup worldGroup, Consumer<Inventory> callback) {
-        loadFromFileOrImport(chestOwner, worldGroup, callback);
     }
 
     /**

@@ -190,12 +190,6 @@ public class BetterEnderFileCache extends AbstractEnderCache {
 
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public nl.rutgerkok.betterenderchest.uuidconversion.BetterEnderUUIDConverter getUUIDConverter() {
-        return new nl.rutgerkok.betterenderchest.uuidconversion.FileUUIDConverter(plugin);
-    }
-
     @Override
     public void saveAllInventories() {
         if (!plugin.canSaveAndLoad()) {

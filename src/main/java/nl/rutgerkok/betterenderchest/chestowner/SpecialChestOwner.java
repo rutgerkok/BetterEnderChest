@@ -1,6 +1,5 @@
 package nl.rutgerkok.betterenderchest.chestowner;
 
-import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.Translations;
 
 import org.bukkit.OfflinePlayer;
@@ -16,14 +15,10 @@ final class SpecialChestOwner implements ChestOwner {
      * one instance of each special chest.
      */
 
-    /*
-     * We will eventually move the definition of the constants to this class,
-     * hiding them from public view
-     */
-    @SuppressWarnings("deprecation")
-    static final ChestOwner DEFAULT_CHEST = new SpecialChestOwner(BetterEnderChest.DEFAULT_CHEST_NAME);
-    @SuppressWarnings("deprecation")
-    static final ChestOwner PUBLIC_CHEST = new SpecialChestOwner(BetterEnderChest.PUBLIC_CHEST_NAME);
+    static final String DEFAULT_CHEST_NAME = "--defaultchest";
+    static final ChestOwner DEFAULT_CHEST_OWNER = new SpecialChestOwner(DEFAULT_CHEST_NAME);
+    static final String PUBLIC_CHEST_NAME = "--publicchest";
+    static final ChestOwner PUBLIC_CHEST_OWNER = new SpecialChestOwner(PUBLIC_CHEST_NAME);
 
     private final String ownerName;
 
@@ -64,7 +59,7 @@ final class SpecialChestOwner implements ChestOwner {
 
     @Override
     public boolean isDefaultChest() {
-        return this == DEFAULT_CHEST;
+        return this == DEFAULT_CHEST_OWNER;
     }
 
     @Override
@@ -81,7 +76,7 @@ final class SpecialChestOwner implements ChestOwner {
 
     @Override
     public boolean isPublicChest() {
-        return this == PUBLIC_CHEST;
+        return this == PUBLIC_CHEST_OWNER;
     }
 
     @Override

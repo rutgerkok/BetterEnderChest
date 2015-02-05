@@ -73,11 +73,9 @@ public class EmptyInventoryProvider {
     public void getFallbackInventory(final ChestOwner chestOwner, final WorldGroup worldGroup, final Consumer<Inventory> callback) {
         // Try to import it from vanilla/some other plugin
         worldGroup.getInventoryImporter().importInventoryAsync(chestOwner, worldGroup, plugin, callback, new Consumer<IOException>() {
-            @SuppressWarnings("deprecation")
-            // ^ Preserve compatibility with old exception
             @Override
             public void consume(IOException e) {
-                if (e instanceof ChestNotFoundException || e instanceof nl.rutgerkok.betterenderchest.exception.NoChestImportedException) {
+                if (e instanceof ChestNotFoundException) {
                     // No chest was found, load default inventory
                     getDefaultInventory(chestOwner, worldGroup, callback);
                     return;

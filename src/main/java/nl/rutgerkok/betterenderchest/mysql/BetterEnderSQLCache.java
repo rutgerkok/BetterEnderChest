@@ -182,12 +182,6 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
         });
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public nl.rutgerkok.betterenderchest.uuidconversion.BetterEnderUUIDConverter getUUIDConverter() {
-        return new nl.rutgerkok.betterenderchest.uuidconversion.MySQLUUIDConverter(plugin, sqlHandler);
-    }
-
     /**
      * Intended to be called from another thread.
      */

@@ -48,8 +48,8 @@ public class TestChestOwners {
 
     @Test
     public void testSpecialChestOwners() {
-        ChestOwner defaultChest = SpecialChestOwner.DEFAULT_CHEST;
-        ChestOwner publicChest = SpecialChestOwner.PUBLIC_CHEST;
+        ChestOwner defaultChest = SpecialChestOwner.DEFAULT_CHEST_OWNER;
+        ChestOwner publicChest = SpecialChestOwner.PUBLIC_CHEST_OWNER;
 
         // They are not equal
         assertFalse(defaultChest.equals(publicChest));

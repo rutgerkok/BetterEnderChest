@@ -37,21 +37,6 @@ public interface BetterEnderCache {
     void getInventory(ChestOwner chestOwner, WorldGroup worldGroup, Consumer<Inventory> callback);
 
     /**
-     * @deprecated Use {@link #getInventory(ChestOwner, WorldGroup, Consumer)}.
-     */
-    @Deprecated
-    void getInventory(String inventoryName, WorldGroup worldGroup, Consumer<Inventory> callback);
-
-    /**
-     * Gets the converter that will convert everything from names to UUIDs.
-     * 
-     * @return The converter.
-     * @deprecated UUID conversion will be removed eventually.
-     */
-    @Deprecated
-    nl.rutgerkok.betterenderchest.uuidconversion.BetterEnderUUIDConverter getUUIDConverter();
-
-    /**
      * Saves all inventories (causing some lag), and unloads the ones that are
      * not needed anymore. Only call this when the server is shutting down!
      */
@@ -73,12 +58,6 @@ public interface BetterEnderCache {
     void saveInventory(ChestOwner chestOwner, WorldGroup group);
 
     /**
-     * @deprecated Use {@link #saveInventory(ChestOwner, WorldGroup)}.
-     */
-    @Deprecated
-    void saveInventory(String inventoryName, WorldGroup group);
-
-    /**
      * Sets the inventory in the cache, replacing the old inventory that may
      * have been in the cache.
      * 
@@ -86,12 +65,6 @@ public interface BetterEnderCache {
      *            The new inventory
      */
     void setInventory(Inventory enderInventory);
-
-    /**
-     * @deprecated Use {@link #setInventory(Inventory)}.
-     */
-    @Deprecated
-    void setInventory(String inventoryName, WorldGroup group, Inventory enderInventory);
 
     /**
      * Unloads all inventories from memory. Doesn't save! Also, make sure that
@@ -109,11 +82,5 @@ public interface BetterEnderCache {
      *            The group of the inventory.
      */
     void unloadInventory(ChestOwner chestOwner, WorldGroup group);
-
-    /**
-     * @deprecated Use {@link #unloadInventory(ChestOwner, WorldGroup)}.
-     */
-    @Deprecated
-    void unloadInventory(String inventoryName, WorldGroup group);
 
 }

@@ -65,17 +65,6 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
     }
 
     /**
-     * @deprecated Use {@link #getChestOwner() getChestOwner()}
-     *             {@link ChestOwner#getDisplayName() .getDisplayName()} or
-     *             {@link #getChestOwner() getChestOwner()}
-     *             {@link ChestOwner#getSaveFileName() .getSaveFileName()}.
-     */
-    @Deprecated
-    public String getName() {
-        return chestOwner.getSaveFileName();
-    }
-
-    /**
      * Gets the world group this inventory is in.
      * 
      * @return The world group.
@@ -91,16 +80,6 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
      */
     public boolean hasUnsavedChanges() {
         return hasUnsavedChanges;
-    }
-
-    /**
-     * UUIDs don't care whether the name has the correct case.
-     * 
-     * @return false
-     */
-    @Deprecated
-    public boolean isOwnerNameCaseCorrect() {
-        return false;
     }
 
     /**

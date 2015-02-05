@@ -86,9 +86,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private SaveAndLoadError saveAndLoadError;
     private boolean useUuids;
 
-    @Deprecated
-    private nl.rutgerkok.betterenderchest.uuidconversion.BetterEnderUUIDConverter uuidConverter;
-
     @Override
     public synchronized boolean canSaveAndLoad() {
         return saveAndLoadError == null;
@@ -484,7 +481,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     /**
      * Loads all IO services that were not yet loaded.
      */
-    @SuppressWarnings("deprecation")
     private void loadIOServices() {
         // File handlers
         fileHandler = new BetterEnderFileHandler(this);
@@ -495,11 +491,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         } else {
             enderCache = new BetterEnderFileCache(this);
         }
-
-        // Converter
-        // Lines will be removed once UUID conversion support is removed
-        uuidConverter = enderCache.getUUIDConverter();
-        uuidConverter.startConversion();
     }
 
     @Override
@@ -626,15 +617,10 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     /**
      * Unloads all IO services.
      */
-    @SuppressWarnings("deprecation")
     private void unloadIOServices() {
         enderCache.disable();
         fileHandler = null;
         enderCache = null;
-
-        // Lines will be removed once UUID conversion support is removed
-        uuidConverter.stopConversion();
-        uuidConverter = null;
     }
 
     @Override

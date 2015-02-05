@@ -11,9 +11,7 @@ import nl.rutgerkok.betterenderchest.exception.InvalidOwnerException;
 import nl.rutgerkok.betterenderchest.io.Consumer;
 import nl.rutgerkok.betterenderchest.registry.Registration;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -195,27 +193,4 @@ public abstract class BaseCommand implements Registration {
         return true; // Commands are always available.
     }
 
-    /**
-     * @deprecated Player name lookup. This will be very inefficient from
-     *             Minecraft 1.7.6 onwards.
-     */
-    @Deprecated
-    protected boolean isValidPlayer(String name) {
-        if (name.equals(BetterEnderChest.PUBLIC_CHEST_NAME)) {
-            return true;
-        }
-        if (name.equals(BetterEnderChest.DEFAULT_CHEST_NAME)) {
-            return true;
-        }
-
-        OfflinePlayer player = Bukkit.getOfflinePlayer(name);
-        if (player.hasPlayedBefore()) {
-            return true;
-        }
-        if (player.isOnline()) {
-            return true;
-        }
-
-        return false;
-    }
 }

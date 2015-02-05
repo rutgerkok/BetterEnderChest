@@ -44,7 +44,7 @@ public class ChestOwners {
      * @return The "owner" of the public chest.
      */
     public ChestOwner defaultChest() {
-        return SpecialChestOwner.DEFAULT_CHEST;
+        return SpecialChestOwner.DEFAULT_CHEST_OWNER;
     }
 
     /**
@@ -64,10 +64,8 @@ public class ChestOwners {
         }
 
         // Go to mojang.com
-        @SuppressWarnings("deprecation")
-        nl.rutgerkok.betterenderchest.uuidconversion.UUIDFetcher uuidFetcher = new nl.rutgerkok.betterenderchest.uuidconversion.UUIDFetcher(plugin, Collections.singletonList(name));
+        UUIDFetcher uuidFetcher = new UUIDFetcher(plugin, Collections.singletonList(name));
         try {
-            @SuppressWarnings("deprecation")
             Map<String, ChestOwner> chestOwnerMap = uuidFetcher.call();
             if (chestOwnerMap.size() == 0) {
                 throw new InvalidOwnerException(name);
@@ -195,6 +193,6 @@ public class ChestOwners {
      * @return The "owner" of the public chest.
      */
     public ChestOwner publicChest() {
-        return SpecialChestOwner.PUBLIC_CHEST;
+        return SpecialChestOwner.PUBLIC_CHEST_OWNER;
     }
 }

@@ -5,7 +5,7 @@
  * Modified by BetterEnderChest to throw less generic exceptions, return
  * ChestOwner instead of UUID and to add support to continue using names.
  */
-package nl.rutgerkok.betterenderchest.uuidconversion;
+package nl.rutgerkok.betterenderchest.chestowner;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -21,21 +21,13 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
-import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
-import nl.rutgerkok.betterenderchest.chestowner.ChestOwners;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-/**
- * @deprecated Class will be moved to another package once UUID conversion
- * support is removed. Use {@link ChestOwners} to retrieve UUIDs.
- *
- */
-@Deprecated
-public class UUIDFetcher implements Callable<Map<String, ChestOwner>> {
+final class UUIDFetcher implements Callable<Map<String, ChestOwner>> {
     private static final String PROFILE_URL = "https://api.mojang.com/profiles/minecraft";
     private static final double PROFILES_PER_REQUEST = 100;
 
@@ -79,11 +71,11 @@ public class UUIDFetcher implements Callable<Map<String, ChestOwner>> {
 
         // Move over special chests early
         specialChests = new HashMap<String, ChestOwner>();
-        if (names.remove(BetterEnderChest.PUBLIC_CHEST_NAME)) {
-            specialChests.put(BetterEnderChest.PUBLIC_CHEST_NAME, plugin.getChestOwners().publicChest());
+        if (names.remove(SpecialChestOwner.PUBLIC_CHEST_NAME)) {
+            specialChests.put(SpecialChestOwner.PUBLIC_CHEST_NAME, plugin.getChestOwners().publicChest());
         }
-        if (names.remove(BetterEnderChest.DEFAULT_CHEST_NAME)) {
-            specialChests.put(BetterEnderChest.DEFAULT_CHEST_NAME, plugin.getChestOwners().defaultChest());
+        if (names.remove(SpecialChestOwner.DEFAULT_CHEST_NAME)) {
+            specialChests.put(SpecialChestOwner.DEFAULT_CHEST_NAME, plugin.getChestOwners().defaultChest());
         }
     }
 
