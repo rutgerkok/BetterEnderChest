@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.Map;
 
-import net.minecraft.server.v1_8_R1.NBTTagCompound;
+import net.minecraft.server.v1_8_R2.NBTTagCompound;
 import nl.rutgerkok.betterenderchest.nms.SimpleNMSHandler.JSONSimpleTypes;
 
 import org.json.simple.JSONObject;
@@ -100,7 +100,7 @@ public class TestJSON {
     public void testPortableHorsesPlugin() throws IOException {
         // BetterEnderChest used to have problems with the data from
         // the Portable Horses plugin
-        String json = "{\"Inventory\":[{\"id\":329,\"Damage\":0,\"Count\":1,\"tag\":{\"display\":{\"Lore\":[\"§2§5§7§f§lHorse\",\"§f§lCreamy\",\"§fHP: §r§729§f\\/§729\",\"§fJump: §r§73,62\",\"§fSpeed: §r§77,23\",\"§0H4sIAAAAAAAAAF1Sy24TMRS900zSTniIPhALhCgSEqtUqdKiZlG1eRSlUkKrNO0GNs7MTWImYw+2\\nh7YqX8COb6jYgsSKFZ\\/AFoREl4jP4Hqm00q15JXPOT73nFsG8OBWW8m4NWHCR10EgOLm56Wzm7cA\\npQFGMSoCLHlQbhij+DAxqMuWMgfuSxYhzI9RoOL+SsROOsimZlICt8k0bm9CdnLkwxwZCumHQ+aH\\nfdRcG2vjkgNwg3P\\/Sl2+wwiFOYgRg0v01o+fz+H365kr9GKOHsnpVB73mRjnytvVTNgDrycDPuKo\\n0jmcnLtA6EBGyzpmx2J5KEWiXfAOD3fbXWTafKzsnl2o+loBvD3KhBkuhaWXoNSIZCLM1nnjz\\/uv\\nvdCFOUvqSW2+nH\\/68PhVc+Z6nIWJVBpX3iRRfGAUivFVWlt\\/v108e\\/L9FxSg0BinQThwp8N0H2Ml\\ng8THgFTKrUQbGaVahHQHp3EKnYFSlj08KsCDZhKG3Kz02ElbRqgN93O7QRGKFvii8c\\/qu01Fsg7M\\nX8secc2HUyRFWzh1NOD2LwdutyYkhUHHTkDPXhuZmeSv7oC4DoW78zbhsS0qXZI08iLcawy1VLE1\\nkYWVeZ7rJMpkCrRsu6JLHWeDexRBl5YkHdrbO6ZWbajwdLSxzmpYr1fYaq1eWasFowqrr29UNmrV\\nqr9ardbWRquUW4uJfe6Hh3FXSkN6i\\/tUN60a0qr1kSzS3I4Ds7baCX1SgNkjpjhLnVGnnp8oqsd0\\n9vMtduDuDqUoxh12qm0uAP8BPKRxOUsDAAA=\"],\"Name\":\"Portable Horse\"}},\"Slot\":0}],\"DisabledSlots\":0,\"Rows\":4,\"OwnerName\":\"Wrong7\"}";
+        String json = "{\"Inventory\":[{\"id\":329,\"Damage\":0,\"Count\":1,\"tag\":{\"display\":{\"Lore\":[\"ï¿½2ï¿½5ï¿½7ï¿½fï¿½lHorse\",\"ï¿½fï¿½lCreamy\",\"ï¿½fHP: ï¿½rï¿½729ï¿½f\\/ï¿½729\",\"ï¿½fJump: ï¿½rï¿½73,62\",\"ï¿½fSpeed: ï¿½rï¿½77,23\",\"ï¿½0H4sIAAAAAAAAAF1Sy24TMRS900zSTniIPhALhCgSEqtUqdKiZlG1eRSlUkKrNO0GNs7MTWImYw+2\\nh7YqX8COb6jYgsSKFZ\\/AFoREl4jP4Hqm00q15JXPOT73nFsG8OBWW8m4NWHCR10EgOLm56Wzm7cA\\npQFGMSoCLHlQbhij+DAxqMuWMgfuSxYhzI9RoOL+SsROOsimZlICt8k0bm9CdnLkwxwZCumHQ+aH\\nfdRcG2vjkgNwg3P\\/Sl2+wwiFOYgRg0v01o+fz+H365kr9GKOHsnpVB73mRjnytvVTNgDrycDPuKo\\n0jmcnLtA6EBGyzpmx2J5KEWiXfAOD3fbXWTafKzsnl2o+loBvD3KhBkuhaWXoNSIZCLM1nnjz\\/uv\\nvdCFOUvqSW2+nH\\/68PhVc+Z6nIWJVBpX3iRRfGAUivFVWlt\\/v108e\\/L9FxSg0BinQThwp8N0H2Ml\\ng8THgFTKrUQbGaVahHQHp3EKnYFSlj08KsCDZhKG3Kz02ElbRqgN93O7QRGKFvii8c\\/qu01Fsg7M\\nX8secc2HUyRFWzh1NOD2LwdutyYkhUHHTkDPXhuZmeSv7oC4DoW78zbhsS0qXZI08iLcawy1VLE1\\nkYWVeZ7rJMpkCrRsu6JLHWeDexRBl5YkHdrbO6ZWbajwdLSxzmpYr1fYaq1eWasFowqrr29UNmrV\\nqr9ardbWRquUW4uJfe6Hh3FXSkN6i\\/tUN60a0qr1kSzS3I4Ds7baCX1SgNkjpjhLnVGnnp8oqsd0\\n9vMtduDuDqUoxh12qm0uAP8BPKRxOUsDAAA=\"],\"Name\":\"Portable Horse\"}},\"Slot\":0}],\"DisabledSlots\":0,\"Rows\":4,\"OwnerName\":\"Wrong7\"}";
 
         NBTTagCompound tagCompound = JSONSimpleTypes.toTag(json);
         assertEquals(tagCompound, roundTrip(tagCompound));

@@ -12,21 +12,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import net.minecraft.server.v1_8_R1.BlockPosition;
-import net.minecraft.server.v1_8_R1.MinecraftServer;
-import net.minecraft.server.v1_8_R1.NBTBase;
-import net.minecraft.server.v1_8_R1.NBTCompressedStreamTools;
-import net.minecraft.server.v1_8_R1.NBTNumber;
-import net.minecraft.server.v1_8_R1.NBTTagByteArray;
-import net.minecraft.server.v1_8_R1.NBTTagCompound;
-import net.minecraft.server.v1_8_R1.NBTTagDouble;
-import net.minecraft.server.v1_8_R1.NBTTagInt;
-import net.minecraft.server.v1_8_R1.NBTTagIntArray;
-import net.minecraft.server.v1_8_R1.NBTTagList;
-import net.minecraft.server.v1_8_R1.NBTTagLong;
-import net.minecraft.server.v1_8_R1.NBTTagString;
-import net.minecraft.server.v1_8_R1.TileEntity;
-import net.minecraft.server.v1_8_R1.TileEntityEnderChest;
+import net.minecraft.server.v1_8_R2.BlockPosition;
+import net.minecraft.server.v1_8_R2.MinecraftServer;
+import net.minecraft.server.v1_8_R2.NBTBase;
+import net.minecraft.server.v1_8_R2.NBTBase.NBTNumber;
+import net.minecraft.server.v1_8_R2.NBTCompressedStreamTools;
+import net.minecraft.server.v1_8_R2.NBTTagByteArray;
+import net.minecraft.server.v1_8_R2.NBTTagCompound;
+import net.minecraft.server.v1_8_R2.NBTTagDouble;
+import net.minecraft.server.v1_8_R2.NBTTagInt;
+import net.minecraft.server.v1_8_R2.NBTTagIntArray;
+import net.minecraft.server.v1_8_R2.NBTTagList;
+import net.minecraft.server.v1_8_R2.NBTTagLong;
+import net.minecraft.server.v1_8_R2.NBTTagString;
+import net.minecraft.server.v1_8_R2.TileEntity;
+import net.minecraft.server.v1_8_R2.TileEntityEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
@@ -34,8 +34,8 @@ import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_8_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_8_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_8_R2.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONObject;
@@ -238,7 +238,6 @@ public class SimpleNMSHandler extends NMSHandler {
          * @throws IOException
          */
         static final Map<String, Object> toMap(NBTTagCompound tagCompound) throws IOException {
-            @SuppressWarnings("unchecked")
             Collection<String> tagNames = tagCompound.c();
 
             // Add all children
@@ -445,7 +444,7 @@ public class SimpleNMSHandler extends NMSHandler {
         for (int i = 0; i < inventoryTag.size(); i++) {
             NBTTagCompound item = inventoryTag.get(i);
             int slot = item.getByte("Slot") & 255;
-            inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_8_R1.ItemStack.createStack(item)));
+            inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_8_R2.ItemStack.createStack(item)));
         }
 
         // Return the inventory
