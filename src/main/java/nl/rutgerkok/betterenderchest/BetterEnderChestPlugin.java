@@ -28,7 +28,6 @@ import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.BetterEnderFileCache;
 import nl.rutgerkok.betterenderchest.io.BetterEnderFileHandler;
 import nl.rutgerkok.betterenderchest.io.SaveAndLoadError;
-import nl.rutgerkok.betterenderchest.io.SaveLocation;
 import nl.rutgerkok.betterenderchest.mysql.BetterEnderSQLCache;
 import nl.rutgerkok.betterenderchest.mysql.DatabaseSettings;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
@@ -77,7 +76,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private BetterEnderFileHandler fileHandler;
     private BetterEnderWorldGroupManager groups;
     private Registry<InventoryImporter> importers = new Registry<InventoryImporter>();
-    private File legacyChestSaveLocation;
     private boolean lockChestsOnError = true;
     private boolean manualGroupManagement;
     private Registry<NMSHandler> nmsHandlers = new Registry<NMSHandler>();
@@ -212,11 +210,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     }
 
     @Override
-    public File getLegacyChestSaveLocation() {
-        return legacyChestSaveLocation;
-    }
-
-    @Override
     public Registry<NMSHandler> getNMSHandlers() {
         return nmsHandlers;
     }
@@ -288,24 +281,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         // UUIDs
         useUuids = config.getBoolean("BetterEnderChest.useUUIDs", true);
         config.set("BetterEnderChest.useUUIDs", useUuids);
-
-        // Save location
-        String defaultSaveLocation = SaveLocation.getDefaultSaveLocation().toString();
-        String givenSaveLocation = config.getString("BetterEnderChest.saveFolderLocation", defaultSaveLocation);
-        SaveLocation saveLocation = SaveLocation.getSaveLocation(givenSaveLocation);
-        if (saveLocation == null) {
-            warning(givenSaveLocation + " is not a valid save location. Defaulting to " + defaultSaveLocation + ".");
-            saveLocation = SaveLocation.getDefaultSaveLocation();
-        }
-        if (saveLocation == SaveLocation.SERVER_ROOT) {
-            // Print warning about deprecated save location
-            log("The save location " + SaveLocation.SERVER_ROOT + " is no longer supported. During the UUID conversion process "
-                    + "all chests will be/have been moved to the plugin folder. You can remove this setting from the config.yml.");
-        } else {
-            // Remove this setting
-            config.set("BetterEnderChest.saveFolderLocation", null);
-        }
-        legacyChestSaveLocation = saveLocation.getLegacyFolder(this);
 
         // ChestDrop
         String chestDrop = config.getString("BetterEnderChest.drop", "OBSIDIAN");
