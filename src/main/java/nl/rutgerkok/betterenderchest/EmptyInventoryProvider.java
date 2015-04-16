@@ -114,9 +114,9 @@ public class EmptyInventoryProvider {
     /**
      * Guesses the number of chest rows based on both the contents and the
      * inventory name. It will calculate the minimum number of rows to fit all
-     * the items. It will also guess the number of rows based on the name, just
-     * like {@link #getInventoryRows(String)}. It will then return the highest
-     * number of the two.
+     * the items. It will also guess the number of rows based on the owner, just
+     * like {@link #getInventoryRows(ChestOwner)}. It will then return the
+     * highest number of the two.
      * 
      * @param chestOwner
      *            The owner of the inventory.
@@ -131,9 +131,9 @@ public class EmptyInventoryProvider {
     /**
      * Guesses the number of chest rows based on both the contents and the
      * inventory name. It will calculate the minimum number of rows to fit all
-     * the items. It will also guess the number of rows based on the name, just
-     * like {@link #getInventoryRows(String)}. It will then return the highest
-     * number of the two.
+     * the items. It will also guess the number of rows based on the owner, just
+     * like {@link #getInventoryRows(ChestOwner)}. It will then return the
+     * highest number of the two.
      * 
      * @param chestOwner
      *            The owner of the inventory.

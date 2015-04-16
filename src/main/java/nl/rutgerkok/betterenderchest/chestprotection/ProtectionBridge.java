@@ -10,8 +10,11 @@ public abstract class ProtectionBridge implements Registration {
     /**
      * Finds out if a player can access a block that is protected by a chest
      * protection plugin.
-     * 
+     *
+     * @param player
+     *            The player trying to access something.
      * @param block
+     *            The block that is being accessed.
      * @return whether the block is protected by a chest protection plugin.
      */
     public abstract boolean canAccess(Player player, Block block);

@@ -43,9 +43,10 @@ public abstract class InventoryImporter implements Registration {
      *            The group the inventory is in.
      * @param plugin
      *            The BetterEnderChest plugin.
-     * @return The inventory, or null if there was nothing to import.
-     * @throws IOException
-     *             When something went wrong.
+     * @param callback
+     *            Called with the inventory.
+     * @param onError
+     *            Called when there was an error.
      */
     public void importInventoryAsync(ChestOwner chestOwner, WorldGroup worldGroup, BetterEnderChest plugin,
             Consumer<Inventory> callback, Consumer<IOException> onError) {

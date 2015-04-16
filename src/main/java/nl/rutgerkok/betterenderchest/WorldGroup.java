@@ -117,7 +117,7 @@ public class WorldGroup {
     /**
      * Returns whether the world is in this group.
      * 
-     * @param world
+     * @param worldName
      *            The name of the world to check.
      * @return Whether the world is in this group.
      */

@@ -83,8 +83,8 @@ public abstract class NMSHandler implements Registration {
      *            The owner of the inventory.
      * @param worldGroup
      *            The world group the inventory is in.
-     * @param nbtFile
-     *            The array to load from.
+     * @param jsonString
+     *            The json to load from.
      * 
      * @throws IOException
      *             If the byte array is corrupted.
@@ -112,6 +112,8 @@ public abstract class NMSHandler implements Registration {
      * @param inventory
      *            The inventory to save to. It must have
      *            BetterEnderInventoryHolder as it's holder.
+     * @throws IOException
+     *             When an IO error occurs.
      */
     public abstract void saveInventoryToFile(File file, Inventory inventory) throws IOException;
 
@@ -119,12 +121,12 @@ public abstract class NMSHandler implements Registration {
      * Saves a BetterEnderChest inventory to a JSON-formatted String, based on
      * the NBT representation of the inventory.
      * 
-     * @param file
-     *            The NBT file to save to. If the file does not exist, it is
-     *            created.
      * @param inventory
      *            The inventory to save to. It must have
      *            BetterEnderInventoryHolder as it's holder.
+     * @throws IOException
+     *             When the NBT can somehow not be converted to JSON.
+     * @return The JSON string.
      */
     public abstract String saveInventoryToJson(Inventory inventory) throws IOException;
 }

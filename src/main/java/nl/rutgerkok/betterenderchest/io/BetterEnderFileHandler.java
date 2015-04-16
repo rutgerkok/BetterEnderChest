@@ -77,13 +77,15 @@ public class BetterEnderFileHandler {
     /**
      * Load the inventory. It will automatically try to load it from a file, or
      * import it from another plugin, or use the default chest.
-     * 
+     *
      * @param chestOwner
      *            Owner of the inventory.
      * @param worldGroup
      *            Name of the world group the inventory is in.
-     * @return The Inventory. {@link BetterEnderInventoryHolder} will be the
-     *         holder of the inventory.
+     * @param callback
+     *            Called with the Inventory as parameter.
+     *            {@link BetterEnderInventoryHolder} will be the holder of the
+     *            inventory.
      */
     public void loadFromFileOrImport(ChestOwner chestOwner, WorldGroup worldGroup, Consumer<Inventory> callback) {
         // Try to load it from a file
@@ -144,6 +146,8 @@ public class BetterEnderFileHandler {
      *            The owner of the inventory.
      * @param group
      *            The group the inventory is in.
+     * @throws IOException
+     *             When saving fails.
      */
     public void saveInventory(Inventory inventory, ChestOwner chestOwner, WorldGroup group) throws IOException {
         File file = getChestFile(chestOwner, group);

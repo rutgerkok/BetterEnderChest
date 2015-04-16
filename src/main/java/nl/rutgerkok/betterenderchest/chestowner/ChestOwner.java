@@ -1,7 +1,5 @@
 package nl.rutgerkok.betterenderchest.chestowner;
 
-import nl.rutgerkok.betterenderchest.BetterEnderChest;
-
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
@@ -64,12 +62,9 @@ public interface ChestOwner {
 
     /**
      * Gets the name of the file this chest will be saved to, without the
-     * extension. Currently, this is just the lowercase player name, but this
-     * will change when UUIDs are introduced. This method may suddenly
-     * dissappear.
-     * 
-     * @see BetterEnderChest#PUBLIC_CHEST_NAME
-     * @see BetterEnderChest#DEFAULT_CHEST_NAME
+     * extension. This is usually the string representation of the UUID, but
+     * some chests (like the public chest) can use something else.
+     *
      * @return The name of
      */
     String getSaveFileName();

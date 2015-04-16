@@ -20,7 +20,7 @@ public class NoPermissionException extends Exception {
      * 
      * @param requiredPermission
      *            The permission node that was missing.
-     * @throws IllegalArgumentExcepiont
+     * @throws IllegalArgumentException
      *             If requiredPermission is null.
      */
     public NoPermissionException(String requiredPermission) {

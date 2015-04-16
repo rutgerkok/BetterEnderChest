@@ -64,7 +64,7 @@ public interface BetterEnderCache {
      * @param inventory
      *            The new inventory
      */
-    void setInventory(Inventory enderInventory);
+    void setInventory(Inventory inventory);
 
     /**
      * Unloads all inventories from memory. Doesn't save! Also, make sure that

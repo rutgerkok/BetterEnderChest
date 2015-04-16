@@ -269,9 +269,10 @@ public class SimpleNMSHandler extends NMSHandler {
 
         /**
          * Converts from a List<Number>, as found in the JSON, to int[].
-         * 
+         *
          * @param boxed
          *            List from the JSON. return The int array.
+         * @return The unboxed ints.
          */
         private static final int[] unboxIntegers(List<Number> boxed) {
             int[] ints = new int[boxed.size()];
@@ -283,9 +284,10 @@ public class SimpleNMSHandler extends NMSHandler {
 
         /**
          * Converts from a List<Number>, as found in the JSON, to byte[].
-         * 
+         *
          * @param boxed
          *            List from the JSON. return The byte array.
+         * @return The unboxed bytes.
          */
         private static final byte[] unboxBytes(List<Number> boxed) {
             byte[] bytes = new byte[boxed.size()];
@@ -451,7 +453,7 @@ public class SimpleNMSHandler extends NMSHandler {
         return inventory;
     }
 
-    private NBTTagCompound saveInventoryToTag(Inventory inventory) throws IOException {
+    private NBTTagCompound saveInventoryToTag(Inventory inventory) {
         BetterEnderInventoryHolder holder = BetterEnderInventoryHolder.of(inventory);
         NBTTagCompound baseTag = new NBTTagCompound();
         NBTTagList inventoryTag = new NBTTagList();

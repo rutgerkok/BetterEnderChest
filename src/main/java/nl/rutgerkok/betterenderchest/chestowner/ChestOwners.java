@@ -93,14 +93,14 @@ public class ChestOwners {
      * for the given name, so it may take some time to be completed. The
      * callbacks are always called on the main thread. At the moment the
      * callback is called immediately.
-     * 
+     *
      * <p>
      * The name may be the name of a player, or it may be
-     * {@link #PUBLIC_CHEST_NAME} or {@link #DEFAULT_CHEST_NAME}.
+     * {@code publicChest().getSaveFileName()} or
+     * {@code defaultChest().getSaveFileName()}.
      * 
      * @param name
-     *            Either a player name, {@link #PUBLIC_CHEST_NAME} or
-     *            {@link #DEFAULT_CHEST_NAME}.
+     *            Either a player name or the name of a special chest.
      * @param onSuccess
      *            Will be called when the {@link ChestOwner} has been found.
      * @param onFailure

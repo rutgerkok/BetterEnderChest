@@ -31,6 +31,8 @@ public class LoadEntry {
      * 
      * @param plugin
      *            The plugin, needed for Bukkit's scheduler.
+     * @param cache
+     *            The cache, to put the inventory in.
      * @param jsonData
      *            The raw bytes of the inventory that was just loaded.
      */
@@ -112,7 +114,7 @@ public class LoadEntry {
     /**
      * Gets the world group of the inventory that should be loaded.
      * 
-     * @return
+     * @return The world group.
      */
     public WorldGroup getWorldGroup() {
         return worldGroup;

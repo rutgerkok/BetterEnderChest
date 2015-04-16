@@ -464,10 +464,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     }
 
     /**
-     * Gets whether the string is a valid chest drop
-     * 
+     * Gets whether the string is a valid chest drop.
+     *
      * @param drop
-     * @return
+     *            The string.
+     * @return True if the drop is valid, false otherwise.
      */
     public boolean isValidChestDrop(String drop) {
         try {

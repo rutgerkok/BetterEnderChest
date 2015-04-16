@@ -50,8 +50,8 @@ public class BetterEnderWorldGroupManager {
      * Returns the group of the world. World name is case insensitive. If the
      * world name is not listed in a group ({@link #isWorldListed(String)}) it
      * will return the default group.
-     * 
-     * @param world
+     *
+     * @param worldName
      *            Name of the world. Case insensitive.
      * @return The world group.
      */

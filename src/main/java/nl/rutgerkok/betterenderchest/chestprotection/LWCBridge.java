@@ -101,7 +101,7 @@ public class LWCBridge extends ProtectionBridge {
      * is looked up and a {@link ChestOwner} is returned. If not, null is
      * returned.
      *
-     * @param ownerName
+     * @param string
      *            The string that is maybe an UUID.
      * @return The {@link ChestOwner}, or null.
      */
