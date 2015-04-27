@@ -66,8 +66,8 @@ public class MyWorldsImporter extends InventoryImporter {
 
         // Search for player file
         File playerFolder = worldToGrabInventoryFrom.getPlayerFolder();
-        File playerFile = BetterEnderUtils.getCaseInsensitiveFile(playerFolder, chestOwner.getSaveFileName() + ".dat");
-        if (playerFile == null) {
+        File playerFile = new File(playerFolder, chestOwner.getSaveFileName() + ".dat");
+        if (!playerFile.exists()) {
             // No player file
             return null;
         }
