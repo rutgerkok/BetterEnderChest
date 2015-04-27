@@ -216,8 +216,7 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
      * Saves all inventories <em>on the main thread</em>. Only use this on
      * shutdown.
      */
-    @Override
-    public void saveAllInventories() {
+    private void saveAllInventories() {
         // Check whether chests can be saved
         if (!plugin.canSaveAndLoad()) {
             return;
@@ -245,35 +244,6 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
                     } catch (SQLException e) {
                         plugin.severe("Failed to save chest " + holder.getChestOwner().getDisplayName() + " to the database", e);
                         plugin.disableSaveAndLoad("Failed to save chest " + holder.getChestOwner().getDisplayName() + " to the database when saving all chests", e);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    // Synchronous saving method - try to avoid this one
-    public void saveInventory(ChestOwner chestOwner, WorldGroup group) {
-        // Check whether chests can be saved
-        if (!plugin.canSaveAndLoad()) {
-            return;
-        }
-
-        Map<ChestOwner, Inventory> inventories = cachedInventories.get(group);
-        if (inventories != null) {
-            Inventory inventory = inventories.get(chestOwner);
-            if (inventory != null) {
-                synchronized (savingLock) {
-                    try {
-                        sqlHandler.updateChest(new SaveEntry(plugin, inventory));
-
-                        // Chest in its current state was just saved
-                        BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
-                        holder.setHasUnsavedChanges(false);
-                    } catch (SQLException e) {
-                        plugin.severe("Failed to save chest", e);
-                    } catch (IOException e) {
-                        plugin.severe("Failed to save chest", e);
                     }
                 }
             }
@@ -312,24 +282,6 @@ public class BetterEnderSQLCache extends AbstractEnderCache {
             builder.append("No inventories loaded.");
         }
         return builder.toString();
-    }
-
-    @Override
-    public void unloadAllInventories() {
-        cachedInventories.clear();
-    }
-
-    @Override
-    public void unloadInventory(ChestOwner chestOwner, WorldGroup group) {
-        Map<ChestOwner, Inventory> inventoriesInGroup = cachedInventories.get(group);
-        if (inventoriesInGroup == null) {
-            // No chests of that group loaded, nothing to do
-            return;
-        }
-
-        if (inventoriesInGroup.remove(chestOwner) == null) {
-            plugin.debug("Failed to unload chest of " + chestOwner.getDisplayName() + " in group " + group.getGroupName());
-        }
     }
 
 }

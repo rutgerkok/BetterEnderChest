@@ -190,8 +190,7 @@ public class BetterEnderFileCache extends AbstractEnderCache {
 
     }
 
-    @Override
-    public void saveAllInventories() {
+    private void saveAllInventories() {
         if (!plugin.canSaveAndLoad()) {
             // Can't do anything
             return;
@@ -215,8 +214,7 @@ public class BetterEnderFileCache extends AbstractEnderCache {
         }
     }
 
-    @Override
-    public void saveInventory(ChestOwner chestOwner, WorldGroup group) {
+    private void saveInventory(ChestOwner chestOwner, WorldGroup group) {
         if (!plugin.canSaveAndLoad()) {
             return;
         }
@@ -272,14 +270,12 @@ public class BetterEnderFileCache extends AbstractEnderCache {
         return builder.toString();
     }
 
-    @Override
-    public void unloadAllInventories() {
+    private void unloadAllInventories() {
         saveQueue.clear();
         inventories.clear();
     }
 
-    @Override
-    public void unloadInventory(ChestOwner chestOwner, WorldGroup group) {
+    private void unloadInventory(ChestOwner chestOwner, WorldGroup group) {
         // Remove it from the list
         if (inventories.containsKey(group)) {
             inventories.get(group).remove(chestOwner);
