@@ -17,7 +17,8 @@ import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 public class SQLHandler {
     private static final String TABLE_NAME_PREFIX = "bec_chestdata_";
     /**
-     * Never use this field directly, use {@link #getConnection()} or {@link #closeConnection()}.
+     * Never use this field directly, use {@link #getConnection()} or
+     * {@link #closeConnection()}.
      */
     private Connection connection;
     private final Object connectionLock = new Object();
@@ -84,9 +85,12 @@ public class SQLHandler {
         Statement statement = getConnection().createStatement();
         try {
             String query = "CREATE TABLE IF NOT EXISTS `" + getTableName(group) + "` ("
-                    + " `chest_id` int(10) unsigned NOT NULL AUTO_INCREMENT, `chest_owner` char(36) NOT NULL,"
-                    + " `chest_data` MEDIUMTEXT NOT NULL, PRIMARY KEY (`chest_id`), UNIQUE KEY (`chest_owner`)"
-                    + ") ENGINE=InnoDB";
+                    + " `chest_id` int(10) unsigned NOT NULL AUTO_INCREMENT,"
+                    + " `chest_owner` char(36) CHARACTER SET ascii NOT NULL,"
+                    + " `chest_data` mediumtext CHARACTER SET utf8mb4 NOT NULL,"
+                    + " PRIMARY KEY (`chest_id`),"
+                    + " UNIQUE KEY `chest_owner` (`chest_owner`)"
+                    + " ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
             statement.execute(query);
         } finally {
             statement.close();
@@ -96,7 +100,7 @@ public class SQLHandler {
     /**
      * Gets the active connection. If the connection is not active yet/anymore,
      * an attempt to (re)connect is made.
-     * 
+     *
      * @return The active connection.
      * @throws SQLException
      *             If no connection could be made
@@ -115,7 +119,10 @@ public class SQLHandler {
             // Try to (re)connect
             try {
                 Class.forName("com.mysql.jdbc.Driver");
-                String connectionString = "jdbc:mysql://" + settings.getHost() + ":" + settings.getPort() + "/" + settings.getDatabaseName();
+                String connectionString = "jdbc:mysql://" + settings.getHost()
+                        + ":" + settings.getPort()
+                        + "/" + settings.getDatabaseName()
+                        + "?useUnicode=true&characterEncoding=UTF-8";
                 connection = DriverManager.getConnection(connectionString, settings.getUsername(), settings.getPassword());
             } catch (ClassNotFoundException e) {
                 throw new SQLException("JDBC Driver not found!");
