@@ -1,12 +1,10 @@
 package nl.rutgerkok.betterenderchest;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
-import nl.rutgerkok.betterenderchest.io.file.CaseInsensitiveFileFilter;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -136,28 +134,6 @@ public class BetterEnderUtils {
                 holder.setHasUnsavedChanges(true);
             }
         }
-    }
-
-    /**
-     * Get's a file in a directory. It is case-insensitive.
-     * 
-     * @param directory
-     *            The directory to load from.
-     * @param fileName
-     *            The file name.
-     * @return The file, or null if it wasn't found.
-     */
-    public static File getCaseInsensitiveFile(File directory, String fileName) {
-        String[] files = directory.list(new CaseInsensitiveFileFilter(fileName));
-
-        // Check if the file exists
-        if (files.length == 0) {
-            // File not found, return null
-            return null;
-        }
-
-        // Return the first (and hopefully only) file
-        return new File(directory.getAbsolutePath(), files[0]);
     }
 
     public static Inventory getCorrectlyResizedInventory(Player player, Inventory inventory, BetterEnderChest plugin) {
