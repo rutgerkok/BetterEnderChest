@@ -8,8 +8,8 @@ import nl.rutgerkok.betterenderchest.command.BaseCommand;
 import nl.rutgerkok.betterenderchest.command.BetterEnderCommandManager;
 import nl.rutgerkok.betterenderchest.importers.InventoryImporter;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
-import nl.rutgerkok.betterenderchest.io.BetterEnderFileHandler;
-import nl.rutgerkok.betterenderchest.mysql.DatabaseSettings;
+import nl.rutgerkok.betterenderchest.io.file.BetterEnderFileHandler;
+import nl.rutgerkok.betterenderchest.io.mysql.DatabaseSettings;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.registry.Registry;
 

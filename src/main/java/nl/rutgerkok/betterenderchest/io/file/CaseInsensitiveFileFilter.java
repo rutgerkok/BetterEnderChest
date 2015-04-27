@@ -1,4 +1,4 @@
-package nl.rutgerkok.betterenderchest.io;
+package nl.rutgerkok.betterenderchest.io.file;
 
 import java.io.File;
 import java.io.FilenameFilter;

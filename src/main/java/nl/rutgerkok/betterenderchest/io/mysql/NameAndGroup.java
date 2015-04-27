@@ -1,4 +1,4 @@
-package nl.rutgerkok.betterenderchest.mysql;
+package nl.rutgerkok.betterenderchest.io.mysql;
 
 import nl.rutgerkok.betterenderchest.WorldGroup;
 

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
-import nl.rutgerkok.betterenderchest.io.CaseInsensitiveFileFilter;
+import nl.rutgerkok.betterenderchest.io.file.CaseInsensitiveFileFilter;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;

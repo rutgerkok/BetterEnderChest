@@ -1,4 +1,4 @@
-package nl.rutgerkok.betterenderchest.io;
+package nl.rutgerkok.betterenderchest.io.file;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,6 +11,8 @@ import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.AutoSave;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.betterenderchest.io.AbstractEnderCache;
+import nl.rutgerkok.betterenderchest.io.Consumer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;

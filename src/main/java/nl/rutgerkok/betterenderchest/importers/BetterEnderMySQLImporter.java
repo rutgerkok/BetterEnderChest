@@ -8,7 +8,7 @@ import java.util.Set;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
-import nl.rutgerkok.betterenderchest.mysql.SQLHandler;
+import nl.rutgerkok.betterenderchest.io.mysql.SQLHandler;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;

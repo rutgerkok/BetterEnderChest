@@ -1,4 +1,4 @@
-package nl.rutgerkok.betterenderchest.io;
+package nl.rutgerkok.betterenderchest.io.file;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,6 +8,7 @@ import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.exception.ChestNotFoundException;
+import nl.rutgerkok.betterenderchest.io.Consumer;
 
 import org.bukkit.inventory.Inventory;
 
