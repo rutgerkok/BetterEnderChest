@@ -1,10 +1,15 @@
 package nl.rutgerkok.betterenderchest;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.apache.commons.lang.Validate;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+
+import com.google.common.base.Preconditions;
 
 public class BetterEnderInventoryHolder implements InventoryHolder {
     /**
@@ -15,17 +20,19 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
      * @param inventory
      *            The inventory to get the holder of.
      * @return The holder.
-     * @throws ClassCastException
+     * @throws IllegalArgumentException
      *             If the inventory doesn't have a
      *             <code>BetterEnderInventoryHolder</code> as holder.
      */
-    public static BetterEnderInventoryHolder of(Inventory inventory) throws ClassCastException {
+    public static BetterEnderInventoryHolder of(Inventory inventory) throws IllegalArgumentException {
+        Preconditions.checkArgument(inventory.getHolder() instanceof BetterEnderInventoryHolder, "not an Ender inventory");
         return (BetterEnderInventoryHolder) inventory.getHolder();
     }
 
     private final ChestOwner chestOwner;
     private final byte disabledSlots;
     private boolean hasUnsavedChanges;
+    private final ReentrantLock saveLock;
 
     private final WorldGroup worldGroup;
 
@@ -35,6 +42,7 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
         this.chestOwner = chestOwner;
         this.disabledSlots = (byte) disabledSlots;
         this.worldGroup = worldGroup;
+        this.saveLock = new ReentrantLock();
     }
 
     /**
@@ -62,6 +70,15 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
     @Deprecated
     public Inventory getInventory() {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Gets a lock used to make sure the chest isn't saved twice at once.
+     *
+     * @return The lock.
+     */
+    public Lock getSaveLock() {
+        return saveLock;
     }
 
     /**

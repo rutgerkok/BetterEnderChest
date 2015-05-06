@@ -1,15 +1,18 @@
 package nl.rutgerkok.betterenderchest.importers;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.exception.ChestNotFoundException;
-import nl.rutgerkok.betterenderchest.io.Consumer;
 import nl.rutgerkok.betterenderchest.registry.Registration;
 
 import org.bukkit.inventory.Inventory;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 public abstract class InventoryImporter implements Registration {
 
@@ -33,9 +36,9 @@ public abstract class InventoryImporter implements Registration {
     }
 
     /**
-     * Imports an inventory from another plugin. Method must be called on the
-     * main thread. Will only be called if isAvailable() returns true. Will
-     * return null if there was nothing to import.
+     * Imports an inventory from another plugin. Method can be called form any
+     * thread. Will only be called if isAvailable() returns true. Will return
+     * null if there was nothing to import.
      * 
      * @param chestOwner
      *            The owner of the inventory.
@@ -43,23 +46,23 @@ public abstract class InventoryImporter implements Registration {
      *            The group the inventory is in.
      * @param plugin
      *            The BetterEnderChest plugin.
-     * @param callback
-     *            Called with the inventory.
-     * @param onError
-     *            Called when there was an error.
+     * @return The inventory, when available. {@link BetterEnderInventoryHolder}
+     *         will be the holder of the inventory. Will be a failed future if
+     *         nothing was imported.
      */
-    public void importInventoryAsync(ChestOwner chestOwner, WorldGroup worldGroup, BetterEnderChest plugin,
-            Consumer<Inventory> callback, Consumer<IOException> onError) {
-        try {
-            Inventory inventory = importInventory(chestOwner, worldGroup, plugin);
-            if (inventory != null) {
-                callback.consume(inventory);
-            } else {
-                onError.consume(new ChestNotFoundException(chestOwner, worldGroup));
+    public ListenableFuture<Inventory> importInventoryAsync(final ChestOwner chestOwner, final WorldGroup worldGroup, final BetterEnderChest plugin) {
+        // This method isn't overridden by a subclass, so fall back to the
+        // sync method on the server thread
+        return plugin.getExecutors().serverThreadExecutor().submit(new Callable<Inventory>() {
+            @Override
+            public Inventory call() throws Exception {
+                Inventory inventory = importInventory(chestOwner, worldGroup, plugin);
+                if (inventory == null) {
+                    throw new ChestNotFoundException(chestOwner, worldGroup);
+                }
+                return inventory;
             }
-        } catch (IOException e) {
-            onError.consume(e);
-        }
+        });
     }
 
     /**

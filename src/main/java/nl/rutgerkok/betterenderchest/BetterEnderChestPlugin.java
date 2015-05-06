@@ -26,13 +26,14 @@ import nl.rutgerkok.betterenderchest.importers.VanillaImporter;
 import nl.rutgerkok.betterenderchest.importers.WorldInventoriesImporter;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.SaveAndLoadError;
-import nl.rutgerkok.betterenderchest.io.file.BetterEnderFileCache;
+import nl.rutgerkok.betterenderchest.io.SimpleEnderCache;
 import nl.rutgerkok.betterenderchest.io.file.BetterEnderFileHandler;
 import nl.rutgerkok.betterenderchest.io.mysql.BetterEnderSQLCache;
 import nl.rutgerkok.betterenderchest.io.mysql.DatabaseSettings;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.nms.SimpleNMSHandler;
 import nl.rutgerkok.betterenderchest.registry.Registry;
+import nl.rutgerkok.betterenderchest.util.BukkitExecutors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -60,6 +61,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         public static boolean openOnOpeningUnprotectedChest, openOnUsingCommand;
     }
 
+    private BukkitExecutors bukkitExecutors;
     private ChestDrop chestDrop, chestDropSilkTouch, chestDropCreative;
     private Material chestMaterial = Material.ENDER_CHEST;
     private ChestOpener chestOpener;
@@ -73,7 +75,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private boolean debug;
     private EmptyInventoryProvider emptyInventoryProvider;
     private BetterEnderCache enderCache;
-    private BetterEnderFileHandler fileHandler;
     private BetterEnderWorldGroupManager groups;
     private Registry<InventoryImporter> importers = new Registry<InventoryImporter>();
     private boolean lockChestsOnError = true;
@@ -200,8 +201,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     }
 
     @Override
-    public BetterEnderFileHandler getFileHandler() {
-        return fileHandler;
+    public BukkitExecutors getExecutors() {
+        return bukkitExecutors;
     }
 
     @Override
@@ -227,24 +228,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public Registry<ProtectionBridge> getProtectionBridges() {
         return protectionBridges;
-    }
-
-    @Override
-    public void printSaveAndLoadError() {
-        SaveAndLoadError error;
-        synchronized (this) {
-            error = saveAndLoadError;
-        }
-
-        if (error == null) {
-            return;
-        }
-
-        severe("- ---------------------------------------------------------- -");
-        severe("Saving and loading had to be disabled. Here's the error again:");
-        severe("(Use \"/bec reload\" to try again to save and load.)");
-        severe(error.getMessage(), error.getCause());
-        severe("- ---------------------------------------------------------- -");
     }
 
     @Override
@@ -458,14 +441,14 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
      * Loads all IO services that were not yet loaded.
      */
     private void loadIOServices() {
-        // File handlers
-        fileHandler = new BetterEnderFileHandler(this);
 
         // Chests storage
         if (databaseSettings.isEnabled()) {
-            enderCache = new BetterEnderSQLCache(this);
+            enderCache = BetterEnderSQLCache.create(this);
         } else {
-            enderCache = new BetterEnderFileCache(this);
+            NMSHandler nmsHandler = getNMSHandlers().getSelectedRegistration();
+            BetterEnderFileHandler fileHandler = new BetterEnderFileHandler(nmsHandler, chestSaveLocation);
+            enderCache = new SimpleEnderCache(this, fileHandler, fileHandler);
         }
     }
 
@@ -485,6 +468,18 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
     @Override
     public void onEnable() {
+        // NMS handlers
+        try {
+            nmsHandlers.register(new SimpleNMSHandler(this));
+        } catch (Throwable t) {
+            // Ignored, it is possible that another save system has been
+            // installed. See message shown near the end of this method.
+        }
+        nmsHandlers.selectAvailableRegistration();
+
+        // Task executors
+        bukkitExecutors = new BukkitExecutors(this);
+
         // Folder
         chestSaveLocation = new File(getDataFolder(), "chestData");
 
@@ -500,7 +495,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         importers.register(new MultiverseInventoriesImporter());
         importers.register(new WorldInventoriesImporter());
         importers.register(new MyWorldsImporter());
-        importers.register(new BetterEnderFlatFileImporter());
+        importers.register(new BetterEnderFlatFileImporter(this));
         importers.register(new BetterEnderMySQLImporter());
         importers.register(new NoneImporter());
         importers.register(new VanillaImporter());
@@ -524,15 +519,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             chestOpener = new ChestOpener(this);
         }
 
-        // NMS handlers
-        try {
-            nmsHandlers.register(new SimpleNMSHandler(this));
-        } catch (Throwable t) {
-            // Ignored, it is possible that another save system has been
-            // installed. See message shown near the end of this method.
-        }
-        nmsHandlers.selectAvailableRegistration();
-
         // Configuration
         groups = new BetterEnderWorldGroupManager(this);
         initConfig();
@@ -554,6 +540,24 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
         // Debug message
         debug("Debug mode enabled. Thanks for helping to debug an issue! BetterEnderChest depends on people like you.");
+    }
+
+    @Override
+    public void printSaveAndLoadError() {
+        SaveAndLoadError error;
+        synchronized (this) {
+            error = saveAndLoadError;
+        }
+
+        if (error == null) {
+            return;
+        }
+
+        severe("- ---------------------------------------------------------- -");
+        severe("Saving and loading had to be disabled. Here's the error again:");
+        severe("(Use \"/bec reload\" to try again to save and load.)");
+        severe(error.getMessage(), error.getCause());
+        severe("- ---------------------------------------------------------- -");
     }
 
     @Override
@@ -595,7 +599,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
      */
     private void unloadIOServices() {
         enderCache.disable();
-        fileHandler = null;
         enderCache = null;
     }
 

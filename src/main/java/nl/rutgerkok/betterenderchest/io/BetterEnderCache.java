@@ -1,9 +1,13 @@
 package nl.rutgerkok.betterenderchest.io;
 
+import java.io.IOException;
+
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.inventory.Inventory;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * Represents the chest cache, used to retrieve inventories.
@@ -25,14 +29,30 @@ public interface BetterEnderCache {
     void disable();
 
     /**
-     * Loads an inventory.
+     * Gets an inventory. If needed, the inventory is loaded from disk/a
+     * database/another data source.
+     *
+     * @param chestOwner
+     *            Owner of the inventory.
+     * @param worldGroup
+     *            Group the inventory is in.
+     * @return The inventory. Holds an {@link IOException} if an IO error
+     *         occured.
+     */
+    ListenableFuture<Inventory> getInventory(ChestOwner chestOwner, WorldGroup worldGroup);
+
+    /**
+     * Loads an inventory. If needed, the inventory is loaded from disk/a
+     * database/another data source.
      *
      * @param chestOwner
      *            Owner of the inventory.
      * @param worldGroup
      *            Group the inventory is in.
      * @param callback
-     *            Called when the chest is retrieved.
+     *            Called when the chest is retrieved. If the chest failed to
+     *            load for whatever reason (no data saved, IO error) an empty
+     *            inventory will be returned.
      */
     void getInventory(ChestOwner chestOwner, WorldGroup worldGroup, Consumer<Inventory> callback);
 

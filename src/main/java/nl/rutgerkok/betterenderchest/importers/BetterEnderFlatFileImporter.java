@@ -3,16 +3,26 @@ package nl.rutgerkok.betterenderchest.importers;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
-import nl.rutgerkok.betterenderchest.io.Consumer;
+import nl.rutgerkok.betterenderchest.io.file.BetterEnderFileHandler;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 public class BetterEnderFlatFileImporter extends InventoryImporter {
+
+    private final BetterEnderFileHandler fileHandler;
+
+    public BetterEnderFlatFileImporter(BetterEnderChest plugin) {
+        fileHandler = new BetterEnderFileHandler(plugin.getNMSHandlers().getSelectedRegistration(),
+                plugin.getChestSaveLocation());
+    }
 
     @Override
     public String getName() {
@@ -26,8 +36,13 @@ public class BetterEnderFlatFileImporter extends InventoryImporter {
     }
 
     @Override
-    public void importInventoryAsync(ChestOwner chestOwner, WorldGroup worldGroup, BetterEnderChest plugin, Consumer<Inventory> callback, Consumer<IOException> onError) {
-        plugin.getFileHandler().loadFromFileOrError(chestOwner, worldGroup, callback, onError);
+    public ListenableFuture<Inventory> importInventoryAsync(final ChestOwner chestOwner, final WorldGroup worldGroup, BetterEnderChest plugin) {
+        return plugin.getExecutors().workerThreadExecutor().submit(new Callable<Inventory>() {
+            @Override
+            public Inventory call() throws IOException {
+                return fileHandler.loadInventory(chestOwner, worldGroup);
+            }
+        });
     }
 
     @Override

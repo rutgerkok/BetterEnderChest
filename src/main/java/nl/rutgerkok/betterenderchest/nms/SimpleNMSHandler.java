@@ -1,6 +1,5 @@
 package nl.rutgerkok.betterenderchest.nms;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -28,9 +27,9 @@ import net.minecraft.server.v1_8_R2.NBTTagString;
 import net.minecraft.server.v1_8_R2.TileEntity;
 import net.minecraft.server.v1_8_R2.TileEntityEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
-import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.betterenderchest.io.SaveEntry;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -268,21 +267,6 @@ public class SimpleNMSHandler extends NMSHandler {
         }
 
         /**
-         * Converts from a List<Number>, as found in the JSON, to int[].
-         *
-         * @param boxed
-         *            List from the JSON. return The int array.
-         * @return The unboxed ints.
-         */
-        private static final int[] unboxIntegers(List<Number> boxed) {
-            int[] ints = new int[boxed.size()];
-            for (int i = 0; i < ints.length; i++) {
-                ints[i] = boxed.get(i).intValue();
-            }
-            return ints;
-        }
-
-        /**
          * Converts from a List<Number>, as found in the JSON, to byte[].
          *
          * @param boxed
@@ -295,6 +279,21 @@ public class SimpleNMSHandler extends NMSHandler {
                 bytes[i] = boxed.get(i).byteValue();
             }
             return bytes;
+        }
+
+        /**
+         * Converts from a List<Number>, as found in the JSON, to int[].
+         *
+         * @param boxed
+         *            List from the JSON. return The int array.
+         * @return The unboxed ints.
+         */
+        private static final int[] unboxIntegers(List<Number> boxed) {
+            int[] ints = new int[boxed.size()];
+            for (int i = 0; i < ints.length; i++) {
+                ints[i] = boxed.get(i).intValue();
+            }
+            return ints;
         }
     }
 
@@ -324,16 +323,40 @@ public class SimpleNMSHandler extends NMSHandler {
         }
     }
 
-    @Override
-    public String convertNBTBytesToJson(byte[] bytes) throws IOException {
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
-        NBTTagCompound baseTag = NBTCompressedStreamTools.a(inputStream);
-        return JSONObject.toJSONString(JSONSimpleTypes.toMap(baseTag));
+    private int getDisabledSlots(NBTTagCompound baseTag) {
+        if (baseTag.hasKey("DisabledSlots")) {
+            // Load the number of disabled slots
+            return baseTag.getByte("DisabledSlots");
+        } else {
+            // Return 0. It doesn't harm anything and it will be corrected when
+            // the chest is opened
+            return 0;
+        }
     }
 
     @Override
     public String getName() {
         return getClass().getSimpleName();
+    }
+
+    private int getRows(ChestOwner chestOwner, NBTTagCompound baseTag, NBTTagList inventoryListTag) {
+        if (baseTag.hasKey("Rows")) {
+            // Load the number of rows
+            return baseTag.getByte("Rows");
+        } else {
+            // Guess the number of rows
+            // Iterates through all the items to find the highest slot number
+            int highestSlot = 0;
+            for (int i = 0; i < inventoryListTag.size(); i++) {
+
+                // Replace the current highest slot if this slot is higher
+                highestSlot = Math.max(inventoryListTag.get(i).getByte("Slot") & 255, highestSlot);
+            }
+
+            // Calculate the needed number of rows for the items, and return the
+            // required number of rows
+            return Math.max((int) Math.ceil(highestSlot / 9.0), plugin.getEmptyInventoryProvider().getInventoryRows(chestOwner));
+        }
     }
 
     @Override
@@ -366,74 +389,6 @@ public class SimpleNMSHandler extends NMSHandler {
         return this.loadNBTInventoryFromTag(JSONSimpleTypes.toTag(jsonString), chestOwner, worldGroup, "Inventory");
     }
 
-    @Override
-    public void openEnderChest(Location loc) {
-        BlockPosition blockPos = toBlockPosition(loc);
-        TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(blockPos);
-        if (tileEntity instanceof TileEntityEnderChest) {
-            ((TileEntityEnderChest) tileEntity).b(); // .open()
-        }
-    }
-
-    @Override
-    public void saveInventoryToFile(File file, Inventory inventory) throws IOException {
-        FileOutputStream stream = null;
-        try {
-            // Write inventory to it
-            file.getAbsoluteFile().getParentFile().mkdirs();
-            file.createNewFile();
-            stream = new FileOutputStream(file);
-            NBTCompressedStreamTools.a(saveInventoryToTag(inventory), stream);
-        } finally {
-            if (stream != null) {
-                stream.flush();
-                stream.close();
-            }
-        }
-    }
-
-    @Override
-    public String saveInventoryToJson(Inventory inventory) throws IOException {
-        NBTTagCompound tag = saveInventoryToTag(inventory);
-        Map<String, Object> map = JSONSimpleTypes.toMap(tag);
-        return JSONObject.toJSONString(map);
-    }
-
-    private BlockPosition toBlockPosition(Location location) {
-        return new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
-    }
-
-    private int getDisabledSlots(NBTTagCompound baseTag) {
-        if (baseTag.hasKey("DisabledSlots")) {
-            // Load the number of disabled slots
-            return baseTag.getByte("DisabledSlots");
-        } else {
-            // Return 0. It doesn't harm anything and it will be corrected when
-            // the chest is opened
-            return 0;
-        }
-    }
-
-    private int getRows(ChestOwner chestOwner, NBTTagCompound baseTag, NBTTagList inventoryListTag) {
-        if (baseTag.hasKey("Rows")) {
-            // Load the number of rows
-            return baseTag.getByte("Rows");
-        } else {
-            // Guess the number of rows
-            // Iterates through all the items to find the highest slot number
-            int highestSlot = 0;
-            for (int i = 0; i < inventoryListTag.size(); i++) {
-
-                // Replace the current highest slot if this slot is higher
-                highestSlot = Math.max(inventoryListTag.get(i).getByte("Slot") & 255, highestSlot);
-            }
-
-            // Calculate the needed number of rows for the items, and return the
-            // required number of rows
-            return Math.max((int) Math.ceil(highestSlot / 9.0), plugin.getEmptyInventoryProvider().getInventoryRows(chestOwner));
-        }
-    }
-
     private Inventory loadNBTInventoryFromTag(NBTTagCompound baseTag, ChestOwner chestOwner, WorldGroup worldGroup, String inventoryTagName) throws IOException {
         NBTTagList inventoryTag = baseTag.getList(inventoryTagName, TagType.COMPOUND);
 
@@ -453,15 +408,47 @@ public class SimpleNMSHandler extends NMSHandler {
         return inventory;
     }
 
-    private NBTTagCompound saveInventoryToTag(Inventory inventory) {
-        BetterEnderInventoryHolder holder = BetterEnderInventoryHolder.of(inventory);
+    @Override
+    public void openEnderChest(Location loc) {
+        BlockPosition blockPos = toBlockPosition(loc);
+        TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(blockPos);
+        if (tileEntity instanceof TileEntityEnderChest) {
+            ((TileEntityEnderChest) tileEntity).b(); // .open()
+        }
+    }
+
+    @Override
+    public void saveInventoryToFile(File file, SaveEntry saveEntry) throws IOException {
+        FileOutputStream stream = null;
+        try {
+            // Write inventory to it
+            file.getAbsoluteFile().getParentFile().mkdirs();
+            file.createNewFile();
+            stream = new FileOutputStream(file);
+            NBTCompressedStreamTools.a(saveInventoryToTag(saveEntry), stream);
+        } finally {
+            if (stream != null) {
+                stream.flush();
+                stream.close();
+            }
+        }
+    }
+
+    @Override
+    public String saveInventoryToJson(SaveEntry inventory) throws IOException {
+        NBTTagCompound tag = saveInventoryToTag(inventory);
+        Map<String, Object> map = JSONSimpleTypes.toMap(tag);
+        return JSONObject.toJSONString(map);
+    }
+
+    private NBTTagCompound saveInventoryToTag(SaveEntry inventory) {
         NBTTagCompound baseTag = new NBTTagCompound();
         NBTTagList inventoryTag = new NBTTagList();
 
         // Chest metadata
         baseTag.setByte("Rows", (byte) (inventory.getSize() / 9));
-        baseTag.setByte("DisabledSlots", (byte) holder.getDisabledSlots());
-        baseTag.setString("OwnerName", holder.getChestOwner().getDisplayName());
+        baseTag.setByte("DisabledSlots", (byte) inventory.getDisabledSlots());
+        baseTag.setString("OwnerName", inventory.getChestOwner().getDisplayName());
 
         // Add all items to the inventory tag
         for (int i = 0; i < inventory.getSize(); i++) {
@@ -477,6 +464,10 @@ public class SimpleNMSHandler extends NMSHandler {
         baseTag.set("Inventory", inventoryTag);
 
         return baseTag;
+    }
+
+    private BlockPosition toBlockPosition(Location location) {
+        return new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
 
 }

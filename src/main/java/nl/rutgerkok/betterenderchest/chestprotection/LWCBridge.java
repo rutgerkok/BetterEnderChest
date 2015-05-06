@@ -28,10 +28,10 @@ public class LWCBridge extends ProtectionBridge {
 
 
     private Method playerInfoGetNameMethod;
-    private Method protectionGetOwnerMethod;
     private Method playerInfoGetUUIDMethod;
-
     private final BetterEnderChest plugin;
+
+    private Method protectionGetOwnerMethod;
 
     public LWCBridge(BetterEnderChest plugin) {
         this.plugin = plugin;

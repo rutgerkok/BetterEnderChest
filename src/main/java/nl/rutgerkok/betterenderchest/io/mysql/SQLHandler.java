@@ -14,7 +14,7 @@ import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
  * Class that executes all queries. This should be the only class with SQL code.
  * 
  */
-public class SQLHandler {
+public final class SQLHandler {
     private static final String TABLE_NAME_PREFIX = "bec_chestdata_";
     /**
      * Never use this field directly, use {@link #getConnection()} or
@@ -31,23 +31,27 @@ public class SQLHandler {
     }
 
     /**
-     * Adds a chest to the database.
-     * 
-     * @param saveEntry
-     *            Entries to save.
+     * Adds a new chest to the database. (INSERT query)
+     *
+     * @param chestOwner
+     *            Owner of the chest.
+     * @param worldGroup
+     *            The world group of the chest.
+     * @param json
+     *            The raw JSON of the chest.
      * @throws SQLException
      *             If something went wrong. For example, the chest already
      *             exists.
      */
-    private void addChest(SaveEntry saveEntry) throws SQLException {
+    private void addChest(ChestOwner chestOwner, WorldGroup worldGroup, String json) throws SQLException {
         PreparedStatement statement = null;
         try {
             // New chest, insert in database
-            String query = "INSERT INTO `" + getTableName(saveEntry.getWorldGroup()) + "` (`chest_owner`, `chest_data`) ";
+            String query = "INSERT INTO `" + getTableName(worldGroup) + "` (`chest_owner`, `chest_data`) ";
             query += "VALUES (?, ?)";
             statement = getConnection().prepareStatement(query);
-            statement.setString(1, saveEntry.getChestOwner().getSaveFileName());
-            statement.setString(2, saveEntry.getChestJson());
+            statement.setString(1, chestOwner.getSaveFileName());
+            statement.setString(2, json);
             statement.executeUpdate();
         } finally {
             if (statement != null) {
@@ -174,20 +178,24 @@ public class SQLHandler {
      * Saves a chest to the database. First the UPDATE query is tried, if
      * nothing has been updated, the INSERT query is tried.
      * 
-     * @param saveEntry
-     *            The chest to save.
+     * @param chestOwner
+     *            The owner of the chest.
+     * @param worldGroup
+     *            The group the chest belongs in.
+     * @param json
+     *            The raw json of the chest.
      * @throws SQLException
      *             If something went wrong.
      */
-    public void updateChest(SaveEntry saveEntry) throws SQLException {
+    public void updateChest(ChestOwner chestOwner, WorldGroup worldGroup, String json) throws SQLException {
         PreparedStatement statement = null;
         boolean performInsert = false;
         try {
             // Existing chest, update row
-            String query = "UPDATE `" + getTableName(saveEntry.getWorldGroup()) + "` SET `chest_data` = ? WHERE `chest_owner` = ?";
+            String query = "UPDATE `" + getTableName(worldGroup) + "` SET `chest_data` = ? WHERE `chest_owner` = ?";
             statement = getConnection().prepareStatement(query);
-            statement.setString(1, saveEntry.getChestJson());
-            statement.setString(2, saveEntry.getChestOwner().getSaveFileName());
+            statement.setString(1, json);
+            statement.setString(2, chestOwner.getSaveFileName());
             int changedRows = statement.executeUpdate();
             if (changedRows == 0) {
                 // Chest doesn't exist yet
@@ -200,7 +208,7 @@ public class SQLHandler {
         }
 
         if (performInsert) {
-            addChest(saveEntry);
+            addChest(chestOwner, worldGroup, json);
         }
     }
 }

@@ -31,11 +31,6 @@ public class BlockLockerBridge extends ProtectionBridge {
     }
 
     @Override
-    public String getName() {
-        return "BlockLocker";
-    }
-
-    @Override
     public ChestOwner getChestOwner(Block block) throws IllegalArgumentException {
         Optional<OfflinePlayer> owner = BlockLockerAPI.getOwner(block);
         if (owner.isPresent()) {
@@ -49,6 +44,11 @@ public class BlockLockerBridge extends ProtectionBridge {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public String getName() {
+        return "BlockLocker";
     }
 
     @Override

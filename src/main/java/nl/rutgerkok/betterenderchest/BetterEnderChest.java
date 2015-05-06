@@ -1,6 +1,7 @@
 package nl.rutgerkok.betterenderchest;
 
 import java.io.File;
+import java.util.concurrent.Executor;
 
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwners;
 import nl.rutgerkok.betterenderchest.chestprotection.ProtectionBridge;
@@ -8,10 +9,10 @@ import nl.rutgerkok.betterenderchest.command.BaseCommand;
 import nl.rutgerkok.betterenderchest.command.BetterEnderCommandManager;
 import nl.rutgerkok.betterenderchest.importers.InventoryImporter;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
-import nl.rutgerkok.betterenderchest.io.file.BetterEnderFileHandler;
 import nl.rutgerkok.betterenderchest.io.mysql.DatabaseSettings;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.registry.Registry;
+import nl.rutgerkok.betterenderchest.util.BukkitExecutors;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -182,11 +183,12 @@ public interface BetterEnderChest {
     EmptyInventoryProvider getEmptyInventoryProvider();
 
     /**
-     * Get the save and load system used for flat files.
-     * 
-     * @return The save and load system.
+     * Gets access to a {@link BukkitExecutors} instance, that bridges Bukkit's
+     * scheduler API with Java's {@link Executor}'s API.
+     *
+     * @return The executors factory.
      */
-    BetterEnderFileHandler getFileHandler();
+    BukkitExecutors getExecutors();
 
     /**
      * Gets the importers which can import Ender Chest inventories from and to

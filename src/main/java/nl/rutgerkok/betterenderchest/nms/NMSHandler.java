@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.betterenderchest.io.SaveEntry;
 import nl.rutgerkok.betterenderchest.registry.Registration;
 
 import org.bukkit.Location;
@@ -25,17 +26,6 @@ public abstract class NMSHandler implements Registration {
      *            The location of the Ender Chest.
      */
     public abstract void closeEnderChest(Location location);
-
-    /**
-     * Converts the given NBT bytes to a JSON-formatted string.
-     * 
-     * @param bytes
-     *            The bytes to convert.
-     * @throws IOException
-     *             If the byte array is corrupted.
-     * @return The JSON representation of the bytes.
-     */
-    public abstract String convertNBTBytesToJson(byte[] bytes) throws IOException;
 
     @Override
     public Priority getPriority() {
@@ -105,28 +95,26 @@ public abstract class NMSHandler implements Registration {
 
     /**
      * Saves a BetterEnderChest inventory to a NBT formatted file.
-     * 
+     *
      * @param file
      *            The NBT file to save to. If the file does not exist, it is
      *            created.
-     * @param inventory
-     *            The inventory to save to. It must have
-     *            BetterEnderInventoryHolder as it's holder.
+     * @param saveEntry
+     *            The inventory to save.
      * @throws IOException
      *             When an IO error occurs.
      */
-    public abstract void saveInventoryToFile(File file, Inventory inventory) throws IOException;
+    public abstract void saveInventoryToFile(File file, SaveEntry saveEntry) throws IOException;
 
     /**
      * Saves a BetterEnderChest inventory to a JSON-formatted String, based on
      * the NBT representation of the inventory.
      * 
      * @param inventory
-     *            The inventory to save to. It must have
-     *            BetterEnderInventoryHolder as it's holder.
+     *            The inventory to save to.
      * @throws IOException
      *             When the NBT can somehow not be converted to JSON.
      * @return The JSON string.
      */
-    public abstract String saveInventoryToJson(Inventory inventory) throws IOException;
+    public abstract String saveInventoryToJson(SaveEntry inventory) throws IOException;
 }

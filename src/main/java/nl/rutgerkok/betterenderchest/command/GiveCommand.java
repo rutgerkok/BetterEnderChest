@@ -26,6 +26,35 @@ public class GiveCommand extends BaseCommand {
         super(plugin);
     }
 
+    private void addItem(final CommandSender sender, final String inventoryName, WorldGroup group, final ItemStack stack, final int amount) {
+        this.getInventory(sender, inventoryName, group, new Consumer<Inventory>() {
+            @Override
+            public void consume(Inventory inventory) {
+                int remainingAmount = amount;
+                while (remainingAmount > 0) {
+                    ItemStack add = stack.clone();
+                    int addCount = Math.min(add.getMaxStackSize(), remainingAmount);
+                    remainingAmount -= addCount;
+                    add.setAmount(addCount);
+
+                    Map<Integer, ItemStack> overflow = inventory.addItem(add);
+                    if (!overflow.isEmpty()) {
+                        // Inventory is full
+                        int didntAdd = overflow.values().iterator().next().getAmount();
+                        remainingAmount += didntAdd;
+                        break;
+                    }
+                }
+
+                // Show appropriate message
+                sendItemAddedMessage(sender, inventoryName, amount, remainingAmount);
+
+                // Mark for resave, // now that there are changed items.
+                BetterEnderInventoryHolder.of(inventory).setHasUnsavedChanges(true);
+            }
+        });
+    }
+
     /**
      * Wrapper around the unsafe method
      * {@link org.bukkit.UnsafeValues#modifyItemStack(ItemStack, String)}, that
@@ -116,59 +145,6 @@ public class GiveCommand extends BaseCommand {
         return true;
     }
 
-    private void addItem(final CommandSender sender, final String inventoryName, WorldGroup group, final ItemStack stack, final int amount) {
-        this.getInventory(sender, inventoryName, group, new Consumer<Inventory>() {
-            @Override
-            public void consume(Inventory inventory) {
-                int remainingAmount = amount;
-                while (remainingAmount > 0) {
-                    ItemStack add = stack.clone();
-                    int addCount = Math.min(add.getMaxStackSize(), remainingAmount);
-                    remainingAmount -= addCount;
-                    add.setAmount(addCount);
-
-                    Map<Integer, ItemStack> overflow = inventory.addItem(add);
-                    if (!overflow.isEmpty()) {
-                        // Inventory is full
-                        int didntAdd = overflow.values().iterator().next().getAmount();
-                        remainingAmount += didntAdd;
-                        break;
-                    }
-                }
-
-                // Show appropriate message
-                sendItemAddedMessage(sender, inventoryName, amount, remainingAmount);
-
-                // Mark for resave, // now that there are changed items.
-                BetterEnderInventoryHolder.of(inventory).setHasUnsavedChanges(true);
-            }
-        });
-    }
-
-    private void sendItemAddedMessage(CommandSender sender, String inventoryName, int totalAmount, int remainingAmount) {
-        if (remainingAmount == 0) {
-            if (totalAmount == 1) {
-                sender.sendMessage("Item added to the Ender Chest inventory of " + inventoryName);
-            } else {
-                sender.sendMessage("Items added to the Ender Chest inventory of " + inventoryName);
-            }
-        } else if (remainingAmount == totalAmount) {
-            // None added
-            if (totalAmount == 1) {
-                sender.sendMessage(ChatColor.RED + "Item has not been added; Ender Chest inventory of " + inventoryName + " was full.");
-            } else {
-                sender.sendMessage(ChatColor.RED + "All items have not been added; Ender Chest inventory of " + inventoryName + " was full.");
-            }
-        } else {
-            // Some added
-            if (remainingAmount == 1) {
-                sender.sendMessage(ChatColor.RED + "One item has not been added; Ender Chest inventory of " + inventoryName + " was full.");
-            } else {
-                sender.sendMessage(ChatColor.RED + "" + remainingAmount + " items have not been added; Ender Chest inventory of " + inventoryName + " was full.");
-            }
-        }
-    }
-
     @Override
     public String getHelpText() {
         return "gives an item to an Ender inventory.";
@@ -205,6 +181,30 @@ public class GiveCommand extends BaseCommand {
             }
         }
         return material;
+    }
+
+    private void sendItemAddedMessage(CommandSender sender, String inventoryName, int totalAmount, int remainingAmount) {
+        if (remainingAmount == 0) {
+            if (totalAmount == 1) {
+                sender.sendMessage("Item added to the Ender Chest inventory of " + inventoryName);
+            } else {
+                sender.sendMessage("Items added to the Ender Chest inventory of " + inventoryName);
+            }
+        } else if (remainingAmount == totalAmount) {
+            // None added
+            if (totalAmount == 1) {
+                sender.sendMessage(ChatColor.RED + "Item has not been added; Ender Chest inventory of " + inventoryName + " was full.");
+            } else {
+                sender.sendMessage(ChatColor.RED + "All items have not been added; Ender Chest inventory of " + inventoryName + " was full.");
+            }
+        } else {
+            // Some added
+            if (remainingAmount == 1) {
+                sender.sendMessage(ChatColor.RED + "One item has not been added; Ender Chest inventory of " + inventoryName + " was full.");
+            } else {
+                sender.sendMessage(ChatColor.RED + "" + remainingAmount + " items have not been added; Ender Chest inventory of " + inventoryName + " was full.");
+            }
+        }
     }
 
 }

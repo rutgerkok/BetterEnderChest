@@ -1,15 +1,18 @@
 package nl.rutgerkok.betterenderchest;
 
-import java.io.IOException;
 import java.util.ListIterator;
 
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.exception.ChestNotFoundException;
-import nl.rutgerkok.betterenderchest.io.Consumer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import com.google.common.base.Function;
+import com.google.common.util.concurrent.FutureFallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * Class that has the logic for creating all kinds of empty inventories.
@@ -30,24 +33,25 @@ public class EmptyInventoryProvider {
      *            The owner of the chest.
      * @param worldGroup
      *            The world group.
-     * @param callback
-     *            Called when the default chest is loaded.
+     * @return The default inventory.
      */
-    private void getDefaultInventory(final ChestOwner chestOwner, final WorldGroup worldGroup, final Consumer<Inventory> callback) {
+    private ListenableFuture<Inventory> getDefaultInventory(final ChestOwner chestOwner, final WorldGroup worldGroup) {
         // Check owner
         if (chestOwner.equals(plugin.getChestOwners().defaultChest())) {
             // This is the default chest, prevent infinite recursion
-            callback.consume(loadEmptyInventory(chestOwner, worldGroup));
-            return;
+            return Futures.immediateFuture(loadEmptyInventory(chestOwner, worldGroup));
         }
 
-        // Try to load the default inventory
-        plugin.getChestCache().getInventory(plugin.getChestOwners().defaultChest(), worldGroup, new Consumer<Inventory>() {
+        // Try to load the default inventory, copy its contents to the desired
+        // player inventory
+        ListenableFuture<Inventory> defaultInventory = plugin.getChestCache().getInventory(plugin.getChestOwners().defaultChest(), worldGroup);
+        return Futures.transform(defaultInventory, new Function<Inventory, Inventory>() {
+
             @Override
-            public void consume(Inventory defaultInventory) {
+            public Inventory apply(Inventory defaultInventory) {
                 Inventory playerInventory = loadEmptyInventory(chestOwner, worldGroup);
                 BetterEnderUtils.copyContents(defaultInventory, playerInventory, null);
-                callback.consume(playerInventory);
+                return playerInventory;
             }
         });
     }
@@ -65,29 +69,28 @@ public class EmptyInventoryProvider {
      *            The name of the inventory, must be lowercase.
      * @param worldGroup
      *            The group the inventory is in.
-     * @param callback
-     *            Called when the invenotory is available.
-     *            {@link BetterEnderInventoryHolder} will be the holder of the
-     *            inventory.
+     * @return The inventory, when available. {@link BetterEnderInventoryHolder}
+     *         will be the holder of the inventory.
      */
-    public void getFallbackInventory(final ChestOwner chestOwner, final WorldGroup worldGroup, final Consumer<Inventory> callback) {
+    public ListenableFuture<Inventory> getFallbackInventory(final ChestOwner chestOwner, final WorldGroup worldGroup) {
         // Try to import it from vanilla/some other plugin
-        worldGroup.getInventoryImporter().importInventoryAsync(chestOwner, worldGroup, plugin, callback, new Consumer<IOException>() {
+        ListenableFuture<Inventory> imported = worldGroup.getInventoryImporter().importInventoryAsync(chestOwner, worldGroup, plugin);
+        return Futures.withFallback(imported, new FutureFallback<Inventory>() {
+
             @Override
-            public void consume(IOException e) {
-                if (e instanceof ChestNotFoundException) {
+            public ListenableFuture<Inventory> create(Throwable t) {
+                if (t instanceof ChestNotFoundException) {
                     // No chest was found, load default inventory
-                    getDefaultInventory(chestOwner, worldGroup, callback);
-                    return;
+                    return getDefaultInventory(chestOwner, worldGroup);
                 }
 
-                plugin.severe("Could not import inventory " + chestOwner, e);
+                plugin.severe("Could not import inventory " + chestOwner, t);
 
                 // Return an empty inventory. Loading the default
                 // chest again
                 // could cause issues when someone
                 // finds a way to constantly break this plugin.
-                callback.consume(loadEmptyInventory(chestOwner, worldGroup));
+                return Futures.immediateFuture(loadEmptyInventory(chestOwner, worldGroup));
             }
         });
     }
