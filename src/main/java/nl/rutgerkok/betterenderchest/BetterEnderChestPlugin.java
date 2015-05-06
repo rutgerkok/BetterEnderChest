@@ -327,25 +327,10 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         }
         config.set("AutoSave.autoSaveIntervalSeconds", autoSaveIntervalSeconds);
         AutoSave.autoSaveIntervalTicks = autoSaveIntervalSeconds * 20;
-        // saveTick every x ticks?
-        AutoSave.saveTickInterval = config.getInt("AutoSave.saveTickIntervalTicks", AutoSave.saveTickInterval);
-        if (AutoSave.saveTickInterval < 1) {
-            warning("AutoSave.saveTickIntervalTicks was " + AutoSave.saveTickInterval + ". Changed it to 3.");
-            AutoSave.saveTickInterval = 3;
-        }
-        config.set("AutoSave.saveTickIntervalTicks", AutoSave.saveTickInterval);
-        // chests per saveTick?
-        AutoSave.chestsPerSaveTick = config.getInt("AutoSave.chestsPerSaveTick", 3);
-        if (AutoSave.chestsPerSaveTick < 1) {
-            warning("You can't save " + AutoSave.chestsPerSaveTick + " chest per saveTick! Changed it to 3.");
-            AutoSave.chestsPerSaveTick = 3;
-        }
-        if (AutoSave.chestsPerSaveTick > 10) {
-            warning("You have set AutoSave.chestsPerSaveTick to " + AutoSave.chestsPerSaveTick + ". This could cause lag when it has to save a lot of chests.");
-        }
-        config.set("AutoSave.chestsPerSaveTick", AutoSave.chestsPerSaveTick);
-        // Remove old showAutoSaveMessage setting
+        // Remove old AutoSave settings
         config.set("AutoSave.showAutoSaveMessage", null);
+        config.set("AutoSave.chestsPerSaveTick", null);
+        config.set("AutoSave.saveTickIntervalTicks", null);
 
         // Private chests
         rankUpgrades = config.getInt("PrivateEnderChest.rankUpgrades", 2);
