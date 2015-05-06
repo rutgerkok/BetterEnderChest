@@ -15,6 +15,7 @@ import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
 import nl.rutgerkok.betterenderchest.io.Consumer;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -34,6 +35,8 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 
+import com.google.common.base.Preconditions;
+
 public class BetterEnderEventHandler implements Listener {
     private BetterEnderCache chests;
     private BetterEnderChest plugin;
@@ -41,6 +44,36 @@ public class BetterEnderEventHandler implements Listener {
     public BetterEnderEventHandler(BetterEnderChest plugin) {
         this.plugin = plugin;
         chests = plugin.getChestCache();
+    }
+
+    /**
+     * Gets the owner of a vanilla Ender Chest.
+     *
+     * @param inventory
+     *            The inventory.
+     * @param guess
+     *            A guess which player it can be.
+     * @return The owner of the inventory, or the provided guess if there is no
+     *         online player that is the owner.
+     */
+    private Player getVanillaEnderChestOwner(Inventory inventory, Player guess) {
+        Preconditions.checkArgument(inventory.getType() == InventoryType.ENDER_CHEST, "inventoryType must be ENDER_CHEST");
+        // Unfortunality, inventory.getHolder() returns null, so we have to
+        // iterate over all the online players
+        // Because this can be a little expensive, we check the Ender Chest of
+        // the provided guess first
+
+        if (inventory.equals(guess.getEnderChest())) {
+            return guess;
+        }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (inventory.equals(player.getEnderChest())) {
+                return player;
+            }
+        }
+
+        // The Ender Chest is not of any online player
+        return guess;
     }
 
     // Change the drop and check if the chest can be broken
@@ -129,7 +162,7 @@ public class BetterEnderEventHandler implements Listener {
         final Player player = (Player) event.getPlayer();
 
         // Check for vanilla Ender Chests
-        if (plugin.getCompatibilityMode() && event.getInventory().getType().equals(InventoryType.ENDER_CHEST)) {
+        if (plugin.getCompatibilityMode() && event.getInventory().getType() == InventoryType.ENDER_CHEST) {
             // Plugin opened the vanilla Ender Chest, take it over
 
             ChestOwner chestOwner = null;
@@ -147,7 +180,8 @@ public class BetterEnderEventHandler implements Listener {
             } else {
                 // Get player's name
                 if (player.hasPermission("betterenderchest.user.open.privatechest")) {
-                    chestOwner = plugin.getChestOwners().playerChest(player);
+                    Player owner = getVanillaEnderChestOwner(event.getInventory(), player);
+                    chestOwner = plugin.getChestOwners().playerChest(owner);
                 } else {
                     player.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
                     return;
