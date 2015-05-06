@@ -51,7 +51,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
      * Another inner class to store some variables.
      */
     public static class AutoSave {
-        public static int autoSaveIntervalTicks = 5 * 60 * 20, saveTickInterval = 10, chestsPerSaveTick = 3;
+        public static int autoSaveIntervalTicks = 5 * 20;
     }
 
     /**
@@ -317,7 +317,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
         // Autosave
         // ticks?
-        int autoSaveIntervalSeconds = config.getInt("AutoSave.autoSaveIntervalSeconds", 300);
+        int autoSaveIntervalSeconds = config.getInt("AutoSave.autoSaveIntervalSeconds", 5);
         if (autoSaveIntervalSeconds < 1) {
             warning("You need at least one second between each autosave. Changed it to one minute.");
             autoSaveIntervalSeconds = 60;
