@@ -9,6 +9,7 @@ import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.io.file.BetterEnderFileHandler;
+import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
@@ -17,11 +18,18 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 public class BetterEnderFlatFileImporter extends InventoryImporter {
 
+    /**
+     * The file handler for reading files, or null when there is no NMS access.
+     */
     private final BetterEnderFileHandler fileHandler;
 
     public BetterEnderFlatFileImporter(BetterEnderChest plugin) {
-        fileHandler = new BetterEnderFileHandler(plugin.getNMSHandlers().getSelectedRegistration(),
-                plugin.getChestSaveLocation());
+        NMSHandler nms = plugin.getNMSHandlers().getSelectedRegistration();
+        if (nms == null) {
+            fileHandler = null;
+        } else {
+            fileHandler = new BetterEnderFileHandler(nms, plugin.getChestSaveLocation());
+        }
     }
 
     @Override
@@ -57,7 +65,7 @@ public class BetterEnderFlatFileImporter extends InventoryImporter {
 
     @Override
     public boolean isAvailable() {
-        return true;
+        return fileHandler != null;
     }
 
 }

@@ -25,7 +25,6 @@ public final class BetterEnderSQLCache extends SimpleEnderCache {
                 sqlHandler.createGroupTable(group);
             }
         } catch (SQLException e) {
-            plugin.severe("Error creating a connection with database", e);
             plugin.disableSaveAndLoad("Error creating a connection with database", e);
         }
 

@@ -25,6 +25,7 @@ import nl.rutgerkok.betterenderchest.importers.NoneImporter;
 import nl.rutgerkok.betterenderchest.importers.VanillaImporter;
 import nl.rutgerkok.betterenderchest.importers.WorldInventoriesImporter;
 import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
+import nl.rutgerkok.betterenderchest.io.DiscardingEnderCache;
 import nl.rutgerkok.betterenderchest.io.SaveAndLoadError;
 import nl.rutgerkok.betterenderchest.io.SimpleEnderCache;
 import nl.rutgerkok.betterenderchest.io.file.BetterEnderFileHandler;
@@ -101,6 +102,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     public synchronized void disableSaveAndLoad(String reason, Throwable throwable) {
         if (this.saveAndLoadError == null) {
             if (this.lockChestsOnError) {
+                severe(reason, throwable);
                 severe("All Ender Chests are now locked to prevent potentially lost and duplicated items.");
                 severe("If you really want to disable chest locking, see the config.yml:");
                 severe("set the BetterEnderChest.lockChestsOnError setting to false.");
@@ -423,17 +425,27 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     }
 
     /**
-     * Loads all IO services that were not yet loaded.
+     * Loads the ender cache and the save and load system behind it.
+     *
+     * @return The ender cache.
      */
-    private void loadIOServices() {
+    private BetterEnderCache setupEnderCache() {
+        NMSHandler nmsHandler = getNMSHandlers().getSelectedRegistration();
+        if (nmsHandler == null) {
+            // No NMS access, so no saving and loading
+            Throwable emptyThrowable = new Throwable();
+            emptyThrowable.setStackTrace(new StackTraceElement[0]);
+            disableSaveAndLoad("Failed to access the net.minecraft.server classes."
+                    + " The usual cause of this is that the plugin is outdated, so please look for an update."
+                    + " Another possibility is that your Spigot build is outdated.", emptyThrowable);
+            return new DiscardingEnderCache(this);
+        }
 
-        // Chests storage
         if (databaseSettings.isEnabled()) {
-            enderCache = BetterEnderSQLCache.create(this);
+            return BetterEnderSQLCache.create(this);
         } else {
-            NMSHandler nmsHandler = getNMSHandlers().getSelectedRegistration();
             BetterEnderFileHandler fileHandler = new BetterEnderFileHandler(nmsHandler, chestSaveLocation);
-            enderCache = new SimpleEnderCache(this, fileHandler, fileHandler);
+            return new SimpleEnderCache(this, fileHandler, fileHandler);
         }
     }
 
@@ -457,8 +469,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         try {
             nmsHandlers.register(new SimpleNMSHandler(this));
         } catch (Throwable t) {
-            // Ignored, it is possible that another save system has been
-            // installed. See message shown near the end of this method.
+            // Error is shown in setupEnderCache, to make it show too on
+            // reload
         }
         nmsHandlers.selectAvailableRegistration();
 
@@ -509,7 +521,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         initConfig();
 
         // IO services
-        loadIOServices();
+        enderCache = setupEnderCache();
 
         // EventHandler
         getServer().getPluginManager().registerEvents(new BetterEnderEventHandler(this), this);
@@ -566,7 +578,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         initConfig();
 
         // Reload IO services
-        loadIOServices();
+        enderCache = setupEnderCache();
     }
 
     @Override
