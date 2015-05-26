@@ -83,7 +83,7 @@ public final class SQLHandler {
      * @param group
      *            The world group to create the table for.
      * @throws SQLException
-     *             If somehting went wrong.
+     *             If something went wrong.
      */
     void createGroupTable(WorldGroup group) throws SQLException {
         Statement statement = getConnection().createStatement();
@@ -91,10 +91,10 @@ public final class SQLHandler {
             String query = "CREATE TABLE IF NOT EXISTS `" + getTableName(group) + "` ("
                     + " `chest_id` int(10) unsigned NOT NULL AUTO_INCREMENT,"
                     + " `chest_owner` char(36) CHARACTER SET ascii NOT NULL,"
-                    + " `chest_data` mediumtext CHARACTER SET utf8mb4 NOT NULL,"
+                    + " `chest_data` mediumtext CHARACTER SET utf8 NOT NULL,"
                     + " PRIMARY KEY (`chest_id`),"
                     + " UNIQUE KEY `chest_owner` (`chest_owner`)"
-                    + " ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
+                    + " ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;";
             statement.execute(query);
         } finally {
             statement.close();
