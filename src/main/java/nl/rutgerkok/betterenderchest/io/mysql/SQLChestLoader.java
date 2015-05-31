@@ -31,6 +31,9 @@ final class SQLChestLoader implements ChestLoader {
     public Inventory loadInventory(ChestOwner chestOwner, WorldGroup worldGroup) throws ChestNotFoundException, IOException {
         try {
             String inventory = sqlHandler.loadChest(chestOwner, worldGroup);
+            if (inventory == null) {
+                throw new ChestNotFoundException(chestOwner, worldGroup);
+            }
             return nmsHandler.loadNBTInventoryFromJson(inventory, chestOwner, worldGroup);
         } catch (SQLException e) {
             throw new IOException(e);
