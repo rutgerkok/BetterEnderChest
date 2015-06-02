@@ -4,6 +4,8 @@ import java.sql.SQLException;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
+import nl.rutgerkok.betterenderchest.io.DiscardingEnderCache;
 import nl.rutgerkok.betterenderchest.io.SimpleEnderCache;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 
@@ -15,7 +17,7 @@ import nl.rutgerkok.betterenderchest.nms.NMSHandler;
  */
 public final class BetterEnderSQLCache extends SimpleEnderCache {
 
-    public static final BetterEnderSQLCache create(BetterEnderChest plugin) {
+    public static final BetterEnderCache create(BetterEnderChest plugin) {
         // Set up the connection
         DatabaseSettings settings = plugin.getDatabaseSettings();
         SQLHandler sqlHandler = null;
@@ -26,6 +28,7 @@ public final class BetterEnderSQLCache extends SimpleEnderCache {
             }
         } catch (SQLException e) {
             plugin.disableSaveAndLoad("Error creating a connection with database", e);
+            return new DiscardingEnderCache(plugin);
         }
 
         NMSHandler nmsHandler = plugin.getNMSHandlers().getSelectedRegistration();
