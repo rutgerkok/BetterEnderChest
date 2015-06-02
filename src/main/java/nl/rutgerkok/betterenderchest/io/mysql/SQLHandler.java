@@ -86,15 +86,27 @@ public final class SQLHandler {
      *             If something went wrong.
      */
     void createGroupTable(WorldGroup group) throws SQLException {
+
         Statement statement = getConnection().createStatement();
         try {
-            String query = "CREATE TABLE IF NOT EXISTS `" + getTableName(group) + "` ("
-                    + " `chest_id` int(10) unsigned NOT NULL AUTO_INCREMENT,"
-                    + " `chest_owner` char(36) CHARACTER SET ascii NOT NULL,"
-                    + " `chest_data` mediumtext CHARACTER SET utf8 NOT NULL,"
-                    + " PRIMARY KEY (`chest_id`),"
-                    + " UNIQUE KEY `chest_owner` (`chest_owner`)"
-                    + " ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;";
+            String query;
+            if (this.settings.useUtf8()) {
+                query = "CREATE TABLE IF NOT EXISTS `" + getTableName(group) + "` ("
+                        + " `chest_id` int(10) unsigned NOT NULL AUTO_INCREMENT,"
+                        + " `chest_owner` char(36) CHARACTER SET ascii NOT NULL,"
+                        + " `chest_data` mediumtext CHARACTER SET utf8 NOT NULL,"
+                        + " PRIMARY KEY (`chest_id`),"
+                        + " UNIQUE KEY `chest_owner` (`chest_owner`)"
+                        + " ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;";
+            } else {
+                query = "CREATE TABLE IF NOT EXISTS `" + getTableName(group) + "` ("
+                        + " `chest_id` int(10) unsigned NOT NULL AUTO_INCREMENT,"
+                        + " `chest_owner` char(36) NOT NULL,"
+                        + " `chest_data` mediumtext NOT NULL,"
+                        + " PRIMARY KEY (`chest_id`),"
+                        + " UNIQUE KEY `chest_owner` (`chest_owner`)"
+                        + " ) ENGINE=InnoDB;";
+            }
             statement.execute(query);
         } finally {
             statement.close();
@@ -125,8 +137,10 @@ public final class SQLHandler {
                 Class.forName("com.mysql.jdbc.Driver");
                 String connectionString = "jdbc:mysql://" + settings.getHost()
                         + ":" + settings.getPort()
-                        + "/" + settings.getDatabaseName()
-                        + "?useUnicode=true&characterEncoding=UTF-8";
+                        + "/" + settings.getDatabaseName();
+                if (settings.useUtf8()) {
+                    connectionString += "?useUnicode=true&characterEncoding=UTF-8";
+                }
                 connection = DriverManager.getConnection(connectionString, settings.getUsername(), settings.getPassword());
             } catch (ClassNotFoundException e) {
                 throw new SQLException("JDBC Driver not found!");

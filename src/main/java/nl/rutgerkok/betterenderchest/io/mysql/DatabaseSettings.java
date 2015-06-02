@@ -9,14 +9,16 @@ public class DatabaseSettings {
     private final String password;
     private final int port;
     private final String username;
+    private final boolean useUtf8;
 
-    public DatabaseSettings(boolean enabled, String host, int port, String databaseName, String username, String password) {
+    public DatabaseSettings(boolean enabled, String host, int port, String databaseName, String username, String password, boolean useUtf8) {
         this.enabled = enabled;
         this.host = host;
         this.port = port;
         this.databaseName = databaseName;
         this.username = username;
         this.password = password;
+        this.useUtf8 = useUtf8;
     }
 
     /**
@@ -27,6 +29,17 @@ public class DatabaseSettings {
      *            The config file.
      */
     public DatabaseSettings(FileConfiguration config) {
+        // UTF-8 reading (checks for existance of some settings, so needs to
+        // run early)
+        if (config.contains("Database.enabled") && !config.contains("Database.useUtf8")) {
+            // Existing config without utf8 setting, don't use UTF-8
+            useUtf8 = false;
+        } else {
+            // New config or config with utf8 setting
+            useUtf8 = config.getBoolean("Database.useUtf8", true);
+        }
+
+        // Other settings
         enabled = config.getBoolean("Database.enabled", false);
         config.set("Database.enabled", enabled);
         host = config.getString("Database.host", "localhost");
@@ -39,6 +52,7 @@ public class DatabaseSettings {
         config.set("Database.username", username);
         password = config.getString("Database.password", "");
         config.set("Database.password", password);
+        config.set("Database.useUtf8", useUtf8);
     }
 
     /**
@@ -96,5 +110,14 @@ public class DatabaseSettings {
      */
     public boolean isEnabled() {
         return enabled;
+    }
+
+    /**
+     * Gets whether UTF-8 is used in the database.
+     *
+     * @return True if UTF-8 is used, false otherwise.
+     */
+    public boolean useUtf8() {
+        return useUtf8;
     }
 }
