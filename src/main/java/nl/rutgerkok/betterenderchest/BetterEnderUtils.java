@@ -147,6 +147,9 @@ public class BetterEnderUtils {
             // Move all items (and drop the excess)
             copyContents(inventory, resizedInventory, player.getLocation());
 
+            // Mark new inventory as needing save
+            BetterEnderInventoryHolder.of(resizedInventory).setHasUnsavedChanges(true);
+
             // Goodbye to old inventory!
             plugin.getChestCache().setInventory(resizedInventory);
             inventory = resizedInventory;
