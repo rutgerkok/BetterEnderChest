@@ -26,6 +26,7 @@ import net.minecraft.server.v1_8_R3.NBTTagLong;
 import net.minecraft.server.v1_8_R3.NBTTagString;
 import net.minecraft.server.v1_8_R3.TileEntity;
 import net.minecraft.server.v1_8_R3.TileEntityEnderChest;
+
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
@@ -233,8 +234,10 @@ public class SimpleNMSHandler extends NMSHandler {
          * have their tags converted to String//primitives/maps/Lists.
          * 
          * @param tagCompound
-         * @return
+         *            The compound tag.
+         * @return The map.
          * @throws IOException
+         *             In case an unknown tag was encountered in the NBT tag.
          */
         static final Map<String, Object> toMap(NBTTagCompound tagCompound) throws IOException {
             Collection<String> tagNames = tagCompound.c();

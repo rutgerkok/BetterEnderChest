@@ -93,8 +93,9 @@ public class Registry<T extends Registration> {
 
     /**
      * Registers a registration. The registration cannot be null.
-     * 
+     *
      * @param registration
+     *            The item to register.
      */
     public void register(T registration) {
         Validate.notNull(registration, "Null registrations are not accepted");

@@ -90,11 +90,13 @@ public abstract class BaseCommand implements Registration {
      * Parses a command inventoryName and returns the world group. If the
      * inventoryName is cavegroup/Notch it will return the group called
      * cavegroup, if it's Notch it will return the world the sender is in.
-     * 
+     *
      * @param inventoryName
+     *            Name of the requested inventory.
      * @param sender
+     *            The command sender.
      * 
-     * @return
+     * @return The world group.
      */
     protected WorldGroup getGroup(String inventoryName, CommandSender sender) {
         String[] parts = inventoryName.split("/");
@@ -146,9 +148,10 @@ public abstract class BaseCommand implements Registration {
      * Parses a command inventoryName and returns the inventoryName. If the
      * inventoryName is world_nether/Notch it will return Notch, if it's Notch
      * it will return Notch.
-     * 
+     *
      * @param inventoryName
-     * @return
+     *            Name of the requested inventory.
+     * @return The inventory name, without the world group part.
      */
     protected String getInventoryName(String inventoryName) {
         String[] parts = inventoryName.split("/");

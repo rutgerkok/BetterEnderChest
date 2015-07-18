@@ -62,8 +62,9 @@ public abstract class ProtectionBridge implements Registration {
 
     /**
      * Finds out if the block is protected by a chest protection plugin.
-     * 
+     *
      * @param block
+     *            The block to check.
      * @return whether the block is protected by a chest protection plugin.
      */
     public abstract boolean isProtected(Block block);

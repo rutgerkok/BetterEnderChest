@@ -39,7 +39,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class SimpleEnderCache implements BetterEnderCache {
 
     /**
-     * Key for use in the {@link AbstractEnderCache#inventories} map.
+     * Key for use in the {@link #inventories} map.
      *
      */
     private static final class ChestKey {

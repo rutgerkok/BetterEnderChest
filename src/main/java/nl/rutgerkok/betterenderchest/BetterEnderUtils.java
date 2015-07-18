@@ -193,9 +193,9 @@ public class BetterEnderUtils {
      *            Player currently opening the inventory.
      * @param inventory
      *            Inventory. BetterEnderInventoryHolder must be the holder.
-     * @param chestOwner
      * @param plugin
-     * @return
+     *            The plugin instance.
+     * @return The resized inventory.
      */
     private static Inventory getResizedEmptyInventory(Player player, Inventory inventory, BetterEnderChest plugin) {
         BetterEnderInventoryHolder inventoryHolder = BetterEnderInventoryHolder.of(inventory);

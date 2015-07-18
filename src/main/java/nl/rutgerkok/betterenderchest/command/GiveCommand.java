@@ -57,8 +57,8 @@ public class GiveCommand extends BaseCommand {
 
     /**
      * Wrapper around the unsafe method
-     * {@link org.bukkit.UnsafeValues#modifyItemStack(ItemStack, String)}, that
-     * forces you to catch any exceptions, but suppresses deprecation warnings.
+     * {@code UnsafeValues.modifyItemStack(ItemStack, String)}, that forces you
+     * to catch any exceptions, but suppresses deprecation warnings.
      *
      * @param stack
      *            Stack to add NBT to. Depending on the implementation, this
@@ -68,7 +68,7 @@ public class GiveCommand extends BaseCommand {
      * @return The modified stack.
      * @throws Throwable
      *             Method may throw anything, as indicated by
-     *             {@link org.bukkit.UnsafeValues}.
+     *             {@code UnsafeValues}.
      */
     @SuppressWarnings("deprecation")
     private ItemStack addNBT(ItemStack stack, String nbt) throws Throwable {

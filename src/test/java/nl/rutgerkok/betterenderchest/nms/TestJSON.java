@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
+
 import nl.rutgerkok.betterenderchest.nms.SimpleNMSHandler.JSONSimpleTypes;
 
 import org.json.simple.JSONObject;
@@ -48,6 +49,7 @@ public class TestJSON {
      *            JSON to decode and encode.
      * @return The JSON after it has been decoded and encoded.
      * @throws IOException
+     *             When a decoding error occurs.
      */
     private String reserialize(String json) throws IOException {
         NBTTagCompound compoundTag = JSONSimpleTypes.toTag(json);
