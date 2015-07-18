@@ -3,6 +3,7 @@ package nl.rutgerkok.betterenderchest.io;
 import java.io.IOException;
 
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
+import nl.rutgerkok.betterenderchest.ChestRestrictions;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
@@ -16,7 +17,7 @@ import org.bukkit.inventory.ItemStack;
 public final class SaveEntry {
 
     private final ChestOwner chestOwner;
-    private final byte disabledSlots;
+    private final ChestRestrictions chestRestrictions;
     private final WorldGroup group;
     private final ItemStack[] stacks;
 
@@ -34,7 +35,7 @@ public final class SaveEntry {
         BetterEnderInventoryHolder holder = BetterEnderInventoryHolder.of(inventory);
         this.chestOwner = holder.getChestOwner();
         this.group = holder.getWorldGroup();
-        this.disabledSlots = (byte) holder.getDisabledSlots();
+        this.chestRestrictions = holder.getChestRestrictions();
 
         // Store clones of all item stacks (the stacks are going to be
         // serialized on another thread, so we can't use the live sticks)
@@ -53,13 +54,12 @@ public final class SaveEntry {
     }
 
     /**
-     * Gets the amount of slots in this inventory that are disabled. Disabled
-     * slots are used to disable part of an inventory row.
+     * Gets the restrictions placed on this chest.
      *
-     * @return The amount of slots.
+     * @return The restrictions.
      */
-    public byte getDisabledSlots() {
-        return disabledSlots;
+    public ChestRestrictions getChestRestrictions() {
+        return chestRestrictions;
     }
 
     /**

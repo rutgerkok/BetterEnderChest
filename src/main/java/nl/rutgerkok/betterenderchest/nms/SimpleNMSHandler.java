@@ -28,6 +28,7 @@ import net.minecraft.server.v1_8_R3.TileEntity;
 import net.minecraft.server.v1_8_R3.TileEntityEnderChest;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.ChestRestrictions;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.io.SaveEntry;
@@ -331,9 +332,19 @@ public class SimpleNMSHandler extends NMSHandler {
             // Load the number of disabled slots
             return baseTag.getByte("DisabledSlots");
         } else {
-            // Return 0. It doesn't harm anything and it will be corrected when
-            // the chest is opened
+            // Return 0. This value doesn't harm anything and will be
+            // corrected when the owner opens his/her own chest
             return 0;
+        }
+    }
+
+    private boolean isItemInsertionAllowed(NBTTagCompound baseTag) {
+        if (baseTag.hasKey("ItemInsertion")) {
+            return baseTag.getBoolean("ItemInsertion");
+        } else {
+            // Return true. This value doesn't harm anything and will be
+            // corrected when the owner opens his/her own chest
+            return true;
         }
     }
 
@@ -398,7 +409,9 @@ public class SimpleNMSHandler extends NMSHandler {
         // Create the Bukkit inventory
         int inventoryRows = getRows(chestOwner, baseTag, inventoryTag);
         int disabledSlots = getDisabledSlots(baseTag);
-        Inventory inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup, inventoryRows, disabledSlots);
+        boolean itemInsertion = isItemInsertionAllowed(baseTag);
+        ChestRestrictions chestRestrictions = new ChestRestrictions(inventoryRows, disabledSlots, itemInsertion);
+        Inventory inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup, chestRestrictions);
 
         // Add all the items
         for (int i = 0; i < inventoryTag.size(); i++) {
@@ -449,8 +462,10 @@ public class SimpleNMSHandler extends NMSHandler {
         NBTTagList inventoryTag = new NBTTagList();
 
         // Chest metadata
-        baseTag.setByte("Rows", (byte) (inventory.getSize() / 9));
-        baseTag.setByte("DisabledSlots", (byte) inventory.getDisabledSlots());
+        ChestRestrictions chestRestrictions = inventory.getChestRestrictions();
+        baseTag.setByte("Rows", (byte) chestRestrictions.getChestRows());
+        baseTag.setByte("DisabledSlots", (byte) chestRestrictions.getDisabledSlots());
+        baseTag.setBoolean("ItemInsertion", chestRestrictions.isItemInsertionAllowed());
         baseTag.setString("OwnerName", inventory.getChestOwner().getDisplayName());
 
         // Add all items to the inventory tag

@@ -111,7 +111,7 @@ public class EmptyInventoryProvider {
         }
         // Private (or default) chest, return the number of rows for the default
         // rank
-        return plugin.getChestSizes().getChestRows();
+        return plugin.getChestSizes().getDefaultChestRows();
     }
 
     /**
@@ -163,7 +163,10 @@ public class EmptyInventoryProvider {
     }
 
     /**
-     * Loads an empty inventory with the given name.
+     * Loads an empty inventory with the given name. The inventory will use the
+     * default amount for a private or public chest (depending on the chest
+     * owner). There will be 0 disabled slots and item insertions will be
+     * allowed.
      * 
      * @param chestOwner
      *            The name of the inventory
@@ -172,13 +175,41 @@ public class EmptyInventoryProvider {
      * @return The inventory.
      */
     public Inventory loadEmptyInventory(ChestOwner chestOwner, WorldGroup worldGroup) {
-        return loadEmptyInventory(chestOwner, worldGroup, getInventoryRows(chestOwner), 0);
+        return loadEmptyInventory(chestOwner, worldGroup, getInventoryRows(chestOwner));
     }
 
-    public Inventory loadEmptyInventory(ChestOwner chestOwner, WorldGroup worldGroup, int inventoryRows, int disabledSlots) {
-
+    /**
+     * Loads an empty inventory with the given name and restrictions.
+     *
+     * @param chestOwner
+     *            The name of the inventory
+     * @param worldGroup
+     *            The world group the inventory is in.
+     * @param chestRestrictions
+     *            The restrictions of the chest, like the number of rows.
+     * @return The inventory.
+     */
+    public Inventory loadEmptyInventory(ChestOwner chestOwner, WorldGroup worldGroup, ChestRestrictions chestRestrictions) {
+        int inventoryRows = chestRestrictions.getChestRows();
         // Return the inventory
-        return Bukkit.createInventory(new BetterEnderInventoryHolder(chestOwner, worldGroup, disabledSlots), inventoryRows * 9, trimTitle(chestOwner.getInventoryTitle()));
+        return Bukkit.createInventory(new BetterEnderInventoryHolder(chestOwner, worldGroup, chestRestrictions), inventoryRows * 9, trimTitle(chestOwner.getInventoryTitle()));
+    }
+
+    /**
+     * Loads an empty inventory with the given name and number of rows. There
+     * will be 0 disabled slots and item insertions will be allowed.
+     *
+     * @param chestOwner
+     *            The name of the inventory
+     * @param worldGroup
+     *            The world group the inventory is in.
+     * @param rows
+     *            The the number of rows of the chest.
+     * @return The inventory.
+     */
+    public Inventory loadEmptyInventory(ChestOwner chestOwner, WorldGroup worldGroup, int rows) {
+        ChestRestrictions restrictions = new ChestRestrictions(rows, 0, true);
+        return loadEmptyInventory(chestOwner, worldGroup, restrictions);
     }
 
     /**

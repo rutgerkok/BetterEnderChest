@@ -9,12 +9,24 @@ public class BetterEnderChestSizes {
     private int publicChestRows;
 
     /**
+     * Gets whether item insertions are allowed to the chest of the given
+     * player.
+     *
+     * @param player
+     *            The owner of the chest.
+     * @return True if item insertions are allowed, false otherwise.
+     */
+    private boolean getAllowInsert(Player player) {
+        return player.hasPermission("betterenderchest.user.insert");
+    }
+
+    /**
      * Gets the rows in the Ender Chest for players without any upgrades. Please
      * note that some slots may be disabled.
      * 
      * @return The rows in the chest for players without any upgrades.
      */
-    public int getChestRows() {
+    public int getDefaultChestRows() {
         return getChestRows(0);
     }
 
@@ -28,7 +40,7 @@ public class BetterEnderChestSizes {
      * @throws ArrayIndexOutOfBoundsException
      *             If that upgrade doesn't exist.
      */
-    public int getChestRows(int upgrade) throws ArrayIndexOutOfBoundsException {
+    private int getChestRows(int upgrade) throws ArrayIndexOutOfBoundsException {
         return playerChestRows[upgrade];
     }
 
@@ -40,7 +52,7 @@ public class BetterEnderChestSizes {
      *            The player to check for.
      * @return The number of rows that the player should have.
      */
-    public int getChestRows(Player player) {
+    private int getChestRows(Player player) {
         // Check for upgrade permission
         for (int i = playerChestRows.length - 1; i > 0; i--) {
             if (player.hasPermission("betterenderchest.slots.upgrade" + i)) {
@@ -49,7 +61,7 @@ public class BetterEnderChestSizes {
         }
 
         // No upgrade permissions found - return rows for no upgrades
-        return getChestRows();
+        return getDefaultChestRows();
     }
 
     /**
@@ -59,7 +71,7 @@ public class BetterEnderChestSizes {
      * 
      * @return The number of disabled slots for players without upgrades.
      */
-    public int getDisabledSlots() {
+    private int getDisabledSlots() {
         return getDisabledSlots(0);
     }
 
@@ -74,7 +86,7 @@ public class BetterEnderChestSizes {
      * @throws ArrayIndexOutOfBoundsException
      *             If this upgrade doesn't exist.
      */
-    public int getDisabledSlots(int upgrade) throws ArrayIndexOutOfBoundsException {
+    private int getDisabledSlots(int upgrade) throws ArrayIndexOutOfBoundsException {
         return playerChestDisabledSlots[upgrade];
     }
 
@@ -87,7 +99,7 @@ public class BetterEnderChestSizes {
      *            The player to check for.
      * @return The number of disabled slots the player should have.
      */
-    public int getDisabledSlots(Player player) {
+    private int getDisabledSlots(Player player) {
         // Check for upgrade permission
         for (int i = playerChestDisabledSlots.length - 1; i > 0; i--) {
             if (player.hasPermission("betterenderchest.slots.upgrade" + i)) {
@@ -147,5 +159,36 @@ public class BetterEnderChestSizes {
             playerChestRows[i] = (playerChestSlots[i] + 8) / 9;
             playerChestDisabledSlots[i] = (playerChestRows[i] * 9) - playerChestSlots[i];
         }
+    }
+
+    /**
+     * Gets the restrictions that should apply to the personal chest of the
+     * player.
+     *
+     * @param player
+     *            The player.
+     * @return The restrictions on the personal chest of the player.
+     */
+    public ChestRestrictions getChestRestrictions(Player player) {
+        return new ChestRestrictions(getChestRows(player), getDisabledSlots(player), getAllowInsert(player));
+    }
+
+    /**
+     * Gets the restrictions on the public chest.
+     *
+     * @return The restrictions.
+     */
+    public ChestRestrictions getPublicChestRestrictions() {
+        return new ChestRestrictions(getPublicChestRows(), getPublicChestDisabledSlots(), true);
+    }
+
+    /**
+     * Gets the restrictions on the default chest; the chest that copies its
+     * contents to all Ender Chests to new players.
+     *
+     * @return The restrictions.
+     */
+    public ChestRestrictions getDefaultChestRestrictions() {
+        return new ChestRestrictions(getDefaultChestRows(), getDisabledSlots(), true);
     }
 }

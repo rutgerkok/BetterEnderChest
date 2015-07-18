@@ -77,12 +77,12 @@ public class SwapInvCommand extends BaseCommand {
 
         // Create new inventory 1 with size and contents of inventory 2
         Inventory newInv1 = plugin.getEmptyInventoryProvider().loadEmptyInventory(
-                holder1.getChestOwner(), holder1.getWorldGroup(), inventory2.getSize() / 9, holder2.getDisabledSlots());
+                holder1.getChestOwner(), holder1.getWorldGroup(), holder2.getChestRestrictions());
         BetterEnderUtils.copyContents(inventory2, newInv1, null);
 
         // Create new inventory 2 with size and contents of inventory 1
         Inventory newInv2 = plugin.getEmptyInventoryProvider().loadEmptyInventory(
-                holder2.getChestOwner(), holder2.getWorldGroup(), inventory1.getSize() / 9, holder1.getDisabledSlots());
+                holder2.getChestOwner(), holder2.getWorldGroup(), holder1.getChestRestrictions());
         BetterEnderUtils.copyContents(inventory1, newInv2, null);
 
         // Let new inventories replace old ones

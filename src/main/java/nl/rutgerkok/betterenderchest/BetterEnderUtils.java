@@ -102,18 +102,7 @@ public class BetterEnderUtils {
     public static void dropItemsInDisabledSlots(Inventory inventory, Player player, BetterEnderChest plugin) {
         BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
         ChestOwner chestOwner = holder.getChestOwner();
-        int disabledSlots = -1;
-
-        // Get the correct number of disabled slots
-        if (chestOwner.isPublicChest()) {
-            disabledSlots = plugin.getChestSizes().getPublicChestDisabledSlots();
-        }
-        if (chestOwner.isDefaultChest()) {
-            disabledSlots = plugin.getChestSizes().getDisabledSlots();
-        }
-        if (chestOwner.isPlayer(player)) {
-            disabledSlots = plugin.getChestSizes().getDisabledSlots(player);
-        }
+        int disabledSlots = holder.getChestRestrictions().getDisabledSlots();
 
         if (disabledSlots > 0) {
             Location playerLocation = player.getLocation();
@@ -201,35 +190,33 @@ public class BetterEnderUtils {
         BetterEnderInventoryHolder inventoryHolder = BetterEnderInventoryHolder.of(inventory);
         ChestOwner chestOwner = inventoryHolder.getChestOwner();
         WorldGroup worldGroup = inventoryHolder.getWorldGroup();
-        int rows = inventory.getSize() / 9;
-        int disabledSlots = inventoryHolder.getDisabledSlots();
+        ChestRestrictions chestRestrictions = inventoryHolder.getChestRestrictions();
         BetterEnderChestSizes chestSizes = plugin.getChestSizes();
         EmptyInventoryProvider emptyChests = plugin.getEmptyInventoryProvider();
 
+        ChestRestrictions desiredRestrictions = null;
         if (chestOwner.isPublicChest()) {
             // It's the public chest
-            if (rows != chestSizes.getPublicChestRows() || disabledSlots != chestSizes.getPublicChestDisabledSlots()) {
-                // Resize
-                return emptyChests.loadEmptyInventory(chestOwner, worldGroup, chestSizes.getPublicChestRows(), chestSizes.getPublicChestDisabledSlots());
-            }
+            desiredRestrictions = chestSizes.getPublicChestRestrictions();
+
         } else if (chestOwner.isDefaultChest()) {
             // It's the default chest
-            if (rows != chestSizes.getChestRows() || disabledSlots != chestSizes.getDisabledSlots()) {
-                // Resize
-                return emptyChests.loadEmptyInventory(chestOwner, worldGroup, chestSizes.getChestRows(), chestSizes.getDisabledSlots());
-            }
+            desiredRestrictions = chestSizes.getDefaultChestRestrictions();
         } else {
             // It's a private chest
             if (chestOwner.isPlayer(player)) {
                 // Player is the owner
-                if (rows != chestSizes.getChestRows(player) || disabledSlots != chestSizes.getDisabledSlots(player)) {
-                    // Number of slots is incorrect
-                    return emptyChests.loadEmptyInventory(chestOwner, worldGroup, chestSizes.getChestRows(player), chestSizes.getDisabledSlots(player));
-                }
+                desiredRestrictions = chestSizes.getChestRestrictions(player);
             }
         }
-        // Don't resize
-        return null;
+
+        if (desiredRestrictions == null || desiredRestrictions.equals(chestRestrictions)) {
+            // Don't resize
+            return null;
+        }
+
+        // Resize
+        return emptyChests.loadEmptyInventory(chestOwner, worldGroup, desiredRestrictions);
     }
 
     /**

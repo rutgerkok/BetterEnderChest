@@ -58,7 +58,7 @@ public class VanillaImporter extends InventoryImporter {
             // Online, load now
             Inventory vanillaInventory = player.getEnderChest();
             int inventoryRows = plugin.getEmptyInventoryProvider().getInventoryRows(chestOwner, vanillaInventory);
-            betterEnderInventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup, inventoryRows, plugin.getChestSizes().getDisabledSlots(player));
+            betterEnderInventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup, inventoryRows);
 
             // Copy all items
             ListIterator<ItemStack> copyIterator = vanillaInventory.iterator();

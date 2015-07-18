@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import me.drayshak.WorldInventories.Group;
-import me.drayshak.WorldInventories.WorldInventories;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
@@ -17,6 +15,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import me.drayshak.WorldInventories.Group;
+import me.drayshak.WorldInventories.WorldInventories;
 
 public class WorldInventoriesImporter extends InventoryImporter {
 
@@ -69,7 +70,7 @@ public class WorldInventoriesImporter extends InventoryImporter {
 
         // Add everything from WorldInventories to betterInventory
         int rows = plugin.getEmptyInventoryProvider().getInventoryRows(chestOwner, stacks.listIterator());
-        Inventory betterInventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup, rows, 0);
+        Inventory betterInventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup, rows);
         for (int i = 0; i < stacks.size(); i++) {
             ItemStack stack = stacks.get(i);
             if (stack != null) {

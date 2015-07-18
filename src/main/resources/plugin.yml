@@ -36,6 +36,7 @@ permissions:
       betterenderchest.user.place: true
       betterenderchest.user.destroy: true
       betterenderchest.user.open: true
+      betterenderchest.user.insert: true
   betterenderchest.user.craft:
     description: Craft the Ender Chest in the workbench.
   betterenderchest.user.place:
@@ -51,6 +52,8 @@ permissions:
     description: Open the private Ender Chest
   betterenderchest.user.open.publicchest:
     description: Open the public Ender Chest
+  betterenderchest.user.insert:
+    description: Insert items in a private Ender Chest
 # Row permissions
   betterenderchest.slots.upgrade1:
     description: Get the rows as specified for this upgrade in the config.yml.

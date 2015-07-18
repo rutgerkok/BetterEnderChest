@@ -30,17 +30,18 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
     }
 
     private final ChestOwner chestOwner;
-    private final byte disabledSlots;
     private boolean hasUnsavedChanges;
+    private final ChestRestrictions chestRestrictions;
     private final ReentrantLock saveLock;
 
     private final WorldGroup worldGroup;
 
-    public BetterEnderInventoryHolder(ChestOwner chestOwner, WorldGroup worldGroup, int disabledSlots) throws IllegalArgumentException {
+    public BetterEnderInventoryHolder(ChestOwner chestOwner, WorldGroup worldGroup, ChestRestrictions chestRestrictions) throws IllegalArgumentException {
         Validate.notNull(chestOwner, "chestOwner may not be null");
         Validate.notNull(worldGroup, "worldGroup may not be null");
+        Validate.notNull(chestRestrictions, "chestRestrictiosn may not be null");
         this.chestOwner = chestOwner;
-        this.disabledSlots = (byte) disabledSlots;
+        this.chestRestrictions = chestRestrictions;
         this.worldGroup = worldGroup;
         this.saveLock = new ReentrantLock();
     }
@@ -55,12 +56,13 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
     }
 
     /**
-     * Gets the number of disabled slots in this chest.
-     * 
-     * @return The number of disabled slots in this chest.
+     * Gets the number of slots in this chest where no items can be placed in.
+     * Items can still be removed from these slots.
+     *
+     * @return The number of take only slots in this chest.
      */
-    public int getDisabledSlots() {
-        return disabledSlots;
+    public int getTakeOnlySlots() {
+        return chestRestrictions.getTakeOnlySlots();
     }
 
     /**
@@ -109,5 +111,16 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
      */
     public void setHasUnsavedChanges(boolean unsavedChanges) {
         this.hasUnsavedChanges = unsavedChanges;
+    }
+
+    /**
+     * Gets the restrictions placed on the chest. These restrictions are
+     * persisted to disk/database, and might not be up to date with the current
+     * permission nodes of the player.
+     *
+     * @return The restrictions.
+     */
+    public ChestRestrictions getChestRestrictions() {
+        return chestRestrictions;
     }
 }

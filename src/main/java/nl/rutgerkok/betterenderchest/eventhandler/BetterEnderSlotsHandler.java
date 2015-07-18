@@ -32,19 +32,19 @@ public class BetterEnderSlotsHandler implements Listener {
      * @param event
      *            The inventory click event.
      */
-    protected void handleDisabledSlots(InventoryClickEvent event) {
+    protected void handleTakeOnlySlots(InventoryClickEvent event) {
         Inventory inventory = event.getInventory();
         BetterEnderInventoryHolder holder = BetterEnderInventoryHolder.of(inventory);
 
-        if (holder.getDisabledSlots() == 0) {
+        if (holder.getTakeOnlySlots() == 0) {
             // Noting to prevent
             return;
         }
 
         if (event.isShiftClick()) {
-            handleDisabledSlotsShiftClick(event);
+            handleTakeOnlySlotsShiftClick(event);
         } else {
-            handleDisabledSlotsNormalClick(event);
+            handleTakeOnlySlotsNormalClick(event);
         }
 
     }
@@ -58,7 +58,7 @@ public class BetterEnderSlotsHandler implements Listener {
      * @param event
      *            The inventory click event.
      */
-    protected void handleDisabledSlotsNormalClick(InventoryClickEvent event) {
+    protected void handleTakeOnlySlotsNormalClick(InventoryClickEvent event) {
         Inventory inventory = event.getInventory();
         BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
 
@@ -67,7 +67,7 @@ public class BetterEnderSlotsHandler implements Listener {
             return;
         }
         int slotFromRightUnder = inventory.getSize() - event.getSlot();
-        if (slotFromRightUnder <= holder.getDisabledSlots() && slotFromRightUnder > 0) {
+        if (slotFromRightUnder <= holder.getTakeOnlySlots() && slotFromRightUnder > 0) {
             // Clicked on a disabled slot
             if (event.getCursor().getType() != Material.AIR) {
                 // Only cancel if the player hasn't an empty hand (so that
@@ -95,7 +95,7 @@ public class BetterEnderSlotsHandler implements Listener {
      * @param event
      *            The inventory click event.
      */
-    protected void handleDisabledSlotsShiftClick(InventoryClickEvent event) {
+    protected void handleTakeOnlySlotsShiftClick(InventoryClickEvent event) {
         Inventory inventory = event.getInventory();
         BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
 
@@ -114,7 +114,7 @@ public class BetterEnderSlotsHandler implements Listener {
 
         // Now loop through the inventory, place what will fit
         ItemStack adding = event.getCurrentItem();
-        for (int i = 0; i < inventory.getSize() - holder.getDisabledSlots(); i++) {
+        for (int i = 0; i < inventory.getSize() - holder.getTakeOnlySlots(); i++) {
             ItemStack inSlot = inventory.getItem(i);
             if (inSlot == null || inSlot.getType().equals(Material.AIR)) {
                 // Found an empty slot, place the stack here
@@ -155,7 +155,7 @@ public class BetterEnderSlotsHandler implements Listener {
         InventoryHolder inventoryHolder = event.getInventory().getHolder();
         if (inventoryHolder instanceof BetterEnderInventoryHolder) {
             // Make sure disabled slots stay disabled.
-            handleDisabledSlots(event);
+            handleTakeOnlySlots(event);
             // Set that changes were made
             ((BetterEnderInventoryHolder) inventoryHolder).setHasUnsavedChanges(true);
             return;
@@ -174,13 +174,13 @@ public class BetterEnderSlotsHandler implements Listener {
             return;
         }
         BetterEnderInventoryHolder holder = BetterEnderInventoryHolder.of(inventory);
-        if (holder.getDisabledSlots() == 0) {
+        if (holder.getTakeOnlySlots() == 0) {
             return;
         }
 
         // Check for illegal slots
         Set<Integer> allSlots = event.getInventorySlots();
-        for (int i = 0; i < holder.getDisabledSlots(); i++) {
+        for (int i = 0; i < holder.getTakeOnlySlots(); i++) {
             int slotToDisable = inventory.getSize() - i - 1;
             if (allSlots.contains(slotToDisable)) {
                 event.setCancelled(true);
