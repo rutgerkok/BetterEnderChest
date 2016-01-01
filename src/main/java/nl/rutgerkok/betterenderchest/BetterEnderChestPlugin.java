@@ -2,6 +2,8 @@ package nl.rutgerkok.betterenderchest;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwners;
@@ -31,6 +33,7 @@ import nl.rutgerkok.betterenderchest.io.SimpleEnderCache;
 import nl.rutgerkok.betterenderchest.io.file.BetterEnderFileHandler;
 import nl.rutgerkok.betterenderchest.io.mysql.BetterEnderSQLCache;
 import nl.rutgerkok.betterenderchest.io.mysql.DatabaseSettings;
+import nl.rutgerkok.betterenderchest.itemfilter.ItemFilterReader;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.nms.SimpleNMSHandler;
 import nl.rutgerkok.betterenderchest.registry.Registry;
@@ -45,7 +48,12 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Lists;
 
 public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChest {
     /**
@@ -78,6 +86,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private BetterEnderCache enderCache;
     private BetterEnderWorldGroupManager groups;
     private Registry<InventoryImporter> importers = new Registry<InventoryImporter>();
+    private Predicate<ItemStack> itemFilter = Predicates.alwaysTrue();
     private boolean lockChestsOnError = true;
     private boolean manualGroupManagement;
     private Registry<NMSHandler> nmsHandlers = new Registry<NMSHandler>();
@@ -334,6 +343,17 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         config.set("AutoSave.chestsPerSaveTick", null);
         config.set("AutoSave.saveTickIntervalTicks", null);
 
+        // Item filters
+        List<Map<?, ?>> illegalItemsFoundInConfig = config.getMapList("IllegalItems");
+        List<Predicate<ItemStack>> illegalItems = Lists.newArrayList();
+        ItemFilterReader itemFilterReader = new ItemFilterReader(this);
+        for (Map<?, ?> entry : illegalItemsFoundInConfig) {
+            illegalItems.add(itemFilterReader.apply(entry));
+        }
+        config.set("IllegalItems", illegalItemsFoundInConfig);
+        Predicate<ItemStack> isIllegalItem = Predicates.or(illegalItems);
+        this.itemFilter = Predicates.not(isIllegalItem);
+
         // Private chests
         rankUpgrades = config.getInt("PrivateEnderChest.rankUpgrades", 2);
         if (rankUpgrades < 0 || rankUpgrades > 20) {
@@ -408,6 +428,11 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         saveConfig();
     }
 
+    @Override
+    public boolean isItemAllowedInChests(ItemStack stack) {
+        return itemFilter.apply(stack);
+    }
+
     /**
      * Gets whether the string is a valid chest drop.
      *
@@ -421,31 +446,6 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             return true;
         } catch (IllegalArgumentException e) {
             return false;
-        }
-    }
-
-    /**
-     * Loads the ender cache and the save and load system behind it.
-     *
-     * @return The ender cache.
-     */
-    private BetterEnderCache setupEnderCache() {
-        NMSHandler nmsHandler = getNMSHandlers().getSelectedRegistration();
-        if (nmsHandler == null) {
-            // No NMS access, so no saving and loading
-            Throwable emptyThrowable = new Throwable();
-            emptyThrowable.setStackTrace(new StackTraceElement[0]);
-            disableSaveAndLoad("Failed to access the net.minecraft.server classes."
-                    + " The usual cause of this is that the plugin is outdated, so please look for an update."
-                    + " Another possibility is that your Spigot build is outdated.", emptyThrowable);
-            return new DiscardingEnderCache(this);
-        }
-
-        if (databaseSettings.isEnabled()) {
-            return BetterEnderSQLCache.create(this);
-        } else {
-            BetterEnderFileHandler fileHandler = new BetterEnderFileHandler(nmsHandler, chestSaveLocation);
-            return new SimpleEnderCache(this, fileHandler, fileHandler);
         }
     }
 
@@ -579,6 +579,31 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
         // Reload IO services
         enderCache = setupEnderCache();
+    }
+
+    /**
+     * Loads the ender cache and the save and load system behind it.
+     *
+     * @return The ender cache.
+     */
+    private BetterEnderCache setupEnderCache() {
+        NMSHandler nmsHandler = getNMSHandlers().getSelectedRegistration();
+        if (nmsHandler == null) {
+            // No NMS access, so no saving and loading
+            Throwable emptyThrowable = new Throwable();
+            emptyThrowable.setStackTrace(new StackTraceElement[0]);
+            disableSaveAndLoad("Failed to access the net.minecraft.server classes."
+                    + " The usual cause of this is that the plugin is outdated, so please look for an update."
+                    + " Another possibility is that your Spigot build is outdated.", emptyThrowable);
+            return new DiscardingEnderCache(this);
+        }
+
+        if (databaseSettings.isEnabled()) {
+            return BetterEnderSQLCache.create(this);
+        } else {
+            BetterEnderFileHandler fileHandler = new BetterEnderFileHandler(nmsHandler, chestSaveLocation);
+            return new SimpleEnderCache(this, fileHandler, fileHandler);
+        }
     }
 
     @Override

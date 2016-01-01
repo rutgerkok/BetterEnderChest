@@ -16,9 +16,10 @@ import nl.rutgerkok.betterenderchest.util.BukkitExecutors;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
-public interface BetterEnderChest {
+public interface BetterEnderChest extends PluginLogger {
 
     /**
      * This is the name of the group that shouldn't be saved in a subfolder, but
@@ -33,14 +34,6 @@ public interface BetterEnderChest {
      * @return True if the plugin can save and load.
      */
     boolean canSaveAndLoad();
-
-    /**
-     * Logs a debug message.
-     * 
-     * @param string
-     *            The string to print.
-     */
-    void debug(String string);
 
     /**
      * Disables saving and loading. Can be called from any thread.
@@ -65,7 +58,7 @@ public interface BetterEnderChest {
     /**
      * Returns the cache of the plugin. Use this to load files from disk and to
      * save them.
-     * 
+     *
      * @return The cache of the plugin.
      */
     BetterEnderCache getChestCache();
@@ -245,13 +238,14 @@ public interface BetterEnderChest {
     boolean hasManualGroupManagement();
 
     /**
-     * Logs a message with normal importance. Message will be prefixed with the
-     * plugin name between square brackets.
-     * 
-     * @param message
-     *            The message to show.
+     * Checks if an item is allowed in chests.
+     *
+     * @param stack
+     *            The item stack.
+     *
+     * @return True if the item is allowed, false otherwise.
      */
-    void log(String message);
+    boolean isItemAllowedInChests(ItemStack stack);
 
     /**
      * Prints the latest error that occurred during saving and loading to the
@@ -267,40 +261,11 @@ public interface BetterEnderChest {
     void reload();
 
     /**
-     * Logs an error. Message will be prefixed with the plugin name between
-     * square brackets.
-     * 
-     * @param message
-     *            The message to show.
-     */
-    void severe(String message);
-
-    /**
-     * Logs an error with the exception. Message will be prefixed with the
-     * plugin name between square brackets.
-     * 
-     * @param message
-     *            The message to show.
-     * @param thrown
-     *            The exception that caused the error.
-     */
-    void severe(String message, Throwable thrown);
-
-    /**
      * Gets whether UUIDs are used to save chests. If false, the chests will be
      * saved using player names.
      * 
      * @return Whether UUIDs are used to save chests.
      */
     boolean useUuidsForSaving();
-
-    /**
-     * Logs a warning. Message will be prefixed with the plugin name between
-     * square brackets.
-     * 
-     * @param message
-     *            The message to show.
-     */
-    void warning(String message);
 
 }

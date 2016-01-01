@@ -8,9 +8,11 @@ import nl.rutgerkok.betterenderchest.ImmutableInventory;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
@@ -23,6 +25,10 @@ public class BetterEnderSlotsHandler implements Listener {
 
     public BetterEnderSlotsHandler(BetterEnderChest plugin) {
         this.plugin = plugin;
+    }
+
+    private boolean canPlaceStack(BetterEnderInventoryHolder holder, ItemStack cursor) {
+        return plugin.isItemAllowedInChests(cursor);
     }
 
     /**
@@ -38,7 +44,7 @@ public class BetterEnderSlotsHandler implements Listener {
 
         if (holder.getTakeOnlySlots() == 0) {
             // Noting to prevent
-            return;
+            // return;
         }
 
         if (event.isShiftClick()) {
@@ -60,29 +66,18 @@ public class BetterEnderSlotsHandler implements Listener {
      */
     protected void handleTakeOnlySlotsNormalClick(InventoryClickEvent event) {
         Inventory inventory = event.getInventory();
-        BetterEnderInventoryHolder holder = (BetterEnderInventoryHolder) inventory.getHolder();
+        BetterEnderInventoryHolder holder = BetterEnderInventoryHolder.of(inventory);
 
-        if (event.getSlot() != event.getRawSlot() || event.getSlotType().equals(SlotType.OUTSIDE)) {
-            // Clicked outside the chest window, ignore
+        boolean cursorOutsideChest = (event.getSlot() != event.getRawSlot() || event.getSlotType().equals(SlotType.OUTSIDE));
+        if (!isAddingItemToChest(event.getAction(), !cursorOutsideChest)) {
+            // Taking items (instead of inserting), ignore
             return;
         }
-        int slotFromRightUnder = inventory.getSize() - event.getSlot();
-        if (slotFromRightUnder <= holder.getTakeOnlySlots() && slotFromRightUnder > 0) {
-            // Clicked on a disabled slot
-            if (event.getCursor().getType() != Material.AIR) {
-                // Only cancel if the player hasn't an empty hand (so that
-                // he can still take items out of the disabled slots).
-                if (event.getWhoClicked() instanceof Player) {
-                    final Player player = (Player) event.getWhoClicked();
-                    Bukkit.getScheduler().runTask(plugin.getPlugin(), new Runnable() {
-                        @Override
-                        public void run() {
-                            player.updateInventory();
-                        }
-                    });
-                }
-                event.setCancelled(true);
-            }
+        int slotFromBottomRight = inventory.getSize() - event.getSlot();
+        if (!canPlaceStack(holder, event.getCursor()) || isInDisabledSlot(slotFromBottomRight, holder)) {
+            // Prevent item placement
+            updateInventoryLater(event.getWhoClicked());
+            event.setCancelled(true);
         }
     }
 
@@ -112,8 +107,14 @@ public class BetterEnderSlotsHandler implements Listener {
         // We're handling the event ourselves
         event.setCancelled(true);
 
-        // Now loop through the inventory, place what will fit
         ItemStack adding = event.getCurrentItem();
+
+        // Check for illegal items
+        if (!canPlaceStack(holder, adding)) {
+            return;
+        }
+
+        // Now loop through the inventory, place what will fit
         for (int i = 0; i < inventory.getSize() - holder.getTakeOnlySlots(); i++) {
             ItemStack inSlot = inventory.getItem(i);
             if (inSlot == null || inSlot.getType().equals(Material.AIR)) {
@@ -150,6 +151,35 @@ public class BetterEnderSlotsHandler implements Listener {
         event.setCurrentItem(adding);
     }
 
+    private boolean isAddingItemToChest(InventoryAction action, boolean cursorInChest) {
+        switch (action) {
+            case CLONE_STACK: return cursorInChest;
+            case COLLECT_TO_CURSOR: return false;
+            case DROP_ALL_CURSOR: return false;
+            case DROP_ALL_SLOT: return false;
+            case DROP_ONE_CURSOR: return false;
+            case DROP_ONE_SLOT: return false;
+            case HOTBAR_MOVE_AND_READD: return true;
+            case HOTBAR_SWAP: return true;
+            case MOVE_TO_OTHER_INVENTORY: return cursorInChest;
+            case NOTHING: return false;
+            case PICKUP_ALL: return false;
+            case PICKUP_HALF: return false;
+            case PICKUP_ONE: return false;
+            case PICKUP_SOME: return false;
+            case PLACE_ALL: return cursorInChest;
+            case PLACE_ONE: return cursorInChest;
+            case PLACE_SOME: return cursorInChest;
+            case SWAP_WITH_CURSOR: return true;
+            case UNKNOWN: return true; // when in doubt - do the safest thing
+            default: return true; // when in doubt - do the safest thing
+        }
+    }
+
+    private boolean isInDisabledSlot(int slotFromBottomRight, BetterEnderInventoryHolder holder) {
+        return (slotFromBottomRight <= holder.getTakeOnlySlots() && slotFromBottomRight > 0);
+    }
+
     @EventHandler(ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
         InventoryHolder inventoryHolder = event.getInventory().getHolder();
@@ -173,20 +203,39 @@ public class BetterEnderSlotsHandler implements Listener {
         if (!(inventory.getHolder() instanceof BetterEnderInventoryHolder)) {
             return;
         }
+
         BetterEnderInventoryHolder holder = BetterEnderInventoryHolder.of(inventory);
-        if (holder.getTakeOnlySlots() == 0) {
+        boolean canPlaceInChest = canPlaceStack(holder, event.getOldCursor());
+
+        if (canPlaceInChest && holder.getTakeOnlySlots() == 0) {
+            // Nothing to prevent
             return;
         }
 
-        // Check for illegal slots
-        Set<Integer> allSlots = event.getInventorySlots();
-        for (int i = 0; i < holder.getTakeOnlySlots(); i++) {
-            int slotToDisable = inventory.getSize() - i - 1;
-            if (allSlots.contains(slotToDisable)) {
+        // Check for illegal slots (when canPlaceInChest == true, all chest slots all illegal)
+        Set<Integer> allSlots = event.getRawSlots();
+        for (int slot : allSlots) {
+            if (slot != event.getView().convertSlot(slot)) {
+                // Clicked outside chest
+                continue;
+            }
+            int slotFromBottomRight = event.getView().getTopInventory().getSize() - slot;
+            if (!canPlaceInChest || isInDisabledSlot(slotFromBottomRight, holder)) {
                 event.setCancelled(true);
-                // Would it be possible to redistribute the items instead?
                 return;
             }
         }
+    }
+
+    private void updateInventoryLater(final HumanEntity humanEntity) {
+        if (!(humanEntity instanceof HumanEntity)) {
+            return;
+        }
+        Bukkit.getScheduler().runTask(plugin.getPlugin(), new Runnable() {
+            @Override
+            public void run() {
+                ((Player) humanEntity).updateInventory();
+            }
+        });
     }
 }
