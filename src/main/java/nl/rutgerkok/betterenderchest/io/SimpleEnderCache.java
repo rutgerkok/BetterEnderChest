@@ -134,6 +134,9 @@ public class SimpleEnderCache implements BetterEnderCache {
                 scheduleSave(inventory);
             } else if (canEvict(inventory)) {
                 unload(inventory);
+            } else {
+                plugin.debug("Not unloading, but also not saving chest of " + entry.getKey().chestOwner.getDisplayName()
+                        + " - no items changed, but chest is still in use");
             }
         }
     }
@@ -169,10 +172,13 @@ public class SimpleEnderCache implements BetterEnderCache {
         try {
             if (!needsSave(inventory)) {
                 // Apparently the needsSave flag was recently changed
+                plugin.debug("Cancelling save for inventory of " + holder.getChestOwner().getDisplayName()
+                        + " - it was just saved");
                 return;
             }
             holder.setHasUnsavedChanges(false);
 
+            plugin.debug("Saving chest of " + holder.getChestOwner().getDisplayName());
             chestSaver.saveChest(new SaveEntry(inventory));
         } finally {
             lock.unlock();
@@ -241,6 +247,9 @@ public class SimpleEnderCache implements BetterEnderCache {
     }
 
     private void scheduleSave(final Inventory inventory) {
+        plugin.debug("Scheduling save for chest of "
+                + BetterEnderInventoryHolder.of(inventory).getChestOwner().getDisplayName());
+
         plugin.getExecutors().workerThreadExecutor().execute(new Runnable() {
 
             @Override
@@ -294,6 +303,8 @@ public class SimpleEnderCache implements BetterEnderCache {
     private void unload(Inventory inventory) {
         BetterEnderInventoryHolder holder = BetterEnderInventoryHolder.of(inventory);
         ChestKey chestKey = new ChestKey(holder.getChestOwner(), holder.getWorldGroup());
+
+        plugin.debug("Unloading chest of " + chestKey.chestOwner.getDisplayName());
         inventories.remove(chestKey);
     }
 
