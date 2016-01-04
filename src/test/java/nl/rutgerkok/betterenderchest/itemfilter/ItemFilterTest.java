@@ -9,6 +9,7 @@ import java.util.Map;
 import nl.rutgerkok.betterenderchest.NameableItemStack;
 import nl.rutgerkok.betterenderchest.TestLogger;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -35,7 +36,7 @@ public final class ItemFilterTest {
     }
 
     @Test
-    public void customNameAndRegex() {
+    public void customNameAndLore() {
         Map<String, Object> section = Maps.newHashMap();
         section.put("check", "customName");
         section.put("for", "Test");
@@ -52,6 +53,52 @@ public final class ItemFilterTest {
     }
 
     @Test
+    public void customNameIgnoringCaseAndColors() {
+        Map<String, Object> section = Maps.newHashMap();
+        section.put("check", "customName");
+        section.put("for", "Some Name");
+        section.put("ignoring", asList("case", "color"));
+
+        ItemFilterReader reader = new ItemFilterReader(new TestLogger());
+        Predicate<ItemStack> filter = reader.apply(section);
+
+        assertTrue(filter.apply(getStackWithName("Some Name")));
+        assertTrue(filter.apply(getStackWithName(ChatColor.RED + "SOME " + ChatColor.BLUE + "NAME")));
+        assertFalse(filter.apply(getStackWithName("Some Other Name")));
+    }
+
+    @Test
+    public void customNameIgnoringColors() {
+        Map<String, Object> section = Maps.newHashMap();
+        section.put("check", "customName");
+        section.put("for", "Some Name");
+        section.put("ignoring", "color");
+
+        ItemFilterReader reader = new ItemFilterReader(new TestLogger());
+        Predicate<ItemStack> filter = reader.apply(section);
+
+        assertTrue(filter.apply(getStackWithName("Some Name")));
+        assertTrue(filter.apply(getStackWithName(ChatColor.RED + "Some " + ChatColor.BLUE + "Name")));
+        assertFalse(filter.apply(getStackWithName("Some Other Name")));
+    }
+
+    @Test
+    public void customNameIgnorningCase() {
+        Map<String, Object> section = Maps.newHashMap();
+        section.put("check", "customName");
+        section.put("for", "Some Name");
+        section.put("ignoring", "case");
+
+        ItemFilterReader reader = new ItemFilterReader(new TestLogger());
+        Predicate<ItemStack> filter = reader.apply(section);
+
+        assertTrue(filter.apply(getStackWithName("Some Name")));
+        assertTrue(filter.apply(getStackWithName("some name")));
+        assertTrue(filter.apply(getStackWithName("SOME NAME")));
+        assertFalse(filter.apply(getStackWithName("some other name")));
+    }
+
+    @Test
     public void customNameRegex() {
         Map<String, Object> section = Maps.newHashMap();
         section.put("check", "customName");
@@ -62,6 +109,39 @@ public final class ItemFilterTest {
 
         assertTrue(filter.apply(getStackWithName("text")));
         assertFalse(filter.apply(getStackWithName("may not contain spaces")));
+    }
+
+    @Test
+    public void customNameRegexIgnoringCaseAndColors() {
+        Map<String, Object> section = Maps.newHashMap();
+        section.put("check", "customName");
+        section.put("forRegex", "Some (Other )?Name");
+        section.put("ignoring", asList("case", "color"));
+
+        ItemFilterReader reader = new ItemFilterReader(new TestLogger());
+        Predicate<ItemStack> filter = reader.apply(section);
+
+        assertTrue(filter.apply(getStackWithName("Some Name")));
+        assertTrue(filter.apply(getStackWithName("some name")));
+        assertTrue(filter.apply(getStackWithName("SOME NAME")));
+        assertTrue(filter.apply(getStackWithName("some other name")));
+        assertTrue(filter.apply(getStackWithName("some OTHER name")));
+        assertTrue(filter.apply(getStackWithName(ChatColor.RED + "some " + ChatColor.YELLOW + "OtheR name")));
+        assertFalse(filter.apply(getStackWithName(ChatColor.RED + "wrong " + ChatColor.BLUE + "name")));
+    }
+
+    @Test
+    public void customNameWithColor() {
+        Map<String, Object> section = Maps.newHashMap();
+        section.put("check", "customName");
+        section.put("for", "&rsome name");
+        
+        ItemFilterReader reader = new ItemFilterReader(new TestLogger());
+        Predicate<ItemStack> filter = reader.apply(section);
+
+        assertTrue("&r must be transformed", filter.apply(getStackWithName(ChatColor.RESET + "some name")));
+        assertFalse("must not match other colors", filter.apply(getStackWithName(ChatColor.RED + "some name")));
+        assertFalse("color code must be present on item", filter.apply(getStackWithName("some name")));
     }
 
     private ItemStack getStackWithLore(String... lore) {
@@ -131,6 +211,24 @@ public final class ItemFilterTest {
 
         assertTrue(filter.apply(getStackWithLore("Forbidden", "lore")));
         assertTrue(filter.apply(getStackWithLore("Forbidden lore")));
+        assertFalse(filter.apply(getStackWithLore("Some Forbidden lore")));
+    }
+
+    @Test
+    public void loreRegexMultilineIgnoringColorAndCase() {
+        Map<String, Object> section = Maps.newHashMap();
+        section.put("check", "lore");
+        section.put("forRegex", "^Forbidden[ \\n]lore$");
+        section.put("ignoring", asList("color", "case"));
+
+        ItemFilterReader reader = new ItemFilterReader(new TestLogger());
+        Predicate<ItemStack> filter = reader.apply(section);
+
+        assertTrue(filter.apply(getStackWithLore("Forbidden", "lore")));
+        assertTrue(filter.apply(getStackWithLore("FORBIDDEN", "LORE")));
+        assertTrue(filter.apply(getStackWithLore(ChatColor.RED + "forbidden", "lore")));
+        assertTrue(filter.apply(getStackWithLore("Forbidden lore")));
+        assertTrue(filter.apply(getStackWithLore("Forbidden " + ChatColor.BLUE + "LORE")));
         assertFalse(filter.apply(getStackWithLore("Some Forbidden lore")));
     }
 }

@@ -8,11 +8,11 @@ import java.util.regex.PatternSyntaxException;
 import nl.rutgerkok.betterenderchest.PluginLogger;
 
 import org.bukkit.ChatColor;
-import org.bukkit.craftbukkit.libs.jline.internal.Preconditions;
 import org.bukkit.inventory.ItemStack;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 
@@ -70,26 +70,17 @@ public final class ItemFilterReader implements Function<Map<?, ?>, Predicate<Ite
     }
 
     private Predicate<ItemStack> getRuleForLore(Map<?, ?> configSection) {
-        String value = null;
-        Object listValues = configSection.get("for");
-        if (listValues instanceof Collection<?>) {
-            Collection<?> cListValues = (Collection<?>) listValues;
-            if (!cListValues.isEmpty()) {
-                value = Joiner.on('\n').join(cListValues);
-            }
-        } else if (listValues != null) {
-            logger.warning(
-                    "Invalid item rule: for value must be a list, " + listValues.getClass().getSimpleName() + " given");
-            return Predicates.alwaysFalse();
-        }
+        boolean ignoreColors = hasIgnoreFlag(configSection, "color");
+        boolean ignoreCase = hasIgnoreFlag(configSection, "case");
 
+        String value = toMultilineStringOrNull(configSection.get("for"));
         String valueRegex = toStringOrNull(configSection.get("forRegex"));
 
         if (value != null && valueRegex == null) {
-            return new LoreFilter(matchLiteral(value));
+            return new LoreFilter(patternFromLiteral(value, ignoreCase), ignoreColors);
         } else if (value == null && valueRegex != null) {
             try {
-                return new LoreFilter(Pattern.compile(valueRegex));
+                return new LoreFilter(patternFromRegex(valueRegex, ignoreCase), ignoreColors);
             } catch (PatternSyntaxException e) {
                 logger.warning("Invalid regex in item rule: '" + e.getLocalizedMessage() + "' for regex " + valueRegex);
                 return Predicates.alwaysFalse();
@@ -104,13 +95,16 @@ public final class ItemFilterReader implements Function<Map<?, ?>, Predicate<Ite
     }
 
     private Predicate<ItemStack> getRuleForName(Map<?, ?> configSection) {
+        boolean ignoreColors = hasIgnoreFlag(configSection, "color");
+        boolean ignoreCase = hasIgnoreFlag(configSection, "case");
         String value = toStringOrNull(configSection.get("for"));
         String valueRegex = toStringOrNull(configSection.get("forRegex"));
+
         if (value != null && valueRegex == null) {
-            return new NameFilter(matchLiteral(value));
+            return new NameFilter(patternFromLiteral(value, ignoreCase), ignoreColors);
         } else if (value == null && valueRegex != null) {
             try {
-                return new NameFilter(Pattern.compile(valueRegex));
+                return new NameFilter(patternFromRegex(valueRegex, ignoreCase), ignoreColors);
             } catch (PatternSyntaxException e) {
                 logger.warning("Invalid regex in item rule: '" + e.getLocalizedMessage() + "' for regex " + valueRegex);
                 return Predicates.alwaysFalse();
@@ -124,9 +118,41 @@ public final class ItemFilterReader implements Function<Map<?, ?>, Predicate<Ite
         }
     }
 
-    private Pattern matchLiteral(String literal) {
-        String regex = Pattern.quote(ChatColor.translateAlternateColorCodes('&', literal));
-        return Pattern.compile("^" + regex + "$");
+    private boolean hasIgnoreFlag(Map<?, ?> configSection, String ignoreFlag) {
+        Object ignoring = configSection.get("ignoring");
+        if (ignoreFlag.equals(ignoring)) {
+            return true;
+        }
+        if (ignoring instanceof Collection<?>) {
+            return ((Collection<?>) ignoring).contains(ignoreFlag);
+        }
+        return false;
+    }
+
+    private Pattern patternFromLiteral(String literal, boolean ignoreCase) {
+        literal = ChatColor.translateAlternateColorCodes('&', literal);
+        int flags = 0;
+        if (ignoreCase) {
+            flags |= Pattern.CASE_INSENSITIVE;
+            flags |= Pattern.UNICODE_CASE;
+        }
+        return Pattern.compile("^" + Pattern.quote(literal) + "$", flags);
+    }
+
+    private Pattern patternFromRegex(String regex, boolean ignoreCase) {
+        int flags = 0;
+        if (ignoreCase) {
+            flags |= Pattern.CASE_INSENSITIVE;
+            flags |= Pattern.UNICODE_CASE;
+        }
+        return Pattern.compile(regex, flags);
+    }
+
+    private String toMultilineStringOrNull(Object value) {
+        if (value instanceof Collection<?>) {
+            return Joiner.on('\n').join((Collection<?>) value);
+        }
+        return null;
     }
 
     private String toStringOrNull(Object object) {
