@@ -6,8 +6,10 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import nl.rutgerkok.betterenderchest.PluginLogger;
+import nl.rutgerkok.betterenderchest.util.MaterialParser;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import com.google.common.base.Function;
@@ -63,10 +65,28 @@ public final class ItemFilterReader implements Function<Map<?, ?>, Predicate<Ite
             return getRuleForName(configSection);
         } else if (key.equals("lore")) {
             return getRuleForLore(configSection);
+        } else if (key.equals("itemType")) {
+            return getRuleForItemType(configSection);
         } else {
             logger.warning("Invalid item rule: key '" + key + "' not recognized");
             return Predicates.alwaysFalse();
         }
+    }
+
+    private Predicate<ItemStack> getRuleForItemType(Map<?, ?> configSection) {
+        String materialString = toStringOrNull(configSection.get("for"));
+        if (materialString == null) {
+            logger.warning("Invalid item rule: no 'for' found");
+            return Predicates.alwaysFalse();
+        }
+
+        Material material = MaterialParser.matchMaterial(materialString);
+        if (material == null) {
+            logger.warning("Invalid item rule: '" + materialString + "' is not a valid material");
+            return Predicates.alwaysFalse();
+        }
+
+        return new ItemTypeFilter(material);
     }
 
     private Predicate<ItemStack> getRuleForLore(Map<?, ?> configSection) {

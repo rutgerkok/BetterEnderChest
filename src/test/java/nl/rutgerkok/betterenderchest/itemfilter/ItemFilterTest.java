@@ -41,12 +41,12 @@ public final class ItemFilterTest {
         section.put("check", "customName");
         section.put("for", "Test");
         section.put("and", ImmutableMap.of(
-                "check", "lore", 
+                "check", "lore",
                 "for", asList("one", "two")));
-        
+
         ItemFilterReader reader = new ItemFilterReader(new TestLogger());
         Predicate<ItemStack> filter = reader.apply(section);
-        
+
         assertTrue(filter.apply(getStackWithNameAndLore("Test", "one", "two")));
         assertFalse(filter.apply(getStackWithNameAndLore("foo", "one", "two")));
         assertFalse(filter.apply(getStackWithNameAndLore("Test", "one", "two", "three")));
@@ -161,12 +161,53 @@ public final class ItemFilterTest {
     }
 
     private ItemStack getStackWithNameAndLore(String name, String... lore) {
-        ItemStack stack = new NameableItemStack(Material.DIAMOND_AXE);
+        return getStackWithNameTypeAndLore(Material.DIAMOND_AXE, name, lore);
+    }
+
+    private ItemStack getStackWithNameTypeAndLore(Material type, String name, String... lore) {
+        ItemStack stack = new NameableItemStack(type, 1);
         ItemMeta meta = stack.getItemMeta();
         meta.setDisplayName(name);
         meta.setLore(asList(lore));
         stack.setItemMeta(meta);
         return stack;
+    }
+
+    @Test
+    public void itemType() {
+        Map<String, Object> section = Maps.newHashMap();
+        section.put("check", "itemType");
+        section.put("for", "diamond");
+        
+        ItemFilterReader reader = new ItemFilterReader(new TestLogger());
+        Predicate<ItemStack> filter = reader.apply(section);
+        assertTrue(filter.apply(new ItemStack(Material.DIAMOND, 1)));
+        assertFalse(filter.apply(new ItemStack(Material.COAL, 1)));
+    }
+
+    @Test
+    public void itemTypeAndCustomNameAndLore() {
+        Map<String, Object> section = Maps.newHashMap();
+        section.put("check", "itemType");
+        section.put("for", "diamond");
+        section.put("and", ImmutableMap.of(
+                "check", "customName",
+                "for", "Shiny Diamond",
+                "ignoring", asList("case", "color"),
+                "and", ImmutableMap.of(
+                        "check", "lore",
+                        "for", asList("Expensive!"))));
+
+        ItemFilterReader reader = new ItemFilterReader(new TestLogger());
+        Predicate<ItemStack> filter = reader.apply(section);
+        assertTrue(filter.apply(getStackWithNameTypeAndLore(
+                Material.DIAMOND,
+                ChatColor.AQUA + "SHINY DIAMOND",
+                "Expensive!")));
+        assertFalse(filter.apply(getStackWithNameTypeAndLore(
+                Material.DIAMOND,
+                ChatColor.AQUA + "SHINY DIAMOND",
+                "wrong lore")));
     }
 
     @Test
