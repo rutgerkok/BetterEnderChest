@@ -20,6 +20,9 @@ public class UpdateableFuture<T> extends AbstractFuture<T> {
 
     /**
      * Creates a new {@link UpdateableFuture}.
+     *
+     * @param <T>
+     *            The result type.
      * 
      * @return The object.
      */

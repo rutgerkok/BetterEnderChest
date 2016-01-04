@@ -34,6 +34,8 @@ public final class BukkitExecutors {
         /**
          * Submits a task to this executor.
          *
+         * @param <T>
+         *            The result type.
          * @param task
          *            The task to run.
          * @return The future result of the task.
