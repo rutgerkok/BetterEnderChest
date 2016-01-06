@@ -5,8 +5,10 @@ import java.util.Set;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.ImmutableInventory;
+import nl.rutgerkok.betterenderchest.Translations;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -27,7 +29,7 @@ public class BetterEnderSlotsHandler implements Listener {
         this.plugin = plugin;
     }
 
-    private boolean canPlaceStack(BetterEnderInventoryHolder holder, ItemStack cursor) {
+    private boolean canPlaceStack(ItemStack cursor) {
         return plugin.isItemAllowedInChests(cursor);
     }
 
@@ -74,10 +76,14 @@ public class BetterEnderSlotsHandler implements Listener {
             return;
         }
         int slotFromBottomRight = inventory.getSize() - event.getSlot();
-        if (!canPlaceStack(holder, event.getCursor()) || isInDisabledSlot(slotFromBottomRight, holder)) {
+        boolean invalidStack = !canPlaceStack(event.getCursor());
+        if (invalidStack || isInDisabledSlot(slotFromBottomRight, holder)) {
             // Prevent item placement
             updateInventoryLater(event.getWhoClicked());
             event.setCancelled(true);
+            if (invalidStack) {
+                sendInvalidItemMessage(event.getWhoClicked());
+            }
         }
     }
 
@@ -110,7 +116,8 @@ public class BetterEnderSlotsHandler implements Listener {
         ItemStack adding = event.getCurrentItem();
 
         // Check for illegal items
-        if (!canPlaceStack(holder, adding)) {
+        if (!canPlaceStack(adding)) {
+            sendInvalidItemMessage(event.getWhoClicked());
             return;
         }
 
@@ -205,7 +212,7 @@ public class BetterEnderSlotsHandler implements Listener {
         }
 
         BetterEnderInventoryHolder holder = BetterEnderInventoryHolder.of(inventory);
-        boolean canPlaceInChest = canPlaceStack(holder, event.getOldCursor());
+        boolean canPlaceInChest = canPlaceStack(event.getOldCursor());
 
         if (canPlaceInChest && holder.getTakeOnlySlots() == 0) {
             // Nothing to prevent
@@ -222,8 +229,18 @@ public class BetterEnderSlotsHandler implements Listener {
             int slotFromBottomRight = event.getView().getTopInventory().getSize() - slot;
             if (!canPlaceInChest || isInDisabledSlot(slotFromBottomRight, holder)) {
                 event.setCancelled(true);
+                if (!canPlaceInChest) {
+                    sendInvalidItemMessage(event.getWhoClicked());
+                }
                 return;
             }
+        }
+    }
+
+    private void sendInvalidItemMessage(HumanEntity humanEntity) {
+        String message = Translations.ITEM_NOT_ALLOWED.toString();
+        if (message.length() > 0) {
+            humanEntity.sendMessage(ChatColor.YELLOW + message);
         }
     }
 
