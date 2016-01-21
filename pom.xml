@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nl.rutgerkok.betterenderchest</groupId>
 	<artifactId>BetterEnderChest</artifactId>
-	<version>2.3.2-SNAPSHOT</version>
+	<version>2.4.0</version>
 	<name>BetterEnderChest</name>
 	<description>CraftBukkit plugin that adds functionality for both players and admins to the Ender Chest.</description>
 	<url>https://github.com/rutgerkok/BetterEnderChest</url>
