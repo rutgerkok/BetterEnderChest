@@ -246,7 +246,7 @@ public class BetterEnderEventHandler implements Listener {
      */
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onPrepareCraftItem(PrepareItemCraftEvent event) {
-        if (event.getRecipe().getResult().getType() != plugin.getChestMaterial()) {
+        if (event.getRecipe().getResult() == null || event.getRecipe().getResult().getType() != plugin.getChestMaterial()) {
             // Something else is being crafted
             return;
         }
