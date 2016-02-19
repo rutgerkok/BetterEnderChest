@@ -70,7 +70,8 @@ public class BetterEnderSlotsHandler implements Listener {
         Inventory inventory = event.getInventory();
         BetterEnderInventoryHolder holder = BetterEnderInventoryHolder.of(inventory);
 
-        boolean cursorOutsideChest = (event.getSlot() != event.getRawSlot() || event.getSlotType().equals(SlotType.OUTSIDE));
+        boolean cursorOutsideChest = (event.getSlot() != event.getRawSlot()
+                || event.getSlotType().equals(SlotType.OUTSIDE));
         if (!isAddingItemToChest(event.getAction(), !cursorOutsideChest)) {
             // Taking items (instead of inserting), ignore
             return;
@@ -122,35 +123,46 @@ public class BetterEnderSlotsHandler implements Listener {
         }
 
         // Now loop through the inventory, place what will fit
-        for (int i = 0; i < inventory.getSize() - holder.getTakeOnlySlots(); i++) {
+        int useableSlotsCount = inventory.getSize() - holder.getTakeOnlySlots();
+
+        // Place on similar stacks first
+        for (int i = 0; i < useableSlotsCount; i++) {
+            ItemStack inSlot = inventory.getItem(i);
+            if (inSlot == null || !inSlot.isSimilar(adding)) {
+                continue;
+            }
+
+            // Found a similar slot
+
+            // Calculate how many will fit
+            int itemsToAdd = Math.min(inventory.getMaxStackSize(), inSlot.getMaxStackSize()) - inSlot.getAmount();
+            // Limit that by how many we actually have
+            itemsToAdd = Math.min(adding.getAmount(), itemsToAdd);
+
+            // Add that to the slot
+            if (itemsToAdd > 0) {
+                inSlot.setAmount(inSlot.getAmount() + itemsToAdd);
+                inventory.setItem(i, inSlot);
+            }
+
+            // Substract that from the item to add
+            if (itemsToAdd >= adding.getAmount()) {
+                // We're done!
+                event.setCurrentItem(new ItemStack(Material.AIR, 0));
+                return;
+            } else {
+                adding.setAmount(adding.getAmount() - itemsToAdd);
+            }
+        }
+
+        // Place on empty slots seconds
+        for (int i = 0; i < useableSlotsCount; i++) {
             ItemStack inSlot = inventory.getItem(i);
             if (inSlot == null || inSlot.getType().equals(Material.AIR)) {
                 // Found an empty slot, place the stack here
                 inventory.setItem(i, adding);
                 event.setCurrentItem(new ItemStack(Material.AIR, 0));
                 return;
-            }
-            if (inSlot.isSimilar(adding)) {
-                // Already some of the same type in the slot
-                // Calculate how many will fit
-                int itemsToAdd = Math.min(inventory.getMaxStackSize(), inSlot.getMaxStackSize()) - inSlot.getAmount();
-                // Limit that by how many we actually have
-                itemsToAdd = Math.min(adding.getAmount(), itemsToAdd);
-
-                // Add that to the slot
-                if (itemsToAdd > 0) {
-                    inSlot.setAmount(inSlot.getAmount() + itemsToAdd);
-                    inventory.setItem(i, inSlot);
-                }
-
-                // Substract that from the item to add
-                if (itemsToAdd >= adding.getAmount()) {
-                    // We're done!
-                    event.setCurrentItem(new ItemStack(Material.AIR, 0));
-                    return;
-                } else {
-                    adding.setAmount(adding.getAmount() - itemsToAdd);
-                }
             }
         }
 
@@ -160,26 +172,46 @@ public class BetterEnderSlotsHandler implements Listener {
 
     private boolean isAddingItemToChest(InventoryAction action, boolean cursorInChest) {
         switch (action) {
-            case CLONE_STACK: return cursorInChest;
-            case COLLECT_TO_CURSOR: return false;
-            case DROP_ALL_CURSOR: return false;
-            case DROP_ALL_SLOT: return false;
-            case DROP_ONE_CURSOR: return false;
-            case DROP_ONE_SLOT: return false;
-            case HOTBAR_MOVE_AND_READD: return true;
-            case HOTBAR_SWAP: return true;
-            case MOVE_TO_OTHER_INVENTORY: return cursorInChest;
-            case NOTHING: return false;
-            case PICKUP_ALL: return false;
-            case PICKUP_HALF: return false;
-            case PICKUP_ONE: return false;
-            case PICKUP_SOME: return false;
-            case PLACE_ALL: return cursorInChest;
-            case PLACE_ONE: return cursorInChest;
-            case PLACE_SOME: return cursorInChest;
-            case SWAP_WITH_CURSOR: return true;
-            case UNKNOWN: return true; // when in doubt - do the safest thing
-            default: return true; // when in doubt - do the safest thing
+            case CLONE_STACK:
+                return cursorInChest;
+            case COLLECT_TO_CURSOR:
+                return false;
+            case DROP_ALL_CURSOR:
+                return false;
+            case DROP_ALL_SLOT:
+                return false;
+            case DROP_ONE_CURSOR:
+                return false;
+            case DROP_ONE_SLOT:
+                return false;
+            case HOTBAR_MOVE_AND_READD:
+                return true;
+            case HOTBAR_SWAP:
+                return true;
+            case MOVE_TO_OTHER_INVENTORY:
+                return cursorInChest;
+            case NOTHING:
+                return false;
+            case PICKUP_ALL:
+                return false;
+            case PICKUP_HALF:
+                return false;
+            case PICKUP_ONE:
+                return false;
+            case PICKUP_SOME:
+                return false;
+            case PLACE_ALL:
+                return cursorInChest;
+            case PLACE_ONE:
+                return cursorInChest;
+            case PLACE_SOME:
+                return cursorInChest;
+            case SWAP_WITH_CURSOR:
+                return true;
+            case UNKNOWN:
+                return true; // when in doubt - do the safest thing
+            default:
+                return true; // when in doubt - do the safest thing
         }
     }
 
@@ -219,7 +251,8 @@ public class BetterEnderSlotsHandler implements Listener {
             return;
         }
 
-        // Check for illegal slots (when canPlaceInChest == true, all chest slots all illegal)
+        // Check for illegal slots (when canPlaceInChest == true, all chest
+        // slots all illegal)
         Set<Integer> allSlots = event.getRawSlots();
         for (int slot : allSlots) {
             if (slot != event.getView().convertSlot(slot)) {
