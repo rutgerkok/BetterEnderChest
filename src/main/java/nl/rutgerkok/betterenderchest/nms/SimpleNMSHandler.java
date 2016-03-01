@@ -11,22 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.MinecraftServer;
-import net.minecraft.server.v1_8_R3.NBTBase;
-import net.minecraft.server.v1_8_R3.NBTBase.NBTNumber;
-import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
-import net.minecraft.server.v1_8_R3.NBTTagByteArray;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.NBTTagDouble;
-import net.minecraft.server.v1_8_R3.NBTTagInt;
-import net.minecraft.server.v1_8_R3.NBTTagIntArray;
-import net.minecraft.server.v1_8_R3.NBTTagList;
-import net.minecraft.server.v1_8_R3.NBTTagLong;
-import net.minecraft.server.v1_8_R3.NBTTagString;
-import net.minecraft.server.v1_8_R3.TileEntity;
-import net.minecraft.server.v1_8_R3.TileEntityEnderChest;
-
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.ChestRestrictions;
 import nl.rutgerkok.betterenderchest.WorldGroup;
@@ -35,14 +19,30 @@ import nl.rutgerkok.betterenderchest.io.SaveEntry;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_9_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_9_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import com.google.common.collect.ImmutableMap;
+
+import net.minecraft.server.v1_9_R1.BlockPosition;
+import net.minecraft.server.v1_9_R1.MinecraftServer;
+import net.minecraft.server.v1_9_R1.NBTBase;
+import net.minecraft.server.v1_9_R1.NBTBase.NBTNumber;
+import net.minecraft.server.v1_9_R1.NBTCompressedStreamTools;
+import net.minecraft.server.v1_9_R1.NBTTagByteArray;
+import net.minecraft.server.v1_9_R1.NBTTagCompound;
+import net.minecraft.server.v1_9_R1.NBTTagDouble;
+import net.minecraft.server.v1_9_R1.NBTTagInt;
+import net.minecraft.server.v1_9_R1.NBTTagIntArray;
+import net.minecraft.server.v1_9_R1.NBTTagList;
+import net.minecraft.server.v1_9_R1.NBTTagLong;
+import net.minecraft.server.v1_9_R1.NBTTagString;
+import net.minecraft.server.v1_9_R1.TileEntity;
+import net.minecraft.server.v1_9_R1.TileEntityEnderChest;
 
 public class SimpleNMSHandler extends NMSHandler {
     static class JSONSimpleTypes {
@@ -211,17 +211,17 @@ public class SimpleNMSHandler extends NMSHandler {
          *             If the tag type is unknown.
          */
         private static final Object tagInNBTListToJavaType(NBTTagList tagList, int position) throws IOException {
-            switch (tagList.f()) {
+            switch (tagList.d()) {
                 case TagType.COMPOUND:
                     NBTTagCompound compoundValue = tagList.get(position);
                     return nbtTagToJavaType(compoundValue);
                 case TagType.INT_ARRAY:
-                    return boxIntegers(tagList.c(position));
+                    return boxIntegers(tagList.d(position));
                 case TagType.DOUBLE:
-                    double doubleValue = tagList.d(position);
+                    double doubleValue = tagList.e(position);
                     return doubleValue;
                 case TagType.FLOAT:
-                    float floatValue = tagList.e(position);
+                    float floatValue = tagList.f(position);
                     return floatValue;
                 case TagType.STRING:
                     String stringValue = tagList.getString(position);
@@ -338,16 +338,6 @@ public class SimpleNMSHandler extends NMSHandler {
         }
     }
 
-    private boolean isItemInsertionAllowed(NBTTagCompound baseTag) {
-        if (baseTag.hasKey("ItemInsertion")) {
-            return baseTag.getBoolean("ItemInsertion");
-        } else {
-            // Return true. This value doesn't harm anything and will be
-            // corrected when the owner opens his/her own chest
-            return true;
-        }
-    }
-
     @Override
     public String getName() {
         return getClass().getSimpleName();
@@ -384,6 +374,16 @@ public class SimpleNMSHandler extends NMSHandler {
         }
     }
 
+    private boolean isItemInsertionAllowed(NBTTagCompound baseTag) {
+        if (baseTag.hasKey("ItemInsertion")) {
+            return baseTag.getBoolean("ItemInsertion");
+        } else {
+            // Return true. This value doesn't harm anything and will be
+            // corrected when the owner opens his/her own chest
+            return true;
+        }
+    }
+
     @Override
     public Inventory loadNBTInventoryFromFile(File file, ChestOwner chestOwner, WorldGroup worldGroup, String inventoryTagName) throws IOException {
         FileInputStream inputStream = null;
@@ -417,7 +417,8 @@ public class SimpleNMSHandler extends NMSHandler {
         for (int i = 0; i < inventoryTag.size(); i++) {
             NBTTagCompound item = inventoryTag.get(i);
             int slot = item.getByte("Slot") & 255;
-            inventory.setItem(slot, CraftItemStack.asCraftMirror(net.minecraft.server.v1_8_R3.ItemStack.createStack(item)));
+            inventory.setItem(slot,
+                    CraftItemStack.asCraftMirror(net.minecraft.server.v1_9_R1.ItemStack.createStack(item)));
         }
 
         // Return the inventory

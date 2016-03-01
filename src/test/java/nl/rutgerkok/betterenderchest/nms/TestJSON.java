@@ -5,8 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.Map;
 
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-
 import nl.rutgerkok.betterenderchest.nms.SimpleNMSHandler.JSONSimpleTypes;
 
 import org.json.simple.JSONObject;
@@ -14,27 +12,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import net.minecraft.server.v1_9_R1.NBTTagCompound;
+
 @RunWith(JUnit4.class)
 public class TestJSON {
-
-    /**
-     * Encodes to JSON and decodes. Useful to test whether Minecraft's NBT
-     * representation is correctly preserved as JSON.
-     *
-     * @param tagCompound
-     *            The tag to encode.
-     * @return The decoded tag.
-     * @throws IOException
-     *             Hopefully never.
-     */
-    private NBTTagCompound roundTrip(NBTTagCompound tagCompound) throws IOException {
-        // Encode
-        String jsonString = toJSON(tagCompound);
-
-        // Decode and assert
-        NBTTagCompound tagDeserialized = JSONSimpleTypes.toTag(jsonString);
-        return tagDeserialized;
-    }
 
     /**
      * Decodes the JSON and encodes. Useful for testing whether JSON is
@@ -56,9 +37,54 @@ public class TestJSON {
         return toJSON(compoundTag);
     }
 
-    private String toJSON(NBTTagCompound tagCompound) throws IOException {
-        Map<String, Object> javaTypes = JSONSimpleTypes.toMap(tagCompound);
-        return JSONObject.toJSONString(javaTypes);
+    /**
+     * Encodes to JSON and decodes. Useful to test whether Minecraft's NBT
+     * representation is correctly preserved as JSON.
+     *
+     * @param tagCompound
+     *            The tag to encode.
+     * @return The decoded tag.
+     * @throws IOException
+     *             Hopefully never.
+     */
+    private NBTTagCompound roundTrip(NBTTagCompound tagCompound) throws IOException {
+        // Encode
+        String jsonString = toJSON(tagCompound);
+
+        // Decode and assert
+        NBTTagCompound tagDeserialized = JSONSimpleTypes.toTag(jsonString);
+        return tagDeserialized;
+    }
+
+    @Test
+    public void testEmptyLists() throws IOException {
+        // No idea what type the list is, so getting it as int[] or List<?>
+        // must both work
+        // This can be achieved in Minecraft's NBTTagCompound simply by not
+        // deserializing it
+        String json = "{\"EmptyList\":[]}";
+        NBTTagCompound tagCompound = JSONSimpleTypes.toTag(json);
+
+        tagCompound.getIntArray("EmptyList"); // Must work
+        tagCompound.getList("EmptyList", 10); // Must work too
+    }
+
+    @Test
+    public void testFloatLists() throws IOException {
+        String json = "{\"FloatList\":[0.0,1.0,2.0]}";
+
+        // Must be reserialized *exactly* the same, which is not possible if
+        // the number is read as an int array (used to be the case in old
+        // versions of BetterEnderChest)
+        assertEquals(json, reserialize(json));
+    }
+
+    @Test
+    public void testIntValue() throws IOException {
+        // Must be reserialized *exactly* the same, which is not possible if
+        // the number is read as a float or double
+        String json = "{\"IntValue\":1}";
+        assertEquals(json, reserialize(json));
     }
 
     @Test
@@ -99,16 +125,6 @@ public class TestJSON {
     }
 
     @Test
-    public void testPortableHorsesPlugin() throws IOException {
-        // BetterEnderChest used to have problems with the data from
-        // the Portable Horses plugin
-        String json = "{\"Inventory\":[{\"id\":329,\"Damage\":0,\"Count\":1,\"tag\":{\"display\":{\"Lore\":[\"�2�5�7�f�lHorse\",\"�f�lCreamy\",\"�fHP: �r�729�f\\/�729\",\"�fJump: �r�73,62\",\"�fSpeed: �r�77,23\",\"�0H4sIAAAAAAAAAF1Sy24TMRS900zSTniIPhALhCgSEqtUqdKiZlG1eRSlUkKrNO0GNs7MTWImYw+2\\nh7YqX8COb6jYgsSKFZ\\/AFoREl4jP4Hqm00q15JXPOT73nFsG8OBWW8m4NWHCR10EgOLm56Wzm7cA\\npQFGMSoCLHlQbhij+DAxqMuWMgfuSxYhzI9RoOL+SsROOsimZlICt8k0bm9CdnLkwxwZCumHQ+aH\\nfdRcG2vjkgNwg3P\\/Sl2+wwiFOYgRg0v01o+fz+H365kr9GKOHsnpVB73mRjnytvVTNgDrycDPuKo\\n0jmcnLtA6EBGyzpmx2J5KEWiXfAOD3fbXWTafKzsnl2o+loBvD3KhBkuhaWXoNSIZCLM1nnjz\\/uv\\nvdCFOUvqSW2+nH\\/68PhVc+Z6nIWJVBpX3iRRfGAUivFVWlt\\/v108e\\/L9FxSg0BinQThwp8N0H2Ml\\ng8THgFTKrUQbGaVahHQHp3EKnYFSlj08KsCDZhKG3Kz02ElbRqgN93O7QRGKFvii8c\\/qu01Fsg7M\\nX8secc2HUyRFWzh1NOD2LwdutyYkhUHHTkDPXhuZmeSv7oC4DoW78zbhsS0qXZI08iLcawy1VLE1\\nkYWVeZ7rJMpkCrRsu6JLHWeDexRBl5YkHdrbO6ZWbajwdLSxzmpYr1fYaq1eWasFowqrr29UNmrV\\nqr9ardbWRquUW4uJfe6Hh3FXSkN6i\\/tUN60a0qr1kSzS3I4Ds7baCX1SgNkjpjhLnVGnnp8oqsd0\\n9vMtduDuDqUoxh12qm0uAP8BPKRxOUsDAAA=\"],\"Name\":\"Portable Horse\"}},\"Slot\":0}],\"DisabledSlots\":0,\"Rows\":4,\"OwnerName\":\"Wrong7\"}";
-
-        NBTTagCompound tagCompound = JSONSimpleTypes.toTag(json);
-        assertEquals(tagCompound, roundTrip(tagCompound));
-    }
-
-    @Test
     public void testNullValues() throws IOException {
         // BetterEnderChest used to have problems with nulls
         String json = "{\"List\":[\"foo\", \"bar\", null], \"NullValue\": null}";
@@ -118,33 +134,17 @@ public class TestJSON {
     }
 
     @Test
-    public void testFloatLists() throws IOException {
-        String json = "{\"FloatList\":[0.0,1.0,2.0]}";
+    public void testPortableHorsesPlugin() throws IOException {
+        // BetterEnderChest used to have problems with the data from
+        // the Portable Horses plugin
+        String json = "{\"Inventory\":[{\"id\":329,\"Damage\":0,\"Count\":1,\"tag\":{\"display\":{\"Lore\":[\"�2�5�7�f�lHorse\",\"�f�lCreamy\",\"�fHP: �r�729�f\\/�729\",\"�fJump: �r�73,62\",\"�fSpeed: �r�77,23\",\"�0H4sIAAAAAAAAAF1Sy24TMRS900zSTniIPhALhCgSEqtUqdKiZlG1eRSlUkKrNO0GNs7MTWImYw+2\\nh7YqX8COb6jYgsSKFZ\\/AFoREl4jP4Hqm00q15JXPOT73nFsG8OBWW8m4NWHCR10EgOLm56Wzm7cA\\npQFGMSoCLHlQbhij+DAxqMuWMgfuSxYhzI9RoOL+SsROOsimZlICt8k0bm9CdnLkwxwZCumHQ+aH\\nfdRcG2vjkgNwg3P\\/Sl2+wwiFOYgRg0v01o+fz+H365kr9GKOHsnpVB73mRjnytvVTNgDrycDPuKo\\n0jmcnLtA6EBGyzpmx2J5KEWiXfAOD3fbXWTafKzsnl2o+loBvD3KhBkuhaWXoNSIZCLM1nnjz\\/uv\\nvdCFOUvqSW2+nH\\/68PhVc+Z6nIWJVBpX3iRRfGAUivFVWlt\\/v108e\\/L9FxSg0BinQThwp8N0H2Ml\\ng8THgFTKrUQbGaVahHQHp3EKnYFSlj08KsCDZhKG3Kz02ElbRqgN93O7QRGKFvii8c\\/qu01Fsg7M\\nX8secc2HUyRFWzh1NOD2LwdutyYkhUHHTkDPXhuZmeSv7oC4DoW78zbhsS0qXZI08iLcawy1VLE1\\nkYWVeZ7rJMpkCrRsu6JLHWeDexRBl5YkHdrbO6ZWbajwdLSxzmpYr1fYaq1eWasFowqrr29UNmrV\\nqr9ardbWRquUW4uJfe6Hh3FXSkN6i\\/tUN60a0qr1kSzS3I4Ds7baCX1SgNkjpjhLnVGnnp8oqsd0\\n9vMtduDuDqUoxh12qm0uAP8BPKRxOUsDAAA=\"],\"Name\":\"Portable Horse\"}},\"Slot\":0}],\"DisabledSlots\":0,\"Rows\":4,\"OwnerName\":\"Wrong7\"}";
 
-        // Must be reserialized *exactly* the same, which is not possible if
-        // the number is read as an int array (used to be the case in old
-        // versions of BetterEnderChest)
-        assertEquals(json, reserialize(json));
-    }
-
-    @Test
-    public void testIntValue() throws IOException {
-        // Must be reserialized *exactly* the same, which is not possible if
-        // the number is read as a float or double
-        String json = "{\"IntValue\":1}";
-        assertEquals(json, reserialize(json));
-    }
-
-    @Test
-    public void testEmptyLists() throws IOException {
-        // No idea what type the list is, so getting it as int[] or List<?>
-        // must both work
-        // This can be achieved in Minecraft's NBTTagCompound simply by not
-        // deserializing it
-        String json = "{\"EmptyList\":[]}";
         NBTTagCompound tagCompound = JSONSimpleTypes.toTag(json);
+        assertEquals(tagCompound, roundTrip(tagCompound));
+    }
 
-        tagCompound.getIntArray("EmptyList"); // Must work
-        tagCompound.getList("EmptyList", 10); // Must work too
+    private String toJSON(NBTTagCompound tagCompound) throws IOException {
+        Map<String, Object> javaTypes = JSONSimpleTypes.toMap(tagCompound);
+        return JSONObject.toJSONString(javaTypes);
     }
 }
