@@ -143,7 +143,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             // Creative mode
             return chestDropCreative;
         }
-        if (player.getItemInHand().getEnchantments().containsKey(Enchantment.SILK_TOUCH)) {
+        ItemStack inHand = player.getInventory().getItemInMainHand();
+        if (inHand.getEnchantments().containsKey(Enchantment.SILK_TOUCH)) {
             // Silk touch
             return chestDropSilkTouch;
         }

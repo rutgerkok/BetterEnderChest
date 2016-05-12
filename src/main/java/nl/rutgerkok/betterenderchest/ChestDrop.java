@@ -22,7 +22,8 @@ public enum ChestDrop {
             dropCreative(event, plugin);
             return;
         }
-        if (event.getPlayer().getItemInHand().getEnchantments().containsKey(Enchantment.SILK_TOUCH)) {
+        ItemStack inHand = event.getPlayer().getInventory().getItemInMainHand();
+        if (inHand.getEnchantments().containsKey(Enchantment.SILK_TOUCH)) {
             // Silk touch
             dropSilkTouch(event);
             return;

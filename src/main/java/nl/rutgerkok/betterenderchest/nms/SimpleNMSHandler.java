@@ -19,8 +19,8 @@ import nl.rutgerkok.betterenderchest.io.SaveEntry;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_9_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_9_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_9_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_9_R2.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONObject;
@@ -28,21 +28,21 @@ import org.json.simple.parser.JSONParser;
 
 import com.google.common.collect.ImmutableMap;
 
-import net.minecraft.server.v1_9_R1.BlockPosition;
-import net.minecraft.server.v1_9_R1.MinecraftServer;
-import net.minecraft.server.v1_9_R1.NBTBase;
-import net.minecraft.server.v1_9_R1.NBTBase.NBTNumber;
-import net.minecraft.server.v1_9_R1.NBTCompressedStreamTools;
-import net.minecraft.server.v1_9_R1.NBTTagByteArray;
-import net.minecraft.server.v1_9_R1.NBTTagCompound;
-import net.minecraft.server.v1_9_R1.NBTTagDouble;
-import net.minecraft.server.v1_9_R1.NBTTagInt;
-import net.minecraft.server.v1_9_R1.NBTTagIntArray;
-import net.minecraft.server.v1_9_R1.NBTTagList;
-import net.minecraft.server.v1_9_R1.NBTTagLong;
-import net.minecraft.server.v1_9_R1.NBTTagString;
-import net.minecraft.server.v1_9_R1.TileEntity;
-import net.minecraft.server.v1_9_R1.TileEntityEnderChest;
+import net.minecraft.server.v1_9_R2.BlockPosition;
+import net.minecraft.server.v1_9_R2.Blocks;
+import net.minecraft.server.v1_9_R2.NBTBase;
+import net.minecraft.server.v1_9_R2.NBTBase.NBTNumber;
+import net.minecraft.server.v1_9_R2.NBTCompressedStreamTools;
+import net.minecraft.server.v1_9_R2.NBTTagByteArray;
+import net.minecraft.server.v1_9_R2.NBTTagCompound;
+import net.minecraft.server.v1_9_R2.NBTTagDouble;
+import net.minecraft.server.v1_9_R2.NBTTagInt;
+import net.minecraft.server.v1_9_R2.NBTTagIntArray;
+import net.minecraft.server.v1_9_R2.NBTTagList;
+import net.minecraft.server.v1_9_R2.NBTTagLong;
+import net.minecraft.server.v1_9_R2.NBTTagString;
+import net.minecraft.server.v1_9_R2.TileEntity;
+import net.minecraft.server.v1_9_R2.TileEntityEnderChest;
 
 public class SimpleNMSHandler extends NMSHandler {
     static class JSONSimpleTypes {
@@ -323,7 +323,7 @@ public class SimpleNMSHandler extends NMSHandler {
         BlockPosition blockPos = toBlockPosition(loc);
         TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(blockPos);
         if (tileEntity instanceof TileEntityEnderChest) {
-            ((TileEntityEnderChest) tileEntity).d(); // .close()
+            ((TileEntityEnderChest) tileEntity).e(); // .close()
         }
     }
 
@@ -367,7 +367,7 @@ public class SimpleNMSHandler extends NMSHandler {
     public boolean isAvailable() {
         try {
             // Test whether nms access works.
-            MinecraftServer.getServer();
+            Blocks.WOOL.getName();
             return true;
         } catch (Throwable t) {
             return false;
@@ -418,7 +418,7 @@ public class SimpleNMSHandler extends NMSHandler {
             NBTTagCompound item = inventoryTag.get(i);
             int slot = item.getByte("Slot") & 255;
             inventory.setItem(slot,
-                    CraftItemStack.asCraftMirror(net.minecraft.server.v1_9_R1.ItemStack.createStack(item)));
+                    CraftItemStack.asCraftMirror(net.minecraft.server.v1_9_R2.ItemStack.createStack(item)));
         }
 
         // Return the inventory
@@ -430,7 +430,7 @@ public class SimpleNMSHandler extends NMSHandler {
         BlockPosition blockPos = toBlockPosition(loc);
         TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(blockPos);
         if (tileEntity instanceof TileEntityEnderChest) {
-            ((TileEntityEnderChest) tileEntity).b(); // .open()
+            ((TileEntityEnderChest) tileEntity).d(); // .open()
         }
     }
 
