@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import net.minecraft.server.v1_9_R2.NBTTagCompound;
+import net.minecraft.server.v1_10_R1.NBTTagCompound;
 
 @RunWith(JUnit4.class)
 public class TestJSON {
@@ -30,7 +30,7 @@ public class TestJSON {
      *            JSON to decode and encode.
      * @return The JSON after it has been decoded and encoded.
      * @throws IOException
-     *             When a decoding error occurs.
+     *             When an error occurs.
      */
     private String reserialize(String json) throws IOException {
         NBTTagCompound compoundTag = JSONSimpleTypes.toTag(json);

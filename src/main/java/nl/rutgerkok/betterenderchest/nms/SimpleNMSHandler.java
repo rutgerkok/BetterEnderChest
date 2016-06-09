@@ -19,8 +19,8 @@ import nl.rutgerkok.betterenderchest.io.SaveEntry;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_9_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_9_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_10_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONObject;
@@ -28,21 +28,23 @@ import org.json.simple.parser.JSONParser;
 
 import com.google.common.collect.ImmutableMap;
 
-import net.minecraft.server.v1_9_R2.BlockPosition;
-import net.minecraft.server.v1_9_R2.Blocks;
-import net.minecraft.server.v1_9_R2.NBTBase;
-import net.minecraft.server.v1_9_R2.NBTBase.NBTNumber;
-import net.minecraft.server.v1_9_R2.NBTCompressedStreamTools;
-import net.minecraft.server.v1_9_R2.NBTTagByteArray;
-import net.minecraft.server.v1_9_R2.NBTTagCompound;
-import net.minecraft.server.v1_9_R2.NBTTagDouble;
-import net.minecraft.server.v1_9_R2.NBTTagInt;
-import net.minecraft.server.v1_9_R2.NBTTagIntArray;
-import net.minecraft.server.v1_9_R2.NBTTagList;
-import net.minecraft.server.v1_9_R2.NBTTagLong;
-import net.minecraft.server.v1_9_R2.NBTTagString;
-import net.minecraft.server.v1_9_R2.TileEntity;
-import net.minecraft.server.v1_9_R2.TileEntityEnderChest;
+import net.minecraft.server.v1_10_R1.BlockPosition;
+import net.minecraft.server.v1_10_R1.Blocks;
+import net.minecraft.server.v1_10_R1.NBTBase;
+import net.minecraft.server.v1_10_R1.NBTCompressedStreamTools;
+import net.minecraft.server.v1_10_R1.NBTTagByte;
+import net.minecraft.server.v1_10_R1.NBTTagByteArray;
+import net.minecraft.server.v1_10_R1.NBTTagCompound;
+import net.minecraft.server.v1_10_R1.NBTTagDouble;
+import net.minecraft.server.v1_10_R1.NBTTagFloat;
+import net.minecraft.server.v1_10_R1.NBTTagInt;
+import net.minecraft.server.v1_10_R1.NBTTagIntArray;
+import net.minecraft.server.v1_10_R1.NBTTagList;
+import net.minecraft.server.v1_10_R1.NBTTagLong;
+import net.minecraft.server.v1_10_R1.NBTTagShort;
+import net.minecraft.server.v1_10_R1.NBTTagString;
+import net.minecraft.server.v1_10_R1.TileEntity;
+import net.minecraft.server.v1_10_R1.TileEntityEnderChest;
 
 public class SimpleNMSHandler extends NMSHandler {
     static class JSONSimpleTypes {
@@ -173,26 +175,32 @@ public class SimpleNMSHandler extends NMSHandler {
                     objects.add(tagInNBTListToJavaType(listTag, i));
                 }
                 return objects;
-            } else if (tag instanceof NBTNumber) {
-                // Check for whole or fractional number (we don't care about
-                // the difference between int/long or double/float, in JSON
-                // they look the same)
-                NBTNumber nbtNumber = (NBTNumber) tag;
-                if (nbtNumber instanceof NBTTagInt || nbtNumber instanceof NBTTagLong) {
-                    // Whole number
-                    return nbtNumber.c();
-                } else {
-                    // Fractional number
-                    return nbtNumber.g();
-                }
+            } else if (tag instanceof NBTTagByte) {
+                byte value = ((NBTTagByte) tag).g();
+                return value;
+            } else if (tag instanceof NBTTagDouble) {
+                double value = ((NBTTagDouble) tag).h();
+                return value;
+            } else if (tag instanceof NBTTagFloat) {
+                float value = ((NBTTagFloat) tag).i();
+                return value;
+            } else if (tag instanceof NBTTagInt) {
+                int value = ((NBTTagInt) tag).e();
+                return value;
+            } else if (tag instanceof NBTTagLong) {
+                long value = ((NBTTagLong) tag).d();
+                return value;
+            } else if (tag instanceof NBTTagShort) {
+                short value = ((NBTTagShort) tag).f();
+                return value;
             } else if (tag instanceof NBTTagString) {
-                String value = ((NBTTagString) tag).a_();
+                String value = ((NBTTagString) tag).c_();
                 return value;
             } else if (tag instanceof NBTTagByteArray) {
                 // Byte arrays are placed in a map, see comment for BYTE_ARRAY
                 return ImmutableMap.of(BYTE_ARRAY, boxBytes(((NBTTagByteArray) tag).c()));
             } else if (tag instanceof NBTTagIntArray) {
-                return boxIntegers(((NBTTagIntArray) tag).c());
+                return boxIntegers(((NBTTagIntArray) tag).d());
             }
 
             throw new IOException("Unknown tag: " + tag);
@@ -211,7 +219,7 @@ public class SimpleNMSHandler extends NMSHandler {
          *             If the tag type is unknown.
          */
         private static final Object tagInNBTListToJavaType(NBTTagList tagList, int position) throws IOException {
-            switch (tagList.d()) {
+            switch (tagList.g()) {
                 case TagType.COMPOUND:
                     NBTTagCompound compoundValue = tagList.get(position);
                     return nbtTagToJavaType(compoundValue);
@@ -418,7 +426,7 @@ public class SimpleNMSHandler extends NMSHandler {
             NBTTagCompound item = inventoryTag.get(i);
             int slot = item.getByte("Slot") & 255;
             inventory.setItem(slot,
-                    CraftItemStack.asCraftMirror(net.minecraft.server.v1_9_R2.ItemStack.createStack(item)));
+                    CraftItemStack.asCraftMirror(net.minecraft.server.v1_10_R1.ItemStack.createStack(item)));
         }
 
         // Return the inventory
