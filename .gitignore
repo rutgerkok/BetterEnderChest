@@ -18,6 +18,8 @@ local.properties
 .classpath
 .settings/
 .loadpath
+.idea/
+BetterEnderChest.iml
 
 # Locally stored "Eclipse launch configurations"
 *.launch
@@ -43,4 +45,5 @@ Desktop.ini
 
 # Mac crap
 .DS_Store
+
 

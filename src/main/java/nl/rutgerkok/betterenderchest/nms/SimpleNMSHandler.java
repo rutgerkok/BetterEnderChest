@@ -19,8 +19,8 @@ import nl.rutgerkok.betterenderchest.io.SaveEntry;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_10_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_10_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_11_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_11_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONObject;
@@ -28,23 +28,23 @@ import org.json.simple.parser.JSONParser;
 
 import com.google.common.collect.ImmutableMap;
 
-import net.minecraft.server.v1_10_R1.BlockPosition;
-import net.minecraft.server.v1_10_R1.Blocks;
-import net.minecraft.server.v1_10_R1.NBTBase;
-import net.minecraft.server.v1_10_R1.NBTCompressedStreamTools;
-import net.minecraft.server.v1_10_R1.NBTTagByte;
-import net.minecraft.server.v1_10_R1.NBTTagByteArray;
-import net.minecraft.server.v1_10_R1.NBTTagCompound;
-import net.minecraft.server.v1_10_R1.NBTTagDouble;
-import net.minecraft.server.v1_10_R1.NBTTagFloat;
-import net.minecraft.server.v1_10_R1.NBTTagInt;
-import net.minecraft.server.v1_10_R1.NBTTagIntArray;
-import net.minecraft.server.v1_10_R1.NBTTagList;
-import net.minecraft.server.v1_10_R1.NBTTagLong;
-import net.minecraft.server.v1_10_R1.NBTTagShort;
-import net.minecraft.server.v1_10_R1.NBTTagString;
-import net.minecraft.server.v1_10_R1.TileEntity;
-import net.minecraft.server.v1_10_R1.TileEntityEnderChest;
+import net.minecraft.server.v1_11_R1.BlockPosition;
+import net.minecraft.server.v1_11_R1.Blocks;
+import net.minecraft.server.v1_11_R1.NBTBase;
+import net.minecraft.server.v1_11_R1.NBTCompressedStreamTools;
+import net.minecraft.server.v1_11_R1.NBTTagByte;
+import net.minecraft.server.v1_11_R1.NBTTagByteArray;
+import net.minecraft.server.v1_11_R1.NBTTagCompound;
+import net.minecraft.server.v1_11_R1.NBTTagDouble;
+import net.minecraft.server.v1_11_R1.NBTTagFloat;
+import net.minecraft.server.v1_11_R1.NBTTagInt;
+import net.minecraft.server.v1_11_R1.NBTTagIntArray;
+import net.minecraft.server.v1_11_R1.NBTTagList;
+import net.minecraft.server.v1_11_R1.NBTTagLong;
+import net.minecraft.server.v1_11_R1.NBTTagShort;
+import net.minecraft.server.v1_11_R1.NBTTagString;
+import net.minecraft.server.v1_11_R1.TileEntity;
+import net.minecraft.server.v1_11_R1.TileEntityEnderChest;
 
 public class SimpleNMSHandler extends NMSHandler {
     static class JSONSimpleTypes {
@@ -58,7 +58,7 @@ public class SimpleNMSHandler extends NMSHandler {
 
         /**
          * Boxes all the values of the array for consumption by JSONSimple.
-         * 
+         *
          * @param byteArray
          *            Array to box.
          * @return The boxed array.
@@ -73,7 +73,7 @@ public class SimpleNMSHandler extends NMSHandler {
 
         /**
          * Boxes all the values of the array for consumption by JSONSimple.
-         * 
+         *
          * @param intArray
          *            Array to box.
          * @return The boxed array.
@@ -179,7 +179,7 @@ public class SimpleNMSHandler extends NMSHandler {
                 byte value = ((NBTTagByte) tag).g();
                 return value;
             } else if (tag instanceof NBTTagDouble) {
-                double value = ((NBTTagDouble) tag).h();
+                double value = ((NBTTagDouble) tag).asDouble();
                 return value;
             } else if (tag instanceof NBTTagFloat) {
                 float value = ((NBTTagFloat) tag).i();
@@ -209,7 +209,7 @@ public class SimpleNMSHandler extends NMSHandler {
         /**
          * Converts the object at the specified position in the list to a Map,
          * List, double, float or String.
-         * 
+         *
          * @param tagList
          *            The list to convert an element from.
          * @param position
@@ -241,7 +241,7 @@ public class SimpleNMSHandler extends NMSHandler {
         /**
          * Converts the compound tag to a map. All values in the tag will also
          * have their tags converted to String//primitives/maps/Lists.
-         * 
+         *
          * @param tagCompound
          *            The compound tag.
          * @return The map.
@@ -263,7 +263,7 @@ public class SimpleNMSHandler extends NMSHandler {
         /**
          * Turns the given json-formatted string back into a NBTTagCompound.
          * Mojangson formatting is also accepted.
-         * 
+         *
          * @param jsonString
          *            The json string to parse.
          * @return The parsed json string.
@@ -426,7 +426,7 @@ public class SimpleNMSHandler extends NMSHandler {
             NBTTagCompound item = inventoryTag.get(i);
             int slot = item.getByte("Slot") & 255;
             inventory.setItem(slot,
-                    CraftItemStack.asCraftMirror(net.minecraft.server.v1_10_R1.ItemStack.createStack(item)));
+                    CraftItemStack.asCraftMirror(new net.minecraft.server.v1_11_R1.ItemStack(item)));
         }
 
         // Return the inventory
@@ -438,7 +438,7 @@ public class SimpleNMSHandler extends NMSHandler {
         BlockPosition blockPos = toBlockPosition(loc);
         TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(blockPos);
         if (tileEntity instanceof TileEntityEnderChest) {
-            ((TileEntityEnderChest) tileEntity).d(); // .open()
+            ((TileEntityEnderChest) tileEntity).a(); // .open()
         }
     }
 
