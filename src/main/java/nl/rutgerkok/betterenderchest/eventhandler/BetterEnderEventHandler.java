@@ -216,7 +216,7 @@ public class BetterEnderEventHandler implements Listener {
         }
 
         // Ignore shift-clicking to place something
-        if (player.isSneaking() && player.getItemInHand() != null && !player.getItemInHand().getType().equals(Material.AIR)) {
+		if (player.isSneaking() && event.getItem() != null && !event.getItem().getType().equals(Material.AIR)) {
             return;
         }
 
