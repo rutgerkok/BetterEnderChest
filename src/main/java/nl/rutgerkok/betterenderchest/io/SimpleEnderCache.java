@@ -1,6 +1,7 @@
 package nl.rutgerkok.betterenderchest.io;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -13,6 +14,7 @@ import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.exception.ChestNotFoundException;
 
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -136,7 +138,8 @@ public class SimpleEnderCache implements BetterEnderCache {
                 unload(inventory);
             } else {
                 plugin.debug("Not unloading, but also not saving chest of " + entry.getKey().chestOwner.getDisplayName()
-                        + " - no items changed, but chest is still in use");
+                        + " - no items changed, but chest is still in use. Viewers: "
+                        + viewersToString(inventory.getViewers()));
             }
         }
     }
@@ -306,6 +309,19 @@ public class SimpleEnderCache implements BetterEnderCache {
 
         plugin.debug("Unloading chest of " + chestKey.chestOwner.getDisplayName());
         inventories.remove(chestKey);
+    }
+
+    private String viewersToString(List<HumanEntity> viewers) {
+        if (viewers.isEmpty()) {
+            return "none";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (HumanEntity humanEntity : viewers) {
+            builder.append(humanEntity.getName());
+            builder.append(", ");
+        }
+        builder.delete(builder.length() - 2, builder.length());
+        return builder.toString();
     }
 
 }
