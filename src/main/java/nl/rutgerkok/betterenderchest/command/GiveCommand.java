@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Map;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
-import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.Translations;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.io.Consumer;
@@ -49,9 +48,6 @@ public class GiveCommand extends BaseCommand {
 
                 // Show appropriate message
                 sendItemAddedMessage(sender, inventoryName, amount, remainingAmount);
-
-                // Mark for resave, // now that there are changed items.
-                BetterEnderInventoryHolder.of(inventory).setHasUnsavedChanges(true);
             }
         });
     }

@@ -36,7 +36,7 @@ public class BetterEnderSlotsHandler implements Listener {
     /**
      * Makes sure that players cannot put items in disabled slots. Assumes that
      * the inventory has {@link BetterEnderInventoryHolder} as the holder.
-     * 
+     *
      * @param event
      *            The inventory click event.
      */
@@ -62,7 +62,7 @@ public class BetterEnderSlotsHandler implements Listener {
      * the inventory has {@link BetterEnderInventoryHolder} as the holder, that
      * the player has indeed normal clicked and that there are actually disabled
      * slots.
-     * 
+     *
      * @param event
      *            The inventory click event.
      */
@@ -93,7 +93,7 @@ public class BetterEnderSlotsHandler implements Listener {
      * the inventory has {@link BetterEnderInventoryHolder} as the holder, that
      * the player has indeed shift clicked and that there are actually disabled
      * slots.
-     * 
+     *
      * @param event
      *            The inventory click event.
      */
@@ -225,8 +225,6 @@ public class BetterEnderSlotsHandler implements Listener {
         if (inventoryHolder instanceof BetterEnderInventoryHolder) {
             // Make sure disabled slots stay disabled.
             handleTakeOnlySlots(event);
-            // Set that changes were made
-            ((BetterEnderInventoryHolder) inventoryHolder).setHasUnsavedChanges(true);
             return;
         }
         if (inventoryHolder instanceof ImmutableInventory) {

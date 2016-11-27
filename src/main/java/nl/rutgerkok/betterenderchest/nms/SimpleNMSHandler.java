@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.ChestRestrictions;
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
@@ -428,6 +429,9 @@ public class SimpleNMSHandler extends NMSHandler {
             inventory.setItem(slot,
                     CraftItemStack.asCraftMirror(new net.minecraft.server.v1_11_R1.ItemStack(item)));
         }
+
+        // Items currently in the chest are what is in the database
+        BetterEnderInventoryHolder.of(inventory).markContentsAsSaved(inventory.getContents());
 
         // Return the inventory
         return inventory;

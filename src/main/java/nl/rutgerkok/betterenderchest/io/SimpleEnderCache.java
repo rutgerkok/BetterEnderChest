@@ -158,7 +158,7 @@ public class SimpleEnderCache implements BetterEnderCache {
     /**
      * Saves an inventory, by acquiring the save lock, checking the needsSave
      * flag, saving the inventory and setting the needsSave flag to false.
-     * 
+     *
      * @param inventory
      *            The inventory.
      * @throws IOException
@@ -176,7 +176,7 @@ public class SimpleEnderCache implements BetterEnderCache {
                         + " - it was just saved");
                 return;
             }
-            holder.setHasUnsavedChanges(false);
+            holder.markContentsAsSaved(inventory.getContents());
 
             plugin.debug("Saving chest of " + holder.getChestOwner().getDisplayName());
             chestSaver.saveChest(new SaveEntry(inventory));
@@ -243,7 +243,7 @@ public class SimpleEnderCache implements BetterEnderCache {
     }
 
     private boolean needsSave(Inventory inventory) {
-        return BetterEnderInventoryHolder.of(inventory).hasUnsavedChanges();
+        return BetterEnderInventoryHolder.of(inventory).hasUnsavedChanges(inventory.getContents());
     }
 
     private void scheduleSave(final Inventory inventory) {

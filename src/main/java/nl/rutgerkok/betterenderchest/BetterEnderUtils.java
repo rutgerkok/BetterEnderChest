@@ -118,9 +118,6 @@ public class BetterEnderUtils {
             if (droppedCount > 0) {
                 player.sendMessage(ChatColor.YELLOW + Translations.OVERFLOWING_CHEST_CLOSE.toString());
                 plugin.log("There were items in disabled slots in the Ender Chest of " + chestOwner.getDisplayName() + ". Demoted? Glitch? Hacking? " + droppedCount + " stacks are ejected.");
-
-                // Make sure that chest gets saved
-                holder.setHasUnsavedChanges(true);
             }
         }
     }
@@ -135,9 +132,6 @@ public class BetterEnderUtils {
 
             // Move all items (and drop the excess)
             copyContents(inventory, resizedInventory, player.getLocation());
-
-            // Mark new inventory as needing save
-            BetterEnderInventoryHolder.of(resizedInventory).setHasUnsavedChanges(true);
 
             // Goodbye to old inventory!
             plugin.getChestCache().setInventory(resizedInventory);
