@@ -17,7 +17,7 @@ import com.google.common.collect.ImmutableSet;
  *
  */
 public final class NameableItemMeta implements ItemMeta {
-    
+
     private String name = null;
     private ImmutableList<String> lore = ImmutableList.of();
 
@@ -99,6 +99,11 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
+    public boolean isUnbreakable() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean removeEnchant(Enchantment ench) {
         return false;
     }
@@ -123,6 +128,12 @@ public final class NameableItemMeta implements ItemMeta {
         this.lore = ImmutableList.copyOf(lore);
     }
 
+    @Override
+    public void setUnbreakable(boolean arg0) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Spigot spigot() {
         throw new UnsupportedOperationException();
     }
