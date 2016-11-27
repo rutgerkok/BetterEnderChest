@@ -41,20 +41,11 @@ public class BetterEnderSlotsHandler implements Listener {
      *            The inventory click event.
      */
     protected void handleTakeOnlySlots(InventoryClickEvent event) {
-        Inventory inventory = event.getInventory();
-        BetterEnderInventoryHolder holder = BetterEnderInventoryHolder.of(inventory);
-
-        if (holder.getTakeOnlySlots() == 0) {
-            // Noting to prevent
-            // return;
-        }
-
         if (event.isShiftClick()) {
             handleTakeOnlySlotsShiftClick(event);
         } else {
             handleTakeOnlySlotsNormalClick(event);
         }
-
     }
 
     /**
@@ -76,8 +67,15 @@ public class BetterEnderSlotsHandler implements Listener {
             // Taking items (instead of inserting), ignore
             return;
         }
-        int slotFromBottomRight = inventory.getSize() - event.getSlot();
+
         boolean invalidStack = !canPlaceStack(event.getCursor());
+        if (event.getHotbarButton() != -1) {
+            // When placing items from the hotbar, also check hotbar slot
+            ItemStack onHotbar = event.getWhoClicked().getInventory().getItem(event.getHotbarButton());
+            invalidStack |= !canPlaceStack(onHotbar);
+        }
+
+        int slotFromBottomRight = inventory.getSize() - event.getSlot();
         if (invalidStack || isInDisabledSlot(slotFromBottomRight, holder)) {
             // Prevent item placement
             updateInventoryLater(event.getWhoClicked());
@@ -187,7 +185,7 @@ public class BetterEnderSlotsHandler implements Listener {
             case HOTBAR_MOVE_AND_READD:
                 return true;
             case HOTBAR_SWAP:
-                return true;
+                return false;
             case MOVE_TO_OTHER_INVENTORY:
                 return cursorInChest;
             case NOTHING:
