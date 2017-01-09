@@ -134,6 +134,8 @@ public class BetterEnderSlotsHandler implements Listener {
 
             // Calculate how many will fit
             int itemsToAdd = Math.min(inventory.getMaxStackSize(), inSlot.getMaxStackSize()) - inSlot.getAmount();
+            
+            itemsToAdd = Math.max(itemsToAdd, 0);
             // Limit that by how many we actually have
             itemsToAdd = Math.min(adding.getAmount(), itemsToAdd);
 
