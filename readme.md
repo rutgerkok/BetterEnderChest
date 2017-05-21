@@ -1,8 +1,23 @@
-BetterEnderChest is a plugin for CraftBukkit (Minecraft server mod) that adds functionality to the Ender Chest. 
+BetterEnderChest is a plugin for Spigot (Minecraft server mod) that adds functionality to the Ender Chest. 
 The documentation of the plugin itself can be found on the home page. On this page there is some information 
-about how to interact with this plugin.
+for Spigot plugin authors about how to interact with this plugin.
 
-# Get the plugin instance
+# Compiling BetterEnderChest
+BetterEnderChest uses [Maven](http://maven.apache.org/download.cgi). After you have installed Maven (make sure
+to include it in your systems PATH environment variable), run the following command:
+
+    mvn install
+
+# Pull requests
+Pull requests are greatly appreciated. Just try to follow my formatting (spaces, not tabs and opening brackets
+on the same line) but don't worry too much if you mess up the style: I'll fix it after the request is pulled.
+If you are about to implement something big, please send me an e-mail (address is on my Github profile), so that
+we can discuss it first. Otherwise, there's a risk of me rejecting your hard work!
+
+# Making your Spigot plugin interact with BetterEnderChest
+Make sure to add BetterEnderChest to your build path/Maven dependencies.
+
+## Get the plugin instance
 
 This is easy, just call the appropriate method in the plugin manager and cast it to `BetterEnderChest`.
 
@@ -10,11 +25,11 @@ This is easy, just call the appropriate method in the plugin manager and cast it
 BetterEnderChest betterEnderChest = (BetterEnderChest) Bukkit.getPluginManager().getPlugin("BetterEnderChest");
 ```
 
-# Getting someone's inventory
+## Getting someone's inventory
 
 You first need to get the appropriate `ChestOwner` and `WorldGroup` instances.
 
-## Getting a `ChestOwner` instance
+### Getting a `ChestOwner` instance
 
 For a chest of a player, you can simply do:
 
@@ -25,7 +40,7 @@ ChestOwner chestOwner = plugin.getChestOwners().playerChest(OfflinePlayer player
 (Keep in mind that all `Player`s are also `OfflinePlayer`s,
 so passing a normal `Player` instance to this method will work.)
 
-## Getting a `WorldGroup` instance
+### Getting a `WorldGroup` instance
 
 You can get the group containing a given world with the following method:
 
@@ -53,7 +68,7 @@ To get the group of the main world you can better do:
     World mainWorld = Bukkit.getServer().getWorlds().get(0);
     WorldGroup mainGroup = betterEnderChest.getGroups().getGroupByWorld(mainWorld);
 
-## Getting the actual Inventory instance
+### Getting the actual Inventory instance
 
 Now that you have the `ChestOwner` and `WorldGroup` instances, you can get the `Inventory` instance.
 
@@ -71,7 +86,7 @@ goes back to the main thread to deliver the chest for the `consume` method. This
 block of code in the `consume` method is always called on the main thread and that you don't need to worry
 about thread safety yourself.
 
-## Example
+### Example
 If you feel a bit lost, this is everything you need to get the Ender Chest of an online player:
 
 ```java
@@ -91,7 +106,7 @@ plugin.getChestCache().getInventory(chestOwner, worldGroup, new Consumer<Invento
 });
 ```
 
-# Making changes to the inventory
+## Making changes to the inventory
 If your plugin is directly making changes to the inventory (for example using `inventory.addItem(...)`),
 be sure to set its internal `hasUnsavedChanges` flag to `true`.
 If you don't do this, the chest won't get saved. If you do, BetterEnderChest will automatically save
@@ -101,7 +116,7 @@ and unload the chest after a while.
 
 When a player clicks on a slot in the chest, BetterEnderChest will automatically set this flag to `true`.
 
-# Public and default chests
+## Public and default chests
 BetterEnderChest includes a public chest and a default chest. The public chest is a chest shared by everyone;
 there is only one for each world group. The server admin can disable the normal private chests, and use the
 public chest instead.
@@ -118,7 +133,7 @@ Same for the default chest:
 ChestOwner chestOwner = plugin.getChestOwners().defaultChest();
 ```
 
-# Getting the inventory of an Ender Chest placed in the world
+## Getting the inventory of an Ender Chest placed in the world
 Sometimes, you just want to know what Ender inventory would show up if a player clicked on that block. There's a method
 for that:
 
@@ -142,7 +157,7 @@ try {
 }
 ```
 
-# Premade `Consumer<Inventory>`s
+## Premade `Consumer<Inventory>`s
 For common tasks like showing an inventory, some premade consumers are available.
 
 * `plugin.getChestOpener().showInventory(Player player)` to show an inventory to a player.
@@ -158,29 +173,9 @@ You can use the consumers like this:
 plugin.getChestCache().getInventory(chestOwner, worldGroup, plugin.getChestOpener().showInventory(player));
 ```
 
-# Adding a /betterenderchest subcommand
+## Adding a /betterenderchest subcommand
 Create a new class that inherits [BaseCommand](https://github.com/rutgerkok/BetterEnderChest/blob/master/src/nl/rutgerkok/betterenderchest/command/BaseCommand.java). Then you can add your command using 
 
     plugin.getCommands().register(BaseCommand command);
 
 Don't forget to look at the utility methods in BaseCommand, which can parse the [groupName/]inventoryName syntax.
-
-# Compiling BetterEnderChest
-BetterEnderChest uses [Maven](http://maven.apache.org/download.cgi). However, it requires Spigot 1.8, which is
-not available in a public repo. A stripped version of Spigot that contains just the method/field/class
-signatures has been uploaded to my personal repo. This version contains no code and cannot be used
-to run the tests.
-
-Spigot's BuildTools.jar automatically installs Spigot to your local Maven repo, so chances are you already have
-Spigot in your local Maven repo. To compile BetterEnderChest, just use:
-
-    mvn install
-
-If the tests fail you can use:
-
-    mvn install -DskipTests
-
-# Pull requests
-Pull requests are greatly appreciated. Just try to follow my formatting (spaces, not tabs and opening brackets
-on the same line) but don't worry too much if you mess up the style: I'll fix it after the request is pulled.
-If you are about to implement something big, please send me a PM on BukkitDev, so that we can discuss it first.
