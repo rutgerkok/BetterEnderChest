@@ -20,8 +20,8 @@ import nl.rutgerkok.betterenderchest.io.SaveEntry;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_11_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_11_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONObject;
@@ -29,23 +29,23 @@ import org.json.simple.parser.JSONParser;
 
 import com.google.common.collect.ImmutableMap;
 
-import net.minecraft.server.v1_11_R1.BlockPosition;
-import net.minecraft.server.v1_11_R1.Blocks;
-import net.minecraft.server.v1_11_R1.NBTBase;
-import net.minecraft.server.v1_11_R1.NBTCompressedStreamTools;
-import net.minecraft.server.v1_11_R1.NBTTagByte;
-import net.minecraft.server.v1_11_R1.NBTTagByteArray;
-import net.minecraft.server.v1_11_R1.NBTTagCompound;
-import net.minecraft.server.v1_11_R1.NBTTagDouble;
-import net.minecraft.server.v1_11_R1.NBTTagFloat;
-import net.minecraft.server.v1_11_R1.NBTTagInt;
-import net.minecraft.server.v1_11_R1.NBTTagIntArray;
-import net.minecraft.server.v1_11_R1.NBTTagList;
-import net.minecraft.server.v1_11_R1.NBTTagLong;
-import net.minecraft.server.v1_11_R1.NBTTagShort;
-import net.minecraft.server.v1_11_R1.NBTTagString;
-import net.minecraft.server.v1_11_R1.TileEntity;
-import net.minecraft.server.v1_11_R1.TileEntityEnderChest;
+import net.minecraft.server.v1_12_R1.BlockPosition;
+import net.minecraft.server.v1_12_R1.Blocks;
+import net.minecraft.server.v1_12_R1.NBTBase;
+import net.minecraft.server.v1_12_R1.NBTCompressedStreamTools;
+import net.minecraft.server.v1_12_R1.NBTTagByte;
+import net.minecraft.server.v1_12_R1.NBTTagByteArray;
+import net.minecraft.server.v1_12_R1.NBTTagCompound;
+import net.minecraft.server.v1_12_R1.NBTTagDouble;
+import net.minecraft.server.v1_12_R1.NBTTagFloat;
+import net.minecraft.server.v1_12_R1.NBTTagInt;
+import net.minecraft.server.v1_12_R1.NBTTagIntArray;
+import net.minecraft.server.v1_12_R1.NBTTagList;
+import net.minecraft.server.v1_12_R1.NBTTagLong;
+import net.minecraft.server.v1_12_R1.NBTTagShort;
+import net.minecraft.server.v1_12_R1.NBTTagString;
+import net.minecraft.server.v1_12_R1.TileEntity;
+import net.minecraft.server.v1_12_R1.TileEntityEnderChest;
 
 public class SimpleNMSHandler extends NMSHandler {
     static class JSONSimpleTypes {
@@ -227,10 +227,10 @@ public class SimpleNMSHandler extends NMSHandler {
                 case TagType.INT_ARRAY:
                     return boxIntegers(tagList.d(position));
                 case TagType.DOUBLE:
-                    double doubleValue = tagList.e(position);
+                    double doubleValue = tagList.f(position);
                     return doubleValue;
                 case TagType.FLOAT:
-                    float floatValue = tagList.f(position);
+                    float floatValue = tagList.g(position);
                     return floatValue;
                 case TagType.STRING:
                     String stringValue = tagList.getString(position);
@@ -427,7 +427,7 @@ public class SimpleNMSHandler extends NMSHandler {
             NBTTagCompound item = inventoryTag.get(i);
             int slot = item.getByte("Slot") & 255;
             inventory.setItem(slot,
-                    CraftItemStack.asCraftMirror(new net.minecraft.server.v1_11_R1.ItemStack(item)));
+                    CraftItemStack.asCraftMirror(new net.minecraft.server.v1_12_R1.ItemStack(item)));
         }
 
         // Items currently in the chest are what is in the database

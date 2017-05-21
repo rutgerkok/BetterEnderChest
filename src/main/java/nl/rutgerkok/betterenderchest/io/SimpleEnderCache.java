@@ -19,11 +19,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.google.common.base.Function;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import com.google.common.collect.MapMaker;
-import com.google.common.util.concurrent.FutureFallback;
+import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -114,11 +113,12 @@ public class SimpleEnderCache implements BetterEnderCache {
         return inventory.getViewers().isEmpty();
     }
 
-    private final FutureFallback<Inventory> chestNotFoundToEmptyInventory(final ChestOwner chestOwner, final WorldGroup worldGroup) {
-        return new FutureFallback<Inventory>() {
+    private final AsyncFunction<Throwable, Inventory> chestNotFoundToEmptyInventory(final ChestOwner chestOwner,
+            final WorldGroup worldGroup) {
+        return new AsyncFunction<Throwable, Inventory>() {
 
             @Override
-            public ListenableFuture<Inventory> create(Throwable t) throws Exception {
+            public ListenableFuture<Inventory> apply(Throwable t) throws Exception {
                 if (!(t instanceof ChestNotFoundException)) {
                     // IO error, disable further saving and loading
                     plugin.disableSaveAndLoad("Failed to load chest of " + chestOwner.getDisplayName(), t);
@@ -212,7 +212,7 @@ public class SimpleEnderCache implements BetterEnderCache {
                 // call, causing the inventory to load twice. If that's the
                 // case, use the inventory loaded by the first call
                 Inventory loadedEarlier = inventories.putIfAbsent(chestKey, newlyLoaded);
-                return Objects.firstNonNull(loadedEarlier, newlyLoaded);
+                return MoreObjects.firstNonNull(loadedEarlier, newlyLoaded);
             }
         });
     }
@@ -221,7 +221,7 @@ public class SimpleEnderCache implements BetterEnderCache {
     public void getInventory(ChestOwner chestOwner, WorldGroup worldGroup, final Consumer<Inventory> callback) {
         ListenableFuture<Inventory> inventoryOrError = getInventory(chestOwner, worldGroup);
 
-        final ListenableFuture<Inventory> inventory = Futures.withFallback(inventoryOrError,
+        final ListenableFuture<Inventory> inventory = Futures.catchingAsync(inventoryOrError, Throwable.class,
                 chestNotFoundToEmptyInventory(chestOwner, worldGroup));
 
         inventory.addListener(new Runnable() {
@@ -231,10 +231,10 @@ public class SimpleEnderCache implements BetterEnderCache {
                     callback.consume(inventory.get());
                 } catch (InterruptedException e) {
                     // The fallback should have prevented this from happening
-                    throw Throwables.propagate(e);
+                    throw new RuntimeException(e);
                 } catch (ExecutionException e) {
                     // The fallback should have prevented this from happening
-                    throw Throwables.propagate(e.getCause());
+                    throw new RuntimeException(e.getCause());
                 }
             }
         }, plugin.getExecutors().serverThreadExecutor());

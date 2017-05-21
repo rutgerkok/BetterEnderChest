@@ -28,8 +28,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -44,23 +44,16 @@
 		</resources>
 	</build>
 	<dependencies>
-		<!--
-		   - The order is important. Spigot-API must override Spigot. Spigot
-		   - contains multiple methods that differ only in the return value,
-		   - which is not allowed in Java (it is on the JVM). Spigot-API
-		   - doesn't have this problem and therefore should override Spigot.
-		   - Spigot is still needed for some NMS classes.
-		   -->
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.11-R0.1-SNAPSHOT</version>
+			<version>1.12-pre5-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot</artifactId>
-			<version>1.11-R0.1-SNAPSHOT</version>
+			<version>1.12-pre5-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

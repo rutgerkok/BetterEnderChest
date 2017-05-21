@@ -23,7 +23,7 @@ public class UpdateableFuture<T> extends AbstractFuture<T> {
      *
      * @param <T>
      *            The result type.
-     * 
+     *
      * @return The object.
      */
     public static <T> UpdateableFuture<T> create() {
@@ -37,7 +37,7 @@ public class UpdateableFuture<T> extends AbstractFuture<T> {
     /**
      * Sets the value of this future. This object will then be marked as
      * completed.
-     * 
+     *
      * @param value
      *            The value.
      * @return True when the value was changed, false if the future was already
@@ -85,6 +85,6 @@ public class UpdateableFuture<T> extends AbstractFuture<T> {
                     setException(e.getCause());
                 }
             }
-        }, MoreExecutors.sameThreadExecutor());
+        }, MoreExecutors.directExecutor());
     }
 }

@@ -10,13 +10,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.google.common.base.Function;
-import com.google.common.util.concurrent.FutureFallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * Class that has the logic for creating all kinds of empty inventories.
- * 
+ *
  */
 public class EmptyInventoryProvider {
     private final BetterEnderChest plugin;
@@ -28,7 +27,7 @@ public class EmptyInventoryProvider {
     /**
      * Gets the default inventory and copies the contets over to an inventory
      * belonging to the given chest owner in the given world group.
-     * 
+     *
      * @param chestOwner
      *            The owner of the chest.
      * @param worldGroup
@@ -64,7 +63,7 @@ public class EmptyInventoryProvider {
      * The inventory will be imported. When there is nothing to be imported, the
      * default chest will be returned. When there is no default chest, an empty
      * chest will be returned. When an error occurs, an emtpy chest is returned.
-     * 
+     *
      * @param chestOwner
      *            The name of the inventory, must be lowercase.
      * @param worldGroup
@@ -75,23 +74,19 @@ public class EmptyInventoryProvider {
     public ListenableFuture<Inventory> getFallbackInventory(final ChestOwner chestOwner, final WorldGroup worldGroup) {
         // Try to import it from vanilla/some other plugin
         ListenableFuture<Inventory> imported = worldGroup.getInventoryImporter().importInventoryAsync(chestOwner, worldGroup, plugin);
-        return Futures.withFallback(imported, new FutureFallback<Inventory>() {
-
-            @Override
-            public ListenableFuture<Inventory> create(Throwable t) {
-                if (t instanceof ChestNotFoundException) {
-                    // No chest was found, load default inventory
-                    return getDefaultInventory(chestOwner, worldGroup);
-                }
-
-                plugin.severe("Could not import inventory " + chestOwner, t);
-
-                // Return an empty inventory. Loading the default
-                // chest again
-                // could cause issues when someone
-                // finds a way to constantly break this plugin.
-                return Futures.immediateFuture(loadEmptyInventory(chestOwner, worldGroup));
+        return Futures.catchingAsync(imported, Throwable.class, (Throwable t) -> {
+            if (t instanceof ChestNotFoundException) {
+                // No chest was found, load default inventory
+                return getDefaultInventory(chestOwner, worldGroup);
             }
+
+            plugin.severe("Could not import inventory " + chestOwner, t);
+
+            // Return an empty inventory. Loading the default
+            // chest again
+            // could cause issues when someone
+            // finds a way to constantly break this plugin.
+            return Futures.immediateFuture(loadEmptyInventory(chestOwner, worldGroup));
         });
     }
 
@@ -99,7 +94,7 @@ public class EmptyInventoryProvider {
      * Guesses the number of chest rows based on the inventory name. It will
      * either return the number of rows in the public chest of the number of
      * rows in a player chest without any upgrades.
-     * 
+     *
      * @param chestOwner
      *            The name of the inventory.
      * @return Guessed number of rows.
@@ -120,7 +115,7 @@ public class EmptyInventoryProvider {
      * the items. It will also guess the number of rows based on the owner, just
      * like {@link #getInventoryRows(ChestOwner)}. It will then return the
      * highest number of the two.
-     * 
+     *
      * @param chestOwner
      *            The owner of the inventory.
      * @param contents
@@ -137,7 +132,7 @@ public class EmptyInventoryProvider {
      * the items. It will also guess the number of rows based on the owner, just
      * like {@link #getInventoryRows(ChestOwner)}. It will then return the
      * highest number of the two.
-     * 
+     *
      * @param chestOwner
      *            The owner of the inventory.
      * @param it
@@ -167,7 +162,7 @@ public class EmptyInventoryProvider {
      * default amount for a private or public chest (depending on the chest
      * owner). There will be 0 disabled slots and item insertions will be
      * allowed.
-     * 
+     *
      * @param chestOwner
      *            The name of the inventory
      * @param worldGroup
@@ -216,7 +211,7 @@ public class EmptyInventoryProvider {
      * Titles can be up to 32 characters. If the given title is too long, this
      * function trims the title to the max allowed length. If the title isn't
      * too long, the title itself is returned.
-     * 
+     *
      * @param title
      *            The title to trim.
      * @return The trimmed title.

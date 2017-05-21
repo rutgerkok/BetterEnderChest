@@ -14,7 +14,7 @@ import nl.rutgerkok.betterenderchest.util.UpdateableFuture;
 import org.bukkit.inventory.Inventory;
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.FutureFallback;
+import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -30,10 +30,10 @@ final class ChestLoadLogic {
     /**
      * Fallback that loads the default chest instead.
      */
-    private final FutureFallback<Inventory> loadDefaultOnChestNotFound = new FutureFallback<Inventory>() {
+    private final AsyncFunction<Throwable, Inventory> loadDefaultOnChestNotFound = new AsyncFunction<Throwable, Inventory>() {
 
         @Override
-        public ListenableFuture<Inventory> create(Throwable t) throws IOException {
+        public ListenableFuture<Inventory> apply(Throwable t) throws IOException {
             if (t instanceof ChestNotFoundException) {
                 ChestNotFoundException chestNotFound = (ChestNotFoundException) t;
 
@@ -77,7 +77,8 @@ final class ChestLoadLogic {
                 } catch (ChestNotFoundException e) {
                     // Use importer and default chest as fallbacks
                     ListenableFuture<Inventory> imported = importer.importInventoryAsync(chestOwner, worldGroup, plugin);
-                    ListenableFuture<Inventory> importedOrDefault = Futures.withFallback(imported, loadDefaultOnChestNotFound, worker);
+                    ListenableFuture<Inventory> importedOrDefault = Futures.catchingAsync(imported, Throwable.class,
+                            loadDefaultOnChestNotFound, worker);
                     inventory.updateUsing(importedOrDefault);
                 } catch (IOException e) {
                     // IO error
