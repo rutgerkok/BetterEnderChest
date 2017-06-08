@@ -64,6 +64,11 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
+    public String getLocalizedName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<String> getLore() {
         return lore;
     }
@@ -94,6 +99,11 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
+    public boolean hasLocalizedName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean hasLore() {
         return !lore.isEmpty();
     }
@@ -121,6 +131,11 @@ public final class NameableItemMeta implements ItemMeta {
     @Override
     public void setDisplayName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public void setLocalizedName(String arg0) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

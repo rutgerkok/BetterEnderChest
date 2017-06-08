@@ -3,16 +3,15 @@ package nl.rutgerkok.betterenderchest.chestprotection;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
-import nl.rutgerkok.betterenderchest.BetterEnderChest;
-import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
-
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import com.google.common.base.Throwables;
 import com.griefcraft.lwc.LWC;
 import com.griefcraft.model.Protection;
+
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 /**
  * Retrieves the name and, if possible, the uuid from an LWC protection. There
@@ -46,7 +45,7 @@ public class LWCBridge extends ProtectionBridge {
         } catch (NoClassDefFoundError e) {
             // Ignore, LWC is not installed
         } catch (Exception e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -92,7 +91,7 @@ public class LWCBridge extends ProtectionBridge {
             // UUID and name stored, situation 3
             return plugin.getChestOwners().playerChest(name, uuid);
         } catch (Exception e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -138,7 +137,7 @@ public class LWCBridge extends ProtectionBridge {
             // Situation 4
             return (String) playerInfoGetNameMethod.invoke(owner);
         } catch (Exception e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 
