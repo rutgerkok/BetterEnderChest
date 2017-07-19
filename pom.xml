@@ -17,8 +17,8 @@
 			<url>http://www.rutgerkok.nl/repo</url>
 		</repository>
 		<repository>
-			<id>myworlds-repo</id>
-			<url>http://maven.mg-dev.eu/</url>
+			<id>myworlds-repo</id> 
+			<url>https://ci.mg-dev.eu/plugin/repository/everything</url> 
 		</repository>
 	</repositories>
 	<build>
@@ -95,7 +95,7 @@
 		<dependency>
 			<groupId>com.bergerkiller.bukkit</groupId>
 			<artifactId>MyWorlds</artifactId>
-			<version>1.67-SNAPSHOT</version>
+			<version>1.12-v2</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
