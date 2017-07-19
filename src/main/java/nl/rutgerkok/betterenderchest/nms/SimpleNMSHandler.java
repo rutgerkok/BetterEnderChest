@@ -11,13 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import nl.rutgerkok.betterenderchest.BetterEnderChest;
-import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
-import nl.rutgerkok.betterenderchest.ChestRestrictions;
-import nl.rutgerkok.betterenderchest.WorldGroup;
-import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
-import nl.rutgerkok.betterenderchest.io.SaveEntry;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
@@ -46,6 +39,12 @@ import net.minecraft.server.v1_12_R1.NBTTagShort;
 import net.minecraft.server.v1_12_R1.NBTTagString;
 import net.minecraft.server.v1_12_R1.TileEntity;
 import net.minecraft.server.v1_12_R1.TileEntityEnderChest;
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
+import nl.rutgerkok.betterenderchest.ChestRestrictions;
+import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.betterenderchest.io.SaveEntry;
 
 public class SimpleNMSHandler extends NMSHandler {
     static class JSONSimpleTypes {
@@ -332,7 +331,7 @@ public class SimpleNMSHandler extends NMSHandler {
         BlockPosition blockPos = toBlockPosition(loc);
         TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(blockPos);
         if (tileEntity instanceof TileEntityEnderChest) {
-            ((TileEntityEnderChest) tileEntity).e(); // .close()
+            ((TileEntityEnderChest) tileEntity).f(); // .close()
         }
     }
 
