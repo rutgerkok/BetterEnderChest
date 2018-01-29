@@ -188,7 +188,7 @@ public class BetterEnderSlotsHandler implements Listener {
             case HOTBAR_MOVE_AND_READD:
                 return true;
             case HOTBAR_SWAP:
-                return false;
+                return true;
             case MOVE_TO_OTHER_INVENTORY:
                 return cursorInChest;
             case NOTHING:
