@@ -5,21 +5,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import nl.rutgerkok.betterenderchest.BetterEnderChest;
-import nl.rutgerkok.betterenderchest.WorldGroup;
-import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
-
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.onarandombox.multiverseinventories.MultiverseInventories;
-import com.onarandombox.multiverseinventories.ProfileTypes;
-import com.onarandombox.multiverseinventories.api.profile.GlobalProfile;
-import com.onarandombox.multiverseinventories.api.profile.PlayerProfile;
-import com.onarandombox.multiverseinventories.api.profile.ProfileType;
-import com.onarandombox.multiverseinventories.api.profile.WorldGroupProfile;
-import com.onarandombox.multiverseinventories.api.share.Sharables;
+import com.onarandombox.multiverseinventories.WorldGroup;
+import com.onarandombox.multiverseinventories.profile.GlobalProfile;
+import com.onarandombox.multiverseinventories.profile.PlayerProfile;
+import com.onarandombox.multiverseinventories.profile.ProfileType;
+import com.onarandombox.multiverseinventories.profile.ProfileTypes;
+import com.onarandombox.multiverseinventories.share.Sharables;
+
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+
 
 public class MultiverseInventoriesImporter extends InventoryImporter {
 
@@ -34,10 +35,12 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
     }
 
     @Override
-    public Inventory importInventory(ChestOwner chestOwner, WorldGroup worldGroup, BetterEnderChest plugin) throws IOException {
+    public Inventory importInventory(ChestOwner chestOwner, nl.rutgerkok.betterenderchest.WorldGroup worldGroup,
+            BetterEnderChest plugin) throws IOException {
         String groupName = worldGroup.getGroupName();
 
-        if (chestOwner.isSpecialChest()) {
+        OfflinePlayer offlinePlayer = chestOwner.getOfflinePlayer();
+        if (offlinePlayer == null || chestOwner.isSpecialChest()) {
             // Public chests and default chests cannot be imported.
             return null;
         }
@@ -46,9 +49,9 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
         MultiverseInventories multiverseInventories = (MultiverseInventories) Bukkit.getServer().getPluginManager().getPlugin("Multiverse-Inventories");
 
         // Make groupName case-correct
-        WorldGroupProfile group = null;
-        List<WorldGroupProfile> multiverseInventoriesGroups = multiverseInventories.getGroupManager().getGroups();
-        for (WorldGroupProfile aGroup : multiverseInventoriesGroups) {
+        WorldGroup group = null;
+        List<WorldGroup> multiverseInventoriesGroups = multiverseInventories.getGroupManager().getGroups();
+        for (WorldGroup aGroup : multiverseInventoriesGroups) {
             if (aGroup.getName().equalsIgnoreCase(groupName)) {
                 group = aGroup;
                 break;
@@ -62,12 +65,13 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
         }
 
         // Get the global profile of the player
-        GlobalProfile globalProfile = multiverseInventories.getData().getGlobalProfile(chestOwner.getSaveFileName());
+        GlobalProfile globalProfile = multiverseInventories.getData().getGlobalProfile(offlinePlayer.getName(),
+                offlinePlayer.getUniqueId());
         if (globalProfile == null) {
             plugin.debug("It seems that there is no data for " + chestOwner.getDisplayName() + ", so nothing can be imported.");
             return null;
         }
-        if (globalProfile.getWorld() == null) {
+        if (globalProfile.getLastWorld() == null) {
             plugin.debug("It seems that the world of " + chestOwner.getDisplayName() + " is null, so nothing can be imported.");
             return null;
         }
@@ -76,7 +80,7 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
         // vanilla (Multiverse-Inventories would return an outdated inventory).
         // If the player is in anthor worldgroup, it should load from
         // Multiverse-Inventories.
-        if (group.containsWorld(globalProfile.getWorld())) {
+        if (group.containsWorld(globalProfile.getLastWorld())) {
             // Player is in the current group, load from vanilla
             return plugin.getInventoryImporters().getRegistration("vanilla").importInventory(chestOwner, worldGroup, plugin);
         } else {
@@ -93,7 +97,8 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
             }
 
             // Get the data
-            PlayerProfile playerData = multiverseInventories.getGroupManager().getGroup(groupName).getPlayerData(profileType, chestOwner.getOfflinePlayer());
+            PlayerProfile playerData = multiverseInventories.getGroupManager().getGroup(groupName)
+                    .getGroupProfileContainer().getPlayerData(profileType, offlinePlayer);
 
             // Return nothing if there is nothing
             if (playerData == null) {
@@ -116,12 +121,13 @@ public class MultiverseInventoriesImporter extends InventoryImporter {
     }
 
     @Override
-    public Iterable<WorldGroup> importWorldGroups(BetterEnderChest plugin) {
-        Set<WorldGroup> becGroups = new HashSet<WorldGroup>();
+    public Iterable<nl.rutgerkok.betterenderchest.WorldGroup> importWorldGroups(BetterEnderChest plugin) {
+        Set<nl.rutgerkok.betterenderchest.WorldGroup> becGroups = new HashSet<>();
         MultiverseInventories multiverseInventories = (MultiverseInventories) Bukkit.getServer().getPluginManager().getPlugin("Multiverse-Inventories");
-        for (WorldGroupProfile miGroup : multiverseInventories.getGroupManager().getGroups()) {
+        for (WorldGroup miGroup : multiverseInventories.getGroupManager().getGroups()) {
             // Convert each group config
-            WorldGroup worldGroup = new WorldGroup(miGroup.getName());
+            nl.rutgerkok.betterenderchest.WorldGroup worldGroup = new nl.rutgerkok.betterenderchest.WorldGroup(
+                    miGroup.getName());
             worldGroup.setInventoryImporter(this);
             worldGroup.addWorlds(miGroup.getWorlds());
             becGroups.add(worldGroup);

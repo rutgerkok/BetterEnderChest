@@ -2,11 +2,6 @@ package nl.rutgerkok.betterenderchest.eventhandler;
 
 import java.util.Set;
 
-import nl.rutgerkok.betterenderchest.BetterEnderChest;
-import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
-import nl.rutgerkok.betterenderchest.ImmutableInventory;
-import nl.rutgerkok.betterenderchest.Translations;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -22,6 +17,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
+import nl.rutgerkok.betterenderchest.ImmutableInventory;
+import nl.rutgerkok.betterenderchest.Translations;
+
 public class BetterEnderSlotsHandler implements Listener {
     protected final BetterEnderChest plugin;
 
@@ -34,8 +34,9 @@ public class BetterEnderSlotsHandler implements Listener {
     }
 
     /**
-     * Makes sure that players cannot put items in disabled slots. Assumes that
-     * the inventory has {@link BetterEnderInventoryHolder} as the holder.
+     * Makes sure that players cannot put items in disabled slots, or invalid
+     * items in any slot. Assumes that the inventory has
+     * {@link BetterEnderInventoryHolder} as the holder.
      *
      * @param event
      *            The inventory click event.
@@ -49,10 +50,10 @@ public class BetterEnderSlotsHandler implements Listener {
     }
 
     /**
-     * Makes sure that players cannot put items in disabled slots. Assumes that
-     * the inventory has {@link BetterEnderInventoryHolder} as the holder, that
-     * the player has indeed normal clicked and that there are actually disabled
-     * slots.
+     * Makes sure that players cannot put items in disabled slots, or invalid
+     * items in any slot. Assumes that the inventory has
+     * {@link BetterEnderInventoryHolder} as the holder, that the player has
+     * indeed normal clicked and that there are actually disabled slots.
      *
      * @param event
      *            The inventory click event.
@@ -87,10 +88,10 @@ public class BetterEnderSlotsHandler implements Listener {
     }
 
     /**
-     * Makes sure that players cannot put items in disabled slots. Assumes that
-     * the inventory has {@link BetterEnderInventoryHolder} as the holder, that
-     * the player has indeed shift clicked and that there are actually disabled
-     * slots.
+     * Makes sure that players cannot put items in disabled slots, or invalid
+     * items in any slot. Assumes that the inventory has
+     * {@link BetterEnderInventoryHolder} as the holder, that the player has
+     * indeed shift clicked and that there are actually disabled slots.
      *
      * @param event
      *            The inventory click event.
@@ -145,7 +146,7 @@ public class BetterEnderSlotsHandler implements Listener {
                 inventory.setItem(i, inSlot);
             }
 
-            // Substract that from the item to add
+            // Subtract that from the item to add
             if (itemsToAdd >= adding.getAmount()) {
                 // We're done!
                 event.setCurrentItem(new ItemStack(Material.AIR, 0));
@@ -223,7 +224,7 @@ public class BetterEnderSlotsHandler implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         InventoryHolder inventoryHolder = event.getInventory().getHolder();
         if (inventoryHolder instanceof BetterEnderInventoryHolder) {
-            // Make sure disabled slots stay disabled.
+            // Standard Ender Chest: disallow invalid slots & items
             handleTakeOnlySlots(event);
             return;
         }
