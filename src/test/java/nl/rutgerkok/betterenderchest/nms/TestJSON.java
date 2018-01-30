@@ -3,16 +3,13 @@ package nl.rutgerkok.betterenderchest.nms;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.Map;
 
-import nl.rutgerkok.betterenderchest.nms.SimpleNMSHandler.JSONSimpleTypes;
-
-import org.json.simple.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
+import nl.rutgerkok.betterenderchest.nms.SimpleNMSHandler.JSONSimpleTypes;
 
 @RunWith(JUnit4.class)
 public class TestJSON {
@@ -76,7 +73,7 @@ public class TestJSON {
         // Must be reserialized *exactly* the same, which is not possible if
         // the number is read as an int array (used to be the case in old
         // versions of BetterEnderChest)
-        assertEquals(json, reserialize(json));
+        assertEquals("{FloatList:[0.0d,1.0d,2.0d]}", reserialize(json));
     }
 
     @Test
@@ -84,7 +81,7 @@ public class TestJSON {
         // Must be reserialized *exactly* the same, which is not possible if
         // the number is read as a float or double
         String json = "{\"IntValue\":1}";
-        assertEquals(json, reserialize(json));
+        assertEquals("{IntValue:1}", reserialize(json));
     }
 
     @Test
@@ -94,6 +91,7 @@ public class TestJSON {
         tagCompound.setString("Test_String", "TestedString: test");
         tagCompound.setDouble("Test_Double", 8.3);
         tagCompound.setInt("Test_Int", 1545);
+        tagCompound.setShort("Test_Short", (short) 4);
         tagCompound.setIntArray("Test_Int_Array", new int[] { 0, 1, 2, -8, Integer.MAX_VALUE });
         tagCompound.setByteArray("Test_Byte_Array", new byte[] { 0, 1, 2, -8, Byte.MAX_VALUE });
 
@@ -144,7 +142,6 @@ public class TestJSON {
     }
 
     private String toJSON(NBTTagCompound tagCompound) throws IOException {
-        Map<String, Object> javaTypes = JSONSimpleTypes.toMap(tagCompound);
-        return JSONObject.toJSONString(javaTypes);
+        return tagCompound.toString();
     }
 }
