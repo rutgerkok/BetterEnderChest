@@ -68,6 +68,9 @@ public class BetterEnderSlotsHandler implements Listener {
             // Taking items (instead of inserting), ignore
             return;
         }
+        if (isNullOrAir(event.getCursor())) {
+            return;
+        }
 
         boolean invalidStack = !canPlaceStack(event.getCursor());
         if (event.getHotbarButton() != -1) {
@@ -106,7 +109,7 @@ public class BetterEnderSlotsHandler implements Listener {
             return;
         }
         // Ignore air
-        if (event.getCurrentItem() == null || event.getCurrentItem().getType().equals(Material.AIR)) {
+        if (isNullOrAir(event.getCurrentItem())) {
             return;
         }
 
@@ -220,6 +223,10 @@ public class BetterEnderSlotsHandler implements Listener {
         return (slotFromBottomRight <= holder.getTakeOnlySlots() && slotFromBottomRight > 0);
     }
 
+    private boolean isNullOrAir(ItemStack stack) {
+        return stack == null || stack.getType() == Material.AIR;
+    }
+
     @EventHandler(ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
         InventoryHolder inventoryHolder = event.getInventory().getHolder();
@@ -239,6 +246,9 @@ public class BetterEnderSlotsHandler implements Listener {
     public void onInventoryDrag(InventoryDragEvent event) {
         Inventory inventory = event.getInventory();
         if (!(inventory.getHolder() instanceof BetterEnderInventoryHolder)) {
+            return;
+        }
+        if (isNullOrAir(event.getOldCursor())) {
             return;
         }
 

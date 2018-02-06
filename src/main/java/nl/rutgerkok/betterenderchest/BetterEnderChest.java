@@ -3,6 +3,11 @@ package nl.rutgerkok.betterenderchest;
 import java.io.File;
 import java.util.concurrent.Executor;
 
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
+
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwners;
 import nl.rutgerkok.betterenderchest.chestprotection.ProtectionBridge;
 import nl.rutgerkok.betterenderchest.command.BaseCommand;
@@ -13,11 +18,6 @@ import nl.rutgerkok.betterenderchest.io.mysql.DatabaseSettings;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 import nl.rutgerkok.betterenderchest.registry.Registry;
 import nl.rutgerkok.betterenderchest.util.BukkitExecutors;
-
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 
 public interface BetterEnderChest extends PluginLogger {
 
@@ -241,7 +241,7 @@ public interface BetterEnderChest extends PluginLogger {
      * Checks if an item is allowed in chests.
      *
      * @param stack
-     *            The item stack.
+     *            The item stack, may not be null.
      *
      * @return True if the item is allowed, false otherwise.
      */
