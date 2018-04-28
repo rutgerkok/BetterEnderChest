@@ -7,6 +7,9 @@
 	<name>BetterEnderChest</name>
 	<description>CraftBukkit plugin that adds functionality for both players and admins to the Ender Chest.</description>
 	<url>https://github.com/rutgerkok/BetterEnderChest</url>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<repositories>
 		<repository>
 			<id>spigot-repo</id>
