@@ -4,9 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -17,25 +14,21 @@ import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-
-import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.server.v1_12_R1.BlockPosition;
 import net.minecraft.server.v1_12_R1.Blocks;
+import net.minecraft.server.v1_12_R1.MojangsonParseException;
+import net.minecraft.server.v1_12_R1.MojangsonParser;
 import net.minecraft.server.v1_12_R1.NBTBase;
 import net.minecraft.server.v1_12_R1.NBTCompressedStreamTools;
-import net.minecraft.server.v1_12_R1.NBTTagByte;
 import net.minecraft.server.v1_12_R1.NBTTagByteArray;
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
 import net.minecraft.server.v1_12_R1.NBTTagDouble;
-import net.minecraft.server.v1_12_R1.NBTTagFloat;
 import net.minecraft.server.v1_12_R1.NBTTagInt;
 import net.minecraft.server.v1_12_R1.NBTTagIntArray;
 import net.minecraft.server.v1_12_R1.NBTTagList;
 import net.minecraft.server.v1_12_R1.NBTTagLong;
-import net.minecraft.server.v1_12_R1.NBTTagShort;
 import net.minecraft.server.v1_12_R1.NBTTagString;
 import net.minecraft.server.v1_12_R1.TileEntity;
 import net.minecraft.server.v1_12_R1.TileEntityEnderChest;
@@ -55,36 +48,6 @@ public class SimpleNMSHandler extends NMSHandler {
          * have a byte[] or a compound tag.
          */
         private static final String BYTE_ARRAY = "byteArray";
-
-        /**
-         * Boxes all the values of the array for consumption by JSONSimple.
-         *
-         * @param byteArray
-         *            Array to box.
-         * @return The boxed array.
-         */
-        private static final List<Byte> boxBytes(byte[] byteArray) {
-            List<Byte> byteList = new ArrayList<Byte>(byteArray.length);
-            for (byte aByte : byteArray) {
-                byteList.add(aByte); // Wraps
-            }
-            return byteList;
-        }
-
-        /**
-         * Boxes all the values of the array for consumption by JSONSimple.
-         *
-         * @param intArray
-         *            Array to box.
-         * @return The boxed array.
-         */
-        private static final List<Integer> boxIntegers(int[] intArray) {
-            List<Integer> integerList = new ArrayList<Integer>(intArray.length);
-            for (int anInt : intArray) {
-                integerList.add(anInt); // Wraps
-            }
-            return integerList;
-        }
 
         static final NBTBase javaTypeToNBTTag(Object object) throws IOException {
             // Handle compounds
@@ -164,105 +127,9 @@ public class SimpleNMSHandler extends NMSHandler {
             throw new IOException("Unknown object: (" + object.getClass() + ") " + object + "");
         }
 
-        private static final Object nbtTagToJavaType(NBTBase tag) throws IOException {
-            if (tag instanceof NBTTagCompound) {
-                return toMap((NBTTagCompound) tag);
-            } else if (tag instanceof NBTTagList) {
-                // Add all children
-                NBTTagList listTag = (NBTTagList) tag;
-                List<Object> objects = new ArrayList<Object>();
-                for (int i = 0; i < listTag.size(); i++) {
-                    objects.add(tagInNBTListToJavaType(listTag, i));
-                }
-                return objects;
-            } else if (tag instanceof NBTTagByte) {
-                byte value = ((NBTTagByte) tag).g();
-                return value;
-            } else if (tag instanceof NBTTagDouble) {
-                double value = ((NBTTagDouble) tag).asDouble();
-                return value;
-            } else if (tag instanceof NBTTagFloat) {
-                float value = ((NBTTagFloat) tag).i();
-                return value;
-            } else if (tag instanceof NBTTagInt) {
-                int value = ((NBTTagInt) tag).e();
-                return value;
-            } else if (tag instanceof NBTTagLong) {
-                long value = ((NBTTagLong) tag).d();
-                return value;
-            } else if (tag instanceof NBTTagShort) {
-                short value = ((NBTTagShort) tag).f();
-                return value;
-            } else if (tag instanceof NBTTagString) {
-                String value = ((NBTTagString) tag).c_();
-                return value;
-            } else if (tag instanceof NBTTagByteArray) {
-                // Byte arrays are placed in a map, see comment for BYTE_ARRAY
-                return ImmutableMap.of(BYTE_ARRAY, boxBytes(((NBTTagByteArray) tag).c()));
-            } else if (tag instanceof NBTTagIntArray) {
-                return boxIntegers(((NBTTagIntArray) tag).d());
-            }
-
-            throw new IOException("Unknown tag: " + tag);
-        }
-
         /**
-         * Converts the object at the specified position in the list to a Map,
-         * List, double, float or String.
-         *
-         * @param tagList
-         *            The list to convert an element from.
-         * @param position
-         *            The position in the list.
-         * @return The converted object.
-         * @throws IOException
-         *             If the tag type is unknown.
-         */
-        private static final Object tagInNBTListToJavaType(NBTTagList tagList, int position) throws IOException {
-            switch (tagList.g()) {
-                case TagType.COMPOUND:
-                    NBTTagCompound compoundValue = tagList.get(position);
-                    return nbtTagToJavaType(compoundValue);
-                case TagType.INT_ARRAY:
-                    return boxIntegers(tagList.d(position));
-                case TagType.DOUBLE:
-                    double doubleValue = tagList.f(position);
-                    return doubleValue;
-                case TagType.FLOAT:
-                    float floatValue = tagList.g(position);
-                    return floatValue;
-                case TagType.STRING:
-                    String stringValue = tagList.getString(position);
-                    return stringValue;
-            }
-            throw new IOException("Unknown list (type " + tagList.getTypeId() + "): " + tagList);
-        }
-
-        /**
-         * Converts the compound tag to a map. All values in the tag will also
-         * have their tags converted to String//primitives/maps/Lists.
-         *
-         * @param tagCompound
-         *            The compound tag.
-         * @return The map.
-         * @throws IOException
-         *             In case an unknown tag was encountered in the NBT tag.
-         */
-        static final Map<String, Object> toMap(NBTTagCompound tagCompound) throws IOException {
-            Collection<String> tagNames = tagCompound.c();
-
-            // Add all children
-            Map<String, Object> jsonObject = new HashMap<String, Object>(tagNames.size());
-            for (String subTagName : tagNames) {
-                NBTBase subTag = tagCompound.get(subTagName);
-                jsonObject.put(subTagName, nbtTagToJavaType(subTag));
-            }
-            return jsonObject;
-        }
-
-        /**
-         * Turns the given json-formatted string back into a NBTTagCompound.
-         * Mojangson formatting is also accepted.
+         * Turns the given json- or Mojangson-formatted string back into a
+         * NBTTagCompound.
          *
          * @param jsonString
          *            The json string to parse.
@@ -271,9 +138,17 @@ public class SimpleNMSHandler extends NMSHandler {
          *             If the string cannot be parsed.
          */
         static final NBTTagCompound toTag(String jsonString) throws IOException {
+            if (jsonString.startsWith("{\"")) {
+                // Probably in the old valid JSON format
+                try {
+                    return (NBTTagCompound) javaTypeToNBTTag(new JSONParser().parse(jsonString));
+                } catch (Exception e) {
+                    // Ignore, retry as Mojangson
+                }
+            }
             try {
-                return (NBTTagCompound) javaTypeToNBTTag(new JSONParser().parse(jsonString));
-            } catch (Exception e) {
+                return MojangsonParser.parse(jsonString);
+            } catch (MojangsonParseException e) {
                 throw new IOException(e);
             }
         }
@@ -314,10 +189,6 @@ public class SimpleNMSHandler extends NMSHandler {
      */
     private static class TagType {
         private static final int COMPOUND = 10;
-        private static final int DOUBLE = 6;
-        private static final int FLOAT = 5;
-        private static final int INT_ARRAY = 11;
-        private static final int STRING = 8;
     }
 
     private BetterEnderChest plugin;
@@ -465,8 +336,7 @@ public class SimpleNMSHandler extends NMSHandler {
     @Override
     public String saveInventoryToJson(SaveEntry inventory) throws IOException {
         NBTTagCompound tag = saveInventoryToTag(inventory);
-        Map<String, Object> map = JSONSimpleTypes.toMap(tag);
-        return JSONObject.toJSONString(map);
+        return tag.toString();
     }
 
     private NBTTagCompound saveInventoryToTag(SaveEntry inventory) {
