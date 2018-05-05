@@ -15,6 +15,14 @@ import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
+import nl.rutgerkok.betterenderchest.ChestRestrictions;
+import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.betterenderchest.io.SaveEntry;
 
 import net.minecraft.server.v1_12_R1.BlockPosition;
 import net.minecraft.server.v1_12_R1.Blocks;
@@ -32,12 +40,6 @@ import net.minecraft.server.v1_12_R1.NBTTagLong;
 import net.minecraft.server.v1_12_R1.NBTTagString;
 import net.minecraft.server.v1_12_R1.TileEntity;
 import net.minecraft.server.v1_12_R1.TileEntityEnderChest;
-import nl.rutgerkok.betterenderchest.BetterEnderChest;
-import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
-import nl.rutgerkok.betterenderchest.ChestRestrictions;
-import nl.rutgerkok.betterenderchest.WorldGroup;
-import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
-import nl.rutgerkok.betterenderchest.io.SaveEntry;
 
 public class SimpleNMSHandler extends NMSHandler {
     static class JSONSimpleTypes {
@@ -138,14 +140,12 @@ public class SimpleNMSHandler extends NMSHandler {
          *             If the string cannot be parsed.
          */
         static final NBTTagCompound toTag(String jsonString) throws IOException {
-            if (jsonString.startsWith("{\"")) {
-                // Probably in the old valid JSON format
-                try {
-                    return (NBTTagCompound) javaTypeToNBTTag(new JSONParser().parse(jsonString));
-                } catch (Exception e) {
-                    // Ignore, retry as Mojangson
-                }
+            try {
+                return (NBTTagCompound) javaTypeToNBTTag(new JSONParser().parse(jsonString));
+            } catch (ParseException e) {
+                // Ignore, retry as Mojangson
             }
+
             try {
                 return MojangsonParser.parse(jsonString);
             } catch (MojangsonParseException e) {
