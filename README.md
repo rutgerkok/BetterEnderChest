@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/rutgerkok/BetterEnderChest.svg?branch=master)](https://travis-ci.com/rutgerkok/BetterEnderChest)
+
 BetterEnderChest is a plugin for Spigot (Minecraft server mod) that adds functionality to the Ender Chest. 
 The documentation of the plugin itself can be found on the home page. On this page there is some information 
 for Spigot plugin authors about how to interact with this plugin.
