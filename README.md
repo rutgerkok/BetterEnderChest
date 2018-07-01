@@ -1,8 +1,20 @@
-[![Build Status](https://travis-ci.com/rutgerkok/BetterEnderChest.svg?branch=master)](https://travis-ci.com/rutgerkok/BetterEnderChest)
+BetterEnderChest
+================
 
-BetterEnderChest is a plugin for Spigot (Minecraft server mod) that adds functionality to the Ender Chest. 
-The documentation of the plugin itself can be found on the home page. On this page there is some information 
-for Spigot plugin authors about how to interact with this plugin.
++[![Build Status](https://travis-ci.com/rutgerkok/BetterEnderChest.svg?branch=master)](https://travis-ci.com/rutgerkok/BetterEnderChest) [![Download at SpigotMC.org](https://img.shields.io/badge/download-SpigotMC.org-orange.svg)](https://www.spigotmc.org/resources/betterenderchest.2073/)
++![Latest release](https://img.shields.io/github/release/rutgerkok/BetterEnderChest.svg)
++![Commits since latest release](https://img.shields.io/github/commits-since/rutgerkok/BetterEnderChest/latest.svg)
+
+Minecraft Spigot plugin to add functionality to Ender Chests.
+
+* Share Ender Chests across servers
+* Share Ender Chests between players (requires Lockette/LWC/BlockLocker)
+* Create a default Ender Chest as a gift for new players
+* Optionally replace the private Ender Chests with a public one
+* A command to view your own Ender Chest (requires a permission node)
+* A command to view the Ender Chests of another player (useful for admins)
+* Create worlds on a server that don't share Ender Chest contents with other worlds
+* API for other plugin developers, see below
 
 # Compiling BetterEnderChest
 BetterEnderChest uses [Maven](http://maven.apache.org/download.cgi). After you have installed Maven (make sure
