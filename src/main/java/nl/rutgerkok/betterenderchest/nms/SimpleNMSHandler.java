@@ -8,30 +8,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.Dynamic;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_13_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_13_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.parser.JSONParser;
 
-import net.minecraft.server.v1_12_R1.BlockPosition;
-import net.minecraft.server.v1_12_R1.Blocks;
-import net.minecraft.server.v1_12_R1.MojangsonParseException;
-import net.minecraft.server.v1_12_R1.MojangsonParser;
-import net.minecraft.server.v1_12_R1.NBTBase;
-import net.minecraft.server.v1_12_R1.NBTCompressedStreamTools;
-import net.minecraft.server.v1_12_R1.NBTTagByteArray;
-import net.minecraft.server.v1_12_R1.NBTTagCompound;
-import net.minecraft.server.v1_12_R1.NBTTagDouble;
-import net.minecraft.server.v1_12_R1.NBTTagInt;
-import net.minecraft.server.v1_12_R1.NBTTagIntArray;
-import net.minecraft.server.v1_12_R1.NBTTagList;
-import net.minecraft.server.v1_12_R1.NBTTagLong;
-import net.minecraft.server.v1_12_R1.NBTTagString;
-import net.minecraft.server.v1_12_R1.TileEntity;
-import net.minecraft.server.v1_12_R1.TileEntityEnderChest;
+import net.minecraft.server.v1_13_R1.BlockPosition;
+import net.minecraft.server.v1_13_R1.Blocks;
+import net.minecraft.server.v1_13_R1.DataConverterRegistry;
+import net.minecraft.server.v1_13_R1.DataConverterTypes;
+import net.minecraft.server.v1_13_R1.DynamicOpsNBT;
+import net.minecraft.server.v1_13_R1.MojangsonParser;
+import net.minecraft.server.v1_13_R1.NBTBase;
+import net.minecraft.server.v1_13_R1.NBTCompressedStreamTools;
+import net.minecraft.server.v1_13_R1.NBTTagByteArray;
+import net.minecraft.server.v1_13_R1.NBTTagCompound;
+import net.minecraft.server.v1_13_R1.NBTTagDouble;
+import net.minecraft.server.v1_13_R1.NBTTagInt;
+import net.minecraft.server.v1_13_R1.NBTTagIntArray;
+import net.minecraft.server.v1_13_R1.NBTTagList;
+import net.minecraft.server.v1_13_R1.NBTTagLong;
+import net.minecraft.server.v1_13_R1.NBTTagString;
+import net.minecraft.server.v1_13_R1.TileEntity;
+import net.minecraft.server.v1_13_R1.TileEntityEnderChest;
+
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.ChestRestrictions;
@@ -148,7 +155,7 @@ public class SimpleNMSHandler extends NMSHandler {
             }
             try {
                 return MojangsonParser.parse(jsonString);
-            } catch (MojangsonParseException e) {
+            } catch (CommandSyntaxException e) {
                 throw new IOException(e);
             }
         }
@@ -202,19 +209,12 @@ public class SimpleNMSHandler extends NMSHandler {
         BlockPosition blockPos = toBlockPosition(loc);
         TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(blockPos);
         if (tileEntity instanceof TileEntityEnderChest) {
-            ((TileEntityEnderChest) tileEntity).f(); // .close()
+            ((TileEntityEnderChest) tileEntity).d(); // .close()
         }
     }
 
     private int getDisabledSlots(NBTTagCompound baseTag) {
-        if (baseTag.hasKey("DisabledSlots")) {
-            // Load the number of disabled slots
-            return baseTag.getByte("DisabledSlots");
-        } else {
-            // Return 0. This value doesn't harm anything and will be
-            // corrected when the owner opens his/her own chest
-            return 0;
-        }
+        return baseTag.getByte("DisabledSlots");
     }
 
     @Override
@@ -233,7 +233,7 @@ public class SimpleNMSHandler extends NMSHandler {
             for (int i = 0; i < inventoryListTag.size(); i++) {
 
                 // Replace the current highest slot if this slot is higher
-                highestSlot = Math.max(inventoryListTag.get(i).getByte("Slot") & 255, highestSlot);
+                highestSlot = Math.max(inventoryListTag.getCompound(i).getByte("Slot") & 255, highestSlot);
             }
 
             // Calculate the needed number of rows for the items, and return the
@@ -242,11 +242,18 @@ public class SimpleNMSHandler extends NMSHandler {
         }
     }
 
+    private int getStoredDataVersion(NBTTagCompound baseTag) {
+        if (!baseTag.hasKey("DataVersion")) {
+            return -1;
+        }
+        return baseTag.getInt("DataVersion");
+    }
+
     @Override
     public boolean isAvailable() {
         try {
             // Test whether nms access works.
-            Blocks.WOOL.getName();
+            Blocks.WHITE_WOOL.toString();
             return true;
         } catch (Throwable t) {
             return false;
@@ -288,16 +295,19 @@ public class SimpleNMSHandler extends NMSHandler {
         // Create the Bukkit inventory
         int inventoryRows = getRows(chestOwner, baseTag, inventoryTag);
         int disabledSlots = getDisabledSlots(baseTag);
+        int dataVersion = getStoredDataVersion(baseTag);
         boolean itemInsertion = isItemInsertionAllowed(baseTag);
         ChestRestrictions chestRestrictions = new ChestRestrictions(inventoryRows, disabledSlots, itemInsertion);
         Inventory inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup, chestRestrictions);
 
         // Add all the items
         for (int i = 0; i < inventoryTag.size(); i++) {
-            NBTTagCompound item = inventoryTag.get(i);
+            NBTTagCompound item = inventoryTag.getCompound(i);
             int slot = item.getByte("Slot") & 255;
+            item = updateToLatestMinecraft(item, dataVersion);
+
             inventory.setItem(slot,
-                    CraftItemStack.asCraftMirror(new net.minecraft.server.v1_12_R1.ItemStack(item)));
+                    CraftItemStack.asCraftMirror(net.minecraft.server.v1_13_R1.ItemStack.a(item)));
         }
 
         // Items currently in the chest are what is in the database
@@ -312,7 +322,7 @@ public class SimpleNMSHandler extends NMSHandler {
         BlockPosition blockPos = toBlockPosition(loc);
         TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(blockPos);
         if (tileEntity instanceof TileEntityEnderChest) {
-            ((TileEntityEnderChest) tileEntity).a(); // .open()
+            ((TileEntityEnderChest) tileEntity).c(); // .open()
         }
     }
 
@@ -342,6 +352,8 @@ public class SimpleNMSHandler extends NMSHandler {
     private NBTTagCompound saveInventoryToTag(SaveEntry inventory) {
         NBTTagCompound baseTag = new NBTTagCompound();
         NBTTagList inventoryTag = new NBTTagList();
+        @SuppressWarnings("deprecation")
+        int dataVersion = Bukkit.getUnsafe().getDataVersion();
 
         // Chest metadata
         ChestRestrictions chestRestrictions = inventory.getChestRestrictions();
@@ -349,6 +361,7 @@ public class SimpleNMSHandler extends NMSHandler {
         baseTag.setByte("DisabledSlots", (byte) chestRestrictions.getDisabledSlots());
         baseTag.setBoolean("ItemInsertion", chestRestrictions.isItemInsertionAllowed());
         baseTag.setString("OwnerName", inventory.getChestOwner().getDisplayName());
+        baseTag.setInt("DataVersion", dataVersion);
 
         // Add all items to the inventory tag
         for (int i = 0; i < inventory.getSize(); i++) {
@@ -368,6 +381,18 @@ public class SimpleNMSHandler extends NMSHandler {
 
     private BlockPosition toBlockPosition(Location location) {
         return new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    }
+
+    private NBTTagCompound updateToLatestMinecraft(NBTTagCompound item, int oldVersion) {
+        @SuppressWarnings("deprecation")
+        int newVersion = Bukkit.getUnsafe().getDataVersion();
+        if (newVersion == oldVersion) {
+            return item;
+        }
+
+        Dynamic<NBTBase> input = new Dynamic<NBTBase>(DynamicOpsNBT.a, item);
+        Dynamic<NBTBase> result = DataConverterRegistry.a().update(DataConverterTypes.ITEM_STACK, input, oldVersion, newVersion);
+        return (NBTTagCompound) result.getValue();
     }
 
 }

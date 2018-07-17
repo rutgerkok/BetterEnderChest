@@ -1,5 +1,7 @@
 package nl.rutgerkok.betterenderchest.util;
 
+import java.util.Locale;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 
@@ -17,16 +19,18 @@ public final class MaterialParser {
      *            Name of the material.
      * @return The parsed material, or null if no such material exists.
      */
-    @SuppressWarnings("deprecation")
     public static Material matchMaterial(String name) {
-        Material material = Material.matchMaterial(name);
-        if (material == null) {
+        if (Bukkit.getServer() == null) {
+            // For unit tests
+            return Material.valueOf(name.toUpperCase(Locale.ROOT));
+        }
+        Material material = Material.matchMaterial(name, true);
+        if (material == null && !name.contains("[")) {
             try {
-                material = Bukkit.getUnsafe().getMaterialFromInternalName(name);
-            } catch (Throwable t) {
-                // As per the JavaDocs of UnsafeValues, anything can be thrown
-                // The method can also cease to exist.
-                // Anyways, the error is useless to us.
+                // Try Minecraft name
+                material = Bukkit.createBlockData(name).getMaterial();
+            } catch (IllegalArgumentException e) {
+                // Material not found
             }
         }
         return material;

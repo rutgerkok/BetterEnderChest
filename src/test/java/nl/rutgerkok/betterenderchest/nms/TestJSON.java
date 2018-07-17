@@ -8,7 +8,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import net.minecraft.server.v1_12_R1.NBTTagCompound;
+import net.minecraft.server.v1_13_R1.NBTTagCompound;
+
 import nl.rutgerkok.betterenderchest.nms.SimpleNMSHandler.JSONSimpleTypes;
 
 @RunWith(JUnit4.class)

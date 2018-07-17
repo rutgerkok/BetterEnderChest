@@ -41,7 +41,7 @@ public enum ChestDrop {
                 break;
             case EYE_OF_ENDER:
                 // Drop Eye of Ender
-                dropLocation.getWorld().dropItemNaturally(dropLocation, new ItemStack(Material.EYE_OF_ENDER));
+                dropLocation.getWorld().dropItemNaturally(dropLocation, new ItemStack(Material.ENDER_EYE));
                 break;
             case ITSELF:
                 // Drop Ender Chest
@@ -62,7 +62,7 @@ public enum ChestDrop {
             case OBSIDIAN_WITH_EYE_OF_ENDER:
                 // Drop obsidian and an Eye of Ender
                 dropLocation.getWorld().dropItemNaturally(dropLocation, new ItemStack(Material.OBSIDIAN, 8));
-                dropLocation.getWorld().dropItemNaturally(dropLocation, new ItemStack(Material.EYE_OF_ENDER));
+                dropLocation.getWorld().dropItemNaturally(dropLocation, new ItemStack(Material.ENDER_EYE));
                 break;
         }
     }
@@ -80,7 +80,7 @@ public enum ChestDrop {
                 // Cancel event, break block ourselves, drop Eye of Ender
                 event.setCancelled(true);
                 event.getBlock().setType(Material.AIR);
-                dropLocation.getWorld().dropItemNaturally(dropLocation, new ItemStack(Material.EYE_OF_ENDER));
+                dropLocation.getWorld().dropItemNaturally(dropLocation, new ItemStack(Material.ENDER_EYE));
                 break;
             case ITSELF:
                 // Cancel event, break block ourselves, drop Ender Chest
@@ -102,7 +102,7 @@ public enum ChestDrop {
                 break;
             case OBSIDIAN_WITH_EYE_OF_ENDER:
                 // Additional Eye of Ender
-                dropLocation.getWorld().dropItemNaturally(dropLocation, new ItemStack(Material.EYE_OF_ENDER));
+                dropLocation.getWorld().dropItemNaturally(dropLocation, new ItemStack(Material.ENDER_EYE));
                 break;
         }
     }
@@ -120,7 +120,7 @@ public enum ChestDrop {
                 // Cancel event, break block ourselves, drop Eye of Ender
                 event.setCancelled(true);
                 event.getBlock().setType(Material.AIR);
-                dropLocation.getWorld().dropItemNaturally(dropLocation, new ItemStack(Material.EYE_OF_ENDER));
+                dropLocation.getWorld().dropItemNaturally(dropLocation, new ItemStack(Material.ENDER_EYE));
                 break;
             case ITSELF:
                 // Do nothing, this is standard drop
@@ -150,7 +150,7 @@ public enum ChestDrop {
                 event.setCancelled(true);
                 event.getBlock().setType(Material.AIR);
                 dropLocation.getWorld().dropItemNaturally(dropLocation, new ItemStack(Material.OBSIDIAN, 8));
-                dropLocation.getWorld().dropItemNaturally(dropLocation, new ItemStack(Material.EYE_OF_ENDER));
+                dropLocation.getWorld().dropItemNaturally(dropLocation, new ItemStack(Material.ENDER_EYE));
                 break;
         }
     }

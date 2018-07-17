@@ -3,11 +3,7 @@ package nl.rutgerkok.betterenderchest.command;
 import java.util.Arrays;
 import java.util.Map;
 
-import nl.rutgerkok.betterenderchest.BetterEnderChest;
-import nl.rutgerkok.betterenderchest.Translations;
-import nl.rutgerkok.betterenderchest.WorldGroup;
-import nl.rutgerkok.betterenderchest.io.Consumer;
-import nl.rutgerkok.betterenderchest.util.MaterialParser;
+import com.google.common.base.Joiner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -16,7 +12,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import com.google.common.base.Joiner;
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.Translations;
+import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.io.Consumer;
+import nl.rutgerkok.betterenderchest.util.MaterialParser;
 
 public class GiveCommand extends BaseCommand {
 
@@ -86,8 +86,38 @@ public class GiveCommand extends BaseCommand {
             sender.sendMessage(ChatColor.RED + Translations.GROUP_NOT_FOUND.toString(args[0]));
         }
 
+        String materialAndCount = Joiner.on(' ').join(Arrays.asList(args).subList(1, args.length));
+        int startBrace = materialAndCount.indexOf('{');
+        int endBrace = materialAndCount.lastIndexOf('}');
+
+        String materialName = null;
+        String nbt = null;
+        String countString = null;
+        if (startBrace == -1) {
+            if (endBrace != -1) {
+                sender.sendMessage(
+                        ChatColor.RED + "Failed to read material and amount: found extra } in " + materialAndCount);
+                return true;
+            }
+            materialName = args[1];
+            if (args.length >= 3) {
+                countString = args[2];
+            }
+        } else {
+            if (endBrace == -1) {
+                sender.sendMessage(
+                        ChatColor.RED + "Failed to read material and amount: missing } in " + materialAndCount);
+                return true;
+            }
+            materialName = materialAndCount.substring(0, startBrace);
+            nbt = materialAndCount.substring(startBrace, endBrace + 1);
+            if (endBrace + 1 < materialAndCount.length()) {
+                countString = materialAndCount.substring(endBrace + 1).trim();
+            }
+        }
+
         // Material
-        Material material = MaterialParser.matchMaterial(args[1]);
+        Material material = MaterialParser.matchMaterial(materialName);
         if (material == null) {
             sender.sendMessage("" + ChatColor.RED + args[1] + " is not a valid material!");
             return true;
@@ -95,26 +125,15 @@ public class GiveCommand extends BaseCommand {
 
         // Count
         int count = 1;
-        if (args.length >= 3) {
+        if (countString != null) {
             try {
-                count = Integer.parseInt(args[2]);
+                count = Integer.parseInt(countString);
                 if (count > MAX_COUNT) {
                     sender.sendMessage(ChatColor.RED + "Amount was capped at " + MAX_COUNT + ".");
                     count = MAX_COUNT;
                 }
             } catch (NumberFormatException e) {
-                sender.sendMessage("" + ChatColor.RED + args[2] + " is not a valid amount!");
-                return true;
-            }
-        }
-
-        // Damage value
-        short damage = 0;
-        if (args.length >= 4) {
-            try {
-                damage = Short.parseShort(args[3]);
-            } catch (NumberFormatException e) {
-                sender.sendMessage("" + ChatColor.RED + args[3] + " is not a valid damage value!");
+                sender.sendMessage("" + ChatColor.RED + countString + " is not a valid amount!");
                 return true;
             }
         }
@@ -122,11 +141,10 @@ public class GiveCommand extends BaseCommand {
         // Using amount of 1; the addItem method will distribute the item
         // correctly
         // Setting the amount here on the stack fails for large amounts of items
-        ItemStack stack = new ItemStack(material, 1, damage);
+        ItemStack stack = new ItemStack(material, 1);
 
         // NBT data
-        if (args.length >= 5) {
-            String nbt = Joiner.on(' ').join(Arrays.asList(args).subList(4, args.length));
+        if (nbt != null) {
             try {
                 stack = addNBT(stack, nbt);
             } catch (Throwable t) {
