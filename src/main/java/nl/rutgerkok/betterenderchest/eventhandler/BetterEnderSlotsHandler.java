@@ -69,11 +69,6 @@ public class BetterEnderSlotsHandler implements Listener {
             return;
         }
 
-        ItemStack stack = event.getCursor();
-        if (event.getHotbarButton() != -1) {
-            stack = event.getWhoClicked().getInventory().getItem(event.getHotbarButton());
-        }
-
         boolean invalidStack = event.getCursor() != null && !canPlaceStack(event.getCursor());
         if (event.getHotbarButton() != -1) {
             // When placing items from the hotbar, also check hotbar slot
