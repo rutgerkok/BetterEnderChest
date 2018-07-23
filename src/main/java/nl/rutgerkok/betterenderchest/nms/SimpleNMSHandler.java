@@ -38,7 +38,6 @@ import net.minecraft.server.v1_13_R1.NBTTagLong;
 import net.minecraft.server.v1_13_R1.NBTTagString;
 import net.minecraft.server.v1_13_R1.TileEntity;
 import net.minecraft.server.v1_13_R1.TileEntityEnderChest;
-
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.ChestRestrictions;
@@ -198,7 +197,9 @@ public class SimpleNMSHandler extends NMSHandler {
         private static final int COMPOUND = 10;
     }
 
-    private BetterEnderChest plugin;
+    private static final int DATA_VERSION_MC_1_12_2 = 1343;
+
+    private final BetterEnderChest plugin;
 
     public SimpleNMSHandler(BetterEnderChest plugin) {
         this.plugin = plugin;
@@ -244,7 +245,7 @@ public class SimpleNMSHandler extends NMSHandler {
 
     private int getStoredDataVersion(NBTTagCompound baseTag) {
         if (!baseTag.hasKey("DataVersion")) {
-            return -1;
+            return DATA_VERSION_MC_1_12_2;
         }
         return baseTag.getInt("DataVersion");
     }
@@ -326,6 +327,33 @@ public class SimpleNMSHandler extends NMSHandler {
         }
     }
 
+    private NBTTagCompound repairShulkerBoxes(NBTTagCompound item) {
+        NBTTagCompound itemTag = item.getCompound("tag");
+        if (!itemTag.hasKey("BlockEntityTag")) {
+            return item;
+        }
+        NBTTagCompound blockEntityTag = itemTag.getCompound("BlockEntityTag");
+        if (!blockEntityTag.hasKey("Items")) {
+            return item;
+        }
+        NBTTagList items = blockEntityTag.getList("Items", TagType.COMPOUND);
+        if (items.isEmpty()) {
+            return item;
+        }
+        NBTTagCompound firstItem = items.getCompound(0);
+        if (!firstItem.hasKey("Damage")) {
+            return item;
+        }
+
+        // Ok, conversion failed. Downgrade item to 1.12.2 and try again
+        item.setByte("Damage", (byte) 0);
+        if (itemTag.hasKey("display")) {
+            NBTTagCompound displayTag = itemTag.getCompound("display");
+            displayTag.setString("Name", blockEntityTag.getString("CustomName"));
+        }
+        return this.updateToLatestMinecraft(item, DATA_VERSION_MC_1_12_2);
+    }
+
     @Override
     public void saveInventoryToFile(File file, SaveEntry saveEntry) throws IOException {
         FileOutputStream stream = null;
@@ -387,11 +415,17 @@ public class SimpleNMSHandler extends NMSHandler {
         @SuppressWarnings("deprecation")
         int newVersion = Bukkit.getUnsafe().getDataVersion();
         if (newVersion == oldVersion) {
+            // Check if update was correct (there used to be a bug)
+            if (item.hasKey("tag") && item.getString("id").endsWith("shulker_box")) {
+                return repairShulkerBoxes(item);
+            }
+
             return item;
         }
 
-        Dynamic<NBTBase> input = new Dynamic<NBTBase>(DynamicOpsNBT.a, item);
-        Dynamic<NBTBase> result = DataConverterRegistry.a().update(DataConverterTypes.ITEM_STACK, input, oldVersion, newVersion);
+        Dynamic<NBTBase> input = new Dynamic<>(DynamicOpsNBT.a, item);
+        Dynamic<NBTBase> result = DataConverterRegistry.a().update(DataConverterTypes.ITEM_STACK, input, oldVersion,
+                newVersion);
         return (NBTTagCompound) result.getValue();
     }
 
