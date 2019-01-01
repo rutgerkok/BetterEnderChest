@@ -1,16 +1,21 @@
 package nl.rutgerkok.betterenderchest;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.meta.ItemMeta;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
+
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  * Simple item meta implementation that supports name and lore.
@@ -20,6 +25,11 @@ public final class NameableItemMeta implements ItemMeta {
 
     private String name = null;
     private ImmutableList<String> lore = ImmutableList.of();
+
+    @Override
+    public boolean addAttributeModifier(Attribute arg0, AttributeModifier arg1) {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public boolean addEnchant(Enchantment ench, int level, boolean ignoreLevelRestriction) {
@@ -41,6 +51,21 @@ public final class NameableItemMeta implements ItemMeta {
         } catch (CloneNotSupportedException e) {
             throw new AssertionError(e);
         }
+    }
+
+    @Override
+    public Multimap<Attribute, AttributeModifier> getAttributeModifiers() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Collection<AttributeModifier> getAttributeModifiers(Attribute arg0) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot arg0) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -71,6 +96,11 @@ public final class NameableItemMeta implements ItemMeta {
     @Override
     public List<String> getLore() {
         return lore;
+    }
+
+    @Override
+    public boolean hasAttributeModifiers() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -114,6 +144,21 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
+    public boolean removeAttributeModifier(Attribute arg0) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean removeAttributeModifier(Attribute arg0, AttributeModifier arg1) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean removeAttributeModifier(EquipmentSlot arg0) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean removeEnchant(Enchantment ench) {
         return false;
     }
@@ -125,6 +170,11 @@ public final class NameableItemMeta implements ItemMeta {
 
     @Override
     public Map<String, Object> serialize() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setAttributeModifiers(Multimap<Attribute, AttributeModifier> arg0) {
         throw new UnsupportedOperationException();
     }
 
