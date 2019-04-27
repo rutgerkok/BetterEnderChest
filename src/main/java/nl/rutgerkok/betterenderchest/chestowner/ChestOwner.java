@@ -70,6 +70,24 @@ public interface ChestOwner {
     String getSaveFileName();
 
     /**
+     * Titles can be up to 32 characters. If the given title ({@link #getInventoryTitle()} is too long, this
+     * function trims the title to the max allowed length. If the title isn't
+     * too long, the title itself is returned.
+     *
+     * @param title
+     *            The title to trim.
+     * @return The trimmed title.
+     */
+    default String getTrimmedInventoryTitle() {
+        String title = getInventoryTitle();
+        
+                    if (title.length() <= 32) {
+                        return title;
+                    }
+                    return title.substring(0, 32);
+    }
+
+    /**
      * Gets whether this owner represents the "owner" of the default chest.
      * 
      * @return True if owner of the default chest, false otherwise.

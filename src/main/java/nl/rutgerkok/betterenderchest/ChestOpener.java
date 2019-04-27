@@ -1,5 +1,10 @@
 package nl.rutgerkok.betterenderchest;
 
+import org.apache.commons.lang.Validate;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+
 import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.PublicChest;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.chestprotection.ProtectionBridge;
@@ -8,11 +13,6 @@ import nl.rutgerkok.betterenderchest.exception.InvalidOwnerException;
 import nl.rutgerkok.betterenderchest.exception.NoPermissionException;
 import nl.rutgerkok.betterenderchest.io.Consumer;
 import nl.rutgerkok.betterenderchest.nms.NMSHandler;
-
-import org.apache.commons.lang.Validate;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 
 public class ChestOpener {
     private final BetterEnderChest plugin;

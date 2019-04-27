@@ -2,9 +2,6 @@ package nl.rutgerkok.betterenderchest;
 
 import java.util.ListIterator;
 
-import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
-import nl.rutgerkok.betterenderchest.exception.ChestNotFoundException;
-
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -12,6 +9,9 @@ import org.bukkit.inventory.ItemStack;
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.betterenderchest.exception.ChestNotFoundException;
 
 /**
  * Class that has the logic for creating all kinds of empty inventories.
@@ -187,7 +187,8 @@ public class EmptyInventoryProvider {
     public Inventory loadEmptyInventory(ChestOwner chestOwner, WorldGroup worldGroup, ChestRestrictions chestRestrictions) {
         int inventoryRows = chestRestrictions.getChestRows();
         // Return the inventory
-        return Bukkit.createInventory(new BetterEnderInventoryHolder(chestOwner, worldGroup, chestRestrictions), inventoryRows * 9, trimTitle(chestOwner.getInventoryTitle()));
+        return Bukkit.createInventory(new BetterEnderInventoryHolder(chestOwner, worldGroup, chestRestrictions),
+                inventoryRows * 9, chestOwner.getTrimmedInventoryTitle());
     }
 
     /**
@@ -207,19 +208,4 @@ public class EmptyInventoryProvider {
         return loadEmptyInventory(chestOwner, worldGroup, restrictions);
     }
 
-    /**
-     * Titles can be up to 32 characters. If the given title is too long, this
-     * function trims the title to the max allowed length. If the title isn't
-     * too long, the title itself is returned.
-     *
-     * @param title
-     *            The title to trim.
-     * @return The trimmed title.
-     */
-    private String trimTitle(String title) {
-        if (title.length() <= 32) {
-            return title;
-        }
-        return title.substring(0, 32);
-    }
 }
