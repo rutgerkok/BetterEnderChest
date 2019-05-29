@@ -210,7 +210,7 @@ public class SimpleNMSHandler extends NMSHandler {
         BlockPosition blockPos = toBlockPosition(loc);
         TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(blockPos);
         if (tileEntity instanceof TileEntityEnderChest) {
-            ((TileEntityEnderChest) tileEntity).d(); // .close()
+            ((TileEntityEnderChest) tileEntity).f(); // .close()
         }
     }
 
@@ -323,7 +323,7 @@ public class SimpleNMSHandler extends NMSHandler {
         BlockPosition blockPos = toBlockPosition(loc);
         TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(blockPos);
         if (tileEntity instanceof TileEntityEnderChest) {
-            ((TileEntityEnderChest) tileEntity).c(); // .open()
+            ((TileEntityEnderChest) tileEntity).d(); // .open()
         }
     }
 
