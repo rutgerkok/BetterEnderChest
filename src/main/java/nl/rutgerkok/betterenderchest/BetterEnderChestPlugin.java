@@ -7,10 +7,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Lists;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -22,6 +18,10 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Lists;
 
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwners;
 import nl.rutgerkok.betterenderchest.chestprotection.BlockLockerBridge;
@@ -79,19 +79,19 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private File chestSaveLocation;
     private BetterEnderChestSizes chestSizes;
     private BetterEnderCommandManager commandManager;
-    private Registry<BaseCommand> commands = new Registry<BaseCommand>();
+    private Registry<BaseCommand> commands = new Registry<>();
     private boolean compatibilityMode;
     private DatabaseSettings databaseSettings;
     private boolean debug;
     private EmptyInventoryProvider emptyInventoryProvider;
     private BetterEnderCache enderCache;
     private BetterEnderWorldGroupManager groups;
-    private Registry<InventoryImporter> importers = new Registry<InventoryImporter>();
+    private Registry<InventoryImporter> importers = new Registry<>();
     private Predicate<ItemStack> itemFilter = Predicates.alwaysTrue();
     private boolean lockChestsOnError = true;
     private boolean manualGroupManagement;
-    private Registry<NMSHandler> nmsHandlers = new Registry<NMSHandler>();
-    private Registry<ProtectionBridge> protectionBridges = new Registry<ProtectionBridge>();
+    private Registry<NMSHandler> nmsHandlers = new Registry<>();
+    private Registry<ProtectionBridge> protectionBridges = new Registry<>();
     private int rankUpgrades;
     private SaveAndLoadError saveAndLoadError;
     private boolean useUuids;
@@ -371,7 +371,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
             playerChestSlots[i] = config.getInt(slotSettingName, 27);
 
-            if (playerChestSlots[i] < 1 || playerChestSlots[i] > 20 * 9) {
+            if (playerChestSlots[i] < 1 || playerChestSlots[i] > 6 * 9) {
                 warning("The number of slots (upgrade nr. " + i + ") in the private chest was " + playerChestSlots[i] + "...");
                 warning("Changed it to 27.");
                 playerChestSlots[i] = 27;
@@ -402,7 +402,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
         // slots?
         int publicChestSlots = config.getInt("PublicEnderChest.defaultSlots", playerChestSlots[0]);
-        if (publicChestSlots < 1 || publicChestSlots > 20 * 9) {
+        if (publicChestSlots < 1 || publicChestSlots > 6 * 9) {
             warning("The number of slots in the public chest was " + publicChestSlots + "...");
             warning("Changed it to 27.");
             publicChestSlots = 27;
