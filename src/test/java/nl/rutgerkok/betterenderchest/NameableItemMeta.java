@@ -230,9 +230,5 @@ public final class NameableItemMeta implements ItemMeta {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public Spigot spigot() {
-        throw new UnsupportedOperationException();
-    }
 
 }
