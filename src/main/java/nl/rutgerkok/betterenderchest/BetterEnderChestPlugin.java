@@ -371,7 +371,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
             playerChestSlots[i] = config.getInt(slotSettingName, 27);
 
-            if (playerChestSlots[i] < 1 || playerChestSlots[i] > 6 * 9) {
+            if (playerChestSlots[i] < 1 || playerChestSlots[i] > ChestRestrictions.MAX_ROWS * 9) {
                 warning("The number of slots (upgrade nr. " + i + ") in the private chest was " + playerChestSlots[i] + "...");
                 warning("Changed it to 27.");
                 playerChestSlots[i] = 27;
@@ -402,7 +402,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
         // slots?
         int publicChestSlots = config.getInt("PublicEnderChest.defaultSlots", playerChestSlots[0]);
-        if (publicChestSlots < 1 || publicChestSlots > 6 * 9) {
+        if (publicChestSlots < 1 || publicChestSlots > ChestRestrictions.MAX_ROWS * 9) {
             warning("The number of slots in the public chest was " + publicChestSlots + "...");
             warning("Changed it to 27.");
             publicChestSlots = 27;

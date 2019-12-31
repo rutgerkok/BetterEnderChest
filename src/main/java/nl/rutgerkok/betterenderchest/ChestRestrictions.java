@@ -7,11 +7,19 @@ package nl.rutgerkok.betterenderchest;
  */
 public final class ChestRestrictions {
 
+    /**
+     * The maximum number of rows in a chest that Minecraft supports.
+     */
+    public static final int MAX_ROWS = 6;
+
     private final boolean allowItemInsertions;
     private final int chestRows;
     private final int disabledSlots;
 
     public ChestRestrictions(int chestRows, int disabledSlots, boolean allowItemInsertions) {
+        if (chestRows > MAX_ROWS) {
+            chestRows = MAX_ROWS;
+        }
         this.chestRows = chestRows;
         this.disabledSlots = disabledSlots;
         this.allowItemInsertions = allowItemInsertions;
@@ -19,19 +27,25 @@ public final class ChestRestrictions {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ChestRestrictions other = (ChestRestrictions) obj;
-        if (allowItemInsertions != other.allowItemInsertions)
+        if (allowItemInsertions != other.allowItemInsertions) {
             return false;
-        if (chestRows != other.chestRows)
+        }
+        if (chestRows != other.chestRows) {
             return false;
-        if (disabledSlots != other.disabledSlots)
+        }
+        if (disabledSlots != other.disabledSlots) {
             return false;
+        }
         return true;
     }
 

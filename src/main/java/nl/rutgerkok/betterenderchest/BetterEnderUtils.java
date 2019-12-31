@@ -1,10 +1,9 @@
 package nl.rutgerkok.betterenderchest;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
-
-import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -18,6 +17,8 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.metadata.Metadatable;
 
 import com.google.common.collect.ImmutableList;
+
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 /**
  * Various utilities used in the BetterEnderChest plugin.
@@ -62,6 +63,10 @@ public class BetterEnderUtils {
      */
     public static void copyContents(Inventory oldInventory, Inventory newInventory, Location dropLocation) {
         int sizeNew = newInventory.getSize();
+        List<ItemStack> overflowing = new ArrayList<>();
+        if (oldInventory.getHolder() instanceof BetterEnderInventoryHolder) {
+            overflowing.addAll(((BetterEnderInventoryHolder) oldInventory.getHolder()).handleOverflowingItems());
+        }
 
         ListIterator<ItemStack> it = oldInventory.iterator();
         while (it.hasNext()) {
@@ -72,16 +77,21 @@ public class BetterEnderUtils {
                     // It fits in the chest, add it
                     newInventory.setItem(slot, stack);
                 } else {
-                    // It doesn't fit, try to add it to another slot
-                    HashMap<Integer, ItemStack> excess = newInventory.addItem(stack);
-                    // Drop everything that doesn't fit
-                    for (ItemStack excessStack : excess.values()) {
-                        if (dropLocation != null) {
-                            dropLocation.getWorld().dropItem(dropLocation, excessStack);
-                        }
-                    }
+                    // Else, we will look for free slots afterwards
+                    overflowing.add(stack);
                 }
+            }
+        }
 
+        // Rearrange or drop everything else
+        for (ItemStack stack : overflowing) {
+            // It doesn't fit, try to add it to another slot
+            HashMap<Integer, ItemStack> excess = newInventory.addItem(stack);
+            // Drop everything that doesn't fit
+            for (ItemStack excessStack : excess.values()) {
+                if (dropLocation != null) {
+                    dropLocation.getWorld().dropItem(dropLocation, excessStack);
+                }
             }
         }
     }
@@ -205,8 +215,10 @@ public class BetterEnderUtils {
         }
 
         if (desiredRestrictions == null || desiredRestrictions.equals(chestRestrictions)) {
-            // Don't resize
-            return null;
+            if (!inventoryHolder.hasOverflowingItems()) {
+                // Don't resize
+                return null;
+            }
         }
 
         // Resize

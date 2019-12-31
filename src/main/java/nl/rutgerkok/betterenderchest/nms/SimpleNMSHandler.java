@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -302,13 +303,21 @@ public class SimpleNMSHandler extends NMSHandler {
         Inventory inventory = plugin.getEmptyInventoryProvider().loadEmptyInventory(chestOwner, worldGroup, chestRestrictions);
 
         // Add all the items
+        List<ItemStack> overflowingItems = new ArrayList<>();
         for (int i = 0; i < inventoryTag.size(); i++) {
             NBTTagCompound item = inventoryTag.getCompound(i);
             int slot = item.getByte("Slot") & 255;
             item = updateToLatestMinecraft(item, dataVersion);
+            ItemStack bukkitItem = CraftItemStack.asCraftMirror(net.minecraft.server.v1_15_R1.ItemStack.a(item));
 
-            inventory.setItem(slot,
-                    CraftItemStack.asCraftMirror(net.minecraft.server.v1_15_R1.ItemStack.a(item)));
+            if (slot < inventory.getSize()) {
+                inventory.setItem(slot, bukkitItem);
+            } else {
+                overflowingItems.add(bukkitItem);
+            }
+        }
+        if (!overflowingItems.isEmpty()) {
+            BetterEnderInventoryHolder.of(inventory).addOverflowingItems(overflowingItems);
         }
 
         // Items currently in the chest are what is in the database
