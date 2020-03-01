@@ -26,7 +26,7 @@
 		</repository>
 		<repository>
 			<id>multiverse-repo</id>
-			<url>http://repo.onarandombox.com/nexus/service/local/repositories/multiverse/content/</url>
+			<url>http://repo.onarandombox.com/content/groups/public/</url>
 		</repository>
 	</repositories>
 	<build>
