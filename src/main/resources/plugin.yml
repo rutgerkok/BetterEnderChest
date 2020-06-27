@@ -3,7 +3,7 @@ main: nl.rutgerkok.betterenderchest.BetterEnderChestPlugin
 description: 'Secure and configurable Ender Chests'
 version: '${project.version}'
 author: 'Rutger Kok'
-api-version: '1.15'
+api-version: '1.16'
 softdepend:
 - 'Lockette'
 - 'LWC'
