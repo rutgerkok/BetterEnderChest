@@ -21,6 +21,10 @@
 			<url>http://www.rutgerkok.nl/repo</url>
 		</repository>
 		<repository>
+			<id>nms-repo</id> <!-- Spigot impl -->
+			<url>https://repo.codemc.io/repository/nms/</url>
+		</repository>
+		<repository>
 			<id>myworlds-repo</id>
 			<url>https://ci.mg-dev.eu/plugin/repository/everything</url>
 		</repository>
@@ -55,13 +59,13 @@
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.15-R0.1-SNAPSHOT</version>
+			<version>1.16.1-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot</artifactId>
-			<version>1.15-R0.1-SNAPSHOT</version>
+			<version>1.16.1-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

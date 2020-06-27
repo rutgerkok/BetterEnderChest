@@ -13,10 +13,10 @@ public interface ChestOwner {
     /**
      * Two <code>ChestOwner</code>s are equal if the owners of the two chests
      * are the same person/entity.
-     * 
+     *
      * <p>
      * {@inheritDoc}
-     * 
+     *
      * @param object
      *            {@inheritDoc}
      * @return {@inheritDoc}
@@ -27,7 +27,7 @@ public interface ChestOwner {
     /**
      * Gets the name of this owner. The name will be suitable for displaying
      * purposes.
-     * 
+     *
      * @return The name of this owner.
      */
     String getDisplayName();
@@ -36,7 +36,7 @@ public interface ChestOwner {
      * Gets the title for inventories with this owner. Warning: the title may be
      * longer than Minecraft's max title length, so make sure to cut it off if
      * needed.
-     * 
+     *
      * @return The title.
      */
     String getInventoryTitle();
@@ -44,7 +44,7 @@ public interface ChestOwner {
     /**
      * Gets the player that this <code>ChestOwner</code> represents. Returns
      * null if this owner {@link #isSpecialChest() is a special chest}.
-     * 
+     *
      * @return The player that this <code>ChestOwner</code> represents, or null.
      * @see #getPlayer() More efficient implementation if you are only
      *      interested in online players.
@@ -55,7 +55,7 @@ public interface ChestOwner {
      * Gets the player that this <code>ChestOwner</code> represents. Returns
      * null if the owner is offline, or if this owner {@link #isSpecialChest()
      * is a special chest}.
-     * 
+     *
      * @return The player that this <code>ChestOwner</code> represents, or null.
      */
     Player getPlayer();
@@ -74,22 +74,20 @@ public interface ChestOwner {
      * function trims the title to the max allowed length. If the title isn't
      * too long, the title itself is returned.
      *
-     * @param title
-     *            The title to trim.
      * @return The trimmed title.
      */
     default String getTrimmedInventoryTitle() {
         String title = getInventoryTitle();
-        
-                    if (title.length() <= 32) {
-                        return title;
-                    }
-                    return title.substring(0, 32);
+
+        if (title.length() <= 32) {
+            return title;
+        }
+        return title.substring(0, 32);
     }
 
     /**
      * Gets whether this owner represents the "owner" of the default chest.
-     * 
+     *
      * @return True if owner of the default chest, false otherwise.
      */
     boolean isDefaultChest();
@@ -98,7 +96,7 @@ public interface ChestOwner {
      * Gets whether the owner of this chest is currently online. The "owners" of
      * the public and default chests are always "online", even though
      * {@link #getPlayer()} returns null.
-     * 
+     *
      * @return Whether the owner this chest is r
      */
     boolean isOwnerOnline();
@@ -106,7 +104,7 @@ public interface ChestOwner {
     /**
      * Gets whether this <code>ChestOwner</code> represents the given
      * {@link OfflinePlayer}.
-     * 
+     *
      * @param player
      *            The player to check.
      * @return True if the two represent the same person, false otherwise.
@@ -115,7 +113,7 @@ public interface ChestOwner {
 
     /**
      * Gets whether this owner represents the "owner" of the public chest.
-     * 
+     *
      * @return True if owner of the public chest, false otherwise.
      */
     boolean isPublicChest();
@@ -123,7 +121,7 @@ public interface ChestOwner {
     /**
      * Gets whether this is the owner of a public/default chest, or a chest for
      * a player.
-     * 
+     *
      * @return True if this is the owner of a public/default chest, false
      *         otherwise.
      */
