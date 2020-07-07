@@ -12,8 +12,7 @@ import org.bukkit.Material;
 public final class MaterialParser {
 
     /**
-     * Parses the material. If possible, internal Minecraft names are supported
-     * too.
+     * Parses the material. If possible, internal Minecraft names are supported too.
      *
      * @param name
      *            Name of the material.
@@ -24,14 +23,19 @@ public final class MaterialParser {
             // For unit tests
             return Material.valueOf(name.toUpperCase(Locale.ROOT));
         }
-        Material material = Material.matchMaterial(name, true);
-        if (material == null && !name.contains("[")) {
-            try {
-                // Try Minecraft name
-                material = Bukkit.createBlockData(name).getMaterial();
-            } catch (IllegalArgumentException e) {
-                // Material not found
-            }
+        Material material = null;
+        if (name.contains("[")) {
+            return null; // Avoid parsing block data
+        }
+        try {
+            // Try Minecraft name
+            material = Bukkit.createBlockData(name).getMaterial();
+        } catch (IllegalArgumentException e) {
+            // Material not found
+        }
+        if (material == null) {
+            // Try legacy name
+            return Material.matchMaterial(name, true);
         }
         return material;
     }
