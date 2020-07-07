@@ -1,8 +1,12 @@
 package nl.rutgerkok.betterenderchest;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Item stack that supports {@link NameableItemMeta}.
@@ -36,6 +40,18 @@ public final class NameableItemStack extends ItemStack {
     @Override
     public boolean hasItemMeta() {
         return meta.hasDisplayName() || meta.hasLore();
+    }
+
+    @Override
+    @NotNull
+    public Map<String, Object> serialize() {
+        // Don't call into Bukkit.getServer(), just serialize type and amount
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("type", this.getType().name());
+        if (this.getAmount() != 1) {
+            result.put("amount", this.getAmount());
+        }
+        return result;
     }
 
     @Override

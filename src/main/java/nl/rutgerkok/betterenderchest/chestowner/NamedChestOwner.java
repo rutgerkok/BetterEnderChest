@@ -1,21 +1,21 @@
 package nl.rutgerkok.betterenderchest.chestowner;
 
-import nl.rutgerkok.betterenderchest.Translations;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import nl.rutgerkok.betterenderchest.Translations;
+
 /**
  * For chests referenced by name.
  *
  */
-class NamedChestOwner implements ChestOwner {
+public final class NamedChestOwner implements ChestOwner {
 
     private final String name;
 
-    NamedChestOwner(String name) {
+    public NamedChestOwner(String name) {
         Validate.notNull(name, "Name may not be null");
         this.name = name;
     }

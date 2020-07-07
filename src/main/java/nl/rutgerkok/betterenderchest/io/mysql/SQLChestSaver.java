@@ -27,7 +27,7 @@ final class SQLChestSaver implements ChestSaver {
         try {
             sqlHandler.updateChest(saveEntry.getChestOwner(), saveEntry.getWorldGroup(), json);
         } catch (SQLException e) {
-            throw new IOException(e);
+            throw new IOException("Failed to save chest. Contents:\n\n" + saveEntry.getDebugYaml() + "\n\n", e);
         }
     }
 }

@@ -7,13 +7,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.Lock;
 
-import nl.rutgerkok.betterenderchest.BetterEnderChest;
-import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.AutoSave;
-import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
-import nl.rutgerkok.betterenderchest.WorldGroup;
-import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
-import nl.rutgerkok.betterenderchest.exception.ChestNotFoundException;
-
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitTask;
@@ -25,6 +18,13 @@ import com.google.common.collect.MapMaker;
 import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.AutoSave;
+import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
+import nl.rutgerkok.betterenderchest.WorldGroup;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.betterenderchest.exception.ChestNotFoundException;
 
 /**
  * Simple implementation of {@link BetterEnderCache}. You need to provide a
@@ -182,7 +182,7 @@ public class SimpleEnderCache implements BetterEnderCache {
             holder.markContentsAsSaved(inventory.getContents());
 
             plugin.debug("Saving chest of " + holder.getChestOwner().getDisplayName());
-            chestSaver.saveChest(new SaveEntry(inventory));
+            chestSaver.saveChest(SaveEntry.copyOf(inventory));
         } finally {
             lock.unlock();
         }
