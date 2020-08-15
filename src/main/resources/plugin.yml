@@ -5,6 +5,7 @@ version: '${project.version}'
 author: 'Rutger Kok'
 api-version: '1.16'
 softdepend:
+- 'BlockLocker'
 - 'Lockette'
 - 'LWC'
 - 'Multiverse-Inventories'
