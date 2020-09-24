@@ -12,7 +12,7 @@ import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 
 /**
  * Class that executes all queries. This should be the only class with SQL code.
- * 
+ *
  */
 public final class SQLHandler {
     private static final String TABLE_NAME_PREFIX = "bec_chestdata_";
@@ -62,7 +62,7 @@ public final class SQLHandler {
 
     /**
      * Closes the connection. Does nothing if the connection was already closed.
-     * 
+     *
      * @throws SQLException
      *             If something went wrong.
      */
@@ -79,7 +79,7 @@ public final class SQLHandler {
     /**
      * Creates the table for the given world group. Does nothing if the table
      * already exists.
-     * 
+     *
      * @param group
      *            The world group to create the table for.
      * @throws SQLException
@@ -93,11 +93,11 @@ public final class SQLHandler {
             if (this.settings.useUtf8()) {
                 query = "CREATE TABLE IF NOT EXISTS `" + getTableName(group) + "` ("
                         + " `chest_id` int(10) unsigned NOT NULL AUTO_INCREMENT,"
-                        + " `chest_owner` char(36) CHARACTER SET ascii NOT NULL,"
-                        + " `chest_data` mediumtext CHARACTER SET utf8 NOT NULL,"
+                        + " `chest_owner` char(36) CHARACTER SET utf8mb4 NOT NULL,"
+                        + " `chest_data` mediumtext CHARACTER SET utf8mb4 NOT NULL,"
                         + " PRIMARY KEY (`chest_id`),"
                         + " UNIQUE KEY `chest_owner` (`chest_owner`)"
-                        + " ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;";
+                        + " ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4  COLLATE=utf8mb4_unicode_ci;";
             } else {
                 query = "CREATE TABLE IF NOT EXISTS `" + getTableName(group) + "` ("
                         + " `chest_id` int(10) unsigned NOT NULL AUTO_INCREMENT,"
@@ -155,7 +155,7 @@ public final class SQLHandler {
 
     /**
      * Loads a chest from the database.
-     * 
+     *
      * @param chestOwner
      *            The name of the inventory.
      * @param group
@@ -191,7 +191,7 @@ public final class SQLHandler {
     /**
      * Saves a chest to the database. First the UPDATE query is tried, if
      * nothing has been updated, the INSERT query is tried.
-     * 
+     *
      * @param chestOwner
      *            The owner of the chest.
      * @param worldGroup
