@@ -21,9 +21,13 @@
 			<url>http://www.rutgerkok.nl/repo</url>
 		</repository>
 		<repository>
-			<id>codemc-repo</id> <!-- Spigot impl, BlockLocker -->
-			<url>https://repo.codemc.io/repository/nms/</url>
+			<id>nms-repo</id> <!-- Spigot impl -->
+			<url>https://repo.codemc.org/repository/nms/</url>
 		</repository>
+		<repository>
+            <id>codemc-repo</id> <!-- BlockLocker -->
+            <url>https://repo.codemc.org/repository/maven-public/</url>
+        </repository>
 		<repository>
 			<id>myworlds-repo</id>
 			<url>https://ci.mg-dev.eu/plugin/repository/everything</url>
