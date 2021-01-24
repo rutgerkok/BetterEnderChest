@@ -5,11 +5,11 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import nl.rutgerkok.betterenderchest.PluginLogger;
-import nl.rutgerkok.betterenderchest.util.MaterialParser;
-
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Tag;
 import org.bukkit.inventory.ItemStack;
 
 import com.google.common.base.Function;
@@ -17,6 +17,9 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+
+import nl.rutgerkok.betterenderchest.PluginLogger;
+import nl.rutgerkok.betterenderchest.util.MaterialParser;
 
 /**
  * Reads configuration sections, converts them to item rules.
@@ -27,7 +30,7 @@ public final class ItemFilterReader implements Function<Map<?, ?>, Predicate<Ite
 
     /**
      * Creates a new item filter reader.
-     * 
+     *
      * @param logger
      *            The logger.
      * @throws NullPointerException
@@ -39,7 +42,7 @@ public final class ItemFilterReader implements Function<Map<?, ?>, Predicate<Ite
 
     /**
      * Parses a configuration section as an item rule.
-     * 
+     *
      * @param configSection
      *            The section to parse.
      * @return The item rule.
@@ -67,10 +70,37 @@ public final class ItemFilterReader implements Function<Map<?, ?>, Predicate<Ite
             return getRuleForLore(configSection);
         } else if (key.equals("itemType")) {
             return getRuleForItemType(configSection);
+        } else if (key.equals("itemTag")) {
+            return getRuleForItemTag(configSection);
         } else {
             logger.warning("Invalid item rule: key '" + key + "' not recognized");
             return Predicates.alwaysFalse();
         }
+    }
+
+    private Predicate<ItemStack> getRuleForItemTag(Map<?, ?> configSection) {
+        String tagString = toStringOrNull(configSection.get("for"));
+        if (tagString == null) {
+            logger.warning("Invalid item rule: no 'for' found");
+            return Predicates.alwaysFalse();
+        }
+        NamespacedKey tagKey;
+        try {
+            tagKey = MaterialParser.key(tagString);
+        } catch (IllegalArgumentException e) {
+            logger.warning("Invalid item rule: '" + tagString + "' is not a valid tag");
+            return Predicates.alwaysFalse();
+        }
+        Tag<Material> tag = Bukkit.getTag(Tag.REGISTRY_BLOCKS, tagKey, Material.class);
+        if (tag == null) {
+            tag = Bukkit.getTag(Tag.REGISTRY_ITEMS, tagKey, Material.class);
+        }
+        if (tag == null) {
+            logger.warning("Invalid item rule: the tag '" + tagString + "' doesn't exist");
+            return Predicates.alwaysFalse();
+        }
+
+        return new ItemTagFilter(tag);
     }
 
     private Predicate<ItemStack> getRuleForItemType(Map<?, ?> configSection) {
