@@ -11,12 +11,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Tag;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.google.common.base.Predicate;
@@ -87,7 +92,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     private BetterEnderCache enderCache;
     private BetterEnderWorldGroupManager groups;
     private Registry<InventoryImporter> importers = new Registry<>();
-    private Predicate<ItemStack> itemFilter = Predicates.alwaysTrue();
+    private Predicate<ItemStack> isIllegalItem = Predicates.alwaysTrue();
     private boolean lockChestsOnError = true;
     private boolean manualGroupManagement;
     private Registry<NMSHandler> nmsHandlers = new Registry<>();
@@ -99,6 +104,28 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public synchronized boolean canSaveAndLoad() {
         return saveAndLoadError == null;
+    }
+
+    private boolean containsIllegalItemInShulker(ItemStack stack) {
+        if (!Tag.SHULKER_BOXES.isTagged(stack.getType())) {
+            return false; // Not a shulker
+        }
+        // Check what's in the box
+        ItemMeta meta = stack.getItemMeta();
+        if (!(meta instanceof BlockStateMeta)) {
+            return false; // Invalid item meta - did someone modify the shulker tag?
+        }
+        BlockState blockState = ((BlockStateMeta) meta).getBlockState();
+        if (!(blockState instanceof ShulkerBox)) {
+            return false; // Invalid item meta - did someone modify the shulker tag?
+        }
+        for (ItemStack storedStack : ((ShulkerBox) blockState).getInventory().getContents()) {
+            if (storedStack != null && isIllegalItem.apply(storedStack)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -309,7 +336,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         this.chestDropCreative = ChestDrop.valueOf(chestDropCreative);
 
         // CompatibilityMode
-        compatibilityMode = config.getBoolean("BetterEnderChest.enderChestCompatibilityMode", config.getBoolean("BetterEnderChest.enderChestCompabilityMode", true));
+        compatibilityMode = config.getBoolean("BetterEnderChest.enderChestCompatibilityMode", config
+                .getBoolean("BetterEnderChest.enderChestCompabilityMode", true));
         config.set("BetterEnderChest.enderChestCompatibilityMode", compatibilityMode);
         config.set("BetterEnderChest.enderChestCompabilityMode", null);
 
@@ -325,7 +353,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
         // (Setting should be set to true by default if there is a Groups
         // section for compability with old configs)
         boolean defaultManualGroupManagement = config.isConfigurationSection("Groups");
-        manualGroupManagement = config.getBoolean("BetterEnderChest.manualWorldgroupManagement", defaultManualGroupManagement);
+        manualGroupManagement = config
+                .getBoolean("BetterEnderChest.manualWorldgroupManagement", defaultManualGroupManagement);
         config.set("BetterEnderChest.manualWorldgroupManagement", manualGroupManagement);
 
         // Autosave
@@ -353,8 +382,7 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             illegalItems.add(itemFilterReader.apply(entry));
         }
         config.set("IllegalItems", illegalItemsFoundInConfig);
-        Predicate<ItemStack> isIllegalItem = Predicates.or(illegalItems);
-        this.itemFilter = Predicates.not(isIllegalItem);
+        this.isIllegalItem = Predicates.or(illegalItems);
 
         // Private chests
         rankUpgrades = config.getInt("PrivateEnderChest.rankUpgrades", 2);
@@ -372,7 +400,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             playerChestSlots[i] = config.getInt(slotSettingName, 27);
 
             if (playerChestSlots[i] < 1 || playerChestSlots[i] > ChestRestrictions.MAX_ROWS * 9) {
-                warning("The number of slots (upgrade nr. " + i + ") in the private chest was " + playerChestSlots[i] + "...");
+                warning("The number of slots (upgrade nr. " + i + ") in the private chest was " + playerChestSlots[i]
+                        + "...");
                 warning("Changed it to 27.");
                 playerChestSlots[i] = 27;
             }
@@ -381,10 +410,12 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
 
         // Public chests
         // show for unprotected chests?
-        PublicChest.openOnOpeningUnprotectedChest = config.getBoolean("PublicEnderChest.showOnOpeningUnprotectedChest", false);
+        PublicChest.openOnOpeningUnprotectedChest = config
+                .getBoolean("PublicEnderChest.showOnOpeningUnprotectedChest", false);
         config.set("PublicEnderChest.showOnOpeningUnprotectedChest", PublicChest.openOnOpeningUnprotectedChest);
         // show for command?
-        PublicChest.openOnUsingCommand = config.getBoolean("PublicEnderChest.showOnUsingCommand", PublicChest.openOnOpeningUnprotectedChest);
+        PublicChest.openOnUsingCommand = config
+                .getBoolean("PublicEnderChest.showOnUsingCommand", PublicChest.openOnOpeningUnprotectedChest);
         config.set("PublicEnderChest.showOnUsingCommand", PublicChest.openOnUsingCommand);
 
         // display name (moved to translations file)
@@ -433,7 +464,15 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public boolean isItemAllowedInChests(ItemStack stack) {
         Objects.requireNonNull(stack, "stack");
-        return itemFilter.apply(stack);
+        if (isIllegalItem.apply(stack)) {
+            return false;
+        }
+
+        if (containsIllegalItemInShulker(stack)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
