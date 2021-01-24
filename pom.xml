@@ -21,7 +21,7 @@
 			<url>http://www.rutgerkok.nl/repo</url>
 		</repository>
 		<repository>
-			<id>nms-repo</id> <!-- Spigot impl -->
+			<id>codemc-repo</id> <!-- Spigot impl, BlockLocker -->
 			<url>https://repo.codemc.io/repository/nms/</url>
 		</repository>
 		<repository>
@@ -83,7 +83,7 @@
 		<dependency>
 			<groupId>nl.rutgerkok</groupId>
 			<artifactId>blocklocker</artifactId>
-			<version>0.1</version>
+			<version>1.9.2</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

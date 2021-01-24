@@ -1,17 +1,17 @@
 package nl.rutgerkok.betterenderchest.chestprotection;
 
+import java.util.Optional;
 import java.util.UUID;
-
-import nl.rutgerkok.betterenderchest.BetterEnderChest;
-import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
-import nl.rutgerkok.blocklocker.BlockLockerAPI;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import com.google.common.base.Optional;
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.blocklocker.BlockLockerAPIv2;
+
 
 /**
  * Hooks into the BlockLocker protection system.
@@ -27,12 +27,12 @@ public class BlockLockerBridge extends ProtectionBridge {
 
     @Override
     public boolean canAccess(Player player, Block block) {
-        return BlockLockerAPI.isAllowed(player, block, false);
+        return BlockLockerAPIv2.isAllowed(player, block, false);
     }
 
     @Override
     public ChestOwner getChestOwner(Block block) throws IllegalArgumentException {
-        Optional<OfflinePlayer> owner = BlockLockerAPI.getOwner(block);
+        Optional<OfflinePlayer> owner = BlockLockerAPIv2.getOwner(block);
         if (owner.isPresent()) {
             String name = owner.get().getName();
             UUID uuid = owner.get().getUniqueId();
@@ -63,6 +63,6 @@ public class BlockLockerBridge extends ProtectionBridge {
 
     @Override
     public boolean isProtected(Block block) {
-        return BlockLockerAPI.isProtected(block);
+        return BlockLockerAPIv2.isProtected(block);
     }
 }
