@@ -26,6 +26,19 @@ public final class SQLHandler {
 
     public SQLHandler(DatabaseSettings settings) throws SQLException {
         this.settings = settings;
+
+        try {
+            // Test if we're on the latest JDBC SQL driver
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            // No, so load the old class (this was a requirement back then)
+            try {
+                Class.forName("com.mysql.jdbc.Driver");
+            } catch (ClassNotFoundException e1) {
+                throw new SQLException("Failed to load Java database driver", e1);
+            }
+        }
+
         getConnection(); // Initializes the connection, so that errors are
         // displayed at server startup
     }
@@ -132,19 +145,13 @@ public final class SQLHandler {
                 connection.close();
             }
 
-            // Try to (re)connect
-            try {
-                Class.forName("com.mysql.jdbc.Driver");
-                String connectionString = "jdbc:mysql://" + settings.getHost()
-                        + ":" + settings.getPort()
-                        + "/" + settings.getDatabaseName();
-                if (settings.useUtf8()) {
-                    connectionString += "?useUnicode=true&characterEncoding=UTF-8";
-                }
-                connection = DriverManager.getConnection(connectionString, settings.getUsername(), settings.getPassword());
-            } catch (ClassNotFoundException e) {
-                throw new SQLException("JDBC Driver not found!");
+            String connectionString = "jdbc:mysql://" + settings.getHost()
+                    + ":" + settings.getPort()
+                    + "/" + settings.getDatabaseName();
+            if (settings.useUtf8()) {
+                connectionString += "?useUnicode=true&characterEncoding=UTF-8";
             }
+            connection = DriverManager.getConnection(connectionString, settings.getUsername(), settings.getPassword());
             return connection;
         }
     }
@@ -173,7 +180,7 @@ public final class SQLHandler {
             statement = getConnection().prepareStatement(query);
             statement.setString(1, chestOwner.getSaveFileName());
             result = statement.executeQuery();
-            if (result.first()) {
+            if (result.next()) {
                 return result.getString("chest_data");
             } else {
                 return null;
