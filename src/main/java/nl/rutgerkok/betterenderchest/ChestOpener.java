@@ -31,7 +31,7 @@ public class ChestOpener {
     /**
      * Gets the inventory that a player would get when he tries to open a chest.
      * If the chest
-     * 
+     *
      * @param player
      *            The player that tries to open a chest.
      * @param block
@@ -109,7 +109,7 @@ public class ChestOpener {
      * Inventory consumer for showing an Ender inventory to a player. The player
      * will be able to modify the chest, changes will automatically be saved. A
      * block animation will play.
-     * 
+     *
      * @param player
      *            The target player, not necessarily the owner of the chest.
      * @param block
@@ -130,7 +130,7 @@ public class ChestOpener {
                 // Play animation, store location
                 NMSHandler nmsHandler = plugin.getNMSHandlers().getSelectedRegistration();
                 if (nmsHandler != null) {
-                    nmsHandler.openEnderChest(block.getLocation());
+                    nmsHandler.openEnderChest(block.getLocation(), player);
                 }
                 BetterEnderUtils.setLastEnderChestOpeningLocation(player, block.getLocation(), plugin);
             }
@@ -140,7 +140,7 @@ public class ChestOpener {
     /**
      * Inventory consumer for showing an Ender inventory to a player. The player
      * will be able to modify the chest, changes will automatically be saved.
-     * 
+     *
      * @param player
      *            The target player, not necessarily the owner of the chest.
      * @return The consumer.
@@ -163,7 +163,7 @@ public class ChestOpener {
     /**
      * Inventory consumer for showing an Ender inventory to a player. The player
      * won't be able to modify the chest.
-     * 
+     *
      * @param player
      *            The target player, not necessarily the owner of the chest.
      * @return The consumer.

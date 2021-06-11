@@ -12,8 +12,10 @@ import java.util.Map.Entry;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.json.simple.parser.JSONParser;
@@ -21,24 +23,24 @@ import org.json.simple.parser.JSONParser;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Dynamic;
 
-import net.minecraft.server.v1_16_R3.BlockPosition;
-import net.minecraft.server.v1_16_R3.Blocks;
-import net.minecraft.server.v1_16_R3.DataConverterRegistry;
-import net.minecraft.server.v1_16_R3.DataConverterTypes;
-import net.minecraft.server.v1_16_R3.DynamicOpsNBT;
-import net.minecraft.server.v1_16_R3.MojangsonParser;
-import net.minecraft.server.v1_16_R3.NBTBase;
-import net.minecraft.server.v1_16_R3.NBTCompressedStreamTools;
-import net.minecraft.server.v1_16_R3.NBTTagByteArray;
-import net.minecraft.server.v1_16_R3.NBTTagCompound;
-import net.minecraft.server.v1_16_R3.NBTTagDouble;
-import net.minecraft.server.v1_16_R3.NBTTagInt;
-import net.minecraft.server.v1_16_R3.NBTTagIntArray;
-import net.minecraft.server.v1_16_R3.NBTTagList;
-import net.minecraft.server.v1_16_R3.NBTTagLong;
-import net.minecraft.server.v1_16_R3.NBTTagString;
-import net.minecraft.server.v1_16_R3.TileEntity;
-import net.minecraft.server.v1_16_R3.TileEntityEnderChest;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.ByteArrayTag;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.IntArrayTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.LongTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.util.datafix.fixes.References;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
 import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
 import nl.rutgerkok.betterenderchest.ChestRestrictions;
@@ -56,7 +58,7 @@ public class SimpleNMSHandler extends NMSHandler {
          */
         private static final String BYTE_ARRAY = "byteArray";
 
-        static final NBTBase javaTypeToNBTTag(Object object) throws IOException {
+        static final Tag javaTypeToNBTTag(Object object) throws IOException {
             // Handle compounds
             if (object instanceof Map) {
                 @SuppressWarnings("unchecked")
@@ -67,14 +69,14 @@ public class SimpleNMSHandler extends NMSHandler {
                     // The map is actually a byte array, not a compound tag
                     @SuppressWarnings("unchecked")
                     List<Number> boxedBytes = (List<Number>) byteArrayValue;
-                    return new NBTTagByteArray(unboxBytes(boxedBytes));
+                    return new ByteArrayTag(unboxBytes(boxedBytes));
                 }
 
-                NBTTagCompound tag = new NBTTagCompound();
+                CompoundTag tag = new CompoundTag();
                 for (Entry<String, ?> entry : map.entrySet()) {
-                    NBTBase value = javaTypeToNBTTag(entry.getValue());
+                    Tag value = javaTypeToNBTTag(entry.getValue());
                     if (value != null) {
-                        tag.set(entry.getKey(), value);
+                        tag.put(entry.getKey(), value);
                     }
                 }
                 return tag;
@@ -86,25 +88,25 @@ public class SimpleNMSHandler extends NMSHandler {
                     // Whole number
                     if (number.intValue() == number.longValue()) {
                         // Fits in integer
-                        return NBTTagInt.a(number.intValue());
+                        return IntTag.valueOf(number.intValue());
                     }
-                    return NBTTagLong.a(number.longValue());
+                    return LongTag.valueOf(number.longValue());
                 } else {
-                    return NBTTagDouble.a(number.doubleValue());
+                    return DoubleTag.valueOf(number.doubleValue());
                 }
             }
             // Handle strings
             if (object instanceof String) {
-                return NBTTagString.a((String) object);
+                return StringTag.valueOf((String) object);
             }
             // Handle lists
             if (object instanceof List) {
                 List<?> list = (List<?>) object;
-                NBTTagList listTag = new NBTTagList();
+                ListTag listTag = new ListTag();
 
                 if (list.isEmpty()) {
                     // Don't deserialize empty lists - we have no idea what
-                    // type it should be. The methods on NBTTagCompound will
+                    // type it should be. The methods on CompoundTag will
                     // now return empty lists of the appropriate type
                     return null;
                 }
@@ -116,12 +118,12 @@ public class SimpleNMSHandler extends NMSHandler {
                     // are small enough for ints
                     @SuppressWarnings("unchecked")
                     List<Number> intList = (List<Number>) list;
-                    return new NBTTagIntArray(unboxIntegers(intList));
+                    return new IntArrayTag(unboxIntegers(intList));
                 }
 
                 // Other lists
                 for (Object entry : list) {
-                    NBTBase javaType = javaTypeToNBTTag(entry);
+                    Tag javaType = javaTypeToNBTTag(entry);
                     if (javaType != null) {
                         listTag.add(javaType);
                     }
@@ -135,8 +137,7 @@ public class SimpleNMSHandler extends NMSHandler {
         }
 
         /**
-         * Turns the given json- or Mojangson-formatted string back into a
-         * NBTTagCompound.
+         * Turns the given json- or Mojangson-formatted string back into a CompoundTag.
          *
          * @param jsonString
          *            The json string to parse.
@@ -144,17 +145,17 @@ public class SimpleNMSHandler extends NMSHandler {
          * @throws IOException
          *             If the string cannot be parsed.
          */
-        static final NBTTagCompound toTag(String jsonString) throws IOException {
+        static final CompoundTag toTag(String jsonString) throws IOException {
             if (jsonString.startsWith("{\"")) {
                 // Probably in the old valid JSON format
                 try {
-                    return (NBTTagCompound) javaTypeToNBTTag(new JSONParser().parse(jsonString));
+                    return (CompoundTag) javaTypeToNBTTag(new JSONParser().parse(jsonString));
                 } catch (Exception e) {
                     // Ignore, retry as Mojangson
                 }
             }
             try {
-                return MojangsonParser.parse(jsonString);
+                return TagParser.parseTag(jsonString);
             } catch (CommandSyntaxException e) {
                 throw new IOException(e);
             }
@@ -207,15 +208,15 @@ public class SimpleNMSHandler extends NMSHandler {
     }
 
     @Override
-    public void closeEnderChest(Location loc) {
-        BlockPosition blockPos = toBlockPosition(loc);
-        TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(blockPos);
-        if (tileEntity instanceof TileEntityEnderChest) {
-            ((TileEntityEnderChest) tileEntity).f(); // .close()
+    public void closeEnderChest(Location loc, Player player) {
+        BlockPos blockPos = toBlockPosition(loc);
+        BlockEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getBlockEntity(blockPos);
+        if (tileEntity instanceof EnderChestBlockEntity) {
+            ((EnderChestBlockEntity) tileEntity).stopOpen(((CraftPlayer) player).getHandle());
         }
     }
 
-    private int getDisabledSlots(NBTTagCompound baseTag) {
+    private int getDisabledSlots(CompoundTag baseTag) {
         return baseTag.getByte("DisabledSlots");
     }
 
@@ -224,8 +225,8 @@ public class SimpleNMSHandler extends NMSHandler {
         return getClass().getSimpleName();
     }
 
-    private int getRows(ChestOwner chestOwner, NBTTagCompound baseTag, NBTTagList inventoryListTag) {
-        if (baseTag.hasKey("Rows")) {
+    private int getRows(ChestOwner chestOwner, CompoundTag baseTag, ListTag inventoryListTag) {
+        if (baseTag.contains("Rows")) {
             // Load the number of rows
             return baseTag.getByte("Rows");
         } else {
@@ -244,8 +245,8 @@ public class SimpleNMSHandler extends NMSHandler {
         }
     }
 
-    private int getStoredDataVersion(NBTTagCompound baseTag) {
-        if (!baseTag.hasKey("DataVersion")) {
+    private int getStoredDataVersion(CompoundTag baseTag) {
+        if (!baseTag.contains("DataVersion")) {
             return DATA_VERSION_MC_1_12_2;
         }
         return baseTag.getInt("DataVersion");
@@ -262,8 +263,8 @@ public class SimpleNMSHandler extends NMSHandler {
         }
     }
 
-    private boolean isItemInsertionAllowed(NBTTagCompound baseTag) {
-        if (baseTag.hasKey("ItemInsertion")) {
+    private boolean isItemInsertionAllowed(CompoundTag baseTag) {
+        if (baseTag.contains("ItemInsertion")) {
             return baseTag.getBoolean("ItemInsertion");
         } else {
             // Return true. This value doesn't harm anything and will be
@@ -277,7 +278,7 @@ public class SimpleNMSHandler extends NMSHandler {
         FileInputStream inputStream = null;
         try {
             inputStream = new FileInputStream(file);
-            NBTTagCompound baseTag = NBTCompressedStreamTools.a(inputStream);
+            CompoundTag baseTag = NbtIo.readCompressed(inputStream);
             return loadNBTInventoryFromTag(baseTag, chestOwner, worldGroup, inventoryTagName);
         } finally {
             if (inputStream != null) {
@@ -291,8 +292,9 @@ public class SimpleNMSHandler extends NMSHandler {
         return this.loadNBTInventoryFromTag(JSONSimpleTypes.toTag(jsonString), chestOwner, worldGroup, "Inventory");
     }
 
-    private Inventory loadNBTInventoryFromTag(NBTTagCompound baseTag, ChestOwner chestOwner, WorldGroup worldGroup, String inventoryTagName) throws IOException {
-        NBTTagList inventoryTag = baseTag.getList(inventoryTagName, TagType.COMPOUND);
+    private Inventory loadNBTInventoryFromTag(CompoundTag baseTag, ChestOwner chestOwner, WorldGroup worldGroup,
+            String inventoryTagName) throws IOException {
+        ListTag inventoryTag = baseTag.getList(inventoryTagName, TagType.COMPOUND);
 
         // Create the Bukkit inventory
         int inventoryRows = getRows(chestOwner, baseTag, inventoryTag);
@@ -305,10 +307,10 @@ public class SimpleNMSHandler extends NMSHandler {
         // Add all the items
         List<ItemStack> overflowingItems = new ArrayList<>();
         for (int i = 0; i < inventoryTag.size(); i++) {
-            NBTTagCompound item = inventoryTag.getCompound(i);
+            CompoundTag item = inventoryTag.getCompound(i);
             int slot = item.getByte("Slot") & 255;
             item = updateToLatestMinecraft(item, dataVersion);
-            ItemStack bukkitItem = CraftItemStack.asCraftMirror(net.minecraft.server.v1_16_R3.ItemStack.a(item));
+            ItemStack bukkitItem = CraftItemStack.asCraftMirror(net.minecraft.world.item.ItemStack.of(item));
 
             if (slot < inventory.getSize()) {
                 inventory.setItem(slot, bukkitItem);
@@ -328,37 +330,37 @@ public class SimpleNMSHandler extends NMSHandler {
     }
 
     @Override
-    public void openEnderChest(Location loc) {
-        BlockPosition blockPos = toBlockPosition(loc);
-        TileEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getTileEntity(blockPos);
-        if (tileEntity instanceof TileEntityEnderChest) {
-            ((TileEntityEnderChest) tileEntity).d(); // .open()
+    public void openEnderChest(Location loc, Player player) {
+        BlockPos blockPos = toBlockPosition(loc);
+        BlockEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getBlockEntity(blockPos);
+        if (tileEntity instanceof EnderChestBlockEntity) {
+            ((EnderChestBlockEntity) tileEntity).startOpen(((CraftPlayer) player).getHandle());
         }
     }
 
-    private NBTTagCompound repairShulkerBoxes(NBTTagCompound item) {
-        NBTTagCompound itemTag = item.getCompound("tag");
-        if (!itemTag.hasKey("BlockEntityTag")) {
+    private CompoundTag repairShulkerBoxes(CompoundTag item) {
+        CompoundTag itemTag = item.getCompound("tag");
+        if (!itemTag.contains("BlockEntityTag")) {
             return item;
         }
-        NBTTagCompound blockEntityTag = itemTag.getCompound("BlockEntityTag");
-        if (!blockEntityTag.hasKey("Items")) {
+        CompoundTag blockEntityTag = itemTag.getCompound("BlockEntityTag");
+        if (!blockEntityTag.contains("Items")) {
             return item;
         }
-        NBTTagList items = blockEntityTag.getList("Items", TagType.COMPOUND);
+        ListTag items = blockEntityTag.getList("Items", TagType.COMPOUND);
         if (items.isEmpty()) {
             return item;
         }
-        NBTTagCompound firstItem = items.getCompound(0);
-        if (!firstItem.hasKey("Damage")) {
+        CompoundTag firstItem = items.getCompound(0);
+        if (!firstItem.contains("Damage")) {
             return item;
         }
 
         // Ok, conversion failed. Downgrade item to 1.12.2 and try again
-        item.setByte("Damage", (byte) 0);
-        if (itemTag.hasKey("display")) {
-            NBTTagCompound displayTag = itemTag.getCompound("display");
-            displayTag.setString("Name", blockEntityTag.getString("CustomName"));
+        item.putByte("Damage", (byte) 0);
+        if (itemTag.contains("display")) {
+            CompoundTag displayTag = itemTag.getCompound("display");
+            displayTag.putString("Name", blockEntityTag.getString("CustomName"));
         }
         return this.updateToLatestMinecraft(item, DATA_VERSION_MC_1_12_2);
     }
@@ -371,7 +373,7 @@ public class SimpleNMSHandler extends NMSHandler {
             file.getAbsoluteFile().getParentFile().mkdirs();
             file.createNewFile();
             stream = new FileOutputStream(file);
-            NBTCompressedStreamTools.a(saveInventoryToTag(saveEntry), stream);
+            NbtIo.writeCompressed(saveInventoryToTag(saveEntry), stream);
         } finally {
             if (stream != null) {
                 stream.flush();
@@ -382,60 +384,60 @@ public class SimpleNMSHandler extends NMSHandler {
 
     @Override
     public String saveInventoryToJson(SaveEntry inventory) throws IOException {
-        NBTTagCompound tag = saveInventoryToTag(inventory);
+        CompoundTag tag = saveInventoryToTag(inventory);
         return tag.toString();
     }
 
-    private NBTTagCompound saveInventoryToTag(SaveEntry inventory) {
-        NBTTagCompound baseTag = new NBTTagCompound();
-        NBTTagList inventoryTag = new NBTTagList();
+    private CompoundTag saveInventoryToTag(SaveEntry inventory) {
+        CompoundTag baseTag = new CompoundTag();
+        ListTag inventoryTag = new ListTag();
         @SuppressWarnings("deprecation")
         int dataVersion = Bukkit.getUnsafe().getDataVersion();
 
         // Chest metadata
         ChestRestrictions chestRestrictions = inventory.getChestRestrictions();
-        baseTag.setByte("Rows", (byte) chestRestrictions.getChestRows());
-        baseTag.setByte("DisabledSlots", (byte) chestRestrictions.getDisabledSlots());
-        baseTag.setBoolean("ItemInsertion", chestRestrictions.isItemInsertionAllowed());
-        baseTag.setString("OwnerName", inventory.getChestOwner().getDisplayName());
-        baseTag.setInt("DataVersion", dataVersion);
+        baseTag.putByte("Rows", (byte) chestRestrictions.getChestRows());
+        baseTag.putByte("DisabledSlots", (byte) chestRestrictions.getDisabledSlots());
+        baseTag.putBoolean("ItemInsertion", chestRestrictions.isItemInsertionAllowed());
+        baseTag.putString("OwnerName", inventory.getChestOwner().getDisplayName());
+        baseTag.putInt("DataVersion", dataVersion);
 
         // Add all items to the inventory tag
         for (int i = 0; i < inventory.getSize(); i++) {
             ItemStack stack = inventory.getItem(i);
             if (stack != null && stack.getType() != Material.AIR) {
-                NBTTagCompound item = new NBTTagCompound();
-                item.setByte("Slot", (byte) i);
+                CompoundTag item = new CompoundTag();
+                item.putByte("Slot", (byte) i);
                 inventoryTag.add(CraftItemStack.asNMSCopy(stack).save(item));
             }
         }
 
         // Add the inventory tag to the base tag
-        baseTag.set("Inventory", inventoryTag);
+        baseTag.put("Inventory", inventoryTag);
 
         return baseTag;
     }
 
-    private BlockPosition toBlockPosition(Location location) {
-        return new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    private BlockPos toBlockPosition(Location location) {
+        return new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
 
-    private NBTTagCompound updateToLatestMinecraft(NBTTagCompound item, int oldVersion) {
+    private CompoundTag updateToLatestMinecraft(CompoundTag item, int oldVersion) {
         @SuppressWarnings("deprecation")
         int newVersion = Bukkit.getUnsafe().getDataVersion();
         if (newVersion == oldVersion) {
             // Check if update was correct (there used to be a bug)
-            if (item.hasKey("tag") && item.getString("id").endsWith("shulker_box")) {
+            if (item.contains("tag") && item.getString("id").endsWith("shulker_box")) {
                 return repairShulkerBoxes(item);
             }
 
             return item;
         }
 
-        Dynamic<NBTBase> input = new Dynamic<>(DynamicOpsNBT.a, item);
-        Dynamic<NBTBase> result = DataConverterRegistry.a().update(DataConverterTypes.ITEM_STACK, input, oldVersion,
-                newVersion);
-        return (NBTTagCompound) result.getValue();
+        Dynamic<Tag> input = new Dynamic<>(NbtOps.INSTANCE, item);
+        Dynamic<Tag> result = DataFixers.getDataFixer()
+                .update(References.ITEM_STACK, input, oldVersion, newVersion);
+        return (CompoundTag) result.getValue();
     }
 
 }

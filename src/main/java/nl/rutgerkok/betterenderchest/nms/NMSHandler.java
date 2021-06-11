@@ -3,29 +3,31 @@ package nl.rutgerkok.betterenderchest.nms;
 import java.io.File;
 import java.io.IOException;
 
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+
 import nl.rutgerkok.betterenderchest.WorldGroup;
 import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
 import nl.rutgerkok.betterenderchest.io.SaveEntry;
 import nl.rutgerkok.betterenderchest.registry.Registration;
 
-import org.bukkit.Location;
-import org.bukkit.inventory.Inventory;
-
 /**
  * Class to help with all NMS tasks.
- * 
+ *
  */
 public abstract class NMSHandler implements Registration {
 
     /**
-     * Decrements one of the player counter of the Ender Chest at the location.
-     * This should play the close animation if no more players are viewing the
-     * chest.
-     * 
+     * Decrements one of the player counter of the Ender Chest at the location. This
+     * should play the close animation if no more players are viewing the chest.
+     *
      * @param location
      *            The location of the Ender Chest.
+     * @param player
+     *            The player that opened the chest.
      */
-    public abstract void closeEnderChest(Location location);
+    public abstract void closeEnderChest(Location location, Player player);
 
     @Override
     public Priority getPriority() {
@@ -41,7 +43,7 @@ public abstract class NMSHandler implements Registration {
      * <p />
      * It is not permitted to use another load format than NBT, as for example
      * the vanilla importing process depends on it.
-     * 
+     *
      * @param nbtFile
      *            The file to load from.
      * @param chestOwner
@@ -68,14 +70,14 @@ public abstract class NMSHandler implements Registration {
      * <p />
      * It is not permitted to use another load format than NBT, as for example
      * the vanilla importing process depends on it.
-     * 
+     *
      * @param chestOwner
      *            The owner of the inventory.
      * @param worldGroup
      *            The world group the inventory is in.
      * @param jsonString
      *            The json to load from.
-     * 
+     *
      * @throws IOException
      *             If the byte array is corrupted.
      * @return The inventory. The holder of the inventory must be
@@ -84,14 +86,16 @@ public abstract class NMSHandler implements Registration {
     public abstract Inventory loadNBTInventoryFromJson(String jsonString, ChestOwner chestOwner, WorldGroup worldGroup) throws IOException;
 
     /**
-     * Increments one to the player counter of the Ender Chest at the location.
-     * This should play the open animation of the Ender Chest if it wasn't
-     * already opened by another player.
-     * 
+     * Increments one to the player counter of the Ender Chest at the location. This
+     * should play the open animation of the Ender Chest if it wasn't already opened
+     * by another player.
+     *
      * @param location
      *            The location of the Ender Chest.
+     * @param player
+     *            The player that opens the chest.
      */
-    public abstract void openEnderChest(Location location);
+    public abstract void openEnderChest(Location location, Player player);
 
     /**
      * Saves a BetterEnderChest inventory to a NBT formatted file.
@@ -109,7 +113,7 @@ public abstract class NMSHandler implements Registration {
     /**
      * Saves a BetterEnderChest inventory to a JSON-formatted String, based on
      * the NBT representation of the inventory.
-     * 
+     *
      * @param inventory
      *            The inventory to save to.
      * @throws IOException

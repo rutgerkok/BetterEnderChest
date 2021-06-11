@@ -2,19 +2,6 @@ package nl.rutgerkok.betterenderchest.eventhandler;
 
 import java.util.List;
 
-import nl.rutgerkok.betterenderchest.BetterEnderChest;
-import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.PublicChest;
-import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
-import nl.rutgerkok.betterenderchest.BetterEnderUtils;
-import nl.rutgerkok.betterenderchest.ChestOpener;
-import nl.rutgerkok.betterenderchest.Translations;
-import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
-import nl.rutgerkok.betterenderchest.exception.ChestProtectedException;
-import nl.rutgerkok.betterenderchest.exception.NoPermissionException;
-import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
-import nl.rutgerkok.betterenderchest.io.Consumer;
-import nl.rutgerkok.betterenderchest.nms.NMSHandler;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -36,6 +23,19 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 
 import com.google.common.base.Preconditions;
+
+import nl.rutgerkok.betterenderchest.BetterEnderChest;
+import nl.rutgerkok.betterenderchest.BetterEnderChestPlugin.PublicChest;
+import nl.rutgerkok.betterenderchest.BetterEnderInventoryHolder;
+import nl.rutgerkok.betterenderchest.BetterEnderUtils;
+import nl.rutgerkok.betterenderchest.ChestOpener;
+import nl.rutgerkok.betterenderchest.Translations;
+import nl.rutgerkok.betterenderchest.chestowner.ChestOwner;
+import nl.rutgerkok.betterenderchest.exception.ChestProtectedException;
+import nl.rutgerkok.betterenderchest.exception.NoPermissionException;
+import nl.rutgerkok.betterenderchest.io.BetterEnderCache;
+import nl.rutgerkok.betterenderchest.io.Consumer;
+import nl.rutgerkok.betterenderchest.nms.NMSHandler;
 
 public class BetterEnderEventHandler implements Listener {
     private BetterEnderCache chests;
@@ -128,7 +128,7 @@ public class BetterEnderEventHandler implements Listener {
             if (lastOpened != null) {
                 NMSHandler nmsHandler = plugin.getNMSHandlers().getSelectedRegistration();
                 if (nmsHandler != null) {
-                    nmsHandler.closeEnderChest(lastOpened);
+                    nmsHandler.closeEnderChest(lastOpened, player);
                 }
 
                 // Clear the inventory opening location

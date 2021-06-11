@@ -20,10 +20,7 @@
 			<id>rutger-repo</id>
 			<url>http://www.rutgerkok.nl/repo</url>
 		</repository>
-		<repository>
-			<id>nms-repo</id> <!-- Spigot impl -->
-			<url>https://repo.codemc.org/repository/nms/</url>
-		</repository>
+
 		<repository>
 			<id>codemc-repo</id> <!-- BlockLocker -->
 			<url>https://repo.codemc.org/repository/maven-public/</url>
@@ -37,40 +34,20 @@
 			<url>http://repo.onarandombox.com/content/groups/public/</url>
 		</repository>
 	</repositories>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-		</plugins>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-				<includes>
-					<include>plugin.yml</include>
-				</includes>
-			</resource>
-		</resources>
-	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.16.4-R0.1-SNAPSHOT</version>
+			<version>1.17-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot</artifactId>
-			<version>1.16.4-R0.1-SNAPSHOT</version>
+			<version>1.17-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
+			<classifier>remapped-mojang</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.yi.acru.bukkit</groupId>
@@ -127,6 +104,64 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<source>16</source>
+					<target>16</target>
+				</configuration>
+			</plugin>
+
+			<!-- Bunch of stuff to convert to Spigot mappings -->
+			<plugin>
+				<groupId>net.md-5</groupId>
+				<artifactId>specialsource-maven-plugin</artifactId>
+				<version>1.2.2</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>remap</goal>
+						</goals>
+						<id>remap-obf</id>
+						<configuration>
+							<srgIn>org.spigotmc:minecraft-server:1.17-R0.1-SNAPSHOT:txt:maps-mojang</srgIn>
+							<reverse>true</reverse>
+							<remappedDependencies>org.spigotmc:spigot:1.17-R0.1-SNAPSHOT:jar:remapped-mojang</remappedDependencies>
+							<remappedArtifactAttached>true</remappedArtifactAttached>
+							<remappedClassifierName>remapped-obf</remappedClassifierName>
+						</configuration>
+					</execution>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>remap</goal>
+						</goals>
+						<id>remap-spigot</id>
+						<configuration>
+							<inputFile>${project.build.directory}/${project.artifactId}-${project.version}-remapped-obf.jar</inputFile>
+							<srgIn>org.spigotmc:minecraft-server:1.17-R0.1-SNAPSHOT:csrg:maps-spigot</srgIn>
+							<remappedDependencies>org.spigotmc:spigot:1.17-R0.1-SNAPSHOT:jar:remapped-obf</remappedDependencies>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>plugin.yml</include>
+				</includes>
+			</resource>
+		</resources>
+	</build>
 
 	<distributionManagement>
 		<repository>
