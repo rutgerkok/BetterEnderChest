@@ -36,6 +36,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.level.block.Blocks;
@@ -211,8 +212,10 @@ public class SimpleNMSHandler extends NMSHandler {
     public void closeEnderChest(Location loc, Player player) {
         BlockPos blockPos = toBlockPosition(loc);
         BlockEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getBlockEntity(blockPos);
-        if (tileEntity instanceof EnderChestBlockEntity) {
-            ((EnderChestBlockEntity) tileEntity).stopOpen(((CraftPlayer) player).getHandle());
+        if (tileEntity instanceof EnderChestBlockEntity enderChest) {
+            ServerPlayer serverPlayer = ((CraftPlayer) player).getHandle();
+            serverPlayer.getEnderChestInventory().setActiveChest(null);
+            enderChest.stopOpen(serverPlayer);
         }
     }
 
@@ -333,8 +336,10 @@ public class SimpleNMSHandler extends NMSHandler {
     public void openEnderChest(Location loc, Player player) {
         BlockPos blockPos = toBlockPosition(loc);
         BlockEntity tileEntity = ((CraftWorld) loc.getWorld()).getHandle().getBlockEntity(blockPos);
-        if (tileEntity instanceof EnderChestBlockEntity) {
-            ((EnderChestBlockEntity) tileEntity).startOpen(((CraftPlayer) player).getHandle());
+        if (tileEntity instanceof EnderChestBlockEntity enderChest) {
+            ServerPlayer serverPlayer = ((CraftPlayer) player).getHandle();
+            enderChest.startOpen(serverPlayer);
+            serverPlayer.getEnderChestInventory().setActiveChest(enderChest);
         }
     }
 
