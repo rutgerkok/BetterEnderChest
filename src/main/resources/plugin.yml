@@ -3,7 +3,7 @@ main: nl.rutgerkok.betterenderchest.BetterEnderChestPlugin
 description: 'Secure and configurable Ender Chests'
 version: '${project.version}'
 author: 'Rutger Kok'
-api-version: '1.16'
+api-version: '1.17'
 softdepend:
 - 'BlockLocker'
 - 'Lockette'
@@ -11,6 +11,7 @@ softdepend:
 - 'Multiverse-Inventories'
 - 'MultiInv'
 - 'My Worlds'
+- 'SimpleClans'
 - 'WorldInventories'
 commands:
   betterenderchest:
