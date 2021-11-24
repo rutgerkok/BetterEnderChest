@@ -52,7 +52,7 @@ public class EmptyInventoryProvider {
                 BetterEnderUtils.copyContents(defaultInventory, playerInventory, null);
                 return playerInventory;
             }
-        });
+        }, Runnable::run);
     }
 
     /**
@@ -87,7 +87,7 @@ public class EmptyInventoryProvider {
             // could cause issues when someone
             // finds a way to constantly break this plugin.
             return Futures.immediateFuture(loadEmptyInventory(chestOwner, worldGroup));
-        });
+        }, Runnable::run);
     }
 
     /**

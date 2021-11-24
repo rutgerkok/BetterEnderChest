@@ -115,7 +115,7 @@ public class SimpleEnderCache implements BetterEnderCache {
 
     private final AsyncFunction<Throwable, Inventory> chestNotFoundToEmptyInventory(final ChestOwner chestOwner,
             final WorldGroup worldGroup) {
-        return new AsyncFunction<Throwable, Inventory>() {
+        return new AsyncFunction<>() {
 
             @Override
             public ListenableFuture<Inventory> apply(Throwable t) throws Exception {
@@ -214,7 +214,7 @@ public class SimpleEnderCache implements BetterEnderCache {
                 Inventory loadedEarlier = inventories.putIfAbsent(chestKey, newlyLoaded);
                 return MoreObjects.firstNonNull(loadedEarlier, newlyLoaded);
             }
-        });
+        }, Runnable::run);
     }
 
     @Override
@@ -222,7 +222,7 @@ public class SimpleEnderCache implements BetterEnderCache {
         ListenableFuture<Inventory> inventoryOrError = getInventory(chestOwner, worldGroup);
 
         final ListenableFuture<Inventory> inventory = Futures.catchingAsync(inventoryOrError, Throwable.class,
-                chestNotFoundToEmptyInventory(chestOwner, worldGroup));
+                chestNotFoundToEmptyInventory(chestOwner, worldGroup), Runnable::run);
 
         inventory.addListener(new Runnable() {
             @Override
