@@ -508,12 +508,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
     @Override
     public void onEnable() {
         // NMS handlers
-        try {
-            nmsHandlers.register(new SimpleNMSHandler(this));
-        } catch (Throwable t) {
-            // Error is shown in setupEnderCache, to make it show too on
-            // reload
-        }
+        nmsHandlers.register(new SimpleNMSHandler(this));
+
         nmsHandlers.selectAvailableRegistration();
 
         // Task executors
