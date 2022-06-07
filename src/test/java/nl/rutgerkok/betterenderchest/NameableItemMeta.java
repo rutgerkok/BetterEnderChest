@@ -55,6 +55,11 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
+    public String getAsString() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Multimap<Attribute, AttributeModifier> getAttributeModifiers() {
         throw new UnsupportedOperationException();
     }
@@ -229,6 +234,5 @@ public final class NameableItemMeta implements ItemMeta {
     public void setVersion(int arg0) {
         throw new UnsupportedOperationException();
     }
-
 
 }
