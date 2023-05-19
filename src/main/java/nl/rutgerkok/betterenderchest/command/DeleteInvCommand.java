@@ -46,11 +46,11 @@ public class DeleteInvCommand extends BaseCommand {
             @Override
             public void consume(Inventory inventory) {
                 // Remove all the viewers
-                BetterEnderUtils.closeInventory(inventory, ChatColor.YELLOW + "An admin just deleted this inventory.");
+                BetterEnderUtils.closeInventory(inventory, ChatColor.YELLOW + Translations.DELETE_INV_ADMIN_DELETED_INVENTORY.toString());
 
                 // Clear it.
                 inventory.clear();
-                sender.sendMessage(ChatColor.GREEN + "Succesfully removed inventory!");
+                sender.sendMessage(ChatColor.GREEN + Translations.DELETE_INV_SUCCESSFULLY_REMOVED_INVENTORY.toString());
             }
         });
         return true;
@@ -58,17 +58,16 @@ public class DeleteInvCommand extends BaseCommand {
 
     @Override
     public String getHelpText() {
-        return "deletes an Ender inventory";
+        return Translations.DELETE_INV_HELP_TEXT.toString();
     }
 
     @Override
     public String getName() {
-        return "deleteinv";
+        return Translations.DELETE_COMMAND.toString();
     }
 
     @Override
     public String getUsage() {
-        return "<player>";
+        return Translations.DELETE_INV_USAGE.toString();
     }
-
 }

@@ -55,18 +55,18 @@ public class BetterEnderCommandManager implements TabExecutor {
         BaseCommand command = plugin.getCommands().getRegistration(originalArgs[0]);
 
         if (command == null) {
-            sender.sendMessage(ChatColor.RED + "Command " + name + " not found... Available commands:");
+            sender.sendMessage(ChatColor.RED + Translations.COMMAND_MANAGER_COMMAND_NOT_FOUND.toString(name));
             showHelp(sender, label);
             return true;
         }
 
         if (!command.hasPermission(sender)) {
-            sender.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION);
+            sender.sendMessage("" + ChatColor.RED + Translations.NO_PERMISSION.toString());
             return true;
         }
 
         if (!command.execute(sender, args)) {
-            sender.sendMessage(ChatColor.RED + "Wrong command usage! Correct usage:");
+            sender.sendMessage(ChatColor.RED + Translations.COMMAND_MANAGER_WRONG_COMMAND_USAGE.toString());
             sender.sendMessage(ChatColor.RED + "/" + label + " " + name + " " + command.getUsage());
             return true;
         }
@@ -123,7 +123,7 @@ public class BetterEnderCommandManager implements TabExecutor {
         }
 
         if (commandCount == 0) {
-            sender.sendMessage(ChatColor.GOLD + "Sorry, no available commands for your rank.");
+            sender.sendMessage(ChatColor.GOLD + Translations.COMMAND_MANAGER_NO_AVAILABLE_COMMANDS.toString());
         }
     }
 }
