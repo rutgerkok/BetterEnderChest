@@ -93,7 +93,7 @@ final class UUIDChestOwner implements ChestOwner {
 
     @Override
     public String toString() {
-        return "PlayerChest[uuid=" + uuid + ",name=" + displayName + "]";
+        return Translations.UUID_CHEST_NAME.toString(uuid,displayName);
     }
 
 }

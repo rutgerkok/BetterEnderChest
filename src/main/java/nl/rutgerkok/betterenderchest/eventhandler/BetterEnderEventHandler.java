@@ -145,7 +145,7 @@ public class BetterEnderEventHandler implements Listener {
                     player.sendMessage(Translations.PUBLIC_CHEST_CLOSE_MESSAGE.toString());
                 }
             } else if (holder.getChestOwner().isDefaultChest()) {
-                player.sendMessage("Default chest is edited. After this chest is (auto)saved, new players will find those items in their Ender Chest.");
+                player.sendMessage(Translations.EVENT_HANDLER_DEFAULT_EDITET.toString());
             }
         }
     }

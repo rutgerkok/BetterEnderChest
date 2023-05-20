@@ -5,6 +5,7 @@ import nl.rutgerkok.betterenderchest.BetterEnderChest;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import nl.rutgerkok.betterenderchest.Translations;
 
 public class ReloadCommand extends BaseCommand {
 
@@ -15,17 +16,17 @@ public class ReloadCommand extends BaseCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
 
-        sender.sendMessage(ChatColor.YELLOW + "Saving all inventories...");
+        sender.sendMessage(ChatColor.YELLOW + Translations.RELOAD_SAVING_INVENTORIES.toString());
 
         // Reloading
         plugin.reload();
 
         // Log message
-        plugin.log("Configuration and chests reloaded.");
+        plugin.log(Translations.RELOAD_CONFIG_AND_CHESTS_RELOADED.toString());
 
         // Print message if it's a player
         if (sender instanceof Player) {
-            sender.sendMessage(ChatColor.YELLOW + "Configuration and chests reloaded.");
+            sender.sendMessage(ChatColor.YELLOW + Translations.RELOAD_CONFIG_AND_CHESTS_RELOADED.toString());
         }
 
         return true;
@@ -33,17 +34,17 @@ public class ReloadCommand extends BaseCommand {
 
     @Override
     public String getHelpText() {
-        return "reload the chests and the config.yml.";
+        return Translations.RELOAD_HELP_TEXT.toString();
     }
 
     @Override
     public String getName() {
-        return "reload";
+        return Translations.RELOAD_NAME.toString();
     }
 
     @Override
     public String getUsage() {
-        return "";
+        return Translations.RELOAD_USAGE.toString();
     }
 
 }

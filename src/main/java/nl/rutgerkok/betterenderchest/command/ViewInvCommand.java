@@ -30,7 +30,7 @@ public class ViewInvCommand extends BaseCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.RED + "You cannot open an Ender inventory from the console. Use a NBT editor.");
+            sender.sendMessage(ChatColor.RED + Translations.CONSOLE_ERROR.toString());
             return true;
         }
 
@@ -82,17 +82,17 @@ public class ViewInvCommand extends BaseCommand {
 
     @Override
     public String getHelpText() {
-        return "views an Ender inventory";
+        return Translations.VIEW_INV_HELP_TEXT.toString();
     }
 
     @Override
     public String getName() {
-        return "viewinv";
+        return Translations.VIEW_INV_COMMAND.toString();
     }
 
     @Override
     public String getUsage() {
-        return "<player>";
+        return Translations.VIEW_INV_USAGE.toString();
     }
 
     @Override

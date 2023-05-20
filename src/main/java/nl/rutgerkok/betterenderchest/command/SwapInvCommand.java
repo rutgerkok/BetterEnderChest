@@ -9,6 +9,7 @@ import nl.rutgerkok.betterenderchest.io.Consumer;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.Inventory;
+import nl.rutgerkok.betterenderchest.Translations;
 
 public class SwapInvCommand extends BaseCommand {
 
@@ -29,11 +30,11 @@ public class SwapInvCommand extends BaseCommand {
 
         // Check groups
         if (group1 == null) {
-            sender.sendMessage(ChatColor.RED + "Group of first inventory not found.");
+            sender.sendMessage(ChatColor.RED + Translations.SWAP_INV_GROUP_NOT_FOUND.toString(args[0]));
             return true;
         }
         if (group2 == null) {
-            sender.sendMessage(ChatColor.RED + "Group of second inventory not found.");
+            sender.sendMessage(ChatColor.RED + Translations.SWAP_INV_GROUP_NOT_FOUND.toString(args[1]));
             return true;
         }
 
@@ -54,17 +55,17 @@ public class SwapInvCommand extends BaseCommand {
 
     @Override
     public String getHelpText() {
-        return "swaps two Ender inventories";
+        return Translations.SWAP_INV_HELP_TEXT.toString();
     }
 
     @Override
     public String getName() {
-        return "swapinv";
+        return Translations.SWAP_INV_COMMAND.toString();
     }
 
     @Override
     public String getUsage() {
-        return "<player1> <player2>";
+        return Translations.SWAP_INV_USAGE.toString();
     }
 
     private void swap(CommandSender sender, Inventory inventory1, Inventory inventory2) {
@@ -72,8 +73,8 @@ public class SwapInvCommand extends BaseCommand {
         BetterEnderInventoryHolder holder2 = BetterEnderInventoryHolder.of(inventory2);
 
         // Get rid of the viewers
-        BetterEnderUtils.closeInventory(inventory1, ChatColor.YELLOW + "An admin just swapped this inventory with another.");
-        BetterEnderUtils.closeInventory(inventory2, ChatColor.YELLOW + "An admin just swapped this inventory with another.");
+        BetterEnderUtils.closeInventory(inventory1, ChatColor.YELLOW + Translations.SWAP_INV_CLOSE_MESSAGE.toString());
+        BetterEnderUtils.closeInventory(inventory2, ChatColor.YELLOW + Translations.SWAP_INV_CLOSE_MESSAGE.toString());
 
         // Create new inventory 1 with size and contents of inventory 2
         Inventory newInv1 = plugin.getEmptyInventoryProvider().loadEmptyInventory(
@@ -90,7 +91,7 @@ public class SwapInvCommand extends BaseCommand {
         plugin.getChestCache().setInventory(newInv2);
 
         // Show a message
-        sender.sendMessage(ChatColor.GREEN + "Succesfully swapped inventories!");
+        sender.sendMessage(ChatColor.GREEN + Translations.SWAP_INV_SUCCESS_MESSAGE.toString());
     }
-
 }
+
