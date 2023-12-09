@@ -29,7 +29,6 @@ public final class MaterialParser {
         }
 
         // Fully qualified, use that
-        @SuppressWarnings("deprecation")
         NamespacedKey parsed = new NamespacedKey(string.substring(0, colonIndex), string.substring(colonIndex+1));
         return parsed;
     }

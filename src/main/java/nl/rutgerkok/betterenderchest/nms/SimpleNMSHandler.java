@@ -12,9 +12,9 @@ import java.util.Map.Entry;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -31,6 +31,7 @@ import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
@@ -281,7 +282,7 @@ public class SimpleNMSHandler extends NMSHandler {
         FileInputStream inputStream = null;
         try {
             inputStream = new FileInputStream(file);
-            CompoundTag baseTag = NbtIo.readCompressed(inputStream);
+            CompoundTag baseTag = NbtIo.readCompressed(inputStream, NbtAccounter.unlimitedHeap());
             return loadNBTInventoryFromTag(baseTag, chestOwner, worldGroup, inventoryTagName);
         } finally {
             if (inputStream != null) {
