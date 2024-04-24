@@ -12,9 +12,12 @@ import java.util.Map.Entry;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_20_R4.CraftRegistry;
+import org.bukkit.craftbukkit.v1_20_R4.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R4.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R4.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_20_R4.legacy.CraftLegacy;
+import org.bukkit.craftbukkit.v1_20_R4.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -24,6 +27,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Dynamic;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.ByteArrayTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
@@ -37,6 +43,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.References;
@@ -314,7 +321,7 @@ public class SimpleNMSHandler extends NMSHandler {
             CompoundTag item = inventoryTag.getCompound(i);
             int slot = item.getByte("Slot") & 255;
             item = updateToLatestMinecraft(item, dataVersion);
-            ItemStack bukkitItem = CraftItemStack.asCraftMirror(net.minecraft.world.item.ItemStack.of(item));
+            ItemStack bukkitItem = CraftItemStack.asCraftMirror(net.minecraft.world.item.ItemStack.parse(CraftRegistry.getMinecraftRegistry(), item).orElseThrow());
 
             if (slot < inventory.getSize()) {
                 inventory.setItem(slot, bukkitItem);
@@ -414,7 +421,7 @@ public class SimpleNMSHandler extends NMSHandler {
             if (stack != null && stack.getType() != Material.AIR) {
                 CompoundTag item = new CompoundTag();
                 item.putByte("Slot", (byte) i);
-                inventoryTag.add(CraftItemStack.asNMSCopy(stack).save(item));
+                inventoryTag.add(CraftItemStack.asNMSCopy(stack).save(CraftRegistry.getMinecraftRegistry(), item));
             }
         }
 

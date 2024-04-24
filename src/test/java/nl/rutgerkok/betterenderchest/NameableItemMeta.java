@@ -10,7 +10,9 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.components.FoodComponent;
 import org.bukkit.persistence.PersistentDataContainer;
 
 import com.google.common.collect.ImmutableList;
@@ -233,6 +235,106 @@ public final class NameableItemMeta implements ItemMeta {
     @Override
     public void setVersion(int arg0) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasItemName() {
+        throw new UnsupportedOperationException("Unimplemented method 'hasItemName'");
+    }
+
+    @Override
+    public String getItemName() {
+        throw new UnsupportedOperationException("Unimplemented method 'getItemName'");
+    }
+
+    @Override
+    public void setItemName(String name) {
+        throw new UnsupportedOperationException("Unimplemented method 'setItemName'");
+    }
+
+    @Override
+    public void removeEnchantments() {
+        throw new UnsupportedOperationException("Unimplemented method 'removeEnchantments'");
+    }
+
+    @Override
+    public boolean isHideTooltip() {
+        throw new UnsupportedOperationException("Unimplemented method 'isHideTooltip'");
+    }
+
+    @Override
+    public void setHideTooltip(boolean hideTooltip) {
+        throw new UnsupportedOperationException("Unimplemented method 'setHideTooltip'");
+    }
+
+    @Override
+    public boolean hasEnchantmentGlintOverride() {
+        throw new UnsupportedOperationException("Unimplemented method 'hasEnchantmentGlintOverride'");
+    }
+
+    @Override
+    public Boolean getEnchantmentGlintOverride() {
+        throw new UnsupportedOperationException("Unimplemented method 'getEnchantmentGlintOverride'");
+    }
+
+    @Override
+    public void setEnchantmentGlintOverride(Boolean override) {
+        throw new UnsupportedOperationException("Unimplemented method 'setEnchantmentGlintOverride'");
+    }
+
+    @Override
+    public boolean isFireResistant() {
+        throw new UnsupportedOperationException("Unimplemented method 'isFireResistant'");
+    }
+
+    @Override
+    public void setFireResistant(boolean fireResistant) {
+        throw new UnsupportedOperationException("Unimplemented method 'setFireResistant'");
+    }
+
+    @Override
+    public boolean hasMaxStackSize() {
+        throw new UnsupportedOperationException("Unimplemented method 'hasMaxStackSize'");
+    }
+
+    @Override
+    public int getMaxStackSize() {
+        throw new UnsupportedOperationException("Unimplemented method 'getMaxStackSize'");
+    }
+
+    @Override
+    public void setMaxStackSize(Integer max) {
+        throw new UnsupportedOperationException("Unimplemented method 'setMaxStackSize'");
+    }
+
+    @Override
+    public boolean hasRarity() {
+        throw new UnsupportedOperationException("Unimplemented method 'hasRarity'");
+    }
+
+    @Override
+    public ItemRarity getRarity() {
+        throw new UnsupportedOperationException("Unimplemented method 'getRarity'");
+    }
+
+    @Override
+    public void setRarity(ItemRarity rarity) {
+        throw new UnsupportedOperationException("Unimplemented method 'setRarity'");
+    }
+
+    @Override
+    public boolean hasFood() {
+        throw new UnsupportedOperationException("Unimplemented method 'hasFood'");
+    }
+
+    @Override
+    public FoodComponent getFood() {
+        throw new UnsupportedOperationException("Unimplemented method 'getFood'");
+    }
+
+    @Override
+    public void setFood(FoodComponent food) {
+        throw new UnsupportedOperationException("Unimplemented method 'setFood'");
     }
 
 }
