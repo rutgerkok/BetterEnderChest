@@ -8,10 +8,15 @@ import java.util.ListIterator;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Tag;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.metadata.Metadatable;
@@ -265,6 +270,51 @@ public class BetterEnderUtils {
             player.setMetadata(LAST_CHEST_Y, new FixedMetadataValue(plugin.getPlugin(), location.getBlockY()));
             player.setMetadata(LAST_CHEST_Z, new FixedMetadataValue(plugin.getPlugin(), location.getBlockZ()));
         }
+    }
+
+    /**
+     * Gets the hashcode of the inventory. This hashcode is based on the hashcode
+     * of the items in the inventory. We use this to detect changes in the
+     * inventory.
+     * 
+     * This method also works for shulker boxes (normally the item count of items in
+     * the shulker box is not taken into account of the hashcode).
+     * 
+     * @param contents
+     *                 The contents of the inventory.
+     * @return The hashcode of the inventory.
+     */
+    public static int inventoryHashCode(ItemStack[] contents) {
+        int result = 1;
+
+        for (ItemStack item : contents) {
+            int itemHashCode = 0;
+            if (item != null) {
+                // For shulker boxes, normally the item count is not taken into account of the
+                // hashcode
+                // We work around this by taking the normal hashcode of the inventory contents
+                if (Tag.SHULKER_BOXES.isTagged(item.getType())) {
+                    ItemMeta meta = item.getItemMeta();
+                    if (meta instanceof BlockStateMeta) {
+                        BlockStateMeta blockStateMeta = (BlockStateMeta) meta;
+                        BlockState blockState = blockStateMeta.getBlockState();
+                        if (blockState instanceof ShulkerBox) {
+                            ShulkerBox shulkerBox = (ShulkerBox) blockState;
+                            itemHashCode = inventoryHashCode(shulkerBox.getInventory().getContents());
+                        }
+                    }
+                }
+
+                // In case we didn't find a hashcode yet, we just use the normal hashcode
+                if (itemHashCode == 0) {
+                    itemHashCode = item.hashCode();
+                }
+            }
+
+            result = 31 * result + itemHashCode;
+        }
+
+        return result;
     }
 
 }

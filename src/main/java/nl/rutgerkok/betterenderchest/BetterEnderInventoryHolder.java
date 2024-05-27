@@ -162,11 +162,11 @@ public class BetterEnderInventoryHolder implements InventoryHolder {
      * @return Whether there are unsaved changes in this chest.
      */
     public boolean hasUnsavedChanges(ItemStack[] currentContents) {
-        return Arrays.hashCode(currentContents) != this.savedItemsHashCode;
+        return BetterEnderUtils.inventoryHashCode(currentContents) != this.savedItemsHashCode;
     }
 
     public void markContentsAsSaved(ItemStack[] contents) {
-        this.savedItemsHashCode = Arrays.hashCode(contents);
+        this.savedItemsHashCode = BetterEnderUtils.inventoryHashCode(contents);
     }
 
 }
