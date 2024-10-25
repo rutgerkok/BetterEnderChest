@@ -5,20 +5,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bukkit.NamespacedKey;
+import org.bukkit.Tag;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemRarity;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.components.FoodComponent;
+import org.bukkit.inventory.meta.components.*;
 import org.bukkit.persistence.PersistentDataContainer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Simple item meta implementation that supports name and lore.
@@ -27,15 +33,166 @@ import com.google.common.collect.Multimap;
 public final class NameableItemMeta implements ItemMeta {
 
     private String name = null;
-    private ImmutableList<String> lore = ImmutableList.of();
 
     @Override
-    public boolean addAttributeModifier(Attribute arg0, AttributeModifier arg1) {
+    public boolean hasEnchantable() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean addEnchant(Enchantment ench, int level, boolean ignoreLevelRestriction) {
+    public int getEnchantable() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setEnchantable(@Nullable Integer enchantable) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasTooltipStyle() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @Nullable NamespacedKey getTooltipStyle() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setTooltipStyle(@Nullable NamespacedKey tooltipStyle) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasItemModel() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @Nullable NamespacedKey getItemModel() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setItemModel(@Nullable NamespacedKey itemModel) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isGlider() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setGlider(boolean glider) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasDamageResistant() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @Nullable Tag<DamageType> getDamageResistant() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setDamageResistant(@Nullable Tag<DamageType> tag) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasUseRemainder() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @Nullable ItemStack getUseRemainder() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setUseRemainder(@Nullable ItemStack remainder) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasUseCooldown() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @NotNull UseCooldownComponent getUseCooldown() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setUseCooldown(@Nullable UseCooldownComponent cooldown) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasTool() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @NotNull ToolComponent getTool() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setTool(@Nullable ToolComponent tool) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasEquippable() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @NotNull EquippableComponent getEquippable() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setEquippable(@Nullable EquippableComponent equippable) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasJukeboxPlayable() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @Nullable JukeboxPlayableComponent getJukeboxPlayable() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setJukeboxPlayable(@Nullable JukeboxPlayableComponent jukeboxPlayable) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @NotNull String getAsComponentString() {
+        throw new UnsupportedOperationException();
+    }
+
+    private ImmutableList<String> lore = ImmutableList.of();
+
+    @Override
+    public boolean addAttributeModifier(@NotNull Attribute arg0, @NotNull AttributeModifier arg1) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean addEnchant(@NotNull Enchantment ench, int level, boolean ignoreLevelRestriction) {
         throw new UnsupportedOperationException();
     }
 
@@ -45,10 +202,12 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
-    public ItemMeta clone() {
+    public @NotNull ItemMeta clone() {
         try {
             ItemMeta meta = (ItemMeta) super.clone();
-            meta.setDisplayName(getDisplayName());
+            if (meta.hasDisplayName()) {
+                meta.setDisplayName(getDisplayName());
+            }
             meta.setLore(getLore());
             return meta;
         } catch (CloneNotSupportedException e) {
@@ -57,7 +216,7 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
-    public String getAsString() {
+    public @NotNull String getAsString() {
         throw new UnsupportedOperationException();
     }
 
@@ -67,12 +226,12 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
-    public Collection<AttributeModifier> getAttributeModifiers(Attribute arg0) {
+    public Collection<AttributeModifier> getAttributeModifiers(@NotNull Attribute arg0) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot arg0) {
+    public @NotNull Multimap<Attribute, AttributeModifier> getAttributeModifiers(@NotNull EquipmentSlot arg0) {
         throw new UnsupportedOperationException();
     }
 
@@ -83,32 +242,37 @@ public final class NameableItemMeta implements ItemMeta {
 
     @Override
     @Deprecated
-    public org.bukkit.inventory.meta.tags.CustomItemTagContainer getCustomTagContainer() {
+    public org.bukkit.inventory.meta.tags.@NotNull CustomItemTagContainer getCustomTagContainer() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String getDisplayName() {
+    public @NotNull String getDisplayName() {
+        if (this.name == null) {
+            throw new IllegalStateException("no name set");
+        }
         return name;
     }
 
     @Override
-    public int getEnchantLevel(Enchantment ench) {
+    public int getEnchantLevel(@NotNull Enchantment ench) {
         return 0;
     }
 
     @Override
-    public Map<Enchantment, Integer> getEnchants() {
+    public @NotNull Map<Enchantment, Integer> getEnchants() {
         return ImmutableMap.of();
     }
 
     @Override
-    public Set<ItemFlag> getItemFlags() {
+    public @NotNull Set<ItemFlag> getItemFlags() {
         return ImmutableSet.of();
     }
 
+    @SuppressWarnings("removal")
     @Override
-    public String getLocalizedName() {
+    @Deprecated(forRemoval = true)
+    public @NotNull String getLocalizedName() {
         throw new UnsupportedOperationException();
     }
 
@@ -118,7 +282,7 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
-    public PersistentDataContainer getPersistentDataContainer() {
+    public @NotNull PersistentDataContainer getPersistentDataContainer() {
         throw new UnsupportedOperationException();
     }
 
@@ -128,7 +292,7 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
-    public boolean hasConflictingEnchant(Enchantment ench) {
+    public boolean hasConflictingEnchant(@NotNull Enchantment ench) {
         return false;
     }
 
@@ -143,7 +307,7 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
-    public boolean hasEnchant(Enchantment ench) {
+    public boolean hasEnchant(@NotNull Enchantment ench) {
         return false;
     }
 
@@ -153,12 +317,13 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
-    public boolean hasItemFlag(ItemFlag flag) {
+    public boolean hasItemFlag(@NotNull ItemFlag flag) {
         return false;
     }
 
+    @SuppressWarnings("removal")
     @Override
-    public boolean hasLocalizedName() {
+    @Deprecated(forRemoval = true)    public boolean hasLocalizedName() {
         throw new UnsupportedOperationException();
     }
 
@@ -173,22 +338,22 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
-    public boolean removeAttributeModifier(Attribute arg0) {
+    public boolean removeAttributeModifier(@NotNull Attribute arg0) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean removeAttributeModifier(Attribute arg0, AttributeModifier arg1) {
+    public boolean removeAttributeModifier(@NotNull Attribute arg0, @NotNull AttributeModifier arg1) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean removeAttributeModifier(EquipmentSlot arg0) {
+    public boolean removeAttributeModifier(@NotNull EquipmentSlot arg0) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean removeEnchant(Enchantment ench) {
+    public boolean removeEnchant(@NotNull Enchantment ench) {
         return false;
     }
 
@@ -198,7 +363,7 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
-    public Map<String, Object> serialize() {
+    public @NotNull Map<String, Object> serialize() {
         throw new UnsupportedOperationException();
     }
 
@@ -217,7 +382,9 @@ public final class NameableItemMeta implements ItemMeta {
         this.name = name;
     }
 
+    @SuppressWarnings("removal")
     @Override
+    @Deprecated(forRemoval = true)
     public void setLocalizedName(String arg0) {
         throw new UnsupportedOperationException();
     }
@@ -243,7 +410,7 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
-    public String getItemName() {
+    public @NotNull String getItemName() {
         throw new UnsupportedOperationException("Unimplemented method 'getItemName'");
     }
 
@@ -273,7 +440,7 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
-    public Boolean getEnchantmentGlintOverride() {
+    public @NotNull Boolean getEnchantmentGlintOverride() {
         throw new UnsupportedOperationException("Unimplemented method 'getEnchantmentGlintOverride'");
     }
 
@@ -313,7 +480,7 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
-    public ItemRarity getRarity() {
+    public @NotNull ItemRarity getRarity() {
         throw new UnsupportedOperationException("Unimplemented method 'getRarity'");
     }
 
@@ -328,7 +495,7 @@ public final class NameableItemMeta implements ItemMeta {
     }
 
     @Override
-    public FoodComponent getFood() {
+    public @NotNull FoodComponent getFood() {
         throw new UnsupportedOperationException("Unimplemented method 'getFood'");
     }
 
