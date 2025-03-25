@@ -1,7 +1,7 @@
-name: ${project.name}
+name: BetterEnderChest
 main: nl.rutgerkok.betterenderchest.BetterEnderChestPlugin
 description: 'Secure and configurable Ender Chests'
-version: '${project.version}'
+version: "2.7-SNAPSHOT"
 author: 'Rutger Kok'
 api-version: '1.21.4'
 softdepend:

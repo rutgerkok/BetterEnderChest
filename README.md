@@ -15,10 +15,10 @@ Minecraft Spigot plugin to add functionality to Ender Chests.
 * API for other plugin developers, see below
 
 # Compiling BetterEnderChest
-BetterEnderChest uses [Maven](http://maven.apache.org/download.cgi). After you have installed Maven (make sure
+BetterEnderChest uses [Gradle](http://maven.apache.org/download.cgi). After you have installed Java (make sure
 to include it in your systems PATH environment variable), run the following command:
 
-    mvn install
+    gradlew build
 
 # Pull requests
 Pull requests are greatly appreciated. Just try to follow my formatting (spaces, not tabs and opening brackets

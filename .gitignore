@@ -1,14 +1,14 @@
 
 #################
-## IDEs
+## IDEs and builds
 #################
 
 .project
 .metadata
-bin/**
-/target
-tmp/**
-tmp/**/*
+bin/
+target/
+build/
+tmp/
 *.tmp
 *.bak
 *.bat
@@ -19,6 +19,7 @@ local.properties
 .settings/
 .loadpath
 .idea/
+.gradle/
 BetterEnderChest.iml
 
 # Locally stored "Eclipse launch configurations"
@@ -48,3 +49,4 @@ Desktop.ini
 
 
 .vscode/settings.json
+
