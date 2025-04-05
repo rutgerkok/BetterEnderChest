@@ -37,7 +37,7 @@ repositories {
 
 dependencies {
     testImplementation("junit:junit:4.13.1")
-    paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.5-no-moonrise-SNAPSHOT")
     compileOnly("com.bergerkiller.bukkit:MyWorlds:1.12-v2") {
         exclude(group="org.spigotmc") // Don't let Spigot API overwrite Paper
     }
@@ -51,7 +51,7 @@ dependencies {
 }
 
 group = "nl.rutgerkok.betterenderchest"
-version = "2.7-SNAPSHOT"
+version = "2.7"
 description = "BetterEnderChest"
 java.sourceCompatibility = JavaVersion.VERSION_21
 

@@ -1,9 +1,9 @@
 name: BetterEnderChest
 main: nl.rutgerkok.betterenderchest.BetterEnderChestPlugin
 description: 'Secure and configurable Ender Chests'
-version: "2.7-SNAPSHOT"
+version: "2.7"
 author: 'Rutger Kok'
-api-version: '1.21.4'
+api-version: '1.21.5'
 softdepend:
 - 'BlockLocker'
 - 'Lockette'

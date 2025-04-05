@@ -1,6 +1,7 @@
 package nl.rutgerkok.betterenderchest.nms;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
@@ -62,8 +63,8 @@ public class TestJSON {
         String json = "{\"EmptyList\":[]}";
         CompoundTag tagCompound = JSONSimpleTypes.toTag(json);
 
-        tagCompound.getIntArray("EmptyList"); // Must work
-        tagCompound.getList("EmptyList", 10); // Must work too
+        assertTrue(tagCompound.getIntArray("EmptyList").isEmpty());
+        assertTrue(tagCompound.getListOrEmpty("EmptyList").isEmpty());
     }
 
     @Test
@@ -118,7 +119,7 @@ public class TestJSON {
         // Test some values
         CompoundTag tagReturned = roundTrip(tagCompound);
         assertEquals(tagCompound.getLong("Test_Long"), tagReturned.getLong("Test_Long"));
-        assertEquals(tagCompound.getFloat("Test_Float"), tagReturned.getFloat("Test_Float"), 0.0001F);
+        assertEquals(tagCompound.getFloatOr("Test_Float", 0), tagReturned.getFloatOr("Test_Float", 1), 0.0001F);
         assertEquals(tagCompound.getByte("Test_Byte"), tagReturned.getByte("Test_Byte"));
     }
 

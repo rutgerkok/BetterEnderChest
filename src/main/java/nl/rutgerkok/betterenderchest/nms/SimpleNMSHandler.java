@@ -61,7 +61,7 @@ public class SimpleNMSHandler extends NMSHandler {
          */
         private static final String BYTE_ARRAY = "byteArray";
 
-        static final Tag javaTypeToNBTTag(Object object) throws IOException {
+        static Tag javaTypeToNBTTag(Object object) throws IOException {
             // Handle compounds
             if (object instanceof Map) {
                 @SuppressWarnings("unchecked")
@@ -148,7 +148,7 @@ public class SimpleNMSHandler extends NMSHandler {
          * @throws IOException
          *             If the string cannot be parsed.
          */
-        static final CompoundTag toTag(String jsonString) throws IOException {
+        static CompoundTag toTag(String jsonString) throws IOException {
             if (jsonString.startsWith("{\"")) {
                 // Probably in the old valid JSON format
                 try {
@@ -158,7 +158,7 @@ public class SimpleNMSHandler extends NMSHandler {
                 }
             }
             try {
-                return TagParser.parseTag(jsonString);
+                return TagParser.parseCompoundFully(jsonString);
             } catch (CommandSyntaxException e) {
                 throw new IOException(e);
             }
@@ -171,7 +171,7 @@ public class SimpleNMSHandler extends NMSHandler {
          *            List from the JSON. return The byte array.
          * @return The unboxed bytes.
          */
-        private static final byte[] unboxBytes(List<Number> boxed) {
+        private static byte[] unboxBytes(List<Number> boxed) {
             byte[] bytes = new byte[boxed.size()];
             for (int i = 0; i < bytes.length; i++) {
                 bytes[i] = boxed.get(i).byteValue();
@@ -222,7 +222,7 @@ public class SimpleNMSHandler extends NMSHandler {
     }
 
     private int getDisabledSlots(CompoundTag baseTag) {
-        return baseTag.getByte("DisabledSlots");
+        return baseTag.getByteOr("DisabledSlots", (byte) 0);
     }
 
     @Override
@@ -233,7 +233,7 @@ public class SimpleNMSHandler extends NMSHandler {
     private int getRows(ChestOwner chestOwner, CompoundTag baseTag, ListTag inventoryListTag) {
         if (baseTag.contains("Rows")) {
             // Load the number of rows
-            return baseTag.getByte("Rows");
+            return baseTag.getByteOr("Rows", (byte) 3);
         } else {
             // Guess the number of rows
             // Iterates through all the items to find the highest slot number
@@ -241,7 +241,7 @@ public class SimpleNMSHandler extends NMSHandler {
             for (int i = 0; i < inventoryListTag.size(); i++) {
 
                 // Replace the current highest slot if this slot is higher
-                highestSlot = Math.max(inventoryListTag.getCompound(i).getByte("Slot") & 255, highestSlot);
+                highestSlot = Math.max(inventoryListTag.getCompoundOrEmpty(i).getByteOr("Slot", (byte) 0) & 255, highestSlot);
             }
 
             // Calculate the needed number of rows for the items, and return the
@@ -251,10 +251,7 @@ public class SimpleNMSHandler extends NMSHandler {
     }
 
     private int getStoredDataVersion(CompoundTag baseTag) {
-        if (!baseTag.contains("DataVersion")) {
-            return DATA_VERSION_MC_1_12_2;
-        }
-        return baseTag.getInt("DataVersion");
+        return baseTag.getIntOr("DataVersion", DATA_VERSION_MC_1_12_2);
     }
 
     @Override
@@ -269,13 +266,9 @@ public class SimpleNMSHandler extends NMSHandler {
     }
 
     private boolean isItemInsertionAllowed(CompoundTag baseTag) {
-        if (baseTag.contains("ItemInsertion")) {
-            return baseTag.getBoolean("ItemInsertion");
-        } else {
-            // Return true. This value doesn't harm anything and will be
-            // corrected when the owner opens his/her own chest
-            return true;
-        }
+        // True is the default value. This value doesn't harm anything and will be
+        // corrected when the owner opens his/her own chest
+        return baseTag.getBooleanOr("ItemInsertion", true);
     }
 
     @Override
@@ -299,7 +292,7 @@ public class SimpleNMSHandler extends NMSHandler {
 
     private Inventory loadNBTInventoryFromTag(CompoundTag baseTag, ChestOwner chestOwner, WorldGroup worldGroup,
             String inventoryTagName) throws IOException {
-        ListTag inventoryTag = baseTag.getList(inventoryTagName, TagType.COMPOUND);
+        ListTag inventoryTag = baseTag.getListOrEmpty(inventoryTagName);
 
         // Create the Bukkit inventory
         int inventoryRows = getRows(chestOwner, baseTag, inventoryTag);
@@ -312,8 +305,8 @@ public class SimpleNMSHandler extends NMSHandler {
         // Add all the items
         List<ItemStack> overflowingItems = new ArrayList<>();
         for (int i = 0; i < inventoryTag.size(); i++) {
-            CompoundTag item = inventoryTag.getCompound(i);
-            int slot = item.getByte("Slot") & 255;
+            CompoundTag item = inventoryTag.getCompoundOrEmpty(i);
+            int slot = item.getByteOr("Slot", (byte) 0) & 255;
             item = updateToLatestMinecraft(item, dataVersion);
             ItemStack bukkitItem = CraftItemStack.asCraftMirror(net.minecraft.world.item.ItemStack.parse(CraftRegistry.getMinecraftRegistry(), item).orElseThrow());
 
@@ -343,33 +336,6 @@ public class SimpleNMSHandler extends NMSHandler {
             enderChest.startOpen(serverPlayer);
             serverPlayer.getEnderChestInventory().setActiveChest(enderChest);
         }
-    }
-
-    private CompoundTag repairShulkerBoxes(CompoundTag item) {
-        CompoundTag itemTag = item.getCompound("tag");
-        if (!itemTag.contains("BlockEntityTag")) {
-            return item;
-        }
-        CompoundTag blockEntityTag = itemTag.getCompound("BlockEntityTag");
-        if (!blockEntityTag.contains("Items")) {
-            return item;
-        }
-        ListTag items = blockEntityTag.getList("Items", TagType.COMPOUND);
-        if (items.isEmpty()) {
-            return item;
-        }
-        CompoundTag firstItem = items.getCompound(0);
-        if (!firstItem.contains("Damage")) {
-            return item;
-        }
-
-        // Ok, conversion failed. Downgrade item to 1.12.2 and try again
-        item.putByte("Damage", (byte) 0);
-        if (itemTag.contains("display")) {
-            CompoundTag displayTag = itemTag.getCompound("display");
-            displayTag.putString("Name", blockEntityTag.getString("CustomName"));
-        }
-        return this.updateToLatestMinecraft(item, DATA_VERSION_MC_1_12_2);
     }
 
     @Override
@@ -432,14 +398,6 @@ public class SimpleNMSHandler extends NMSHandler {
     private CompoundTag updateToLatestMinecraft(CompoundTag item, int oldVersion) {
         @SuppressWarnings("deprecation")
         int newVersion = Bukkit.getUnsafe().getDataVersion();
-        if (newVersion == oldVersion) {
-            // Check if update was correct (there used to be a bug)
-            if (item.contains("tag") && item.getString("id").endsWith("shulker_box")) {
-                return repairShulkerBoxes(item);
-            }
-
-            return item;
-        }
 
         Dynamic<Tag> input = new Dynamic<>(NbtOps.INSTANCE, item);
         Dynamic<Tag> result = DataFixers.getDataFixer()
