@@ -3,7 +3,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 plugins {
     `java-library`
     `maven-publish`
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.16"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.17"
 }
 
 
@@ -37,7 +37,7 @@ repositories {
 
 dependencies {
     testImplementation("junit:junit:4.13.1")
-    paperweight.paperDevBundle("1.21.5-no-moonrise-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.6-R0.1-SNAPSHOT")
     compileOnly("com.bergerkiller.bukkit:MyWorlds:1.12-v2") {
         exclude(group="org.spigotmc") // Don't let Spigot API overwrite Paper
     }
@@ -51,15 +51,9 @@ dependencies {
 }
 
 group = "nl.rutgerkok.betterenderchest"
-version = "2.7"
+version = "2.7.1"
 description = "BetterEnderChest"
 java.sourceCompatibility = JavaVersion.VERSION_21
-
-// For supporting Spigot
-paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.REOBF_PRODUCTION
-tasks.assemble {
-    dependsOn(tasks.reobfJar)
-}
 
 publishing {
     publications.create<MavenPublication>("maven") {

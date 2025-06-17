@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.minecraft.resources.RegistryOps;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -304,11 +305,12 @@ public class SimpleNMSHandler extends NMSHandler {
 
         // Add all the items
         List<ItemStack> overflowingItems = new ArrayList<>();
+        RegistryOps<Tag> context = CraftRegistry.getMinecraftRegistry().createSerializationContext(NbtOps.INSTANCE);
         for (int i = 0; i < inventoryTag.size(); i++) {
             CompoundTag item = inventoryTag.getCompoundOrEmpty(i);
             int slot = item.getByteOr("Slot", (byte) 0) & 255;
             item = updateToLatestMinecraft(item, dataVersion);
-            ItemStack bukkitItem = CraftItemStack.asCraftMirror(net.minecraft.world.item.ItemStack.parse(CraftRegistry.getMinecraftRegistry(), item).orElseThrow());
+            ItemStack bukkitItem = CraftItemStack.asCraftMirror(net.minecraft.world.item.ItemStack.CODEC.parse(context, item).getOrThrow());
 
             if (slot < inventory.getSize()) {
                 inventory.setItem(slot, bukkitItem);
@@ -376,12 +378,13 @@ public class SimpleNMSHandler extends NMSHandler {
         baseTag.putInt("DataVersion", dataVersion);
 
         // Add all items to the inventory tag
+        RegistryOps<Tag> context = CraftRegistry.getMinecraftRegistry().createSerializationContext(NbtOps.INSTANCE);
         for (int i = 0; i < inventory.getSize(); i++) {
             ItemStack stack = inventory.getItem(i);
             if (stack != null && stack.getType() != Material.AIR) {
-                CompoundTag item = new CompoundTag();
+                CompoundTag item = (CompoundTag)net.minecraft.world.item.ItemStack.CODEC.encodeStart(context, CraftItemStack.asNMSCopy(stack)).getOrThrow();
                 item.putByte("Slot", (byte) i);
-                inventoryTag.add(CraftItemStack.asNMSCopy(stack).save(CraftRegistry.getMinecraftRegistry(), item));
+                inventoryTag.add(item);
             }
         }
 

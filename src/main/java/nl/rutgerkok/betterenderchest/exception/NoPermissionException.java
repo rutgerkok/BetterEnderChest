@@ -2,7 +2,7 @@ package nl.rutgerkok.betterenderchest.exception;
 
 import nl.rutgerkok.betterenderchest.Translations;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Indicates that a chest could not be opened, because the player had no

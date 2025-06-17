@@ -1,6 +1,6 @@
 package nl.rutgerkok.betterenderchest.exception;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Thrown when the owner of a chest is not found.
