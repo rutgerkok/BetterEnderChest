@@ -1,9 +1,9 @@
 BetterEnderChest
 ================
 
-[![Build Status]( https://img.shields.io/github/actions/workflow/status/rutgerkok/BetterEnderChest/build.yml?branch=master)](https://github.com/rutgerkok/BetterEnderChest/actions?query=workflow%3A%22dev+build%22)  [![Download at SpigotMC.org](https://img.shields.io/badge/download-SpigotMC.org-orange.svg)](https://www.spigotmc.org/resources/betterenderchest.2073/) ![Latest release](https://img.shields.io/github/release/rutgerkok/BetterEnderChest.svg) ![Commits since latest release](https://img.shields.io/github/commits-since/rutgerkok/BetterEnderChest/latest.svg)
+[![Build Status]( https://img.shields.io/github/actions/workflow/status/rutgerkok/BetterEnderChest/build.yml?branch=master)](https://github.com/rutgerkok/BetterEnderChest/actions?query=workflow%3A%22dev+build%22)  [![Download at Hangar](https://img.shields.io/badge/download-hangar.papermc.io-cyan.svg)](https://hangar.papermc.io/Rutger/BetterEnderChest) ![Latest release](https://img.shields.io/github/release/rutgerkok/BetterEnderChest.svg) ![Commits since latest release](https://img.shields.io/github/commits-since/rutgerkok/BetterEnderChest/latest.svg)
 
-Minecraft Spigot plugin to add functionality to Ender Chests.
+Minecraft PaperMC plugin to add functionality to Ender Chests.
 
 * Share Ender Chests across servers
 * Share Ender Chests between players (requires Lockette/LWC/BlockLocker)
@@ -26,8 +26,8 @@ on the same line) but don't worry too much if you mess up the style: I'll fix it
 If you are about to implement something big, please send me an e-mail (address is on my Github profile), so that
 we can discuss it first. Otherwise, there's a risk of me rejecting your hard work!
 
-# Making your Spigot plugin interact with BetterEnderChest
-Make sure to add BetterEnderChest to your build path/Maven dependencies.
+# Making your Paper plugin interact with BetterEnderChest
+Make sure to add BetterEnderChest to your build path/Maven/Gradle dependencies.
 
 ## Get the plugin instance
 
