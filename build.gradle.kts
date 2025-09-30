@@ -3,7 +3,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 plugins {
     `java-library`
     `maven-publish`
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.17"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.18"
 }
 
 
@@ -37,7 +37,7 @@ repositories {
 
 dependencies {
     testImplementation("junit:junit:4.13.1")
-    paperweight.paperDevBundle("1.21.6-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.9-R0.1-SNAPSHOT")
     compileOnly("com.bergerkiller.bukkit:MyWorlds:1.12-v2") {
         exclude(group="org.spigotmc") // Don't let Spigot API overwrite Paper
     }
@@ -51,7 +51,7 @@ dependencies {
 }
 
 group = "nl.rutgerkok.betterenderchest"
-version = "2.7.1"
+version = "2.7.2-SNAPSHOT"
 description = "BetterEnderChest"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
