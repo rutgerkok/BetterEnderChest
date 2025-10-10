@@ -37,13 +37,13 @@ repositories {
 
 dependencies {
     testImplementation("junit:junit:4.13.1")
-    paperweight.paperDevBundle("1.21.5-no-moonrise-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.5-R0.1-SNAPSHOT")
     compileOnly("com.bergerkiller.bukkit:MyWorlds:1.12-v2") {
         exclude(group="org.spigotmc") // Don't let Spigot API overwrite Paper
     }
     compileOnly("com.griefcraft:LWC:4.3.2")
-    compileOnly("com.onarandombox.multiversecore:Multiverse-Core:4.1.0")
-    compileOnly("com.onarandombox.multiverseinventories:Multiverse-Inventories:3.0.0")
+    compileOnly("org.mvplugins.multiverse.core:multiverse-core:5.0.2")
+    compileOnly("org.mvplugins.multiverse.inventories:multiverse-inventories:5.0.2")
     compileOnly("me.drayshak.worldinventories:WorldInventories:1.7.0")
     compileOnly("nl.rutgerkok:blocklocker:1.9.2")
     compileOnly("org.yi.acru.bukkit:Lockette:1.7.12")
@@ -51,7 +51,7 @@ dependencies {
 }
 
 group = "nl.rutgerkok.betterenderchest"
-version = "2.7"
+version = "2.7.3-custom"
 description = "BetterEnderChest"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
