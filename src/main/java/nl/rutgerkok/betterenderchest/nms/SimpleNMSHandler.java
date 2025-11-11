@@ -311,6 +311,9 @@ public class SimpleNMSHandler extends NMSHandler {
             int slot = item.getByteOr("Slot", (byte) 0) & 255;
             item = updateToLatestMinecraft(item, dataVersion);
 
+            // Fix invalid enchantment levels (e.g., level 0) before parsing
+            fixInvalidEnchantmentLevels(item, chestOwner, slot);
+
             // Try to parse the item, but handle failures gracefully for items with invalid/unknown enchantments
             var parseResult = net.minecraft.world.item.ItemStack.CODEC.parse(context, item);
             if (parseResult.error().isPresent()) {
@@ -416,6 +419,53 @@ public class SimpleNMSHandler extends NMSHandler {
         Dynamic<Tag> result = DataFixers.getDataFixer()
                 .update(References.ITEM_STACK, input, oldVersion, newVersion);
         return (CompoundTag) result.getValue();
+    }
+
+    /**
+     * Fixes invalid enchantment levels in the item NBT data.
+     * Enchantment levels must be between 1-255, but some items may have level 0.
+     * This method clamps level 0 to level 1 to allow the item to load.
+     *
+     * @param item The item NBT data to fix
+     * @param chestOwner The owner of the chest (for logging)
+     * @param slot The slot number (for logging)
+     */
+    private void fixInvalidEnchantmentLevels(CompoundTag item, ChestOwner chestOwner, int slot) {
+        if (!item.contains("components")) {
+            return; // No components data
+        }
+
+        CompoundTag components = item.getCompoundOrEmpty("components");
+        if (!components.contains("minecraft:enchantments")) {
+            return; // No enchantments
+        }
+
+        CompoundTag enchantmentsData = components.getCompoundOrEmpty("minecraft:enchantments");
+        if (!enchantmentsData.contains("levels")) {
+            return; // No levels data
+        }
+
+        CompoundTag levels = enchantmentsData.getCompoundOrEmpty("levels");
+        boolean modified = false;
+
+        // Iterate through all enchantment entries
+        for (String enchantmentId : levels.keySet()) {
+            int level = levels.getIntOr(enchantmentId, 1);
+            if (level <= 0) {
+                // Clamp invalid level to 1
+                levels.putInt(enchantmentId, 1);
+                modified = true;
+                plugin.warning("Fixed invalid enchantment level (0 -> 1) for " + enchantmentId +
+                    " in slot " + slot + " for " + chestOwner.getDisplayName());
+            }
+        }
+
+        if (modified) {
+            // Update the components with the fixed enchantments
+            enchantmentsData.put("levels", levels);
+            components.put("minecraft:enchantments", enchantmentsData);
+            item.put("components", components);
+        }
     }
 
 }
