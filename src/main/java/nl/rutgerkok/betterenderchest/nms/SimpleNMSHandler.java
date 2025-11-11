@@ -317,10 +317,26 @@ public class SimpleNMSHandler extends NMSHandler {
             // Try to parse the item, but handle failures gracefully for items with invalid/unknown enchantments
             var parseResult = net.minecraft.world.item.ItemStack.CODEC.parse(context, item);
             if (parseResult.error().isPresent()) {
-                // Log the error and skip this item instead of crashing
+                // First attempt failed, try removing invalid enchantments and parsing again
+                String errorMessage = parseResult.error().get().message();
                 plugin.warning("Failed to load item in slot " + slot + " for " + chestOwner.getDisplayName() +
-                    ": " + parseResult.error().get().message() + ". Item will be skipped.");
-                continue;
+                    ": " + errorMessage + ". Attempting to remove invalid enchantments...");
+
+                boolean hadEnchantments = removeAllEnchantments(item, chestOwner, slot);
+
+                // Retry parsing after removing enchantments
+                parseResult = net.minecraft.world.item.ItemStack.CODEC.parse(context, item);
+                if (parseResult.error().isPresent()) {
+                    // Still failed even after removing enchantments, skip this item
+                    plugin.warning("Failed to load item in slot " + slot + " for " + chestOwner.getDisplayName() +
+                        " even after removing enchantments: " + parseResult.error().get().message() + ". Item will be skipped.");
+                    continue;
+                }
+
+                if (hadEnchantments) {
+                    plugin.warning("Successfully loaded item in slot " + slot + " for " + chestOwner.getDisplayName() +
+                        " after removing invalid enchantments.");
+                }
             }
 
             ItemStack bukkitItem = CraftItemStack.asCraftMirror(parseResult.result().get());
@@ -419,6 +435,32 @@ public class SimpleNMSHandler extends NMSHandler {
         Dynamic<Tag> result = DataFixers.getDataFixer()
                 .update(References.ITEM_STACK, input, oldVersion, newVersion);
         return (CompoundTag) result.getValue();
+    }
+
+    /**
+     * Removes all enchantments from the item NBT data.
+     * This is used as a last resort when an item has invalid enchantments that prevent parsing.
+     *
+     * @param item The item NBT data to modify
+     * @param chestOwner The owner of the chest (for logging)
+     * @param slot The slot number (for logging)
+     * @return true if enchantments were removed, false if there were none
+     */
+    private boolean removeAllEnchantments(CompoundTag item, ChestOwner chestOwner, int slot) {
+        if (!item.contains("components")) {
+            return false; // No components data
+        }
+
+        CompoundTag components = item.getCompoundOrEmpty("components");
+        if (!components.contains("minecraft:enchantments")) {
+            return false; // No enchantments to remove
+        }
+
+        // Remove the enchantments component entirely
+        components.remove("minecraft:enchantments");
+        item.put("components", components);
+
+        return true;
     }
 
     /**
