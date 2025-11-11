@@ -310,7 +310,17 @@ public class SimpleNMSHandler extends NMSHandler {
             CompoundTag item = inventoryTag.getCompoundOrEmpty(i);
             int slot = item.getByteOr("Slot", (byte) 0) & 255;
             item = updateToLatestMinecraft(item, dataVersion);
-            ItemStack bukkitItem = CraftItemStack.asCraftMirror(net.minecraft.world.item.ItemStack.CODEC.parse(context, item).getOrThrow());
+
+            // Try to parse the item, but handle failures gracefully for items with invalid/unknown enchantments
+            var parseResult = net.minecraft.world.item.ItemStack.CODEC.parse(context, item);
+            if (parseResult.error().isPresent()) {
+                // Log the error and skip this item instead of crashing
+                plugin.warning("Failed to load item in slot " + slot + " for " + chestOwner.getDisplayName() +
+                    ": " + parseResult.error().get().message() + ". Item will be skipped.");
+                continue;
+            }
+
+            ItemStack bukkitItem = CraftItemStack.asCraftMirror(parseResult.result().get());
 
             if (slot < inventory.getSize()) {
                 inventory.setItem(slot, bukkitItem);
