@@ -320,22 +320,22 @@ public class SimpleNMSHandler extends NMSHandler {
                 // First attempt failed, try removing invalid enchantments and parsing again
                 String errorMessage = parseResult.error().get().message();
                 plugin.warning("Failed to load item in slot " + slot + " for " + chestOwner.getDisplayName() +
-                    ": " + errorMessage + ". Attempting to remove invalid enchantments...");
+                    ": " + errorMessage + ". Attempting to identify and remove invalid enchantments...");
 
-                boolean hadEnchantments = removeAllEnchantments(item, chestOwner, slot);
+                boolean removedEnchantments = removeInvalidEnchantments(item, chestOwner, slot, context);
 
-                // Retry parsing after removing enchantments
+                // Retry parsing after removing invalid enchantments
                 parseResult = net.minecraft.world.item.ItemStack.CODEC.parse(context, item);
                 if (parseResult.error().isPresent()) {
                     // Still failed even after removing enchantments, skip this item
                     plugin.warning("Failed to load item in slot " + slot + " for " + chestOwner.getDisplayName() +
-                        " even after removing enchantments: " + parseResult.error().get().message() + ". Item will be skipped.");
+                        " even after removing invalid enchantments: " + parseResult.error().get().message() + ". Item will be skipped.");
                     continue;
                 }
 
-                if (hadEnchantments) {
+                if (removedEnchantments) {
                     plugin.warning("Successfully loaded item in slot " + slot + " for " + chestOwner.getDisplayName() +
-                        " after removing invalid enchantments.");
+                        " after removing invalid enchantments (valid enchantments were preserved).");
                 }
             }
 
@@ -438,15 +438,16 @@ public class SimpleNMSHandler extends NMSHandler {
     }
 
     /**
-     * Removes all enchantments from the item NBT data.
-     * This is used as a last resort when an item has invalid enchantments that prevent parsing.
+     * Attempts to remove invalid enchantments from the item NBT data while keeping valid ones.
+     * This tries to identify which specific enchantments are causing parsing issues.
      *
      * @param item The item NBT data to modify
      * @param chestOwner The owner of the chest (for logging)
      * @param slot The slot number (for logging)
-     * @return true if enchantments were removed, false if there were none
+     * @param context The registry context for parsing
+     * @return true if any enchantments were removed, false if there were none
      */
-    private boolean removeAllEnchantments(CompoundTag item, ChestOwner chestOwner, int slot) {
+    private boolean removeInvalidEnchantments(CompoundTag item, ChestOwner chestOwner, int slot, RegistryOps<Tag> context) {
         if (!item.contains("components")) {
             return false; // No components data
         }
@@ -456,11 +457,57 @@ public class SimpleNMSHandler extends NMSHandler {
             return false; // No enchantments to remove
         }
 
-        // Remove the enchantments component entirely
-        components.remove("minecraft:enchantments");
-        item.put("components", components);
+        CompoundTag enchantmentsData = components.getCompoundOrEmpty("minecraft:enchantments");
+        if (!enchantmentsData.contains("levels")) {
+            // If there's no levels data, just remove the entire enchantments component
+            components.remove("minecraft:enchantments");
+            item.put("components", components);
+            return true;
+        }
 
-        return true;
+        CompoundTag levels = enchantmentsData.getCompoundOrEmpty("levels");
+        CompoundTag validLevels = new CompoundTag();
+        int removedCount = 0;
+
+        // Try to identify which enchantments are valid by testing each one
+        for (String enchantmentId : levels.keySet()) {
+            // Create a test item with only this enchantment
+            CompoundTag testItem = item.copy();
+            CompoundTag testComponents = testItem.getCompoundOrEmpty("components");
+            CompoundTag testEnchantmentsData = testComponents.getCompoundOrEmpty("minecraft:enchantments");
+            CompoundTag testLevels = new CompoundTag();
+            testLevels.putInt(enchantmentId, levels.getIntOr(enchantmentId, 1));
+            testEnchantmentsData.put("levels", testLevels);
+            testComponents.put("minecraft:enchantments", testEnchantmentsData);
+            testItem.put("components", testComponents);
+
+            // Try to parse with just this enchantment
+            var testResult = net.minecraft.world.item.ItemStack.CODEC.parse(context, testItem);
+            if (testResult.result().isPresent()) {
+                // This enchantment is valid, keep it
+                validLevels.putInt(enchantmentId, levels.getIntOr(enchantmentId, 1));
+            } else {
+                // This enchantment is invalid, remove it
+                plugin.warning("Removed invalid enchantment '" + enchantmentId + "' from slot " + slot +
+                    " for " + chestOwner.getDisplayName());
+                removedCount++;
+            }
+        }
+
+        if (removedCount > 0) {
+            if (validLevels.isEmpty()) {
+                // All enchantments were invalid, remove the enchantments component entirely
+                components.remove("minecraft:enchantments");
+            } else {
+                // Some enchantments were valid, update with only the valid ones
+                enchantmentsData.put("levels", validLevels);
+                components.put("minecraft:enchantments", enchantmentsData);
+            }
+            item.put("components", components);
+            return true;
+        }
+
+        return false;
     }
 
     /**
