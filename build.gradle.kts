@@ -1,4 +1,3 @@
-import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
     `java-library`
@@ -51,7 +50,7 @@ dependencies {
 }
 
 group = "nl.rutgerkok.betterenderchest"
-version = "2.7.3"
+version = "2.7.4-SNAPSHOT"
 description = "BetterEnderChest"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
@@ -67,4 +66,8 @@ tasks.withType<JavaCompile>() {
 
 tasks.withType<Javadoc>() {
     options.encoding = "UTF-8"
+}
+
+tasks.processResources {
+    expand("version" to project.version)
 }
