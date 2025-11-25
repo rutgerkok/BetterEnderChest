@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import net.minecraft.resources.RegistryOps;
 import org.bukkit.Bukkit;
@@ -24,6 +25,7 @@ import org.json.simple.parser.JSONParser;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DataResult;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.ByteArrayTag;
@@ -312,15 +314,16 @@ public class SimpleNMSHandler extends NMSHandler {
             item = updateToLatestMinecraft(item, dataVersion);
 
             // Try to parse the item, but handle failures gracefully for items with invalid/unknown enchantments
-            var parseResult = net.minecraft.world.item.ItemStack.CODEC.parse(context, item);
-            if (parseResult.error().isPresent()) {
+            DataResult<net.minecraft.world.item.ItemStack> parseResult = net.minecraft.world.item.ItemStack.CODEC.parse(context, item);
+            Optional<net.minecraft.world.item.ItemStack> minecraftItem = parseResult.resultOrPartial();
+            if (minecraftItem.isEmpty()) {
                 // Log the error and skip this item instead of crashing
                 plugin.warning("Failed to load item in slot " + slot + " for " + chestOwner.getDisplayName() +
-                    ": " + parseResult.error().get().message() + ". Item will be skipped.");
+                    ": " + parseResult.error().map(DataResult.Error::message).orElse("unknown reason") + ". Item will be skipped.");
                 continue;
             }
 
-            ItemStack bukkitItem = CraftItemStack.asCraftMirror(parseResult.result().get());
+            ItemStack bukkitItem = CraftItemStack.asCraftMirror(minecraftItem.orElseThrow());
 
             if (slot < inventory.getSize()) {
                 inventory.setItem(slot, bukkitItem);
