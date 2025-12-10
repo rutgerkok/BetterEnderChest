@@ -50,7 +50,7 @@ dependencies {
 }
 
 group = "nl.rutgerkok.betterenderchest"
-version = "2.7.4-SNAPSHOT"
+version = "2.7.4"
 description = "BetterEnderChest"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
