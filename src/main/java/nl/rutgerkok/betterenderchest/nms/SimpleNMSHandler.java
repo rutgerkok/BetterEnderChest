@@ -261,7 +261,7 @@ public class SimpleNMSHandler extends NMSHandler {
     public boolean isAvailable() {
         try {
             // Test whether nms access works.
-            Blocks.WHITE_WOOL.toString();
+            Blocks.BEDROCK.toString();
             return true;
         } catch (Throwable t) {
             return false;

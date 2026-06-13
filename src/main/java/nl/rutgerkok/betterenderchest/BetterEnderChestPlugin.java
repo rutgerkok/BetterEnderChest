@@ -632,7 +632,8 @@ public class BetterEnderChestPlugin extends JavaPlugin implements BetterEnderChe
             emptyThrowable.setStackTrace(new StackTraceElement[0]);
             disableSaveAndLoad("Failed to access the net.minecraft.server classes."
                     + " The usual cause of this is that the plugin is outdated, so please look for an update."
-                    + " Another possibility is that your Spigot build is outdated.", emptyThrowable);
+                    + " Another possibility is that your Minecraft server is outdated;"
+                    +"  in that case you'll need to install an older version of this plugin.", emptyThrowable);
             return new DiscardingEnderCache(this);
         }
 

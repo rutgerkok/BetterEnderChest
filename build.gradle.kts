@@ -36,7 +36,7 @@ repositories {
 
 dependencies {
     testImplementation("junit:junit:4.13.1")
-    paperweight.paperDevBundle("26.1.1.build.14-alpha")
+    paperweight.paperDevBundle("26.2-rc-2.build.7-alpha")
     compileOnly("com.bergerkiller.bukkit:MyWorlds:1.12-v2") {
         exclude(group="org.spigotmc") // Don't let Spigot API overwrite Paper
     }
@@ -50,7 +50,7 @@ dependencies {
 }
 
 group = "nl.rutgerkok.betterenderchest"
-version = "2.7.5"
+version = "2.7.6"
 description = "BetterEnderChest"
 java.sourceCompatibility = JavaVersion.VERSION_25
 
