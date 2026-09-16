@@ -2,7 +2,7 @@
 plugins {
     `java-library`
     `maven-publish`
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.21"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.23"
 }
 
 
@@ -36,7 +36,7 @@ repositories {
 
 dependencies {
     testImplementation("junit:junit:4.13.1")
-    paperweight.paperDevBundle("26.2-rc-2.build.7-alpha")
+    paperweight.paperDevBundle("26.3.build.+")
     compileOnly("com.bergerkiller.bukkit:MyWorlds:1.12-v2") {
         exclude(group="org.spigotmc") // Don't let Spigot API overwrite Paper
     }
@@ -50,7 +50,7 @@ dependencies {
 }
 
 group = "nl.rutgerkok.betterenderchest"
-version = "2.7.6"
+version = "2.7.7"
 description = "BetterEnderChest"
 java.sourceCompatibility = JavaVersion.VERSION_25
 

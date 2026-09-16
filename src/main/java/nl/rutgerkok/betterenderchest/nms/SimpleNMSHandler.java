@@ -323,7 +323,7 @@ public class SimpleNMSHandler extends NMSHandler {
                 continue;
             }
 
-            ItemStack bukkitItem = CraftItemStack.asCraftMirror(minecraftItem.orElseThrow());
+            ItemStack bukkitItem = CraftItemStack.asBukkitMirror(minecraftItem.orElseThrow());
 
             if (slot < inventory.getSize()) {
                 inventory.setItem(slot, bukkitItem);
